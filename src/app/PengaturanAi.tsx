@@ -2,21 +2,38 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useState } from 'react';
 import { adaptorUntuk } from '../ai';
 import { GalatAi } from '../ai/galat';
-import { gabungModel, penyediaDari } from '../ai/registri';
-import type { StatusModel } from '../ai/tipe';
+import { gabungModel, penyediaDari, type BarisModel } from '../ai/registri';
+import type { PenyediaRegistri, StatusModel } from '../ai/tipe';
 import { db } from '../db/skema';
 import { simpanProfil } from '../db/profil';
-import type { PenyediaId } from '../db/tipe';
+import type { KunciApi, PenyediaId } from '../db/tipe';
 import { tanggalLokal } from '../db/util';
-import { PanelBantuan } from '../komponen/Bantuan';
+import { BANTUAN } from '../bantuan/daftar';
 import { KepalaHalaman } from '../komponen/Kepala';
 import { usePesan } from '../komponen/Pesan';
-import { Kotak, Label, Peringatan, Titik } from '../komponen/Status';
+import { Label, Peringatan, Titik } from '../komponen/Status';
 import { Tombol } from '../komponen/Tombol';
 import { useJudulHalaman, useProfil, useRegistri } from './kait';
 import { formatBiaya } from './ringkas';
 
-const LABEL_STATUS: Record<StatusModel, string> = { direkomendasikan: 'Direkomendasikan', stabil: 'Stabil', pratinjau: 'Pratinjau', usang: 'Usang' };
+const LABEL_STATUS: Record<StatusModel, string> = { direkomendasikan: 'direkomendasikan', stabil: 'stabil', pratinjau: 'pratinjau', usang: 'usang' };
+
+function modelTersedia(p: PenyediaRegistri, k: KunciApi | undefined): BarisModel[] {
+  if (k?.status !== 'berfungsi') return [];
+  return gabungModel(p, k.model_tersedia.map((id) => ({ id, nama: id }))).filter((m) => m.tersedia);
+}
+
+function Langkah({ nomor, judul, children, redup = false }: { nomor: string; judul: string; children: React.ReactNode; redup?: boolean }) {
+  return (
+    <section className={`border-t border-garis py-8 ${redup ? 'opacity-50' : ''}`}>
+      <div className="flex items-baseline gap-4">
+        <span className="mono text-redup">{nomor}</span>
+        <h2 className="text-xl font-normal">{judul}</h2>
+      </div>
+      <div className="mt-5">{children}</div>
+    </section>
+  );
+}
 
 export default function PengaturanAi() {
   useJudulHalaman('Pengaturan AI');
@@ -25,42 +42,48 @@ export default function PengaturanAi() {
   const pesan = usePesan();
   const daftarKunci = useLiveQuery(() => db.kunci_api.toArray(), []);
   const pemakaian = useLiveQuery(() => db.pemakaian_ai.where('tanggal').equals(tanggalLokal()).toArray(), []);
-  const [pilih, setPilih] = useState<PenyediaId>('gemini');
+  const [pilih, setPilih] = useState<PenyediaId | null>(null);
   const [teksKunci, setTeksKunci] = useState('');
   const [lihat, setLihat] = useState(false);
   const [menguji, setMenguji] = useState(false);
-  const kunci = daftarKunci?.find((k) => k.penyedia === pilih);
+  const aktif: PenyediaId = pilih ?? profil.penyedia_utama ?? 'gemini';
+  const kunci = daftarKunci?.find((k) => k.penyedia === aktif);
 
-  useEffect(() => {
-    if (profil.penyedia_utama) setPilih(profil.penyedia_utama);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profil.penyedia_utama === null]);
   useEffect(() => {
     setTeksKunci(kunci?.kunci ?? '');
     setLihat(false);
-  }, [pilih, kunci?.kunci]);
+  }, [aktif, kunci?.kunci]);
 
   if (galatReg) return <div className="px-4 py-20 sm:px-16">Registri model tidak dapat dimuat: {galatReg}</div>;
   if (!reg) return <div className="mono px-16 py-20 text-redup">Memuat…</div>;
-  const p = penyediaDari(reg, pilih)!;
-  const baris = gabungModel(p, kunci?.status === 'berfungsi' ? kunci.model_tersedia.map((id) => ({ id, nama: id })) : null);
+
+  const p = penyediaDari(reg, aktif)!;
+  const tersedia = modelTersedia(p, kunci);
+  const siap = !!(profil.penyedia_utama && profil.model_utama && daftarKunci?.some((k) => k.penyedia === profil.penyedia_utama && k.status === 'berfungsi'));
+  const namaUtama = profil.penyedia_utama ? penyediaDari(reg, profil.penyedia_utama) : undefined;
+  const labelUtama = namaUtama?.model.find((m) => m.id === profil.model_utama)?.label ?? profil.model_utama;
+  const modelDipilih = profil.penyedia_utama === aktif ? profil.model_utama ?? '' : '';
+
+  // Model cadangan boleh dari penyedia mana pun yang kuncinya berfungsi.
+  const pilihanCadangan = reg.penyedia.flatMap((x) => modelTersedia(x, daftarKunci?.find((k) => k.penyedia === x.id)).map((m) => ({ penyedia: x, m })));
 
   async function simpanDanUji() {
     const k = teksKunci.trim();
     if (!k) return;
     setMenguji(true);
-    await db.kunci_api.put({ penyedia: pilih, kunci: k, diuji_pada: null, status: 'belum', pesan: '', model_tersedia: [] });
+    await db.kunci_api.put({ penyedia: aktif, kunci: k, diuji_pada: null, status: 'belum', pesan: '', model_tersedia: [] });
     try {
-      const model = await adaptorUntuk(pilih).daftarModel(k);
-      await db.kunci_api.put({ penyedia: pilih, kunci: k, diuji_pada: Date.now(), status: 'berfungsi', pesan: `Kunci berfungsi · ${model.length} model tersedia`, model_tersedia: model.map((m) => m.id) });
-      if (!profil.penyedia_utama || !profil.model_utama) {
+      const model = await adaptorUntuk(aktif).daftarModel(k);
+      await db.kunci_api.put({ penyedia: aktif, kunci: k, diuji_pada: Date.now(), status: 'berfungsi', pesan: `Kunci berfungsi · ${model.length} model tersedia`, model_tersedia: model.map((m) => m.id) });
+      // Pilih model terbaik secara otomatis bila belum ada model utama di penyedia ini.
+      if (profil.penyedia_utama !== aktif || !profil.model_utama) {
         const saran = gabungModel(p, model).find((m) => m.tersedia && m.registri);
-        if (saran) await simpanProfil({ penyedia_utama: pilih, model_utama: saran.id });
+        if (saran) await simpanProfil({ penyedia_utama: aktif, model_utama: saran.id });
       }
-      pesan('Kunci berfungsi.');
+      pesan('Kunci berfungsi. GenSoal siap dipakai.');
     } catch (e) {
       const g = e instanceof GalatAi ? e : new GalatAi('lain', (e as Error).message);
-      await db.kunci_api.put({ penyedia: pilih, kunci: k, diuji_pada: Date.now(), status: 'gagal', pesan: g.message, model_tersedia: [] });
+      await db.kunci_api.put({ penyedia: aktif, kunci: k, diuji_pada: Date.now(), status: 'gagal', pesan: g.message, model_tersedia: [] });
     } finally {
       setMenguji(false);
     }
@@ -68,9 +91,9 @@ export default function PengaturanAi() {
 
   async function hapusKunci() {
     if (!confirm(`Hapus kunci ${p.nama} dari perangkat ini?`)) return;
-    await db.kunci_api.delete(pilih);
-    if (profil.penyedia_utama === pilih) await simpanProfil({ penyedia_utama: null, model_utama: null });
-    if (profil.penyedia_cadangan === pilih) await simpanProfil({ penyedia_cadangan: null, model_cadangan: null });
+    await db.kunci_api.delete(aktif);
+    if (profil.penyedia_utama === aktif) await simpanProfil({ penyedia_utama: null, model_utama: null });
+    if (profil.penyedia_cadangan === aktif) await simpanProfil({ penyedia_cadangan: null, model_cadangan: null });
   }
 
   const lolosHariIni = pemakaian?.filter((x) => x.lolos).length ?? 0;
@@ -78,133 +101,152 @@ export default function PengaturanAi() {
   const lewatBatasBiaya = biayaHariIni !== null && biayaHariIni > profil.batas_biaya_usd;
 
   return (
-    <div className="mx-auto max-w-[1312px] px-4 pb-20 pt-10 sm:px-8 lg:px-16 lg:pt-14">
-      <KepalaHalaman label="Pengaturan · AI" judul="Kunci dan model">
-        GenSoal memakai kunci API milik Anda. Kunci hanya disimpan di peramban ini dan tidak ikut berkas cadangan. Beberapa penyedia menyediakan tingkat gratis.
+    <div className="mx-auto max-w-[880px] px-4 pb-24 pt-10 sm:px-8 lg:pt-14">
+      <KepalaHalaman label="Pengaturan · AI" judul="Kunci AI">
+        Tempel kunci API dari satu penyedia AI, lalu GenSoal siap membuat soal. Kunci hanya tersimpan di peramban ini dan tidak ikut berkas cadangan.
       </KepalaHalaman>
 
-      <div className="mt-12 flex flex-wrap border-t border-tinta">
-        <nav aria-label="Penyedia" className="w-full border-garis lg:w-[280px] lg:border-r">
-          <div className="mono border-b border-garis p-4 text-redup">Penyedia</div>
-          {reg.penyedia.map((x) => {
-            const k = daftarKunci?.find((y) => y.penyedia === x.id);
-            return (
-              <button
-                key={x.id}
-                type="button"
-                onClick={() => setPilih(x.id)}
-                aria-current={pilih === x.id}
-                className={`flex min-h-[52px] w-full items-center justify-between gap-3 border-b border-garis px-4 text-left text-base hover:bg-lembut ${pilih === x.id ? 'bg-lembut' : ''}`}
-              >
-                <span className="flex items-center gap-2.5">
-                  {x.nama}
-                  {k?.status === 'berfungsi' ? <span className="mono text-redup">· kunci</span> : null}
-                </span>
-                <span className={`mono inline-flex items-center gap-2 ${x.tingkat_gratis ? '' : 'text-redup'}`}>
-                  <Titik isi={x.tingkat_gratis} />
-                  {x.tingkat_gratis ? 'Gratis' : 'Berbayar'}
-                </span>
-              </button>
-            );
-          })}
-        </nav>
+      <div className={`mt-8 flex items-start gap-3 border px-5 py-4 ${siap ? 'border-tinta' : 'border-garis-kuat bg-panel'}`} role="status">
+        <Titik isi={siap} className="mt-2" />
+        <span className="min-w-0 flex-1 text-[16px]">
+          {siap ? (
+            <>
+              Siap dipakai · <strong className="font-medium">{namaUtama?.nama}</strong> · {labelUtama}
+            </>
+          ) : (
+            'Belum siap. Ikuti tiga langkah di bawah.'
+          )}
+        </span>
+      </div>
 
-        <div className="min-w-0 flex-[999_1_560px] pt-8 lg:pl-12">
-          <h2 className="text-[28px] font-light">{p.nama}</h2>
-          <div className="mt-7">
-            <Label htmlFor="kunci">Kunci API</Label>
-            <div className="mt-2.5 flex flex-wrap gap-3">
-              <input
-                id="kunci"
-                type={lihat ? 'text' : 'password'}
-                autoComplete="off"
-                spellCheck={false}
-                value={teksKunci}
-                onChange={(e) => setTeksKunci(e.target.value)}
-                placeholder={p.awalan_kunci ? `${p.awalan_kunci}…` : 'Tempel kunci di sini'}
-                className="min-h-[52px] flex-[1_1_320px] rounded-[2px] border border-tinta bg-latar px-4 font-mono text-sm text-tinta"
-              />
-              <Tombol varian="hantu" onClick={() => setLihat((l) => !l)} aria-pressed={lihat}>
-                {lihat ? 'Sembunyikan' : 'Lihat'}
-              </Tombol>
-              <Tombol onClick={simpanDanUji} disabled={menguji || !teksKunci.trim()} className="min-h-[52px] px-7">
-                {menguji ? 'Menguji…' : 'Uji kunci'}
-              </Tombol>
-            </div>
-            {kunci ? (
-              <div className={`mono mt-3 flex flex-wrap items-center gap-2 ${kunci.status === 'gagal' ? 'text-buruk' : ''}`}>
-                <Titik isi={kunci.status === 'berfungsi'} />
-                <span className="normal-case tracking-normal">{kunci.status === 'belum' ? 'Belum diuji' : kunci.pesan}</span>
-                <button type="button" className="ml-auto text-redup hover:text-buruk" onClick={hapusKunci}>
-                  Hapus kunci
+      <div className="mt-8">
+        <Langkah nomor="01" judul="Pilih penyedia">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {reg.penyedia.map((x) => {
+              const k = daftarKunci?.find((y) => y.penyedia === x.id);
+              const dipilih = aktif === x.id;
+              return (
+                <button
+                  key={x.id}
+                  type="button"
+                  onClick={() => setPilih(x.id)}
+                  aria-pressed={dipilih}
+                  className={`flex min-h-[72px] flex-col items-start justify-center gap-1.5 rounded-[2px] border px-4 py-3 text-left transition-colors ${dipilih ? 'border-tinta bg-tinta text-di-tinta' : 'border-garis-kuat hover:border-tinta'}`}
+                >
+                  <span className="text-[16px]">{x.nama}</span>
+                  <span className={`mono ${dipilih ? 'opacity-80' : 'text-redup'}`}>
+                    {x.tingkat_gratis ? 'Gratis' : 'Berbayar'}
+                    {k?.status === 'berfungsi' ? ' · kunci ✓' : ''}
+                  </span>
                 </button>
-              </div>
-            ) : null}
-            <p className="mt-3 text-sm text-redup">
-              Buat kunci di{' '}
-              <a href={p.situs_kunci} target="_blank" rel="noreferrer noopener" className="underline">
-                {new URL(p.situs_kunci).host}
-              </a>
-              . Sebaiknya buat kunci khusus GenSoal dengan batas pengeluaran.
+              );
+            })}
+          </div>
+          <p className="mt-3 text-sm text-redup">Baru mulai? Google Gemini gratis tanpa kartu kredit.</p>
+        </Langkah>
+
+        <Langkah nomor="02" judul={`Tempel kunci ${p.nama}`}>
+          <p className="text-[15px] text-isi">
+            Belum punya kunci? Buat di{' '}
+            <a href={p.situs_kunci} target="_blank" rel="noreferrer noopener" className="underline">
+              {new URL(p.situs_kunci).host}
+            </a>
+            , salin, lalu tempel di sini.
+          </p>
+          <Label htmlFor="kunci" className="mt-5">
+            Kunci API
+          </Label>
+          <div className="relative mt-2">
+            <input
+              id="kunci"
+              type={lihat ? 'text' : 'password'}
+              autoComplete="off"
+              spellCheck={false}
+              value={teksKunci}
+              onChange={(e) => setTeksKunci(e.target.value)}
+              placeholder={p.awalan_kunci ? `${p.awalan_kunci}…` : 'Tempel kunci di sini'}
+              className="min-h-[52px] w-full rounded-[2px] border border-tinta bg-latar py-0 pl-4 pr-24 font-mono text-sm text-tinta"
+            />
+            <button type="button" onClick={() => setLihat((l) => !l)} aria-pressed={lihat} className="mono absolute inset-y-0 right-0 px-4 text-redup hover:text-tinta">
+              {lihat ? 'Sembunyi' : 'Lihat'}
+            </button>
+          </div>
+          <Tombol onClick={simpanDanUji} disabled={menguji || !teksKunci.trim()} ukuran="besar" className="mt-4 w-full sm:w-auto">
+            {menguji ? 'Menguji…' : 'Simpan dan uji'}
+          </Tombol>
+          {kunci && kunci.status !== 'belum' ? (
+            <div className={`mt-4 flex items-start gap-2 text-[15px] ${kunci.status === 'gagal' ? 'text-buruk' : ''}`}>
+              <Titik isi={kunci.status === 'berfungsi'} className="mt-2" />
+              <span>{kunci.status === 'berfungsi' ? 'Kunci berfungsi.' : kunci.pesan}</span>
+            </div>
+          ) : null}
+          <details className="mt-5 border border-garis px-5 py-4">
+            <summary className="cursor-pointer text-[15px]">Cara mendapatkan kunci</summary>
+            <ol className="mt-3 list-decimal pl-5 text-[15px] leading-[1.7] text-isi">
+              {BANTUAN['kunci-api'].langkah.map((l) => (
+                <li key={l}>{l}</li>
+              ))}
+            </ol>
+          </details>
+        </Langkah>
+
+        <Langkah nomor="03" judul="Pilih model" redup={!tersedia.length}>
+          {tersedia.length ? (
+            <>
+              <Label htmlFor="model-utama">Model yang dipakai</Label>
+              <select id="model-utama" className="bidang mt-2" value={modelDipilih} onChange={(e) => simpanProfil({ penyedia_utama: aktif, model_utama: e.target.value })}>
+                {!modelDipilih ? <option value="">Pilih model…</option> : null}
+                {tersedia.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.label}
+                    {m.status !== 'stabil' ? ` (${LABEL_STATUS[m.status]})` : ''}
+                    {m.registri?.catatan ? ` · ${m.registri.catatan}` : ''}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-3 text-sm text-redup">Pilihan pertama biasanya sudah tepat. Setiap soal tetap dihitung ulang oleh GenSoal, model mana pun yang dipakai.</p>
+            </>
+          ) : (
+            <p className="text-[15px] text-isi">Model muncul setelah kunci berfungsi.</p>
+          )}
+          <div className="mt-6 border border-garis bg-panel px-5 py-4 text-sm leading-relaxed text-isi">
+            <p>
+              <span className="mono text-redup">Biaya · </span>
+              {p.peringatan_biaya}
+            </p>
+            <p className="mt-2">
+              <span className="mono text-redup">Privasi · </span>
+              {p.peringatan_privasi}
             </p>
           </div>
+        </Langkah>
 
-          <div className="mt-10">
-            <div className="mono pb-3 text-redup">Model</div>
-            <div className="border-t border-tinta">
-              {baris.length === 0 ? <p className="py-5 text-isi">Tidak ada model.</p> : null}
-              {baris.map((m) => {
-                const utama = profil.penyedia_utama === pilih && profil.model_utama === m.id;
-                const cadangan = profil.penyedia_cadangan === pilih && profil.model_cadangan === m.id;
-                const bisa = kunci?.status === 'berfungsi' && m.tersedia !== false;
-                return (
-                  <div key={m.id} className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-5 gap-y-2 border-b border-garis px-2 py-4 sm:grid-cols-[minmax(0,1.4fr)_auto_auto] ${utama ? 'bg-lembut' : ''}`}>
-                    <div className="min-w-0">
-                      <div className={`text-lg ${utama ? 'font-normal' : 'font-light'}`}>{m.label}</div>
-                      <div className="mono mt-1.5 break-all text-redup">
-                        {utama ? 'Model utama · ' : cadangan ? 'Model cadangan · ' : ''}
-                        {m.registri?.catatan ? `${m.registri.catatan} · ` : ''}
-                        {m.id}
-                        {m.tersedia === false ? ' · tidak tersedia untuk kunci ini' : ''}
-                      </div>
-                    </div>
-                    <span className={`mono inline-flex items-center gap-2 ${m.status === 'pratinjau' ? 'text-redup' : ''}`}>
-                      <Titik isi={m.status === 'direkomendasikan' || m.status === 'stabil'} />
-                      {LABEL_STATUS[m.status]}
-                    </span>
-                    <div className="col-span-2 flex flex-wrap items-center gap-3 sm:col-span-1 sm:justify-end">
-                      <span className="mono text-redup">Golden set: {m.registri?.golden.status === 'lolos' ? 'lolos' : m.registri?.golden.status === 'gagal' ? 'gagal' : 'belum'}</span>
-                      <Tombol ukuran="kecil" varian={utama ? 'utama' : 'hantu'} disabled={!bisa} onClick={() => simpanProfil({ penyedia_utama: pilih, model_utama: m.id })}>
-                        Utama
-                      </Tombol>
-                      <Tombol ukuran="kecil" varian={cadangan ? 'utama' : 'hantu'} disabled={!bisa} onClick={() => simpanProfil({ penyedia_cadangan: pilih, model_cadangan: m.id })}>
-                        Cadangan
-                      </Tombol>
-                    </div>
-                  </div>
-                );
-              })}
+        <details className="border-y border-garis py-5">
+          <summary className="cursor-pointer text-[17px]">Pengaturan lanjutan</summary>
+          <div className="mt-6 space-y-8">
+            <div>
+              <Label htmlFor="model-cadangan">Model cadangan (bila batas penyedia utama tercapai)</Label>
+              <select
+                id="model-cadangan"
+                className="bidang mt-2"
+                value={profil.penyedia_cadangan && profil.model_cadangan ? `${profil.penyedia_cadangan}|${profil.model_cadangan}` : ''}
+                onChange={(e) => {
+                  const [penyedia, ...model] = e.target.value.split('|');
+                  void simpanProfil(e.target.value ? { penyedia_cadangan: penyedia as PenyediaId, model_cadangan: model.join('|') } : { penyedia_cadangan: null, model_cadangan: null });
+                }}
+              >
+                <option value="">Tidak ada</option>
+                {pilihanCadangan.map(({ penyedia, m }) => (
+                  <option key={`${penyedia.id}|${m.id}`} value={`${penyedia.id}|${m.id}`}>
+                    {penyedia.nama} · {m.label}
+                  </option>
+                ))}
+              </select>
             </div>
-            {baris.some((m) => m.status === 'pratinjau') ? <p className="mt-3 text-sm text-redup">Model pratinjau belum diuji dengan golden set; mutu soal dapat lebih rendah. Semua soal tetap melewati verifikasi.</p> : null}
-            <p className="mt-3 text-sm text-redup">Registri diperiksa {reg.diperiksa_pada}. {reg.catatan}</p>
-          </div>
 
-          <div className="mt-9 grid gap-5 sm:grid-cols-2">
-            <Kotak>
-              <div className="mono text-redup">Biaya</div>
-              <p className="mt-2.5">{p.peringatan_biaya}</p>
-            </Kotak>
-            <Kotak>
-              <div className="mono text-redup">Privasi</div>
-              <p className="mt-2.5">{p.peringatan_privasi}</p>
-            </Kotak>
-          </div>
-
-          <div className="mt-12 border-t border-garis pt-8">
-            <h2 className="text-xl font-light">Batas dan pemakaian</h2>
-            <div className="mt-5 grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <Label htmlFor="batas">Batas harian soal lolos</Label>
+                <Label htmlFor="batas">Batas harian soal</Label>
                 <input id="batas" type="number" min={1} max={5000} className="bidang mt-2" value={profil.batas_harian} onChange={(e) => simpanProfil({ batas_harian: Math.max(1, Number(e.target.value) || 1) })} />
               </div>
               <div>
@@ -212,17 +254,37 @@ export default function PengaturanAi() {
                 <input id="biaya" type="number" min={0} step={0.1} className="bidang mt-2" value={profil.batas_biaya_usd} onChange={(e) => simpanProfil({ batas_biaya_usd: Math.max(0, Number(e.target.value) || 0) })} />
               </div>
             </div>
-            <p className="mono mt-4 text-redup">
-              Hari ini: {lolosHariIni} soal lolos · {(pemakaian ?? []).length} permintaan · {formatBiaya(biayaHariIni)}
-            </p>
-            {lewatBatasBiaya ? <Peringatan className="mt-3">Perkiraan biaya hari ini melewati batas peringatan yang Anda atur.</Peringatan> : null}
-            <p className="mt-3 text-sm text-redup">Hanya soal yang lolos verifikasi yang mengurangi batas harian. Biaya dihitung dari token dan harga registri; harga yang belum diverifikasi ditampilkan sebagai "belum diketahui".</p>
-          </div>
-        </div>
+            <div>
+              <p className="mono text-redup">
+                Hari ini: {lolosHariIni} soal lolos · {(pemakaian ?? []).length} permintaan · {formatBiaya(biayaHariIni)}
+              </p>
+              {lewatBatasBiaya ? <Peringatan className="mt-3">Perkiraan biaya hari ini melewati batas peringatan yang Anda atur.</Peringatan> : null}
+              <p className="mt-2 text-sm text-redup">Hanya soal yang lolos verifikasi yang mengurangi batas harian.</p>
+            </div>
 
-        <aside aria-label="Bantuan" className="w-full border-garis pt-10 lg:w-[320px] lg:border-l lg:pl-10 lg:pt-8">
-          <PanelBantuan id="kunci-api" />
-        </aside>
+            <div>
+              <div className="mono text-redup">Semua model {p.nama}</div>
+              <ul className="mt-3 border-t border-garis text-[15px]">
+                {gabungModel(p, kunci?.status === 'berfungsi' ? kunci.model_tersedia.map((id) => ({ id, nama: id })) : null).map((m) => (
+                  <li key={m.id} className="flex flex-wrap justify-between gap-x-4 gap-y-1 border-b border-garis py-3">
+                    <span className={m.tersedia === false ? 'text-redup' : ''}>{m.label}</span>
+                    <span className="mono text-redup">
+                      {LABEL_STATUS[m.status]} · golden set {m.registri?.golden.status ?? 'belum'}
+                      {m.tersedia === false ? ' · tidak tersedia' : ''}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-sm text-redup">Registri diperiksa {reg.diperiksa_pada}. Lencana "direkomendasikan" hanya diberikan setelah model lolos golden set.</p>
+            </div>
+
+            {kunci ? (
+              <button type="button" className="mono text-redup hover:text-buruk" onClick={hapusKunci}>
+                Hapus kunci {p.nama} dari perangkat ini
+              </button>
+            ) : null}
+          </div>
+        </details>
       </div>
     </div>
   );

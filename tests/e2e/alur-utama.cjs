@@ -84,9 +84,10 @@ function butirPalsu(bentuk) {
   // Pengaturan AI: tempel kunci, uji, pilih model
   await page.goto(DASAR + '/pengaturan/ai');
   await page.fill('#kunci', 'AIzaUJI-palsu-1234567890');
-  await page.click('text=Uji kunci');
-  await page.waitForSelector('text=Kunci berfungsi');
-  await page.getByRole('button', { name: 'Cadangan' }).nth(1).click();
+  await page.getByRole('button', { name: 'Simpan dan uji' }).click();
+  await page.waitForSelector('text=Siap dipakai');
+  await page.click('text=Pengaturan lanjutan');
+  await page.selectOption('#model-cadangan', { index: 2 });
   await foto('02-pengaturan-ai');
 
   // Buat soal
