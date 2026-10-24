@@ -1,0 +1,20 @@
+kurikulum_id,kode,nama,rumpun,fase,paket_aktif
+merdeka-2024,matematika,Matematika,matematika,A;B;C;D;E;F,1
+merdeka-2024,ipas,IPAS,ipa,A;B;C,0
+merdeka-2024,bahasa-indonesia,Bahasa Indonesia,bahasa,A;B;C;D;E;F,0
+merdeka-2024,bahasa-inggris,Bahasa Inggris,bahasa,A;B;C;D;E;F,0
+merdeka-2024,pendidikan-pancasila,Pendidikan Pancasila,pancasila_agama,A;B;C;D;E;F,0
+merdeka-2024,pai-bp,Pendidikan Agama Islam dan Budi Pekerti,pancasila_agama,A;B;C;D;E;F,0
+merdeka-2024,ipa,IPA,ipa,D;E,0
+merdeka-2024,ips,IPS,ips,D;E,0
+merdeka-2024,fisika,Fisika,ipa,F,0
+merdeka-2024,kimia,Kimia,ipa,F,0
+merdeka-2024,biologi,Biologi,ipa,F,0
+merdeka-2024,sejarah,Sejarah,ips,E;F,0
+merdeka-2024,geografi,Geografi,ips,F,0
+merdeka-2024,ekonomi,Ekonomi,ips,F,0
+merdeka-2024,sosiologi,Sosiologi,ips,F,0
+merdeka-2024,informatika,Informatika,seni_pjok_informatika,D;E;F,0
+merdeka-2024,pjok,PJOK,seni_pjok_informatika,A;B;C;D;E;F,0
+merdeka-2024,seni-rupa,Seni Rupa,seni_pjok_informatika,A;B;C;D;E;F,0
+merdeka-2024,seni-musik,Seni Musik,seni_pjok_informatika,A;B;C;D;E;F,0

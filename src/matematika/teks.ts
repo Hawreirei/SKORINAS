@@ -1,0 +1,220 @@
+// Teks soal: kalimat biasa dengan rumus LaTeX sebaris di antara $...$ atau \(...\).
+// Pecahan polos seperti 3/4 di luar rumus diubah menjadi pecahan bertumpuk.
+// Satu pohon sintaks dipakai semua keluaran: KaTeX (layar), Office Math (Word), tata letak PDF, dan LaTeX.
+
+export type Simpul =
+  | { t: 'teks'; s: string; mentah?: boolean }
+  | { t: 'pecahan'; atas: Simpul[]; bawah: Simpul[] }
+  | { t: 'pangkat'; basis: Simpul[]; atas: Simpul[] }
+  | { t: 'indeks'; basis: Simpul[]; bawah: Simpul[] }
+  | { t: 'akar'; isi: Simpul[]; derajat: Simpul[] | null };
+
+export type Segmen = { jenis: 'teks'; s: string } | { jenis: 'mat'; latex: string; simpul: Simpul[] };
+
+const SIMBOL: Record<string, string> = {
+  times: '×', div: '÷', cdot: '·', pm: '±', mp: '∓', le: '≤', leq: '≤', ge: '≥', geq: '≥', ne: '≠', neq: '≠',
+  approx: '≈', equiv: '≡', pi: 'π', degree: '°', circ: '°', ldots: '…', dots: '…', cdots: '⋯', square: '□',
+  Box: '□', angle: '∠', triangle: '△', alpha: 'α', beta: 'β', gamma: 'γ', theta: 'θ', lambda: 'λ', mu: 'μ',
+  sigma: 'σ', Delta: 'Δ', infty: '∞', to: '→', rightarrow: '→', Rightarrow: '⇒', leftarrow: '←', perp: '⊥',
+  parallel: '∥', cong: '≅', sim: '∼', in: '∈', notin: '∉', subset: '⊂', cup: '∪', cap: '∩', emptyset: '∅',
+  lt: '<', gt: '>', colon: ':', '%': '%', '{': '{', '}': '}', '$': '$', '#': '#', '&': '&', _: '_',
+  ',': ' ', ';': ' ', ':': ' ', '!': '', quad: ' ', qquad: '  ', ' ': ' ', left: '', right: '', displaystyle: '',
+  textstyle: '', mid: '|', vert: '|', cdotp: '·', bullet: '•', prime: '′',
+};
+
+const PERINTAH_TEKS = new Set(['text', 'textrm', 'mathrm', 'textbf', 'mathbf', 'textit', 'mathit', 'mbox', 'operatorname', 'overline', 'underline', 'boxed']);
+const PERINTAH_PECAHAN = new Set(['frac', 'dfrac', 'tfrac', 'cfrac']);
+
+class PenguraiLatex {
+  private i = 0;
+  constructor(private readonly s: string) {}
+
+  urai(): Simpul[] {
+    return this.daftar(null);
+  }
+
+  private daftar(penutup: string | null): Simpul[] {
+    const hasil: Simpul[] = [];
+    while (this.i < this.s.length) {
+      const c = this.s[this.i];
+      if (penutup && c === penutup) {
+        this.i++;
+        return gabungTeks(hasil);
+      }
+      if (c === '^' || c === '_') {
+        this.i++;
+        const arg = this.argumen();
+        const basis = ambilBasis(hasil);
+        if (c === '^') hasil.push({ t: 'pangkat', basis, atas: arg });
+        else hasil.push({ t: 'indeks', basis, bawah: arg });
+        continue;
+      }
+      const atom = this.atom();
+      if (atom) hasil.push(...atom);
+    }
+    return gabungTeks(hasil);
+  }
+
+  private argumen(): Simpul[] {
+    this.lewatiSpasi();
+    if (this.s[this.i] === '{') {
+      this.i++;
+      return this.daftar('}');
+    }
+    return this.atom() ?? [];
+  }
+
+  private lewatiSpasi() {
+    while (this.s[this.i] === ' ') this.i++;
+  }
+
+  private atom(): Simpul[] | null {
+    const c = this.s[this.i];
+    if (c === undefined) return null;
+    if (c === '{') {
+      this.i++;
+      return this.daftar('}');
+    }
+    if (c === '}') {
+      this.i++;
+      return [];
+    }
+    if (c === '\\') {
+      this.i++;
+      let nama = '';
+      if (/[a-zA-Z]/.test(this.s[this.i] ?? '')) {
+        while (/[a-zA-Z]/.test(this.s[this.i] ?? '')) nama += this.s[this.i++];
+      } else {
+        nama = this.s[this.i++] ?? '';
+      }
+      if (PERINTAH_PECAHAN.has(nama)) {
+        const atas = this.argumen();
+        const bawah = this.argumen();
+        return [{ t: 'pecahan', atas, bawah }];
+      }
+      if (nama === 'sqrt') {
+        let derajat: Simpul[] | null = null;
+        this.lewatiSpasi();
+        if (this.s[this.i] === '[') {
+          const tutup = this.s.indexOf(']', this.i);
+          derajat = new PenguraiLatex(this.s.slice(this.i + 1, tutup < 0 ? undefined : tutup)).urai();
+          this.i = tutup < 0 ? this.s.length : tutup + 1;
+        }
+        return [{ t: 'akar', isi: this.argumen(), derajat }];
+      }
+      if (PERINTAH_TEKS.has(nama)) {
+        this.lewatiSpasi();
+        if (this.s[this.i] === '{') {
+          const awal = ++this.i;
+          let dalam = 1;
+          while (this.i < this.s.length && dalam > 0) {
+            if (this.s[this.i] === '{') dalam++;
+            else if (this.s[this.i] === '}') dalam--;
+            this.i++;
+          }
+          const isi = this.s.slice(awal, this.i - 1);
+          return nama === 'text' || nama === 'textrm' || nama === 'mbox' ? [{ t: 'teks', s: isi }] : new PenguraiLatex(isi).urai();
+        }
+        return [];
+      }
+      if (nama in SIMBOL) return [{ t: 'teks', s: SIMBOL[nama] }];
+      return [{ t: 'teks', s: '\\' + nama, mentah: true }];
+    }
+    this.i++;
+    if (c === '~') return [{ t: 'teks', s: ' ' }];
+    return [{ t: 'teks', s: c }];
+  }
+}
+
+function ambilBasis(hasil: Simpul[]): Simpul[] {
+  const akhir = hasil.pop();
+  if (!akhir) return [];
+  if (akhir.t === 'teks' && !akhir.mentah && akhir.s.length > 1) {
+    // Ambil hanya token terakhir (angka utuh atau satu huruf) sebagai basis.
+    const m = akhir.s.match(/(\d+(?:[.,]\d+)?|.)$/u);
+    const tok = m ? m[1] : akhir.s.slice(-1);
+    const sisa = akhir.s.slice(0, akhir.s.length - tok.length);
+    if (sisa) hasil.push({ t: 'teks', s: sisa });
+    return [{ t: 'teks', s: tok }];
+  }
+  return [akhir];
+}
+
+function gabungTeks(daftar: Simpul[]): Simpul[] {
+  const hasil: Simpul[] = [];
+  for (const s of daftar) {
+    const akhir = hasil[hasil.length - 1];
+    if (s.t === 'teks' && akhir?.t === 'teks' && !s.mentah && !akhir.mentah) {
+      hasil[hasil.length - 1] = { t: 'teks', s: akhir.s + s.s };
+    } else hasil.push(s);
+  }
+  return hasil;
+}
+
+export function uraiLatex(latex: string): Simpul[] {
+  return new PenguraiLatex(latex).urai();
+}
+
+const POLA_RUMUS = /\$([^$]+)\$|\\\((.+?)\\\)/g;
+const POLA_PECAHAN_POLOS = /(?<![\d/.,\w])(\d+)\s?\/\s?(\d+)(?![\d/,.]?\d)/g;
+
+/** Pecah teks menjadi segmen kalimat dan rumus. */
+export function uraiTeks(teks: string, pecahanOtomatis = true): Segmen[] {
+  const hasil: Segmen[] = [];
+  const dorongTeks = (s: string) => {
+    if (!s) return;
+    if (!pecahanOtomatis) {
+      hasil.push({ jenis: 'teks', s });
+      return;
+    }
+    let akhir = 0;
+    for (const m of s.matchAll(POLA_PECAHAN_POLOS)) {
+      const idx = m.index ?? 0;
+      if (idx > akhir) hasil.push({ jenis: 'teks', s: s.slice(akhir, idx) });
+      const latex = `\\frac{${m[1]}}{${m[2]}}`;
+      hasil.push({ jenis: 'mat', latex, simpul: uraiLatex(latex) });
+      akhir = idx + m[0].length;
+    }
+    if (akhir < s.length) hasil.push({ jenis: 'teks', s: s.slice(akhir) });
+  };
+  let akhir = 0;
+  for (const m of teks.matchAll(POLA_RUMUS)) {
+    const idx = m.index ?? 0;
+    dorongTeks(teks.slice(akhir, idx));
+    const latex = (m[1] ?? m[2] ?? '').trim();
+    hasil.push({ jenis: 'mat', latex, simpul: uraiLatex(latex) });
+    akhir = idx + m[0].length;
+  }
+  dorongTeks(teks.slice(akhir));
+  return hasil;
+}
+
+/** Teks polos tanpa rumus, untuk alt, pencarian, dan kemiripan. */
+export function teksPolos(teks: string): string {
+  return uraiTeks(teks, false)
+    .map((g) => (g.jenis === 'teks' ? g.s : simpulKePolos(g.simpul)))
+    .join('');
+}
+
+export function simpulKePolos(daftar: Simpul[]): string {
+  return daftar
+    .map((n) => {
+      switch (n.t) {
+        case 'teks':
+          return n.mentah ? n.s.slice(1) : n.s;
+        case 'pecahan':
+          return `${simpulKePolos(n.atas)}/${simpulKePolos(n.bawah)}`;
+        case 'pangkat':
+          return `${simpulKePolos(n.basis)}^${simpulKePolos(n.atas)}`;
+        case 'indeks':
+          return `${simpulKePolos(n.basis)}_${simpulKePolos(n.bawah)}`;
+        case 'akar':
+          return `√(${simpulKePolos(n.isi)})`;
+      }
+    })
+    .join('');
+}
+
+export function adaRumus(teks: string): boolean {
+  return uraiTeks(teks).some((g) => g.jenis === 'mat');
+}

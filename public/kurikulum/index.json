@@ -1,0 +1,335 @@
+{
+ "versi_data": "merdeka-2024@2024.1",
+ "dibangun_pada": "2026-10-24T07:44:44.524Z",
+ "kurikulum": [
+  {
+   "id": "merdeka-2024",
+   "nama": "Kurikulum Merdeka",
+   "versi": "2024.1",
+   "dasar_hukum": "Keputusan Kepala BSKAP Kemendikbudristek Nomor 032/H/KR/2024",
+   "berlaku_dari": "2024-07-01",
+   "aktif": true,
+   "fase": [
+    {
+     "id": "merdeka-2024.A",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "A",
+     "kelas_dari": 1,
+     "kelas_sampai": 2
+    },
+    {
+     "id": "merdeka-2024.B",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "B",
+     "kelas_dari": 3,
+     "kelas_sampai": 4
+    },
+    {
+     "id": "merdeka-2024.C",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "C",
+     "kelas_dari": 5,
+     "kelas_sampai": 6
+    },
+    {
+     "id": "merdeka-2024.D",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "D",
+     "kelas_dari": 7,
+     "kelas_sampai": 9
+    },
+    {
+     "id": "merdeka-2024.E",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "E",
+     "kelas_dari": 10,
+     "kelas_sampai": 10
+    },
+    {
+     "id": "merdeka-2024.F",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "F",
+     "kelas_dari": 11,
+     "kelas_sampai": 12
+    }
+   ],
+   "mapel": [
+    {
+     "id": "merdeka-2024.matematika",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "matematika",
+     "nama": "Matematika",
+     "rumpun": "matematika",
+     "fase": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+     ],
+     "paket_aktif": true,
+     "berkas": "merdeka-2024/matematika.json"
+    },
+    {
+     "id": "merdeka-2024.ipas",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "ipas",
+     "nama": "IPAS",
+     "rumpun": "ipa",
+     "fase": [
+      "A",
+      "B",
+      "C"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.bahasa-indonesia",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "bahasa-indonesia",
+     "nama": "Bahasa Indonesia",
+     "rumpun": "bahasa",
+     "fase": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.bahasa-inggris",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "bahasa-inggris",
+     "nama": "Bahasa Inggris",
+     "rumpun": "bahasa",
+     "fase": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.pendidikan-pancasila",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "pendidikan-pancasila",
+     "nama": "Pendidikan Pancasila",
+     "rumpun": "pancasila_agama",
+     "fase": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.pai-bp",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "pai-bp",
+     "nama": "Pendidikan Agama Islam dan Budi Pekerti",
+     "rumpun": "pancasila_agama",
+     "fase": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.ipa",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "ipa",
+     "nama": "IPA",
+     "rumpun": "ipa",
+     "fase": [
+      "D",
+      "E"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.ips",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "ips",
+     "nama": "IPS",
+     "rumpun": "ips",
+     "fase": [
+      "D",
+      "E"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.fisika",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "fisika",
+     "nama": "Fisika",
+     "rumpun": "ipa",
+     "fase": [
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.kimia",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "kimia",
+     "nama": "Kimia",
+     "rumpun": "ipa",
+     "fase": [
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.biologi",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "biologi",
+     "nama": "Biologi",
+     "rumpun": "ipa",
+     "fase": [
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.sejarah",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "sejarah",
+     "nama": "Sejarah",
+     "rumpun": "ips",
+     "fase": [
+      "E",
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.geografi",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "geografi",
+     "nama": "Geografi",
+     "rumpun": "ips",
+     "fase": [
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.ekonomi",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "ekonomi",
+     "nama": "Ekonomi",
+     "rumpun": "ips",
+     "fase": [
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.sosiologi",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "sosiologi",
+     "nama": "Sosiologi",
+     "rumpun": "ips",
+     "fase": [
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.informatika",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "informatika",
+     "nama": "Informatika",
+     "rumpun": "seni_pjok_informatika",
+     "fase": [
+      "D",
+      "E",
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.pjok",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "pjok",
+     "nama": "PJOK",
+     "rumpun": "seni_pjok_informatika",
+     "fase": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.seni-rupa",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "seni-rupa",
+     "nama": "Seni Rupa",
+     "rumpun": "seni_pjok_informatika",
+     "fase": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    },
+    {
+     "id": "merdeka-2024.seni-musik",
+     "kurikulum_id": "merdeka-2024",
+     "kode": "seni-musik",
+     "nama": "Seni Musik",
+     "rumpun": "seni_pjok_informatika",
+     "fase": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F"
+     ],
+     "paket_aktif": false,
+     "berkas": null
+    }
+   ]
+  }
+ ]
+}

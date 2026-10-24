@@ -1,0 +1,1506 @@
+{
+ "keterangan": "Dibangkitkan oleh scripts/golden-aritmetika.py; kunci dihitung dengan Fraction.",
+ "benar": [
+  {
+   "id": "G-J00",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $87 + 33$ adalah ....",
+    "opsi": {
+     "A": "119",
+     "B": "54",
+     "C": "130",
+     "D": "120"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "87 + 33 = 120"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "87 + 33",
+     "nilai": "120"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-J01",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $36 + 78$ adalah ....",
+    "opsi": {
+     "A": "124",
+     "B": "42",
+     "C": "113",
+     "D": "114"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "36 + 78 = 114"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "36 + 78",
+     "nilai": "114"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-J02",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $55 + 76$ adalah ....",
+    "opsi": {
+     "A": "21",
+     "B": "131",
+     "C": "141",
+     "D": "130"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "55 + 76 = 131"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "55 + 76",
+     "nilai": "131"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-J03",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $34 + 71$ adalah ....",
+    "opsi": {
+     "A": "105",
+     "B": "104",
+     "C": "115",
+     "D": "37"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "34 + 71 = 105"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "34 + 71",
+     "nilai": "105"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-J04",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $44 + 58$ adalah ....",
+    "opsi": {
+     "A": "14",
+     "B": "102",
+     "C": "112",
+     "D": "101"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "44 + 58 = 102"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "44 + 58",
+     "nilai": "102"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-J05",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $17 + 64$ adalah ....",
+    "opsi": {
+     "A": "80",
+     "B": "91",
+     "C": "47",
+     "D": "81"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "17 + 64 = 81"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "17 + 64",
+     "nilai": "81"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-J06",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $76 + 31$ adalah ....",
+    "opsi": {
+     "A": "106",
+     "B": "107",
+     "C": "45",
+     "D": "117"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "76 + 31 = 107"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "76 + 31",
+     "nilai": "107"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-J07",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $59 + 41$ adalah ....",
+    "opsi": {
+     "A": "18",
+     "B": "110",
+     "C": "99",
+     "D": "100"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "59 + 41 = 100"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "59 + 41",
+     "nilai": "100"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-J08",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $52 + 69$ adalah ....",
+    "opsi": {
+     "A": "120",
+     "B": "131",
+     "C": "17",
+     "D": "121"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "52 + 69 = 121"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "52 + 69",
+     "nilai": "121"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-J09",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $36 + 21$ adalah ....",
+    "opsi": {
+     "A": "56",
+     "B": "57",
+     "C": "67",
+     "D": "15"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "36 + 21 = 57"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "36 + 21",
+     "nilai": "57"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-J10",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $80 + 17$ adalah ....",
+    "opsi": {
+     "A": "96",
+     "B": "107",
+     "C": "97",
+     "D": "63"
+    },
+    "kunci": "C",
+    "pembahasan": [
+     "80 + 17 = 97"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "80 + 17",
+     "nilai": "97"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-J11",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $43 + 12$ adalah ....",
+    "opsi": {
+     "A": "65",
+     "B": "31",
+     "C": "54",
+     "D": "55"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "43 + 12 = 55"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "43 + 12",
+     "nilai": "55"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-J12",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $64 + 20$ adalah ....",
+    "opsi": {
+     "A": "94",
+     "B": "84",
+     "C": "44",
+     "D": "83"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "64 + 20 = 84"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "64 + 20",
+     "nilai": "84"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-J13",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $33 + 18$ adalah ....",
+    "opsi": {
+     "A": "61",
+     "B": "51",
+     "C": "50",
+     "D": "15"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "33 + 18 = 51"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "33 + 18",
+     "nilai": "51"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-J14",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $45 + 63$ adalah ....",
+    "opsi": {
+     "A": "118",
+     "B": "18",
+     "C": "107",
+     "D": "108"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "45 + 63 = 108"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "45 + 63",
+     "nilai": "108"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K00",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $5 \\times 6$ adalah ....",
+    "opsi": {
+     "A": "25",
+     "B": "35",
+     "C": "30",
+     "D": "11"
+    },
+    "kunci": "C",
+    "pembahasan": [
+     "5 × 6 = 30"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "5 * 6",
+     "nilai": "30"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K01",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $8 \\times 11$ adalah ....",
+    "opsi": {
+     "A": "88",
+     "B": "19",
+     "C": "96",
+     "D": "80"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "8 × 11 = 88"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "8 * 11",
+     "nilai": "88"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K03",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $4 \\times 6$ adalah ....",
+    "opsi": {
+     "A": "10",
+     "B": "24",
+     "C": "28",
+     "D": "20"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "4 × 6 = 24"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "4 * 6",
+     "nilai": "24"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K04",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $4 \\times 12$ adalah ....",
+    "opsi": {
+     "A": "52",
+     "B": "16",
+     "C": "48",
+     "D": "44"
+    },
+    "kunci": "C",
+    "pembahasan": [
+     "4 × 12 = 48"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "4 * 12",
+     "nilai": "48"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K05",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $5 \\times 12$ adalah ....",
+    "opsi": {
+     "A": "65",
+     "B": "60",
+     "C": "17",
+     "D": "55"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "5 × 12 = 60"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "5 * 12",
+     "nilai": "60"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K06",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $8 \\times 9$ adalah ....",
+    "opsi": {
+     "A": "72",
+     "B": "64",
+     "C": "17",
+     "D": "80"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "8 × 9 = 72"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "8 * 9",
+     "nilai": "72"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K07",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $5 \\times 8$ adalah ....",
+    "opsi": {
+     "A": "40",
+     "B": "13",
+     "C": "35",
+     "D": "45"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "5 × 8 = 40"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "5 * 8",
+     "nilai": "40"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K08",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $3 \\times 7$ adalah ....",
+    "opsi": {
+     "A": "18",
+     "B": "21",
+     "C": "24",
+     "D": "10"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "3 × 7 = 21"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "3 * 7",
+     "nilai": "21"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K09",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $9 \\times 5$ adalah ....",
+    "opsi": {
+     "A": "45",
+     "B": "54",
+     "C": "36",
+     "D": "14"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "9 × 5 = 45"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "9 * 5",
+     "nilai": "45"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K10",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $9 \\times 4$ adalah ....",
+    "opsi": {
+     "A": "27",
+     "B": "13",
+     "C": "45",
+     "D": "36"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "9 × 4 = 36"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "9 * 4",
+     "nilai": "36"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K12",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $6 \\times 4$ adalah ....",
+    "opsi": {
+     "A": "18",
+     "B": "24",
+     "C": "10",
+     "D": "30"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "6 × 4 = 24"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "6 * 4",
+     "nilai": "24"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K14",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $3 \\times 5$ adalah ....",
+    "opsi": {
+     "A": "15",
+     "B": "12",
+     "C": "18",
+     "D": "8"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "3 × 5 = 15"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "3 * 5",
+     "nilai": "15"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K15",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $3 \\times 6$ adalah ....",
+    "opsi": {
+     "A": "9",
+     "B": "15",
+     "C": "21",
+     "D": "18"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "3 × 6 = 18"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "3 * 6",
+     "nilai": "18"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K16",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $3 \\times 10$ adalah ....",
+    "opsi": {
+     "A": "30",
+     "B": "33",
+     "C": "13",
+     "D": "27"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "3 × 10 = 30"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "3 * 10",
+     "nilai": "30"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-K17",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $7 \\times 9$ adalah ....",
+    "opsi": {
+     "A": "63",
+     "B": "70",
+     "C": "16",
+     "D": "56"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "7 × 9 = 63"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "7 * 9",
+     "nilai": "63"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P00",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{3}{7}$ + $\\frac{3}{7}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{9}{7}$",
+     "B": "$\\frac{6}{7}$",
+     "C": "$1$",
+     "D": "$\\frac{3}{7}$"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 3 + 3 = 6."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "3/7 + 3/7",
+     "nilai": "6/7"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P01",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{3}{11}$ + $\\frac{5}{11}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{15}{11}$",
+     "B": "$\\frac{4}{11}$",
+     "C": "$\\frac{8}{11}$",
+     "D": "$\\frac{9}{11}$"
+    },
+    "kunci": "C",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 3 + 5 = 8."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "3/11 + 5/11",
+     "nilai": "8/11"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P02",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{7}{12}$ + $\\frac{4}{12}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{11}{24}$",
+     "B": "$\\frac{7}{3}$",
+     "C": "$1$",
+     "D": "$\\frac{11}{12}$"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 7 + 4 = 11."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "7/12 + 4/12",
+     "nilai": "11/12"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P03",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{3}{5}$ + $\\frac{1}{5}$ adalah ....",
+    "opsi": {
+     "A": "$1$",
+     "B": "$\\frac{2}{5}$",
+     "C": "$\\frac{3}{5}$",
+     "D": "$\\frac{4}{5}$"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 3 + 1 = 4."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "3/5 + 1/5",
+     "nilai": "4/5"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P06",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{1}{7}$ + $\\frac{5}{7}$ adalah ....",
+    "opsi": {
+     "A": "$1$",
+     "B": "$\\frac{6}{7}$",
+     "C": "$\\frac{3}{7}$",
+     "D": "$\\frac{5}{7}$"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 1 + 5 = 6."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "1/7 + 5/7",
+     "nilai": "6/7"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P07",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{1}{11}$ + $\\frac{9}{11}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{5}{11}$",
+     "B": "$1$",
+     "C": "$\\frac{9}{11}$",
+     "D": "$\\frac{10}{11}$"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 1 + 9 = 10."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "1/11 + 9/11",
+     "nilai": "10/11"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P09",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{2}{9}$ + $\\frac{5}{9}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{7}{9}$",
+     "B": "$\\frac{10}{9}$",
+     "C": "$\\frac{8}{9}$",
+     "D": "$\\frac{7}{18}$"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 2 + 5 = 7."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "2/9 + 5/9",
+     "nilai": "7/9"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P11",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{1}{5}$ + $\\frac{2}{5}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{4}{5}$",
+     "B": "$\\frac{3}{5}$",
+     "C": "$\\frac{3}{10}$",
+     "D": "$\\frac{2}{5}$"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 1 + 2 = 3."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "1/5 + 2/5",
+     "nilai": "3/5"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P16",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{1}{9}$ + $\\frac{6}{9}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{2}{3}$",
+     "B": "$\\frac{8}{9}$",
+     "C": "$\\frac{7}{9}$",
+     "D": "$\\frac{7}{18}$"
+    },
+    "kunci": "C",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 1 + 6 = 7."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "1/9 + 6/9",
+     "nilai": "7/9"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P18",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{5}{12}$ + $\\frac{2}{12}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{7}{12}$",
+     "B": "$\\frac{2}{3}$",
+     "C": "$\\frac{7}{24}$",
+     "D": "$\\frac{5}{6}$"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 5 + 2 = 7."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "5/12 + 2/12",
+     "nilai": "7/12"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P19",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{2}{12}$ + $\\frac{9}{12}$ adalah ....",
+    "opsi": {
+     "A": "$1$",
+     "B": "$\\frac{3}{2}$",
+     "C": "$\\frac{11}{24}$",
+     "D": "$\\frac{11}{12}$"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 2 + 9 = 11."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "2/12 + 9/12",
+     "nilai": "11/12"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P21",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{2}{11}$ + $\\frac{4}{11}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{6}{11}$",
+     "B": "$\\frac{7}{11}$",
+     "C": "$\\frac{8}{11}$",
+     "D": "$\\frac{3}{11}$"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 2 + 4 = 6."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "2/11 + 4/11",
+     "nilai": "6/11"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P23",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{6}{11}$ + $\\frac{1}{11}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{7}{22}$",
+     "B": "$\\frac{7}{11}$",
+     "C": "$\\frac{6}{11}$",
+     "D": "$\\frac{8}{11}$"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 6 + 1 = 7."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "6/11 + 1/11",
+     "nilai": "7/11"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P26",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{1}{9}$ + $\\frac{4}{9}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{5}{18}$",
+     "B": "$\\frac{4}{9}$",
+     "C": "$\\frac{5}{9}$",
+     "D": "$\\frac{2}{3}$"
+    },
+    "kunci": "C",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 1 + 4 = 5."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "1/9 + 4/9",
+     "nilai": "5/9"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-P29",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Hasil dari $\\frac{1}{9}$ + $\\frac{3}{9}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{1}{3}$",
+     "B": "$\\frac{5}{9}$",
+     "C": "$\\frac{2}{9}$",
+     "D": "$\\frac{4}{9}$"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "Penyebut sama, jumlahkan pembilangnya: 1 + 3 = 4."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "1/9 + 3/9",
+     "nilai": "4/9"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R00",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 25% dari 400 adalah ....",
+    "opsi": {
+     "A": "300",
+     "B": "25",
+     "C": "200",
+     "D": "100"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "25% × 400 = 100"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "25% * 400",
+     "nilai": "100"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R01",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 20% dari 60 adalah ....",
+    "opsi": {
+     "A": "20",
+     "B": "48",
+     "C": "12",
+     "D": "24"
+    },
+    "kunci": "C",
+    "pembahasan": [
+     "20% × 60 = 12"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "20% * 60",
+     "nilai": "12"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R02",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 10% dari 120 adalah ....",
+    "opsi": {
+     "A": "108",
+     "B": "10",
+     "C": "12",
+     "D": "24"
+    },
+    "kunci": "C",
+    "pembahasan": [
+     "10% × 120 = 12"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "10% * 120",
+     "nilai": "12"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R06",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 50% dari 40 adalah ....",
+    "opsi": {
+     "A": "20",
+     "B": "50",
+     "C": "40",
+     "D": "30"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "50% × 40 = 20"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "50% * 40",
+     "nilai": "20"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R07",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 40% dari 80 adalah ....",
+    "opsi": {
+     "A": "48",
+     "B": "64",
+     "C": "40",
+     "D": "32"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "40% × 80 = 32"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "40% * 80",
+     "nilai": "32"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R08",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 20% dari 120 adalah ....",
+    "opsi": {
+     "A": "48",
+     "B": "20",
+     "C": "96",
+     "D": "24"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "20% × 120 = 24"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "20% * 120",
+     "nilai": "24"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R09",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 10% dari 40 adalah ....",
+    "opsi": {
+     "A": "36",
+     "B": "8",
+     "C": "10",
+     "D": "4"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "10% × 40 = 4"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "10% * 40",
+     "nilai": "4"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R10",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 75% dari 200 adalah ....",
+    "opsi": {
+     "A": "75",
+     "B": "50",
+     "C": "150",
+     "D": "300"
+    },
+    "kunci": "C",
+    "pembahasan": [
+     "75% × 200 = 150"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "75% * 200",
+     "nilai": "150"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R11",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 20% dari 400 adalah ....",
+    "opsi": {
+     "A": "160",
+     "B": "320",
+     "C": "20",
+     "D": "80"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "20% × 400 = 80"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "20% * 400",
+     "nilai": "80"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R13",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 25% dari 200 adalah ....",
+    "opsi": {
+     "A": "100",
+     "B": "50",
+     "C": "150",
+     "D": "25"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "25% × 200 = 50"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "25% * 200",
+     "nilai": "50"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R14",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 25% dari 60 adalah ....",
+    "opsi": {
+     "A": "25",
+     "B": "15",
+     "C": "45",
+     "D": "30"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "25% × 60 = 15"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "25% * 60",
+     "nilai": "15"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R16",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 50% dari 200 adalah ....",
+    "opsi": {
+     "A": "50",
+     "B": "100",
+     "C": "110",
+     "D": "200"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "50% × 200 = 100"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "50% * 200",
+     "nilai": "100"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R17",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 10% dari 240 adalah ....",
+    "opsi": {
+     "A": "48",
+     "B": "216",
+     "C": "24",
+     "D": "10"
+    },
+    "kunci": "C",
+    "pembahasan": [
+     "10% × 240 = 24"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "10% * 240",
+     "nilai": "24"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R18",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 25% dari 40 adalah ....",
+    "opsi": {
+     "A": "30",
+     "B": "10",
+     "C": "25",
+     "D": "20"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "25% × 40 = 10"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "25% * 40",
+     "nilai": "10"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "G-R19",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Nilai dari 75% dari 120 adalah ....",
+    "opsi": {
+     "A": "180",
+     "B": "90",
+     "C": "30",
+     "D": "75"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "75% × 120 = 90"
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "75% * 120",
+     "nilai": "90"
+    },
+    "gambar": null
+   }
+  }
+ ],
+ "salah": []
+}
