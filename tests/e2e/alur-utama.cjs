@@ -139,17 +139,29 @@ function butirPalsu(bentuk) {
   }
   await page.getByRole('button', { name: /^Semua ·/ }).click();
   await page.click('text=Lanjut ke Unduh');
-  await page.waitForSelector('text=Unduh Word');
+  await page.waitForSelector('text=Unduh 3 berkas Word');
   await page.waitForSelector('text=Langkah 3 dari 3');
   await foto('05-unduh');
   const urlUnduh = page.url();
   for (const [fmt, label] of [['docx', 'Word'], ['pdf', 'PDF'], ['tex', 'LaTeX']]) {
     if (fmt === 'tex') await page.click('text=Menu lanjutan');
     await page.getByRole('radio', { name: new RegExp(label) }).click();
-    const [unduh] = await Promise.all([page.waitForEvent('download', { timeout: 30000 }), page.getByRole('button', { name: new RegExp(`^Unduh ${label}`) }).click()]);
-    const tujuan = path.join(KELUAR, `soal.${fmt}`);
-    await unduh.saveAs(tujuan);
-    console.log(fmt, fs.statSync(tujuan).size, 'bytes');
+    // Lembar soal, kunci jawaban, dan kisi-kisi diunduh sebagai tiga berkas terpisah.
+    const berkas = [];
+    const dengar = (d) => berkas.push(d);
+    page.on('download', dengar);
+    await page.getByRole('button', { name: new RegExp(`^Unduh 3 berkas ${label}`) }).click();
+    const batas = Date.now() + 30000;
+    while (berkas.length < 3 && Date.now() < batas) await page.waitForTimeout(200);
+    page.off('download', dengar);
+    if (berkas.length !== 3) galat.push(`${fmt}: ${berkas.length} berkas terunduh, seharusnya 3`);
+    for (const u of berkas) {
+      const nama = u.suggestedFilename();
+      const akhiran = /Kunci-Jawaban/.test(nama) ? '-kunci' : /Kisi-kisi/.test(nama) ? '-kisi' : '';
+      const tujuan = path.join(KELUAR, `soal${akhiran}.${fmt}`);
+      await u.saveAs(tujuan);
+      console.log(fmt, nama, fs.statSync(tujuan).size, 'bytes');
+    }
   }
 
   // Cetak, beranda, ponsel

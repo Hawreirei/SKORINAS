@@ -72,4 +72,6 @@ Bagian rancangan perubahan, pembaruan 24 Oktober, dan kanvas desain v0.4 tidak s
 | Tampilan cetak | Mengikuti pakem dan font yang sama dengan Word/PDF, 12 pt, tepi 2 cm | Cadangan bila PDF gagal |
 | Bantuan | Halaman /bantuan tetap ada (kaki halaman dan menu ponsel); langkah memasang kunci tetap sebagai bagian lipat di Pengaturan AI | Saran 7: dihapus dari layar kerja; video "tetap boleh dibuat" |
 | Mode gelap | Tetap tersedia dengan palet setara | Pengaturan profil yang sudah ada |
-
+| Jumlah soal | Diketik langsung (5–50), tanpa tombol tambah-kurang; angka di luar batas diberi pesan dan dirapikan saat kolom ditinggalkan | Permintaan pemilik (25 Oktober): tombol terlalu rumit |
+| Berkas terpisah | Lembar soal, kunci jawaban, dan kisi-kisi menjadi tiga berkas terpisah dengan akhiran nama `-Kunci-Jawaban` dan `-Kisi-kisi`; pembahasan ikut berkas kunci. Satu tombol mengunduh semua berkas terpilih berurutan, dan tiap berkas punya tombol "Unduh ini saja" bila peramban menolak unduhan beruntun | Permintaan pemilik (25 Oktober) |
+| Baris jejak berkas | Baris "GenSoal versi · versi soal · … · dibuat dengan bantuan AI · tanggal" dihapus dari Word, PDF, .tex, tampilan cetak, dan properti berkas | Permintaan pemilik (25 Oktober); mengubah butir "Transparansi" rancangan |

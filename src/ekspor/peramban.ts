@@ -1,6 +1,6 @@
 import type { jsPDF } from 'jspdf';
 import type { PaketSoal, Profil, Soal } from '../db/tipe';
-import { bangunDokumen, namaBerkas, type OpsiEkspor } from './model';
+import { bangunDokumen, namaBerkas, type JenisBerkas, type OpsiEkspor } from './model';
 
 export type FormatEkspor = 'docx' | 'pdf' | 'tex';
 
@@ -79,10 +79,10 @@ export function unduhBlob(blob: Blob, nama: string) {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
-/** Buat dan unduh berkas langsung di perangkat. Tidak ada yang diunggah ke server. */
-export async function ekspor(format: FormatEkspor, paket: PaketSoal, soal: Soal[], profil: Profil, opsi: OpsiEkspor): Promise<{ nama: string; ukuran: number; ms: number }> {
+/** Buat dan unduh satu berkas (lembar soal, kunci jawaban, atau kisi-kisi) langsung di perangkat. Tidak ada yang diunggah ke server. */
+export async function ekspor(format: FormatEkspor, paket: PaketSoal, soal: Soal[], profil: Profil, opsi: OpsiEkspor, berkas: JenisBerkas = 'soal'): Promise<{ nama: string; ukuran: number; ms: number }> {
   const mulai = performance.now();
-  const d = bangunDokumen(paket, soal, profil, opsi, VERSI_APLIKASI);
+  const d = bangunDokumen(paket, soal, profil, opsi, berkas);
   let blob: Blob;
   if (format === 'tex') {
     const { buatTex } = await import('./tex');
@@ -95,7 +95,7 @@ export async function ekspor(format: FormatEkspor, paket: PaketSoal, soal: Soal[
     const font = await muatFont();
     blob = await buatPdf(d, { ...font, gambarSvg: gambarSvgPdf });
   }
-  const nama = namaBerkas(paket, format);
+  const nama = namaBerkas(paket, format, berkas);
   unduhBlob(blob, nama);
   return { nama, ukuran: blob.size, ms: performance.now() - mulai };
 }

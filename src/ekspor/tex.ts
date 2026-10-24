@@ -52,13 +52,17 @@ function daftarButir(butir: ButirDok[], d: DokumenSoal): string {
   return blok.join('\n');
 }
 
-/** Berkas .tex untuk dikompilasi sendiri: 14 pt, dua kolom untuk soal sederhana, kotak jawaban di bawah soal cerita. */
+/** Kepala berkas kunci jawaban dan kisi-kisi. */
+function kepalaLampiran(d: DokumenSoal, judulBerkas: string): string {
+  return `\\begin{center}{\\bfseries ${judulBerkas}}\\\\${d.kop ? ` ${escLatex(d.kop.sekolah.toUpperCase())}\\\\` : ''} ${escLatex(d.judul)} · ${escLatex(d.mapel)} · ${escLatex(d.inggris ? 'Grade' : 'Kelas')} ${d.kelas}\\end{center}`;
+}
+
+/** Berkas .tex untuk dikompilasi sendiri (satu berkas: lembar soal, kunci jawaban, atau kisi-kisi): 14 pt, dua kolom untuk soal sederhana, kotak jawaban di bawah soal cerita. */
 export function buatTex(d: DokumenSoal): string {
   const en = d.inggris;
   const L = (id: string, inggris: string) => escLatex(en ? inggris : id);
   const bagian: string[] = [];
-  bagian.push(`% Dibuat oleh ${d.jejak}
-% Kompilasi dengan pdflatex (Overleaf atau TeX lokal).
+  bagian.push(`% Kompilasi dengan pdflatex (Overleaf atau TeX lokal).
 \\documentclass[14pt,a4paper]{extarticle}
 \\usepackage[utf8]{inputenc}
 \\usepackage[T1]{fontenc}
@@ -82,44 +86,43 @@ export function buatTex(d: DokumenSoal): string {
 \\pagestyle{plain}
 \\begin{document}`);
 
-  if (d.kop) {
-    bagian.push(`\\begin{center}
-{\\large\\bfseries ${escLatex(d.kop.sekolah.toUpperCase())}}\\\\
-${d.kop.baris.map((b) => `${escLatex(b)}\\\\`).join('\n')}
-${d.kop.alamat ? `{\\small ${escLatex(d.kop.alamat)}}` : ''}
-\\end{center}
-\\vspace{-0.5em}\\hrule height 1pt\\vspace{0.8em}`);
+  if (d.berkas === 'soal') {
+    if (d.kop) {
+      bagian.push(`\\begin{center}
+  {\\large\\bfseries ${escLatex(d.kop.sekolah.toUpperCase())}}\\\\
+  ${d.kop.baris.map((b) => `${escLatex(b)}\\\\`).join('\n')}
+  ${d.kop.alamat ? `{\\small ${escLatex(d.kop.alamat)}}` : ''}
+  \\end{center}
+  \\vspace{-0.5em}\\hrule height 1pt\\vspace{0.8em}`);
+    }
+    bagian.push(`\\begin{center}{\\bfseries ${escLatex(d.judul)}}\\\\ ${escLatex(d.mapel)} · ${L('Kelas', 'Grade')} ${d.kelas}\\end{center}`);
+    if (d.identitas.length) {
+      const n = d.identitas.length;
+      const lebar = (i: number) => (n === 1 ? 0.98 : i === 0 ? 0.44 : 0.52 / (n - 1)).toFixed(3);
+      bagian.push(`\\noindent ${d.identitas.map((f, i) => `\\parbox[b]{${lebar(i)}\\linewidth}{${escLatex(f)}: \\hrulefill}`).join('\\hfill')}\\par\\medskip`);
+    }
+    for (const b of d.bagian) {
+      bagian.push(`\\subsection*{${escLatex(b.judul)}}\n{\\itshape ${escLatex(b.petunjuk)}}\\par\\smallskip\n${daftarButir(b.butir, d)}`);
+    }
   }
-  bagian.push(`\\begin{center}{\\bfseries ${escLatex(d.judul)}}\\\\ ${escLatex(d.mapel)} · ${L('Kelas', 'Grade')} ${d.kelas}\\end{center}`);
-  if (d.identitas.length) {
-    const n = d.identitas.length;
-    const lebar = (i: number) => (n === 1 ? 0.98 : i === 0 ? 0.44 : 0.52 / (n - 1)).toFixed(3);
-    bagian.push(`\\noindent ${d.identitas.map((f, i) => `\\parbox[b]{${lebar(i)}\\linewidth}{${escLatex(f)}: \\hrulefill}`).join('\\hfill')}\\par\\medskip`);
-  }
-  for (const b of d.bagian) {
-    bagian.push(`\\subsection*{${escLatex(b.judul)}}\n{\\itshape ${escLatex(b.petunjuk)}}\\par\\smallskip\n${daftarButir(b.butir, d)}`);
-  }
-  bagian.push(`\\vfill{\\footnotesize ${escLatex(d.jejak)}}`);
-
-  if (d.opsi.kunci) {
+  if (d.berkas === 'kunci') {
     const pendek = d.kunci.filter((k) => !k.rubrik?.length);
     const panjang = d.kunci.filter((k) => k.rubrik?.length);
-    bagian.push(`\\newpage
-\\section*{${L('Kunci Jawaban', 'Answer Key')}}
+    bagian.push(`${kepalaLampiran(d, L('KUNCI JAWABAN', 'ANSWER KEY'))}
 ${pendek.length ? `\\begin{multicols}{2}\n\\begin{itemize}[leftmargin=*,itemsep=2pt]\n${pendek.map((k) => `\\item[${k.nomor}.] ${keLatex(k.teks)}`).join('\n')}\n\\end{itemize}\n\\end{multicols}` : ''}
 ${panjang
   .map((k) => `\\paragraph{${k.nomor}.} ${keLatex(k.teks)}\\par\n${L('Rubrik', 'Rubric')}:\n\\begin{itemize}[itemsep=0pt]\n${k.rubrik!.map((r) => `\\item ${keLatex(r)}`).join('\n')}\n\\end{itemize}`)
   .join('\n')}`);
-  }
-  if (d.opsi.pembahasan) {
-    bagian.push(`\\newpage
+    // Pembahasan ikut berkas kunci jawaban, mulai di halaman baru.
+    if (d.opsi.pembahasan) {
+      bagian.push(`\\newpage
 \\section*{${L('Pembahasan', 'Worked Solutions')}}
 ${d.pembahasan.map((p) => `\\paragraph{${p.nomor}.}\n\\begin{itemize}[itemsep=0pt]\n${p.langkah.map((l) => `\\item ${keLatex(l)}`).join('\n')}\n\\end{itemize}`).join('\n')}`);
+    }
   }
-  if (d.opsi.kisi) {
-    bagian.push(`\\newpage
-\\section*{${L('Kisi-kisi', 'Test Blueprint')}}
-{\\small ${escLatex(d.kurikulumLabel)} · ${escLatex(d.mapel)} · ${L('Kelas', 'Grade')} ${d.kelas} · ${L('Fase', 'Phase')} ${escLatex(d.fase)}}\\par\\smallskip
+  if (d.berkas === 'kisi') {
+    bagian.push(`${kepalaLampiran(d, L('KISI-KISI', 'TEST BLUEPRINT'))}
+{\\small ${L('Fase', 'Phase')} ${escLatex(d.fase)} · ${escLatex(d.kurikulumLabel)}}\\par\\smallskip
 {\\footnotesize\\setlength{\\tabcolsep}{4pt}
 \\begin{longtable}{|p{0.6cm}|p{4.0cm}|p{4.9cm}|p{1.0cm}|p{1.8cm}|p{2.0cm}|}
 \\hline

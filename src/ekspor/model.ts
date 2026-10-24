@@ -9,9 +9,22 @@ import { URUTAN_BENTUK } from '../generasi/rencana';
 
 export interface OpsiEkspor {
   kop: boolean;
+  /** Unduh kunci jawaban sebagai berkas tersendiri. */
   kunci: boolean;
+  /** Unduh kisi-kisi sebagai berkas tersendiri. */
   kisi: boolean;
+  /** Pembahasan ikut berkas kunci jawaban. */
   pembahasan: boolean;
+}
+
+/** Lembar soal, kunci jawaban, dan kisi-kisi selalu menjadi berkas yang terpisah. */
+export type JenisBerkas = 'soal' | 'kunci' | 'kisi';
+
+export const JENIS_BERKAS_LABEL: Record<JenisBerkas, string> = { soal: 'Lembar soal', kunci: 'Kunci jawaban', kisi: 'Kisi-kisi' };
+
+/** Berkas yang dibuat untuk satu unduhan, berurutan. */
+export function berkasDipilih(opsi: OpsiEkspor): JenisBerkas[] {
+  return ['soal', ...(opsi.kunci ? (['kunci'] as const) : []), ...(opsi.kisi ? (['kisi'] as const) : [])];
 }
 
 /** Font dokumen Word dan PDF (rancangan v0.4): Times New Roman 12; PDF menanam Liberation Serif yang metriknya sama. */
@@ -108,9 +121,9 @@ export interface DokumenSoal {
   kunci: { nomor: number; teks: string; rubrik?: string[] }[];
   pembahasan: { nomor: number; langkah: string[] }[];
   kisi: BarisKisi[];
-  /** Kelas, mapel, dan sumber TP yang dipakai; dicatat di kisi-kisi dan jejak berkas. */
+  /** Kelas, mapel, dan sumber TP yang dipakai; dicatat di kisi-kisi. */
   kurikulumLabel: string;
-  jejak: string;
+  berkas: JenisBerkas;
   opsi: OpsiEkspor;
 }
 
@@ -184,7 +197,7 @@ export function soalUntukEkspor(soal: Soal[]): Soal[] {
   return soal.filter((s) => s.dihapus_pada == null && s.status_mutu !== 'ditolak').sort((a, b) => a.urutan - b.urutan);
 }
 
-export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Profil, opsi: OpsiEkspor, versiAplikasi: string): DokumenSoal {
+export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Profil, opsi: OpsiEkspor, berkas: JenisBerkas = 'soal'): DokumenSoal {
   const p = paket.parameter_json;
   const inggris = p.bahasa === 'en';
   const cara = p.cara_bs ?? 'centang';
@@ -225,11 +238,8 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
     bagian.push({ bentuk, judul: `${ROMAWI[bagian.length]}. ${JUDUL_BAGIAN[bentuk][inggris ? 1 : 0]}`, petunjuk: petunjukBagian(bentuk, butir, cara, inggris), butir });
   }
   const semua = bagian.flatMap((b) => b.butir);
-  const versiSoal = soal.length ? `${Math.min(...soal.map((s) => s.versi))}–${Math.max(...soal.map((s) => s.versi))}` : '-';
   // Paket dari versi 0.3 masih mencatat kurikulum resminya; paket baru memakai CP dan TP yang ditulis guru.
   const kurikulumLabel = p.kurikulum_nama && p.tp.some((t) => t.sumber === 'resmi') ? `${p.kurikulum_nama} ${p.kurikulum_versi ?? ''}`.trim() : inggris ? "Teacher's learning objectives" : 'CP dan TP dari guru';
-  const tanggal = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-  const jumlahPerluTelaah = soal.filter((s) => s.status_mutu === 'perlu_telaah').length;
   return {
     judul: paket.judul,
     mapel: p.mapel,
@@ -256,17 +266,19 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
       status: STATUS_MUTU_LABEL[b.soal.status_mutu] + (b.soal.status_telaah === 'ditelaah_guru' ? ' · ditelaah guru' : ''),
     })),
     kurikulumLabel,
-    jejak: `GenSoal ${versiAplikasi} · versi soal ${versiSoal} · ${p.mapel} kelas ${p.kelas} · ${kurikulumLabel} · dibuat dengan bantuan AI${jumlahPerluTelaah ? `, ${jumlahPerluTelaah} soal dicek guru` : ''} · ${tanggal}`,
     opsi,
+    berkas,
   };
 }
 
-export function namaBerkas(paket: PaketSoal, ekstensi: string): string {
+const AKHIRAN_BERKAS: Record<JenisBerkas, string> = { soal: '', kunci: '-Kunci-Jawaban', kisi: '-Kisi-kisi' };
+
+export function namaBerkas(paket: PaketSoal, ekstensi: string, berkas: JenisBerkas = 'soal'): string {
   const dasar = `${paket.parameter_json.mapel} K${paket.parameter_json.kelas} ${paket.judul}`
     .normalize('NFKD')
     .replace(/[^\w\s-]/g, '')
     .trim()
     .replace(/\s+/g, '-')
     .slice(0, 80);
-  return `${dasar || 'soal'}.${ekstensi}`;
+  return `${dasar || 'soal'}${AKHIRAN_BERKAS[berkas]}.${ekstensi}`;
 }

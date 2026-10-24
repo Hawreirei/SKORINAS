@@ -108,13 +108,27 @@ function TabelBenarSalah({ bg, d }: { bg: BagianDok; d: DokumenSoal }) {
   );
 }
 
-/** Lembar soal sebagai HTML: pratinjau di layar Unduh dan tampilan cetak peramban. Mengikuti pakem Word dan PDF (Times New Roman). */
+function KepalaLampiran({ d, judul }: { d: DokumenSoal; judul: string }) {
+  return (
+    <div className="mb-[1em] text-center">
+      <div className="font-bold">{judul}</div>
+      {d.kop ? <div>{d.kop.sekolah.toUpperCase()}</div> : null}
+      <div>
+        {d.judul} · {d.mapel} · {d.inggris ? 'Grade' : 'Kelas'} {d.kelas}
+      </div>
+    </div>
+  );
+}
+
+/** Satu berkas (lembar soal, kunci jawaban, atau kisi-kisi) sebagai HTML: pratinjau di layar Unduh dan tampilan cetak peramban. Mengikuti pakem Word dan PDF (Times New Roman). */
 export function LembarCetak({ d, hanyaHalamanPertama = false }: { d: DokumenSoal; hanyaHalamanPertama?: boolean }) {
   const L = (id: string, en: string) => (d.inggris ? en : id);
   const bagian = hanyaHalamanPertama ? d.bagian.slice(0, 2).map((b) => ({ ...b, butir: b.butir.slice(0, 4) })) : d.bagian;
   const mapelKelas = `${d.mapel} · ${L('Kelas', 'Grade')} ${d.kelas}`;
   return (
     <div className="lembar bg-white text-black" style={{ fontFamily: "'Times New Roman', 'Liberation Serif', Tinos, serif" }}>
+      {d.berkas === 'soal' ? (
+        <>
       {d.kop ? (
         <div className="flex items-end gap-[0.8em] border-b-[1.5px] border-black pb-[0.3em]">
           {d.kop.logo ? <img src={d.kop.logo} alt="" className="size-[3.2em] object-contain" /> : null}
@@ -146,12 +160,13 @@ export function LembarCetak({ d, hanyaHalamanPertama = false }: { d: DokumenSoal
           {bg.bentuk === 'benar_salah' ? <TabelBenarSalah bg={bg} d={d} /> : bg.butir.map((b) => <Butir key={b.nomor} b={b} d={d} />)}
         </section>
       ))}
+        </>
+      ) : null}
       {!hanyaHalamanPertama ? (
         <>
-          <p className="mt-[1.5em] text-[0.75em] text-[#4b5563]">{d.jejak}</p>
-          {d.opsi.kunci ? (
-            <section className="halaman-baru mt-[2em]">
-              <div className="text-center font-bold">{L('KUNCI JAWABAN', 'ANSWER KEY')}</div>
+          {d.berkas === 'kunci' ? (
+            <section>
+              <KepalaLampiran d={d} judul={L('KUNCI JAWABAN', 'ANSWER KEY')} />
               <div className="mt-[0.5em] columns-2 gap-[1.5em]">
                 {d.kunci.map((k) => (
                   <div key={k.nomor} className="break-inside-avoid py-[0.15em]">
@@ -170,7 +185,7 @@ export function LembarCetak({ d, hanyaHalamanPertama = false }: { d: DokumenSoal
               </div>
             </section>
           ) : null}
-          {d.opsi.pembahasan ? (
+          {d.berkas === 'kunci' && d.opsi.pembahasan ? (
             <section className="halaman-baru mt-[2em]">
               <div className="text-center font-bold">{L('PEMBAHASAN', 'WORKED SOLUTIONS')}</div>
               {d.pembahasan.map((p) => (
@@ -187,11 +202,11 @@ export function LembarCetak({ d, hanyaHalamanPertama = false }: { d: DokumenSoal
               ))}
             </section>
           ) : null}
-          {d.opsi.kisi ? (
-            <section className="halaman-baru mt-[2em]">
-              <div className="text-center font-bold">{L('KISI-KISI', 'TEST BLUEPRINT')}</div>
+          {d.berkas === 'kisi' ? (
+            <section>
+              <KepalaLampiran d={d} judul={L('KISI-KISI', 'TEST BLUEPRINT')} />
               <div>
-                {d.mapel} · {L('Kelas', 'Grade')} {d.kelas} · {L('Fase', 'Phase')} {d.fase} · {d.kurikulumLabel}
+                {L('Fase', 'Phase')} {d.fase} · {d.kurikulumLabel}
               </div>
               {d.cp ? (
                 <div>

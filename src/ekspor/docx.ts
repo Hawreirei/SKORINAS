@@ -32,7 +32,6 @@ export type UbahPng = (svg: string, lebarPx: number, tinggiPx: number) => Promis
 const UKURAN = UKURAN_DOKUMEN * 2; // setengah poin
 const LEBAR_ISI = 9638; // twip: A4 dengan tepi 2 cm
 const INDEN = 425; // nomor rata kiri, isi soal menggantung 0,75 cm
-const ABU = '4B5563';
 const GARIS = { style: BorderStyle.SINGLE, size: 6, color: '000000' } as const;
 const TANPA = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } as const;
 
@@ -263,36 +262,50 @@ function kepalaDokumen(d: DokumenSoal): (Paragraph | Table)[] {
   return hasil;
 }
 
+/** Kepala berkas kunci jawaban dan kisi-kisi: judul berkas, nama sekolah bila kop dipakai, judul paket, mapel, dan kelas. */
+function kepalaLampiran(d: DokumenSoal, judulBerkas: string): Paragraph[] {
+  const L = (id: string, en: string) => (d.inggris ? en : id);
+  return [
+    p([tr(judulBerkas, { tebal: true })], { alignment: AlignmentType.CENTER, spacing: { after: 40 } }),
+    ...(d.kop ? [p([tr(d.kop.sekolah.toUpperCase())], { alignment: AlignmentType.CENTER, spacing: { after: 0 } })] : []),
+    p([tr(`${d.judul} · ${d.mapel} · ${L('Kelas', 'Grade')} ${d.kelas}`)], { alignment: AlignmentType.CENTER, spacing: { after: 240 } }),
+  ];
+}
+
 export async function buatDocx(d: DokumenSoal, ubahPng: UbahPng): Promise<Blob> {
   const en = d.inggris;
   const L = (id: string, inggris: string) => (en ? inggris : id);
-  const isi: (Paragraph | Table)[] = kepalaDokumen(d);
+  const isi: (Paragraph | Table)[] = [];
 
-  for (const bg of d.bagian) {
-    isi.push(p([tr(bg.judul, { tebal: true })], { spacing: { before: 240, after: 40 }, keepNext: true }));
-    isi.push(p([tr(bg.petunjuk, { miring: true })], { keepNext: true, spacing: { after: 80 } }));
-    if (bg.bentuk === 'benar_salah') isi.push(tabelBenarSalah(bg, d));
-    else for (const b of bg.butir) isi.push(...(await butirKeParagraf(b, d, ubahPng)));
+  if (d.berkas === 'soal') {
+    isi.push(...kepalaDokumen(d));
+    for (const bg of d.bagian) {
+      isi.push(p([tr(bg.judul, { tebal: true })], { spacing: { before: 240, after: 40 }, keepNext: true }));
+      isi.push(p([tr(bg.petunjuk, { miring: true })], { keepNext: true, spacing: { after: 80 } }));
+      if (bg.bentuk === 'benar_salah') isi.push(tabelBenarSalah(bg, d));
+      else for (const b of bg.butir) isi.push(...(await butirKeParagraf(b, d, ubahPng)));
+    }
   }
-  isi.push(p([tr(d.jejak, { kecil: true, warna: ABU })], { spacing: { before: 360 } }));
 
-  if (d.opsi.kunci) {
-    isi.push(p([tr(L('KUNCI JAWABAN', 'ANSWER KEY'), { tebal: true })], { pageBreakBefore: true, alignment: AlignmentType.CENTER, spacing: { after: 200 } }));
+  if (d.berkas === 'kunci') {
+    isi.push(...kepalaLampiran(d, L('KUNCI JAWABAN', 'ANSWER KEY')));
     for (const k of d.kunci) {
       isi.push(p([tr(`${k.nomor}.\t`), ...teksKeRun(k.teks)], { indent: { left: INDEN, hanging: INDEN }, tabStops: [{ type: TabStopType.LEFT, position: INDEN }], spacing: { after: 40 }, keepNext: !!k.rubrik?.length }));
       if (k.rubrik?.length) k.rubrik.forEach((r, i) => isi.push(p([tr('– '), ...teksKeRun(r)], { indent: { left: INDEN * 2 }, spacing: { after: 20 }, keepNext: i < k.rubrik!.length - 1 })));
     }
-  }
-  if (d.opsi.pembahasan) {
-    isi.push(p([tr(L('PEMBAHASAN', 'WORKED SOLUTIONS'), { tebal: true })], { pageBreakBefore: true, alignment: AlignmentType.CENTER, spacing: { after: 200 } }));
-    for (const pb of d.pembahasan) {
-      isi.push(p([tr(`${pb.nomor}.`, { tebal: true })], { spacing: { before: 120, after: 20 }, keepNext: true }));
-      pb.langkah.forEach((l, i) => isi.push(p([tr('– '), ...teksKeRun(l)], { indent: { left: INDEN }, spacing: { after: 20 }, keepNext: i < pb.langkah.length - 1 })));
+    // Pembahasan ikut berkas kunci jawaban, mulai di halaman baru.
+    if (d.opsi.pembahasan) {
+      isi.push(p([tr(L('PEMBAHASAN', 'WORKED SOLUTIONS'), { tebal: true })], { pageBreakBefore: true, alignment: AlignmentType.CENTER, spacing: { after: 200 } }));
+      for (const pb of d.pembahasan) {
+        isi.push(p([tr(`${pb.nomor}.`, { tebal: true })], { spacing: { before: 120, after: 20 }, keepNext: true }));
+        pb.langkah.forEach((l, i) => isi.push(p([tr('– '), ...teksKeRun(l)], { indent: { left: INDEN }, spacing: { after: 20 }, keepNext: i < pb.langkah.length - 1 })));
+      }
     }
   }
-  if (d.opsi.kisi) {
-    isi.push(p([tr(L('KISI-KISI', 'TEST BLUEPRINT'), { tebal: true })], { pageBreakBefore: true, alignment: AlignmentType.CENTER, spacing: { after: 80 } }));
-    isi.push(p([tr(`${d.mapel} · ${L('Kelas', 'Grade')} ${d.kelas} · ${L('Fase', 'Phase')} ${d.fase} · ${d.kurikulumLabel}`)], { spacing: { after: d.cp ? 40 : 160 } }));
+
+  if (d.berkas === 'kisi') {
+    isi.push(...kepalaLampiran(d, L('KISI-KISI', 'TEST BLUEPRINT')));
+    isi.push(p([tr(`${L('Fase', 'Phase')} ${d.fase} · ${d.kurikulumLabel}`)], { spacing: { after: d.cp ? 40 : 160 } }));
     if (d.cp) isi.push(p([tr('CP: ', { tebal: true }), ...teksKeRun(d.cp)], { spacing: { after: 160 } }));
     const lebar = [6, 28, 32, 8, 12, 14];
     const kepala = ['No', 'TP', L('Indikator', 'Indicator'), 'Level', L('Kesukaran', 'Difficulty'), L('Bentuk', 'Type')];
@@ -322,8 +335,7 @@ export async function buatDocx(d: DokumenSoal, ubahPng: UbahPng): Promise<Blob> 
 
   const doc = new Document({
     creator: 'GenSoal',
-    title: d.judul,
-    description: d.jejak,
+    title: d.berkas === 'soal' ? d.judul : `${d.judul} · ${d.berkas === 'kunci' ? 'Kunci jawaban' : 'Kisi-kisi'}`,
     styles: {
       default: {
         document: { run: { font: FONT_DOKUMEN, size: UKURAN }, paragraph: { spacing: { line: 276 } } },

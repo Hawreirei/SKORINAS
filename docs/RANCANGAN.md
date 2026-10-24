@@ -123,7 +123,7 @@ Semua pekerjaan guru dipadatkan menjadi 3 layar berurutan: **Buat, Periksa, Undu
 | Beranda | / | Satu tombol besar "Buat soal" dan daftar soal terakhir; pengingat memasang kunci bila belum ada | Mulai buat soal, buka soal |
 | Langkah 1 · Buat | /soal/baru | Pengaturan tersimpan; Kelas dan mapel; CP dan TP; Jumlah soal; Pengaturan lanjutan (tertutup) | Buat soal, simpan pengaturan, Batal |
 | Langkah 2 · Periksa | /soal/\[id\] | Daftar soal dengan gambar, kunci, pembahasan; satu penanda per soal; tanda jenis jawaban uraian; status paket | Setujui, sunting, ganti soal, buat ulang, hapus |
-| Langkah 3 · Unduh | /soal/\[id\]/ekspor | Pilih Word atau PDF; isi dokumen (kop, kunci, kisi-kisi, pembahasan); pratinjau halaman; menu lanjutan berisi .tex dan tampilan cetak | Unduh |
+| Langkah 3 · Unduh | /soal/\[id\]/ekspor | Pilih Word atau PDF; berkas yang diunduh (lembar soal dengan atau tanpa kop, kunci jawaban dengan atau tanpa pembahasan, kisi-kisi), masing-masing berkas terpisah; pratinjau tiap berkas; menu lanjutan berisi .tex dan tampilan cetak | Unduh semua berkas terpilih, atau satu berkas saja |
 | Soal saya | /soal | Paket soal, tong sampah, tautan ke semua soal "Mohon cek dulu" | Buka, unduh, hapus, pulihkan |
 | Pengaturan AI | /pengaturan/ai | Tiga langkah: pilih penyedia, tempel kunci, pilih model; batas pemakaian; biaya dan privasi | Simpan dan uji kunci, pilih model utama dan cadangan |
 | Cadangan | /cadangan | Ukuran data, cadangan terakhir, penyimpanan persisten, pengaturan tersimpan | Unduh dan impor .gensoal, hapus semua data |
@@ -361,7 +361,7 @@ Aturan templat: ukuran dasar tetap (viewBox seragam), hitam putih yang terbaca s
 | xlsx (V1) | Kisi-kisi dan rekap | Satu lembar per dokumen |
 | LMS (V1) | Google Forms dan QTI | Hanya bentuk yang dapat dinilai otomatis |
 
-Pecahan di semua format ditampilkan sebagai pecahan bertumpuk (KaTeX di layar, \\frac di LaTeX, Office Math di Word, SVG vektor di PDF), bukan a/b. Setiap ekspor mencatat versi soal, kelas, mapel, CP, dan TP yang dipakai agar dapat ditelusuri. Gambar SVG diubah ke PNG 300 dpi untuk Word. Pembuatan berkas besar berjalan di Web Worker agar layar tidak membeku. Syarat penerimaan: satu paket 25 soal dengan rumus dan gambar terunduh sebagai Word dan PDF dalam waktu di bawah 10 detik di laptop sekolah biasa.
+Pecahan di semua format ditampilkan sebagai pecahan bertumpuk (KaTeX di layar, \\frac di LaTeX, Office Math di Word, SVG vektor di PDF), bukan a/b. Lembar soal, kunci jawaban (pembahasan ikut di dalamnya bila dipilih), dan kisi-kisi selalu diunduh sebagai berkas terpisah. Kisi-kisi mencatat kelas, mapel, CP, dan TP yang dipakai; baris jejak versi aplikasi dan versi soal tidak dicetak di berkas maupun disimpan di properti berkas (permintaan pemilik, 25 Oktober 2026). Gambar SVG diubah ke PNG 300 dpi untuk Word. Pembuatan berkas besar berjalan di Web Worker agar layar tidak membeku. Syarat penerimaan: satu paket 25 soal dengan rumus dan gambar terunduh sebagai Word dan PDF dalam waktu di bawah 10 detik di laptop sekolah biasa.
 
 ### Pakem penulisan soal (Word dan PDF)
 
@@ -427,7 +427,7 @@ MVP tidak menyimpan data siswa dan tidak memiliki akun atau server data, sehingg
 - Peringatan per penyedia. Layar Pengaturan AI menyatakan bila tingkat gratis penyedia mencatat atau melatih dari prompt.
 - Tampilan biaya. Biaya per soal dan total sesi dihitung dari token dan harga di registri, dengan peringatan pada angka yang diatur guru.
 - Hak cipta. Instruksi model melarang menyalin; pemeriksa kemiripan membandingkan soal dengan soal lain di paket yang sama; teks yang ditempel guru dianggap tanggung jawab guru.
-- Transparansi. Setiap soal membawa label dibuat dengan bantuan AI beserta status mutunya, termasuk pada berkas ekspor.
+- Transparansi. Setiap soal membawa label dibuat dengan bantuan AI beserta status mutunya di layar Periksa. Berkas unduhan tidak memuat baris jejak (keputusan pemilik, 25 Oktober 2026).
 - Data pribadi. Tanpa akun dan tanpa data siswa, MVP berada jauh dari cakupan UU Nomor 27 Tahun 2022; V1 hanya menyimpan email pembeli untuk lisensi, dan V2 (data siswa) menambah pemisahan identitas dari hasil, retensi data, dan persetujuan sekolah.
 - Ketahanan data. Cadangan tidak otomatis: aplikasi meminta penyimpanan persisten, mengingatkan cadangan .gensoal mingguan, dan memperingatkan sebelum guru menghapus data situs.
 

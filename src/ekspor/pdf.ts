@@ -19,7 +19,7 @@ const LEBAR = A4.w - TEPI.kiri - TEPI.kanan;
 const UKURAN = UKURAN_DOKUMEN;
 const INDEN = 21.3; // 0,75 cm: nomor rata kiri, isi soal menggantung
 const ABU: [number, number, number] = [75, 85, 99];
-const KECIL = 9; // jejak berkas dan nomor halaman
+const KECIL = 9; // nomor halaman
 
 const g = (o: Partial<GayaTeks> = {}): GayaTeks => ({ ukuran: UKURAN, ...o });
 
@@ -248,7 +248,7 @@ function tabelKisi(p: Penulis, d: DokumenSoal) {
   const doc = p.doc;
   const gaya = g();
   const gayaKepala = g({ tebal: true });
-  const lebar = [24, 128, 160, 38, 60, 72].map((w) => (w / 482) * LEBAR);
+  const lebar = [24, 118, 150, 36, 72, 82].map((w) => (w / 482) * LEBAR);
   const kepala = ['No', 'TP', d.inggris ? 'Indicator' : 'Indikator', 'Level', d.inggris ? 'Difficulty' : 'Kesukaran', d.inggris ? 'Type' : 'Bentuk'];
   const pad = 4;
   const baris = (sel: string[], gy: GayaTeks) => {
@@ -329,7 +329,15 @@ function kepalaDokumen(p: Penulis, d: DokumenSoal) {
   if (!d.kop) p.paragraf(mapelKelas, g(), { rata: 'tengah', jarak: 4 });
 }
 
-/** PDF lengkap langsung dari peramban, Times New Roman 12 (Liberation Serif tertanam): kop, soal, gambar vektor, kunci, pembahasan, kisi-kisi. */
+/** Kepala berkas kunci jawaban dan kisi-kisi: judul berkas, nama sekolah bila kop dipakai, judul paket, mapel, dan kelas. */
+function kepalaLampiran(p: Penulis, d: DokumenSoal, judulBerkas: string) {
+  const L = (id: string, en: string) => (d.inggris ? en : id);
+  p.paragraf(judulBerkas, g({ tebal: true }), { rata: 'tengah', jarak: 2 });
+  if (d.kop) p.paragraf(d.kop.sekolah.toUpperCase(), g(), { rata: 'tengah' });
+  p.paragraf(`${d.judul} · ${d.mapel} · ${L('Kelas', 'Grade')} ${d.kelas}`, g(), { rata: 'tengah', jarak: 14 });
+}
+
+/** PDF satu berkas (lembar soal, kunci jawaban, atau kisi-kisi) langsung dari peramban, Times New Roman 12 (Liberation Serif tertanam): kop, soal, gambar vektor, kunci, pembahasan, kisi-kisi. */
 export async function buatPdf(d: DokumenSoal, aset: AsetPdf): Promise<Blob> {
   const doc = new jsPDF({ unit: 'pt', format: 'a4', compress: true });
   doc.addFileToVFS('LiberationSerif-Regular.ttf', aset.fontBiasa);
@@ -338,18 +346,17 @@ export async function buatPdf(d: DokumenSoal, aset: AsetPdf): Promise<Blob> {
   doc.addFont('LiberationSerif-Bold.ttf', FONT_PDF, 'bold');
   doc.addFileToVFS('LiberationSerif-Italic.ttf', aset.fontMiring);
   doc.addFont('LiberationSerif-Italic.ttf', FONT_PDF, 'italic');
-  doc.setProperties({ title: d.judul, subject: `${d.mapel} kelas ${d.kelas}`, creator: 'GenSoal', keywords: d.jejak });
+  doc.setProperties({ title: d.berkas === 'soal' ? d.judul : `${d.judul} · ${d.berkas === 'kunci' ? 'Kunci jawaban' : 'Kisi-kisi'}`, subject: `${d.mapel} kelas ${d.kelas}`, creator: 'GenSoal' });
   const p = new Penulis(doc, aset);
   const L = (id: string, en: string) => (d.inggris ? en : id);
 
-  kepalaDokumen(p, d);
-  await bagianSoal(p, d);
-  p.y += 8;
-  p.paragraf(d.jejak, g({ ukuran: KECIL, warna: ABU }));
+  if (d.berkas === 'soal') {
+    kepalaDokumen(p, d);
+    await bagianSoal(p, d);
+  }
 
-  if (d.opsi.kunci) {
-    p.halamanBaru();
-    p.paragraf(L('KUNCI JAWABAN', 'ANSWER KEY'), g({ tebal: true }), { rata: 'tengah', jarak: 10 });
+  if (d.berkas === 'kunci') {
+    kepalaLampiran(p, d, L('KUNCI JAWABAN', 'ANSWER KEY'));
     const pendek = d.kunci.filter((k) => !k.rubrik?.length);
     const kolom = (LEBAR - 24) / 2;
     const gk = g();
@@ -367,21 +374,22 @@ export async function buatPdf(d: DokumenSoal, aset: AsetPdf): Promise<Blob> {
       p.paragraf(L('Rubrik:', 'Rubric:'), g({ tebal: true }));
       for (const r of k.rubrik!) p.paragraf(`–  ${r}`, gk, { x: TEPI.kiri + INDEN, lebar: LEBAR - INDEN });
     }
-  }
-  if (d.opsi.pembahasan) {
-    p.halamanBaru();
-    p.paragraf(L('PEMBAHASAN', 'WORKED SOLUTIONS'), g({ tebal: true }), { rata: 'tengah', jarak: 10 });
-    for (const pb of d.pembahasan) {
-      p.ruang(40);
-      p.paragraf(`${pb.nomor}.`, g({ tebal: true }));
-      for (const l of pb.langkah) p.paragraf(`–  ${l}`, g(), { x: TEPI.kiri + INDEN, lebar: LEBAR - INDEN });
-      p.y += 6;
+    // Pembahasan ikut berkas kunci jawaban, mulai di halaman baru.
+    if (d.opsi.pembahasan) {
+      p.halamanBaru();
+      p.paragraf(L('PEMBAHASAN', 'WORKED SOLUTIONS'), g({ tebal: true }), { rata: 'tengah', jarak: 10 });
+      for (const pb of d.pembahasan) {
+        p.ruang(40);
+        p.paragraf(`${pb.nomor}.`, g({ tebal: true }));
+        for (const l of pb.langkah) p.paragraf(`–  ${l}`, g(), { x: TEPI.kiri + INDEN, lebar: LEBAR - INDEN });
+        p.y += 6;
+      }
     }
   }
-  if (d.opsi.kisi) {
-    p.halamanBaru();
-    p.paragraf(L('KISI-KISI', 'TEST BLUEPRINT'), g({ tebal: true }), { rata: 'tengah', jarak: 6 });
-    p.paragraf(`${d.mapel} · ${L('Kelas', 'Grade')} ${d.kelas} · ${L('Fase', 'Phase')} ${d.fase} · ${d.kurikulumLabel}`, g(), { jarak: 4 });
+
+  if (d.berkas === 'kisi') {
+    kepalaLampiran(p, d, L('KISI-KISI', 'TEST BLUEPRINT'));
+    p.paragraf(`${L('Fase', 'Phase')} ${d.fase} · ${d.kurikulumLabel}`, g(), { jarak: 4 });
     if (d.cp) p.paragraf(`CP: ${d.cp}`, g(), { jarak: 8 });
     tabelKisi(p, d);
   }

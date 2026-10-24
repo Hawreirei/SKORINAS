@@ -2,8 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { db } from '../db/skema';
-import { bangunDokumen } from '../ekspor/model';
-import { VERSI_APLIKASI } from '../ekspor/peramban';
+import { bangunDokumen, type JenisBerkas } from '../ekspor/model';
 import { LembarCetak } from '../komponen/LembarCetak';
 import { kelasTombol } from '../komponen/Tombol';
 import { useJudulHalaman, useProfil } from './kait';
@@ -16,7 +15,8 @@ export default function Cetak() {
   const soal = useLiveQuery(() => db.soal.where('paket_id').equals(id).toArray(), [id]);
   const profil = useProfil();
   const opsi = { kop: q.get('kop') !== '0', kunci: q.get('kunci') !== '0', kisi: q.get('kisi') !== '0', pembahasan: q.get('pembahasan') === '1' };
-  const dok = useMemo(() => (paket && soal ? bangunDokumen(paket, soal, profil, opsi, VERSI_APLIKASI) : null), [paket, soal, profil, opsi.kop, opsi.kunci, opsi.kisi, opsi.pembahasan]);
+  const berkas: JenisBerkas = q.get('berkas') === 'kunci' ? 'kunci' : q.get('berkas') === 'kisi' ? 'kisi' : 'soal';
+  const dok = useMemo(() => (paket && soal ? bangunDokumen(paket, soal, profil, opsi, berkas) : null), [paket, soal, profil, opsi.kop, opsi.kunci, opsi.kisi, opsi.pembahasan, berkas]);
   useJudulHalaman(paket?.judul ?? 'Cetak');
   useEffect(() => {
     document.documentElement.classList.remove('dark');
