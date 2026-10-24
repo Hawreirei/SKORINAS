@@ -1,0 +1,150 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --gs-bg: #ffffff;
+  --gs-ink: #0b0c0e;
+  --gs-on-ink: #ffffff;
+  --gs-body: #3d424a;
+  --gs-muted: #5b616b;
+  --gs-line: #e4e6e9;
+  --gs-line-strong: #c9cdd3;
+  --gs-soft: #f6f7f8;
+  --gs-panel: #fafbfb;
+  --gs-orbit: #d9dde2;
+  --gs-warn: #8a4b00;
+  --gs-warn-bg: #fff7ec;
+  --gs-bad: #a1261b;
+  color-scheme: light;
+}
+
+.dark {
+  --gs-bg: #0c0d0f;
+  --gs-ink: #f1f2f4;
+  --gs-on-ink: #0b0c0e;
+  --gs-body: #c4c8ce;
+  --gs-muted: #8e949d;
+  --gs-line: #24272c;
+  --gs-line-strong: #3b3f46;
+  --gs-soft: #16181b;
+  --gs-panel: #131517;
+  --gs-orbit: #2a2e34;
+  --gs-warn: #f1b766;
+  --gs-warn-bg: #241a0c;
+  --gs-bad: #ff8a7a;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-latar: var(--gs-bg);
+  --color-tinta: var(--gs-ink);
+  --color-di-tinta: var(--gs-on-ink);
+  --color-isi: var(--gs-body);
+  --color-redup: var(--gs-muted);
+  --color-garis: var(--gs-line);
+  --color-garis-kuat: var(--gs-line-strong);
+  --color-lembut: var(--gs-soft);
+  --color-panel: var(--gs-panel);
+  --color-orbit: var(--gs-orbit);
+  --color-awas: var(--gs-warn);
+  --color-awas-latar: var(--gs-warn-bg);
+  --color-buruk: var(--gs-bad);
+  --font-sans: 'Inter Tight', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+html,
+body {
+  background: var(--gs-bg);
+  color: var(--gs-ink);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Label huruf kapital berjarak, ciri desain GenSoal. */
+.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.judul-besar {
+  font-weight: 200;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+  line-height: 1.02;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gs-ink);
+  outline-offset: 2px;
+}
+
+input.bidang,
+select.bidang,
+textarea.bidang {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--gs-line-strong);
+  border-radius: 2px;
+  font: inherit;
+  font-size: 16px;
+  background: var(--gs-bg);
+  color: var(--gs-ink);
+  box-sizing: border-box;
+}
+textarea.bidang {
+  padding: 14px 16px;
+  line-height: 1.55;
+  resize: vertical;
+}
+input.bidang:focus,
+select.bidang:focus,
+textarea.bidang:focus {
+  outline: none;
+  border-color: var(--gs-ink);
+}
+select.bidang {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--gs-muted) 50%), linear-gradient(135deg, var(--gs-muted) 50%, transparent 50%);
+  background-position: calc(100% - 22px) 23px, calc(100% - 17px) 23px;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 40px;
+}
+
+input[type='checkbox'],
+input[type='radio'],
+input[type='range'] {
+  accent-color: var(--gs-ink);
+}
+
+/* Teks soal dengan rumus KaTeX. */
+.teks-soal .katex {
+  font-size: 1.08em;
+}
+.teks-soal .katex-display {
+  margin: 0.4em 0;
+}
+
+.gambar-soal svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media print {
+  .tanpa-cetak {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+}

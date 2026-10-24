@@ -7,3 +7,4 @@ dev-dist
 !.env.example
 .netlify
 coverage
+e2e-hasil

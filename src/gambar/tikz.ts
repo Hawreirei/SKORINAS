@@ -41,7 +41,7 @@ function primitifKeTikz(p: Primitif): string {
     case 'teks':
       return `\\node${opsi(JANGKAR[p.jangkar ?? 'tengah'], 'inner sep=1pt')} at (${b(p.x)},${b(p.y)}) {\\fontsize{${b((p.ukuran ?? 13) * 0.75)}}{${b((p.ukuran ?? 13) * 0.9)}}\\selectfont ${p.tebal ? '\\bfseries ' : ''}${escTeks(p.s)}};`;
     case 'pecahan':
-      return `\\node[inner sep=1pt] at (${b(p.x)},${b(p.y)}) {$\\frac{${escTeks(p.atas)}}{${escTeks(p.bawah)}}$};`;
+      return `\\node[inner sep=1pt] at (${b(p.x)},${b(p.y)}) {$\\tfrac{${escTeks(p.atas)}}{${escTeks(p.bawah)}}$};`;
   }
 }
 
