@@ -13,6 +13,7 @@ const BENDA = ['pita', 'tali', 'kue', 'roti', 'kertas', 'kain', 'pizza', 'semang
 
 let panggil = 0;
 let jumlahGenerate = 0;
+const waktuKirim = [];
 function butirPalsu(bentuk) {
   panggil++;
   const i = panggil;
@@ -71,6 +72,7 @@ function butirPalsu(bentuk) {
     if (url.includes('/models?')) return route.fulfill({ json: { models: [{ name: 'models/gemini-3.8-flash', displayName: 'Gemini 3.8 Flash', supportedGenerationMethods: ['generateContent'] }, { name: 'models/gemini-3.5-flash', displayName: 'Gemini 3.5 Flash', supportedGenerationMethods: ['generateContent'] }] } });
     // Permintaan ke-4: batas per menit gaya Gemini; aplikasi harus menunggu lalu lanjut sendiri.
     jumlahGenerate++;
+    waktuKirim.push(Date.now());
     if (jumlahGenerate === 4)
       return route.fulfill({
         status: 429,
@@ -118,7 +120,9 @@ function butirPalsu(bentuk) {
   await page.waitForSelector('text=Lanjut ke ekspor');
   await page.waitForSelector('text=Melanjutkan otomatis dalam', { timeout: 30000 });
   await foto('04a-menunggu-batas');
-  await page.waitForFunction(() => !document.body.innerText.includes('Membuat butir') && !document.body.innerText.includes('Menunggu batas'), null, { timeout: 60000 });
+  await page.waitForSelector('text=Menjaga batas per menit', { timeout: 120000 });
+  await foto('04b-menjaga-batas');
+  await page.waitForFunction(() => !/Membuat butir|Menunggu batas|Menjaga batas/.test(document.body.innerText), null, { timeout: 400000 });
   if (await page.locator('text=Dijeda').count()) throw new Error('Pembuatan terjeda padahal batas hanya per menit');
   await foto('04-peninjauan');
 
@@ -165,6 +169,9 @@ function butirPalsu(bentuk) {
   console.log('cadangan soal', isi.data.soal.length, 'kunci_api ikut?', 'kunci_api' in isi.data, JSON.stringify(isi).includes('AIzaUJI'));
   await foto('10-cadangan');
 
+  const padat = Math.max(...waktuKirim.map((t) => waktuKirim.filter((u) => u >= t && u < t + 60000).length));
+  console.log('permintaan terbanyak dalam 60 detik:', padat, '(batas 5)');
+  if (padat > 5) galat.push(`RPM terlampaui: ${padat}`);
   console.log('permintaan AI', panggil, '· termasuk satu 429 yang ditunggu:', jumlahGenerate === panggil + 1);
   console.log('galat halaman', galat.length ? galat : 'tidak ada');
   await browser.close();

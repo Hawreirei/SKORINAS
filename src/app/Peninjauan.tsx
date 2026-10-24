@@ -122,7 +122,7 @@ export default function Peninjauan() {
               <span className="text-[17px] font-light">
                 {sedangDibuat
                   ? status.menunggu
-                    ? `Menunggu batas penyedia pulih · butir ${status.slotAktif ?? selesaiSlot + 1} dari ${slot.length}`
+                    ? `${status.menunggu.alasan.startsWith('Menjaga') ? 'Menjaga batas per menit' : 'Menunggu batas penyedia pulih'} · butir ${status.slotAktif ?? selesaiSlot + 1} dari ${slot.length}`
                     : `Membuat butir ${status.slotAktif ?? selesaiSlot + 1} dari ${slot.length}…`
                   : `Dijeda · ${selesaiSlot} dari ${slot.length} butir selesai`}
               </span>

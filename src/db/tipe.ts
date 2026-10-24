@@ -117,6 +117,8 @@ export interface Profil extends Rekaman {
   model_cadangan: string | null;
   cadangan_terakhir: number | null;
   persisten_diminta: boolean;
+  /** Batas laju yang diatur guru per model ("penyedia|model"), menimpa angka registri. */
+  batas_model: Record<string, { rpm: number | null; rpd: number | null }>;
 }
 
 /** Kunci API guru. Toko terpisah agar tidak pernah ikut berkas .gensoal. */

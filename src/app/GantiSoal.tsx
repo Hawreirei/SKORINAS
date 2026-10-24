@@ -12,6 +12,7 @@ export function GantiSoal({ soal, mode, selesai }: { soal: Soal; mode: 'ganti' |
   const [kandidat, setKandidat] = useState<Kandidat | null>(null);
   const [sibuk, setSibuk] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
+  const [tunggu, setTunggu] = useState<string | null>(null);
   const kendali = useRef<AbortController | null>(null);
   useEffect(() => () => kendali.current?.abort(), []);
 
@@ -21,7 +22,7 @@ export function GantiSoal({ soal, mode, selesai }: { soal: Soal; mode: 'ganti' |
     setKandidat(null);
     kendali.current = new AbortController();
     try {
-      const k = await buatKandidat(soal.id, mode === 'buat_ulang' ? catatan : null, kendali.current.signal);
+      const k = await buatKandidat(soal.id, mode === 'buat_ulang' ? catatan : null, kendali.current.signal, (ms, alasan) => setTunggu(ms > 0 ? `${alasan} Menunggu ${Math.ceil(ms / 1000)} detik…` : null));
       if (!k.hasil.ok) setGalat(`Tiga percobaan tidak lolos pemeriksaan: ${k.hasil.percobaan.at(-1)?.alasan.join(' ') ?? ''}`);
       setKandidat(k);
     } catch (e) {
@@ -47,7 +48,7 @@ export function GantiSoal({ soal, mode, selesai }: { soal: Soal; mode: 'ganti' |
           </Tombol>
         </div>
       ) : null}
-      {sibuk ? <p className="mono text-redup">Membuat dan memeriksa butir baru…</p> : null}
+      {sibuk ? <p className="mono text-redup">{tunggu ?? 'Membuat dan memeriksa butir baru…'}</p> : null}
       {galat ? <Peringatan className="mb-4">{galat}</Peringatan> : null}
       {kandidat?.hasil.ok && kandidat.hasil.isi ? (
         <>

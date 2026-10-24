@@ -38,6 +38,8 @@ export interface ModelRegistri {
   tingkat: 'gratis' | 'murah' | 'premium';
   /** USD per 1 juta token. null bila belum diverifikasi. */
   harga: { masuk: number; keluar: number } | null;
+  /** Batas tingkat gratis: permintaan per menit dan per hari. null bila tidak diketahui atau berbayar. */
+  batas_gratis?: { rpm: number | null; rpd: number | null } | null;
   golden: { status: 'lolos' | 'gagal' | 'belum'; tanggal: string | null; benar_lolos?: number; salah_ditolak?: number; json_sah?: number };
   catatan: string;
 }

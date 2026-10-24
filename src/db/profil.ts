@@ -24,6 +24,7 @@ export function profilBawaan(): Profil {
     model_cadangan: null,
     cadangan_terakhir: null,
     persisten_diminta: false,
+    batas_model: {},
   };
 }
 

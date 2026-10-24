@@ -19,7 +19,8 @@ import { usePesan } from '../komponen/Pesan';
 import { Label, Peringatan, Titik } from '../komponen/Status';
 import { Chip, Panah, Tombol } from '../komponen/Tombol';
 import { kemiripan } from '../verifikasi/kemiripan';
-import { useIndeksKurikulum, useJudulHalaman, useProfil } from './kait';
+import { useIndeksKurikulum, useJudulHalaman, useProfil, useRegistri } from './kait';
+import { batasEfektif, permintaanHariIni } from '../ai/laju';
 import { PemilihTpResmi, type TpTerpilih } from './PemilihTpResmi';
 
 const KUSTOM = 'kustom';
@@ -163,6 +164,8 @@ export default function BuatSoal() {
   const { data: indeks, galat: galatIndeks } = useIndeksKurikulum();
   const preset = useLiveQuery(() => db.preset.orderBy('terakhir_dipakai').reverse().toArray(), []);
   const kunci = useLiveQuery(() => db.kunci_api.toArray(), []);
+  const { data: registri } = useRegistri();
+  const terpakai = useLiveQuery(() => (profil.penyedia_utama && profil.model_utama ? permintaanHariIni(profil.penyedia_utama, profil.model_utama) : Promise.resolve(0)), [profil.penyedia_utama, profil.model_utama]);
   const [f, setF] = useState<Isian>(() => isianKosong(cari.get('mulai') === KUSTOM ? KUSTOM : 'merdeka-2024'));
   const [presetId, setPresetId] = useState<string | null>(null);
   const [simpanPreset, setSimpanPreset] = useState(false);
@@ -220,6 +223,11 @@ export default function BuatSoal() {
   const kuota = bagiKomposisi(f.n, f.persen);
   const kataMateri = f.materi.trim() ? f.materi.trim().split(/\s+/).length : 0;
   const adaKunci = (kunci ?? []).some((k) => k.kunci && k.penyedia === profil.penyedia_utama);
+  const batasModel = profil.penyedia_utama && profil.model_utama ? batasEfektif(profil, registri ?? null, profil.penyedia_utama, profil.model_utama) : null;
+  // Setiap soal minimal satu permintaan; soal yang ditolak pemeriksa dibuat ulang, jadi sediakan sekitar 30% lebih.
+  const perkiraanMaks = Math.ceil(f.n * 1.3);
+  const sisaHarian = batasModel?.rpd ? Math.max(0, batasModel.rpd - (terpakai ?? 0)) : null;
+  const menitPerkiraan = batasModel?.rpm ? Math.max(1, Math.ceil((f.n - batasModel.rpm) / batasModel.rpm)) : null;
 
   // Mapel resmi menentukan rumpun; mapel yang belum dibuka tidak dapat dipilih pada kurikulum resmi.
   useEffect(() => {
@@ -497,6 +505,24 @@ export default function BuatSoal() {
               ))}
             </div>
             <p className="mt-3 text-sm text-redup">Persentase saling terkunci pada 100%. Sisa soal dibagikan ke kategori dengan pecahan sisa terbesar.</p>
+            {batasModel && (batasModel.rpm || batasModel.rpd) ? (
+              <div className={`mt-5 border px-5 py-4 text-[15px] leading-relaxed ${sisaHarian !== null && sisaHarian < f.n ? 'border-awas/40 bg-awas-latar text-awas' : 'border-garis text-isi'}`}>
+                <div>
+                  Perkiraan {f.n}–{perkiraanMaks} permintaan ke {profil.model_utama}
+                  {menitPerkiraan && f.n > (batasModel.rpm ?? 0) ? `, sekitar ${menitPerkiraan} menit karena batas ${batasModel.rpm} permintaan per menit` : ''}.
+                </div>
+                {sisaHarian !== null ? (
+                  <div className="mt-1">
+                    Sisa kuota hari ini: {sisaHarian} dari {batasModel.rpd} permintaan.
+                    {sisaHarian < f.n
+                      ? profil.model_cadangan
+                        ? ' Sisanya dibuat dengan model cadangan.'
+                        : ' Tidak cukup untuk satu paket; pembuatan akan dijeda di tengah. Kurangi jumlah soal atau pasang model cadangan di Pengaturan AI.'
+                      : ''}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </Bagian>
 
           <Bagian nomor="04" judul="Opsi">

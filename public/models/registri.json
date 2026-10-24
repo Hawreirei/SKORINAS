@@ -1,7 +1,7 @@
 {
   "versi": "2026-10-24",
   "diperiksa_pada": "2026-10-24",
-  "catatan": "Titik awal dari rancangan v0.3. Nama model, harga, dan batas gratis berubah cepat: verifikasi ulang sebelum rilis. Belum ada model yang lolos golden set karena scripts/uji-model.ts belum dijalankan dengan kunci asli, sehingga belum ada lencana direkomendasikan. Harga null berarti belum diverifikasi; biaya ditampilkan sebagai token saja.",
+  "catatan": "Titik awal dari rancangan v0.3. Nama model, harga, dan batas gratis berubah cepat: verifikasi ulang sebelum rilis. Belum ada model yang lolos golden set karena scripts/uji-model.ts belum dijalankan dengan kunci asli, sehingga belum ada lencana direkomendasikan. Harga null berarti belum diverifikasi; biaya ditampilkan sebagai token saja. Batas gratis (rpm, rpd) Gemini diisi angka paling ketat yang terlihat di dasbor AI Studio (5 per menit, 20 per hari); guru dapat menyesuaikannya di Pengaturan AI.",
   "penyedia": [
     {
       "id": "gemini",
@@ -13,11 +13,86 @@
       "peringatan_privasi": "Prompt pada tingkat gratis dapat dipakai Google untuk perbaikan produk di luar EEA, Swiss, dan Inggris. Jangan menempel data siswa.",
       "akses": "langsung",
       "model": [
-        { "id": "gemini-3.8-flash", "label": "Gemini 3.8 Flash", "status": "stabil", "tingkat": "gratis", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "Usulan model utama" },
-        { "id": "gemini-3.5-flash", "label": "Gemini 3.5 Flash", "status": "stabil", "tingkat": "gratis", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "Usulan model cadangan" },
-        { "id": "gemini-3.5-flash-lite", "label": "Gemini 3.5 Flash-Lite", "status": "stabil", "tingkat": "gratis", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "Paling murah" },
-        { "id": "gemini-2.5-flash", "label": "Gemini 2.5 Flash", "status": "stabil", "tingkat": "gratis", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "Generasi sebelumnya" },
-        { "id": "gemma-4-31b-it", "label": "Gemma 4", "status": "pratinjau", "tingkat": "gratis", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "Model terbuka" }
+        {
+          "id": "gemini-3.8-flash",
+          "label": "Gemini 3.8 Flash",
+          "status": "stabil",
+          "tingkat": "gratis",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "Usulan model utama",
+          "batas_gratis": {
+            "rpm": 5,
+            "rpd": 20
+          }
+        },
+        {
+          "id": "gemini-3.5-flash",
+          "label": "Gemini 3.5 Flash",
+          "status": "stabil",
+          "tingkat": "gratis",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "Usulan model cadangan",
+          "batas_gratis": {
+            "rpm": 5,
+            "rpd": 20
+          }
+        },
+        {
+          "id": "gemini-3.5-flash-lite",
+          "label": "Gemini 3.5 Flash-Lite",
+          "status": "stabil",
+          "tingkat": "gratis",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "Paling murah",
+          "batas_gratis": {
+            "rpm": 5,
+            "rpd": 20
+          }
+        },
+        {
+          "id": "gemini-2.5-flash",
+          "label": "Gemini 2.5 Flash",
+          "status": "stabil",
+          "tingkat": "gratis",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "Generasi sebelumnya",
+          "batas_gratis": {
+            "rpm": 5,
+            "rpd": 20
+          }
+        },
+        {
+          "id": "gemma-4-31b-it",
+          "label": "Gemma 4",
+          "status": "pratinjau",
+          "tingkat": "gratis",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "Model terbuka",
+          "batas_gratis": {
+            "rpm": 5,
+            "rpd": 20
+          }
+        }
       ]
     },
     {
@@ -30,9 +105,54 @@
       "peringatan_privasi": "Penyedia model gratis di OpenRouter dapat mencatat prompt. Jangan menempel data siswa.",
       "akses": "langsung",
       "model": [
-        { "id": "openrouter/free", "label": "OpenRouter Free (otomatis)", "status": "pratinjau", "tingkat": "gratis", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "Model gratis dipilih otomatis; mutu berubah-ubah" },
-        { "id": "google/gemma-4-31b-it:free", "label": "Gemma 4 31B (gratis)", "status": "pratinjau", "tingkat": "gratis", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "" },
-        { "id": "nvidia/nemotron-3-super-120b-a12b:free", "label": "Nemotron 3 Super (gratis)", "status": "pratinjau", "tingkat": "gratis", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "" }
+        {
+          "id": "openrouter/free",
+          "label": "OpenRouter Free (otomatis)",
+          "status": "pratinjau",
+          "tingkat": "gratis",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "Model gratis dipilih otomatis; mutu berubah-ubah",
+          "batas_gratis": {
+            "rpm": 20,
+            "rpd": 50
+          }
+        },
+        {
+          "id": "google/gemma-4-31b-it:free",
+          "label": "Gemma 4 31B (gratis)",
+          "status": "pratinjau",
+          "tingkat": "gratis",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "",
+          "batas_gratis": {
+            "rpm": 20,
+            "rpd": 50
+          }
+        },
+        {
+          "id": "nvidia/nemotron-3-super-120b-a12b:free",
+          "label": "Nemotron 3 Super (gratis)",
+          "status": "pratinjau",
+          "tingkat": "gratis",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "",
+          "batas_gratis": {
+            "rpm": 20,
+            "rpd": 50
+          }
+        }
       ]
     },
     {
@@ -45,9 +165,54 @@
       "peringatan_privasi": "Periksa kebijakan data Groq sebelum dipakai. Jangan menempel data siswa.",
       "akses": "langsung",
       "model": [
-        { "id": "openai/gpt-oss-120b", "label": "GPT-OSS 120B", "status": "stabil", "tingkat": "gratis", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "" },
-        { "id": "openai/gpt-oss-20b", "label": "GPT-OSS 20B", "status": "stabil", "tingkat": "gratis", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "Lebih cepat, lebih ringan" },
-        { "id": "qwen/qwen3.8-27b", "label": "Qwen 3.8 27B", "status": "pratinjau", "tingkat": "gratis", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "" }
+        {
+          "id": "openai/gpt-oss-120b",
+          "label": "GPT-OSS 120B",
+          "status": "stabil",
+          "tingkat": "gratis",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "",
+          "batas_gratis": {
+            "rpm": 30,
+            "rpd": 1000
+          }
+        },
+        {
+          "id": "openai/gpt-oss-20b",
+          "label": "GPT-OSS 20B",
+          "status": "stabil",
+          "tingkat": "gratis",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "Lebih cepat, lebih ringan",
+          "batas_gratis": {
+            "rpm": 30,
+            "rpd": 1000
+          }
+        },
+        {
+          "id": "qwen/qwen3.8-27b",
+          "label": "Qwen 3.8 27B",
+          "status": "pratinjau",
+          "tingkat": "gratis",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "",
+          "batas_gratis": {
+            "rpm": 30,
+            "rpd": 1000
+          }
+        }
       ]
     },
     {
@@ -60,9 +225,45 @@
       "peringatan_privasi": "Mode gratis Mistral dapat dipakai melatih model kecuali dinonaktifkan di pengaturan akun. Jangan menempel data siswa.",
       "akses": "langsung",
       "model": [
-        { "id": "mistral-medium-latest", "label": "Mistral Medium 3.5", "status": "stabil", "tingkat": "murah", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "" },
-        { "id": "mistral-small-latest", "label": "Mistral Small 4", "status": "stabil", "tingkat": "murah", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "" },
-        { "id": "mistral-large-latest", "label": "Mistral Large 3", "status": "stabil", "tingkat": "premium", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "" }
+        {
+          "id": "mistral-medium-latest",
+          "label": "Mistral Medium 3.5",
+          "status": "stabil",
+          "tingkat": "murah",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "",
+          "batas_gratis": null
+        },
+        {
+          "id": "mistral-small-latest",
+          "label": "Mistral Small 4",
+          "status": "stabil",
+          "tingkat": "murah",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "",
+          "batas_gratis": null
+        },
+        {
+          "id": "mistral-large-latest",
+          "label": "Mistral Large 3",
+          "status": "stabil",
+          "tingkat": "premium",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "",
+          "batas_gratis": null
+        }
       ]
     },
     {
@@ -75,9 +276,45 @@
       "peringatan_privasi": "Data API tidak dipakai melatih model secara bawaan menurut kebijakan OpenAI; tetap jangan menempel data siswa.",
       "akses": "langsung",
       "model": [
-        { "id": "gpt-6.1-sol", "label": "GPT-6.1 Sol", "status": "stabil", "tingkat": "premium", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "" },
-        { "id": "gpt-6-luna", "label": "GPT-6 Luna", "status": "stabil", "tingkat": "murah", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "" },
-        { "id": "gpt-6-astra", "label": "GPT-6 Astra", "status": "stabil", "tingkat": "murah", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "" }
+        {
+          "id": "gpt-6.1-sol",
+          "label": "GPT-6.1 Sol",
+          "status": "stabil",
+          "tingkat": "premium",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "",
+          "batas_gratis": null
+        },
+        {
+          "id": "gpt-6-luna",
+          "label": "GPT-6 Luna",
+          "status": "stabil",
+          "tingkat": "murah",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "",
+          "batas_gratis": null
+        },
+        {
+          "id": "gpt-6-astra",
+          "label": "GPT-6 Astra",
+          "status": "stabil",
+          "tingkat": "murah",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "",
+          "batas_gratis": null
+        }
       ]
     },
     {
@@ -90,10 +327,58 @@
       "peringatan_privasi": "Data API tidak dipakai melatih model secara bawaan menurut kebijakan Anthropic; tetap jangan menempel data siswa. Panggilan dari peramban memakai header khusus akses langsung.",
       "akses": "langsung",
       "model": [
-        { "id": "claude-sonnet-5-5", "label": "Claude Sonnet 5.5", "status": "stabil", "tingkat": "premium", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "" },
-        { "id": "claude-haiku-5-5", "label": "Claude Haiku 5.5", "status": "stabil", "tingkat": "murah", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "" },
-        { "id": "claude-opus-5-5", "label": "Claude Opus 5.5", "status": "stabil", "tingkat": "premium", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "" },
-        { "id": "claude-fable-5-1", "label": "Claude Fable 5.1", "status": "stabil", "tingkat": "premium", "harga": null, "golden": { "status": "belum", "tanggal": null }, "catatan": "" }
+        {
+          "id": "claude-sonnet-5-5",
+          "label": "Claude Sonnet 5.5",
+          "status": "stabil",
+          "tingkat": "premium",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "",
+          "batas_gratis": null
+        },
+        {
+          "id": "claude-haiku-5-5",
+          "label": "Claude Haiku 5.5",
+          "status": "stabil",
+          "tingkat": "murah",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "",
+          "batas_gratis": null
+        },
+        {
+          "id": "claude-opus-5-5",
+          "label": "Claude Opus 5.5",
+          "status": "stabil",
+          "tingkat": "premium",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "",
+          "batas_gratis": null
+        },
+        {
+          "id": "claude-fable-5-1",
+          "label": "Claude Fable 5.1",
+          "status": "stabil",
+          "tingkat": "premium",
+          "harga": null,
+          "golden": {
+            "status": "belum",
+            "tanggal": null
+          },
+          "catatan": "",
+          "batas_gratis": null
+        }
       ]
     }
   ]

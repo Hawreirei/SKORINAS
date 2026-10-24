@@ -30,13 +30,13 @@ export interface Kandidat {
 }
 
 /** Buat butir pengganti dengan kategori yang sama, tanpa menyimpan. Guru membandingkan lalu menerima atau mengembalikan. */
-export async function buatKandidat(soalId: string, catatan: string | null, signal?: AbortSignal): Promise<Kandidat> {
+export async function buatKandidat(soalId: string, catatan: string | null, signal?: AbortSignal, saatMenunggu?: (ms: number, alasan: string) => void): Promise<Kandidat> {
   const s = await ambilSoal(soalId);
   if (s.terkunci) throw new Error('Soal terkunci. Buka kunci dulu.');
   const paket = await db.paket_soal.get(s.paket_id);
   if (!paket) throw new Error('Paket tidak ditemukan.');
   const m = await modelAktif();
-  const kirim = pengirimDari(m);
+  const kirim = pengirimDari(m, { saatMenunggu });
   const ctx = await konteksPaket(s.paket_id, s.id);
   const param = { ...paket.parameter_json, tp: [s.tp] };
   const reg = await muatRegistri().catch(() => null);

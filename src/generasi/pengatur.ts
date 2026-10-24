@@ -1,5 +1,6 @@
 import { adaptorUntuk, hitungBiaya } from '../ai';
 import { GalatAi } from '../ai/galat';
+import { batasEfektif, pembatas, awalHariKuota } from '../ai/laju';
 import { modelDari, muatRegistri } from '../ai/registri';
 import { db } from '../db/skema';
 import { ambilProfil } from '../db/profil';
@@ -26,9 +27,26 @@ export async function modelAktif(pakaiCadangan = false): Promise<ModelAktif> {
   return { penyedia, model, kunci: k.kunci };
 }
 
-export function pengirimDari(m: ModelAktif): Pengirim {
+/**
+ * Pengirim ke model, dijaga pembatas laju: tidak melewati batas per menit dan per hari model itu.
+ * saatMenunggu dipanggil dengan ms > 0 sebelum menunggu dan dengan 0 setelahnya.
+ */
+export function pengirimDari(m: ModelAktif, opsi: { saatMenunggu?: (ms: number, alasan: string) => void } = {}): Pengirim {
   const a = adaptorUntuk(m.penyedia);
-  return (sistem, pesan, signal) => a.kirim({ kunci: m.kunci, model: m.model, sistem, pesan, signal });
+  return async (sistem, pesan, signal) => {
+    const [prof, reg] = await Promise.all([ambilProfil(), muatRegistri().catch(() => null)]);
+    let menunggu = false;
+    await pembatas.izin(m.penyedia, m.model, batasEfektif(prof, reg, m.penyedia, m.model), {
+      signal,
+      namaPenyedia: namaPenyedia(m.penyedia),
+      saatMenunggu: (ms, alasan) => {
+        menunggu = true;
+        opsi.saatMenunggu?.(ms, alasan);
+      },
+    });
+    if (menunggu) opsi.saatMenunggu?.(0, '');
+    return a.kirim({ kunci: m.kunci, model: m.model, sistem, pesan, signal });
+  };
 }
 
 export async function jumlahLolosHariIni(): Promise<number> {
@@ -143,13 +161,7 @@ const tundaBawaan: Tunda = (ms, signal) =>
 
 /** Kuota harian Gemini pulih tengah malam waktu Pasifik; tampilkan dalam jam perangkat. */
 export function waktuResetGemini(kini = new Date()): string {
-  const bagian = Object.fromEntries(
-    new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hourCycle: 'h23' })
-      .formatToParts(kini)
-      .map((x) => [x.type, Number(x.value)]),
-  ) as Record<string, number>;
-  const selisih = Date.UTC(bagian.year, bagian.month - 1, bagian.day, bagian.hour, bagian.minute, bagian.second) - Math.floor(kini.getTime() / 1000) * 1000;
-  const reset = new Date(Date.UTC(bagian.year, bagian.month - 1, bagian.day + 1, 0, 0, 0) - selisih);
+  const reset = new Date(awalHariKuota('gemini', kini) + 24 * 3600_000);
   return reset.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 }
 
@@ -208,13 +220,14 @@ class PengaturGenerasi {
     try {
       const paket = await db.paket_soal.get(paketId);
       if (!paket || !kerja) throw new Error('Paket tidak ditemukan.');
+      const saatMenunggu = (ms: number, alasan: string) => this.ubah({ menunggu: ms > 0 ? { sampai: Date.now() + ms, alasan } : null });
       const utama: ModelAktif = opsi.model ?? (await modelAktif(opsi.pakaiCadangan));
-      let aktif = { m: utama, kirim: opsi.pengirim ?? pengirimDari(utama), cadangan: !!opsi.pakaiCadangan };
+      let aktif = { m: utama, kirim: opsi.pengirim ?? pengirimDari(utama, { saatMenunggu }), cadangan: !!opsi.pakaiCadangan };
       // Model cadangan dipakai otomatis bila kuota model utama habis (F-18).
       let cadangan: { m: ModelAktif; kirim: Pengirim } | null = null;
       if (!opsi.pakaiCadangan) {
         const c = opsi.cadangan !== undefined ? opsi.cadangan : await modelAktif(true).then((model) => ({ model, pengirim: undefined as Pengirim | undefined }), () => null);
-        if (c && !(c.model.penyedia === utama.penyedia && c.model.model === utama.model)) cadangan = { m: c.model, kirim: c.pengirim ?? pengirimDari(c.model) };
+        if (c && !(c.model.penyedia === utama.penyedia && c.model.model === utama.model)) cadangan = { m: c.model, kirim: c.pengirim ?? pengirimDari(c.model, { saatMenunggu }) };
       }
       const prof = await ambilProfil();
       kerja = { ...kerja, status: 'berjalan', galat: null, mulai: kerja.mulai ?? sekarang(), diubah_pada: sekarang() };

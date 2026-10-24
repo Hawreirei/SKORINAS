@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useState } from 'react';
 import { adaptorUntuk } from '../ai';
+import { batasEfektif, kunciModel, permintaanHariIni } from '../ai/laju';
 import { GalatAi } from '../ai/galat';
 import { gabungModel, penyediaDari, type BarisModel } from '../ai/registri';
 import type { PenyediaRegistri, StatusModel } from '../ai/tipe';
@@ -48,6 +49,8 @@ export default function PengaturanAi() {
   const [menguji, setMenguji] = useState(false);
   const aktif: PenyediaId = pilih ?? profil.penyedia_utama ?? 'gemini';
   const kunci = daftarKunci?.find((k) => k.penyedia === aktif);
+  const modelDipilih = profil.penyedia_utama === aktif ? profil.model_utama ?? '' : '';
+  const terpakaiHariIni = useLiveQuery(() => (modelDipilih ? permintaanHariIni(aktif, modelDipilih) : Promise.resolve(0)), [aktif, modelDipilih]);
 
   useEffect(() => {
     setTeksKunci(kunci?.kunci ?? '');
@@ -62,7 +65,12 @@ export default function PengaturanAi() {
   const siap = !!(profil.penyedia_utama && profil.model_utama && daftarKunci?.some((k) => k.penyedia === profil.penyedia_utama && k.status === 'berfungsi'));
   const namaUtama = profil.penyedia_utama ? penyediaDari(reg, profil.penyedia_utama) : undefined;
   const labelUtama = namaUtama?.model.find((m) => m.id === profil.model_utama)?.label ?? profil.model_utama;
-  const modelDipilih = profil.penyedia_utama === aktif ? profil.model_utama ?? '' : '';
+  const batas = modelDipilih ? batasEfektif(profil, reg, aktif, modelDipilih) : null;
+  const ubahBatas = (u: Partial<{ rpm: number | null; rpd: number | null }>) => {
+    if (!modelDipilih || !batas) return;
+    void simpanProfil({ batas_model: { ...profil.batas_model, [kunciModel(aktif, modelDipilih)]: { ...batas, ...u } } });
+  };
+  const angkaAtauKosong = (v: string) => (v.trim() === '' ? null : Math.max(1, Math.round(Number(v)) || 1));
 
   // Model cadangan boleh dari penyedia mana pun yang kuncinya berfungsi.
   const pilihanCadangan = reg.penyedia.flatMap((x) => modelTersedia(x, daftarKunci?.find((k) => k.penyedia === x.id)).map((m) => ({ penyedia: x, m })));
@@ -205,6 +213,29 @@ export default function PengaturanAi() {
                 ))}
               </select>
               <p className="mt-3 text-sm text-redup">Pilihan pertama biasanya sudah tepat. Setiap soal tetap dihitung ulang oleh GenSoal, model mana pun yang dipakai.</p>
+              {batas ? (
+                <div className="mt-6 border border-garis px-5 py-4">
+                  <div className="text-[15px]">Batas pemakaian model ini</div>
+                  <p className="mt-1 text-sm text-redup">
+                    Samakan dengan angka di dasbor penyedia{aktif === 'gemini' ? ' (aistudio.google.com → Usage and billing)' : ''}. GenSoal memberi jeda antar permintaan agar tidak melewatinya. Kosongkan bila tidak dibatasi.
+                  </p>
+                  <div className="mt-4 grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="rpm">Per menit (RPM)</Label>
+                      <input id="rpm" type="number" min={1} className="bidang mt-2" value={batas.rpm ?? ''} placeholder="tanpa batas" onChange={(e) => ubahBatas({ rpm: angkaAtauKosong(e.target.value) })} />
+                    </div>
+                    <div>
+                      <Label htmlFor="rpd">Per hari (RPD)</Label>
+                      <input id="rpd" type="number" min={1} className="bidang mt-2" value={batas.rpd ?? ''} placeholder="tanpa batas" onChange={(e) => ubahBatas({ rpd: angkaAtauKosong(e.target.value) })} />
+                    </div>
+                  </div>
+                  <p className="mono mt-3 text-redup">
+                    Terpakai hari ini: {terpakaiHariIni ?? 0}
+                    {batas.rpd ? ` dari ${batas.rpd} permintaan` : ' permintaan'}
+                    {batas.rpm ? ` · paling banyak ${batas.rpm} permintaan tiap 60 detik` : ''}
+                  </p>
+                </div>
+              ) : null}
               <div className="mt-6">
                 <Label htmlFor="model-cadangan">Model cadangan (opsional)</Label>
                 <select
