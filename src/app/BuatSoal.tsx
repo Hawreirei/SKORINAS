@@ -19,6 +19,8 @@ import { useJudulHalaman, useProfil, useRegistri } from './kait';
 import { batasEfektif, permintaanHariIni } from '../ai/laju';
 
 const MAKS_TP = 500;
+const MIN_SOAL = 5;
+const MAKS_SOAL = 50;
 const MAKS_KATA_MATERI = 3000;
 
 interface Isian {
@@ -152,6 +154,10 @@ export default function BuatSoal() {
   const [mengirim, setMengirim] = useState(false);
   const [galat, setGalat] = useState<string[]>([]);
   const ubah = (u: Partial<Isian>) => setF((x) => ({ ...x, ...u }));
+  // Jumlah soal diketik bebas; angka baru dipakai bila sah, dan dirapikan saat kolom ditinggalkan.
+  const [teksN, setTeksN] = useState(String(f.n));
+  useEffect(() => setTeksN(String(f.n)), [f.n]);
+  const nSah = /^\d+$/.test(teksN.trim()) && Number(teksN) >= MIN_SOAL && Number(teksN) <= MAKS_SOAL;
 
   useEffect(() => {
     const ulang = cari.get('ulang');
@@ -202,6 +208,7 @@ export default function BuatSoal() {
     const g: string[] = [];
     if (!f.kelas) g.push('Pilih kelas.');
     if (!f.mapel.trim()) g.push('Isi topik atau mata pelajaran.');
+    if (!nSah) g.push(`Jumlah soal ${MIN_SOAL} sampai ${MAKS_SOAL}.`);
     if (daftarTp.length > MAKS_TP) g.push(`Maksimal ${MAKS_TP} TP.`);
     if (!f.bentuk.length) g.push('Pilih minimal satu bentuk soal di Pengaturan lanjutan.');
     if (kataMateri > MAKS_KATA_MATERI) g.push(`Teks materi maksimal ${MAKS_KATA_MATERI} kata (sekarang ${kataMateri}).`);
@@ -366,19 +373,33 @@ export default function BuatSoal() {
           </Bagian>
 
           <Bagian nomor="03" judul="Jumlah soal" pita="kuning">
-            <div className="flex items-center gap-4">
-              <Langkah label="Kurangi jumlah soal" onClick={() => ubah({ n: Math.max(5, f.n - 1) })} disabled={f.n <= 5} />
+            <Label htmlFor="jumlah">Jumlah soal</Label>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
               <input
-                aria-label="Jumlah soal"
-                type="number"
-                min={5}
-                max={50}
-                value={f.n}
-                onChange={(e) => ubah({ n: Math.max(5, Math.min(50, Number(e.target.value) || 5)) })}
-                className="w-20 bg-transparent text-center text-[40px] font-extrabold text-judul [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+                id="jumlah"
+                type="text"
+                inputMode="numeric"
+                autoComplete="off"
+                value={teksN}
+                aria-invalid={!nSah}
+                aria-describedby="jumlah-ket"
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => {
+                  const s = e.target.value.replace(/\D/g, '').slice(0, 3);
+                  setTeksN(s);
+                  const n = Number(s);
+                  if (s && n >= MIN_SOAL && n <= MAKS_SOAL) ubah({ n });
+                }}
+                onBlur={() => {
+                  const n = Math.max(MIN_SOAL, Math.min(MAKS_SOAL, Number(teksN) || f.n));
+                  ubah({ n });
+                  setTeksN(String(n));
+                }}
+                className={`bidang !w-28 text-center !text-[28px] font-extrabold text-judul ${nSah ? '' : '!border-buruk'}`}
               />
-              <Langkah label="Tambah jumlah soal" onClick={() => ubah({ n: Math.min(50, f.n + 1) })} disabled={f.n >= 50} />
-              <span className="text-base text-redup">5 sampai 50 soal</span>
+              <span id="jumlah-ket" className={`text-base ${nSah ? 'text-redup' : 'font-bold text-buruk'}`}>
+                {nSah ? 'soal (5 sampai 50)' : `Ketik angka ${MIN_SOAL} sampai ${MAKS_SOAL}`}
+              </span>
             </div>
             {batasModel && (batasModel.rpm || batasModel.rpd) ? (
               <div className={`mt-4 rounded-lg border px-4 py-3 text-base leading-relaxed ${sisaHarian !== null && sisaHarian < f.n ? 'border-awas/40 bg-awas-latar text-awas' : 'border-garis bg-panel text-isi'}`}>
@@ -555,7 +576,7 @@ export default function BuatSoal() {
               Batal
             </Tombol>
             <Tombol ukuran="besar" onClick={buat} disabled={mengirim} className="flex-[2] sm:flex-none">
-              {mengirim ? 'Menyiapkan…' : `Buat ${f.n} soal`} <Panah />
+              {mengirim ? 'Menyiapkan…' : `Buat ${nSah ? Number(teksN) : f.n} soal`} <Panah />
             </Tombol>
           </div>
         </div>

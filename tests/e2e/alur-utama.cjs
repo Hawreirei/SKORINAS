@@ -108,7 +108,7 @@ function butirPalsu(bentuk) {
   await page.selectOption('#kelas', '4');
   await page.fill('#mapel', 'Matematika');
   await page.fill('#tp', 'Peserta didik dapat menjumlahkan dua pecahan berpenyebut sama.\nPeserta didik dapat membandingkan dua pecahan berpenyebut berbeda dengan menyamakan penyebutnya.');
-  for (let k = 0; k < 2; k++) await page.getByRole('button', { name: 'Tambah jumlah soal' }).click();
+  await page.fill('#jumlah', '12');
   await page.getByRole('button', { name: /Pengaturan lanjutan/ }).click();
   for (const b of ['Isian singkat', 'Benar-salah', 'Uraian']) await page.getByRole('button', { name: b, exact: true }).click();
   await page.getByLabel('Simpan pengaturan ini').check();
