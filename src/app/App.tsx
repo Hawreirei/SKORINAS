@@ -39,7 +39,7 @@ function Tata() {
 export function App() {
   return (
     <PenyediaPesan>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
         <Routes>
           <Route path="/soal/:id/cetak" element={<Suspense fallback={null}><Cetak /></Suspense>} />
           <Route element={<Tata />}>

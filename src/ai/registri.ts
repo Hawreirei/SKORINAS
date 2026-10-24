@@ -4,7 +4,7 @@ import type { ModelLangsung, ModelRegistri, PenyediaRegistri, Registri, StatusMo
 let cache: Promise<Registri> | null = null;
 
 export function muatRegistri(): Promise<Registri> {
-  cache ??= fetch('/models/registri.json')
+  cache ??= fetch(`${import.meta.env.BASE_URL}models/registri.json`)
     .then((r) => {
       if (!r.ok) throw new Error('Registri model tidak dapat dimuat.');
       return r.json() as Promise<Registri>;

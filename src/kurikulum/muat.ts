@@ -6,7 +6,7 @@ let indeks: Promise<IndeksKurikulum> | null = null;
 const berkas = new Map<string, Promise<BerkasMapel>>();
 
 async function ambilJson<T>(jalur: string): Promise<T> {
-  const r = await fetch(`/kurikulum/${jalur}`);
+  const r = await fetch(`${import.meta.env.BASE_URL}kurikulum/${jalur}`);
   if (!r.ok) throw new Error(`Gagal memuat data kurikulum (${r.status}).`);
   return (await r.json()) as T;
 }

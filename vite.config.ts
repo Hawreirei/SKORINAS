@@ -1,15 +1,44 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import paket from './package.json' with { type: 'json' };
 
+// GitHub Pages menyajikan situs di sub-jalur (/SKORINAS/); Netlify dan pengembangan memakai '/'.
+const base = process.env.BASE_PATH ?? '/';
+
+// Kebijakan keamanan konten sebagai meta, untuk hosting yang tidak dapat mengirim header (GitHub Pages).
+// Header di netlify.toml tetap berlaku di Netlify. frame-ancestors hanya berlaku lewat header.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'wasm-unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self' data:",
+  "connect-src 'self' https://generativelanguage.googleapis.com https://openrouter.ai https://api.groq.com https://api.mistral.ai https://api.openai.com https://api.anthropic.com",
+  'frame-src https://www.youtube-nocookie.com',
+  "worker-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ');
+
+function metaCsp(): Plugin {
+  return {
+    name: 'gensoal-meta-csp',
+    apply: 'build',
+    transformIndexHtml: () => [{ tag: 'meta', attrs: { 'http-equiv': 'Content-Security-Policy', content: CSP }, injectTo: 'head-prepend' }],
+  };
+}
+
 export default defineConfig({
+  base,
   define: { __VERSI_APLIKASI__: JSON.stringify(paket.version) },
   plugins: [
     react(),
     tailwindcss(),
+    metaCsp(),
     VitePWA({
       registerType: 'prompt',
       includeAssets: ['favicon.svg', 'fonts/*.ttf'],
@@ -18,7 +47,8 @@ export default defineConfig({
         short_name: 'GenSoal',
         description: 'Soal Kurikulum Merdeka yang kuncinya dihitung ulang, siap diunduh sebagai Word, PDF, atau LaTeX.',
         lang: 'id',
-        start_url: '/',
+        start_url: base,
+        scope: base,
         display: 'standalone',
         background_color: '#ffffff',
         theme_color: '#0b0c0e',
@@ -31,7 +61,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,ttf,json}'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
-        navigateFallback: '/index.html',
+        navigateFallback: `${base}index.html`,
       },
     }),
   ],

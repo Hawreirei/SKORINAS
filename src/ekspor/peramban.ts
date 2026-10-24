@@ -58,7 +58,7 @@ async function keBase64(url: string): Promise<string> {
 }
 
 function muatFont() {
-  fontCache ??= Promise.all([keBase64('/fonts/InterTight-Regular.ttf'), keBase64('/fonts/InterTight-SemiBold.ttf')])
+  fontCache ??= Promise.all([keBase64(`${import.meta.env.BASE_URL}fonts/InterTight-Regular.ttf`), keBase64(`${import.meta.env.BASE_URL}fonts/InterTight-SemiBold.ttf`)])
     .then(([fontBiasa, fontTebal]) => ({ fontBiasa, fontTebal }))
     .catch((e) => {
       fontCache = null;

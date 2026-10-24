@@ -61,7 +61,9 @@ function butirPalsu(bentuk) {
   const page = await ctx.newPage();
   const galat = [];
   page.on('pageerror', (e) => galat.push(e.message));
-  page.on('console', (m) => m.type() === 'error' && galat.push(m.text()));
+  // Di GitHub Pages, tautan dalam disajikan lewat 404.html (status 404) lalu dirender aplikasi; itu bukan galat.
+  page.on('console', (m) => m.type() === 'error' && !m.text().startsWith('Failed to load resource') && galat.push(m.text()));
+  page.on('response', (r) => r.status() >= 400 && r.request().resourceType() !== 'document' && !r.url().includes('googleapis') && galat.push(`${r.status()} ${r.url()}`));
 
   await page.route('https://generativelanguage.googleapis.com/**', async (route) => {
     const url = route.request().url();

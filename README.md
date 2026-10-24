@@ -15,7 +15,12 @@ npm run build        # bangun JSON kurikulum dari CSV, cek tipe, bundel PWA ke d
 npx vite preview --port 4173 & npm run e2e   # alur ujung ke ujung dengan penyedia AI palsu
 ```
 
-Deploy: Netlify membaca `netlify.toml` (situs statis `dist/`, SPA redirect, Content-Security-Policy yang hanya mengizinkan domain penyedia AI).
+Deploy:
+
+- **GitHub Pages** (uji coba): `.github/workflows/pages.yml` menjalankan uji, membangun dengan `BASE_PATH=/SKORINAS/`, menyalin `index.html` ke `404.html` agar tautan dalam berfungsi, lalu menerbitkan ke `https://hawreirei.github.io/SKORINAS/`. Sekali saja: Settings → Pages → Build and deployment → Source: **GitHub Actions**.
+- **Netlify**: `netlify.toml` (situs statis `dist/`, SPA redirect, header Content-Security-Policy).
+
+Kebijakan keamanan konten juga disisipkan sebagai `<meta>` saat build, karena GitHub Pages tidak dapat mengirim header.
 
 ## Status MVP
 
