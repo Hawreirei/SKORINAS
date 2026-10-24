@@ -2,7 +2,7 @@ name: GitHub Pages
 
 on:
   push:
-    branches: [claude/serene-heisenberg-7fg0nf]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
