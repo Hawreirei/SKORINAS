@@ -12,6 +12,7 @@ const NAMA = ['Ani', 'Budi', 'Citra', 'Dedi', 'Eka', 'Fajar', 'Gita', 'Hadi', 'I
 const BENDA = ['pita', 'tali', 'kue', 'roti', 'kertas', 'kain', 'pizza', 'semangka', 'cokelat', 'kayu', 'pipa', 'kabel'];
 
 let panggil = 0;
+let jumlahGenerate = 0;
 function butirPalsu(bentuk) {
   panggil++;
   const i = panggil;
@@ -68,6 +69,13 @@ function butirPalsu(bentuk) {
   await page.route('https://generativelanguage.googleapis.com/**', async (route) => {
     const url = route.request().url();
     if (url.includes('/models?')) return route.fulfill({ json: { models: [{ name: 'models/gemini-3.8-flash', displayName: 'Gemini 3.8 Flash', supportedGenerationMethods: ['generateContent'] }, { name: 'models/gemini-3.5-flash', displayName: 'Gemini 3.5 Flash', supportedGenerationMethods: ['generateContent'] }] } });
+    // Permintaan ke-4: batas per menit gaya Gemini; aplikasi harus menunggu lalu lanjut sendiri.
+    jumlahGenerate++;
+    if (jumlahGenerate === 4)
+      return route.fulfill({
+        status: 429,
+        json: { error: { code: 429, message: 'You exceeded your current quota. Please retry in 2s.', status: 'RESOURCE_EXHAUSTED', details: [{ '@type': 'type.googleapis.com/google.rpc.QuotaFailure', violations: [{ quotaId: 'GenerateRequestsPerMinutePerProjectPerModel-FreeTier' }] }, { '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: '2s' }] } },
+      });
     const body = JSON.parse(route.request().postData() ?? '{}');
     const teks = body.contents[0].parts[0].text;
     const bentuk = teks.match(/\("(pilihan_ganda|benar_salah|isian_singkat|uraian)"\)/)[1];
@@ -108,7 +116,10 @@ function butirPalsu(bentuk) {
   await page.getByRole('button', { name: /Generate 12 soal/ }).click();
   await page.waitForURL(/\/soal\/[0-9a-f-]+$/);
   await page.waitForSelector('text=Lanjut ke ekspor');
-  await page.waitForFunction(() => !document.body.innerText.includes('Membuat butir'), null, { timeout: 60000 });
+  await page.waitForSelector('text=Melanjutkan otomatis dalam', { timeout: 30000 });
+  await foto('04a-menunggu-batas');
+  await page.waitForFunction(() => !document.body.innerText.includes('Membuat butir') && !document.body.innerText.includes('Menunggu batas'), null, { timeout: 60000 });
+  if (await page.locator('text=Dijeda').count()) throw new Error('Pembuatan terjeda padahal batas hanya per menit');
   await foto('04-peninjauan');
 
   // Telaah soal uraian lalu ekspor
@@ -154,7 +165,7 @@ function butirPalsu(bentuk) {
   console.log('cadangan soal', isi.data.soal.length, 'kunci_api ikut?', 'kunci_api' in isi.data, JSON.stringify(isi).includes('AIzaUJI'));
   await foto('10-cadangan');
 
-  console.log('permintaan AI', panggil);
+  console.log('permintaan AI', panggil, '· termasuk satu 429 yang ditunggu:', jumlahGenerate === panggil + 1);
   console.log('galat halaman', galat.length ? galat : 'tidak ada');
   await browser.close();
   if (galat.length || lebar > 390) process.exit(1);

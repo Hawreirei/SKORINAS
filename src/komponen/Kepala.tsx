@@ -40,7 +40,7 @@ export function Kepala() {
           {pengatur.berjalan ? (
             <Link to={`/soal/${pengatur.paketId}`} className="mono hidden items-center gap-2.5 text-tinta sm:flex">
               <span className="inline-block size-[7px] animate-pulse rounded-full bg-tinta" />
-              Membuat soal {pengatur.slotAktif ? `· butir ${pengatur.slotAktif}` : ''}
+              {pengatur.menunggu ? 'Menunggu batas penyedia' : 'Membuat soal'} {pengatur.slotAktif ? `· butir ${pengatur.slotAktif}` : ''}
             </Link>
           ) : (
             <span className="mono hidden items-center gap-2.5 text-redup sm:flex">

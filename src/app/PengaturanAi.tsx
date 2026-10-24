@@ -205,6 +205,28 @@ export default function PengaturanAi() {
                 ))}
               </select>
               <p className="mt-3 text-sm text-redup">Pilihan pertama biasanya sudah tepat. Setiap soal tetap dihitung ulang oleh GenSoal, model mana pun yang dipakai.</p>
+              <div className="mt-6">
+                <Label htmlFor="model-cadangan">Model cadangan (opsional)</Label>
+                <select
+                  id="model-cadangan"
+                  className="bidang mt-2"
+                  value={profil.penyedia_cadangan && profil.model_cadangan ? `${profil.penyedia_cadangan}|${profil.model_cadangan}` : ''}
+                  onChange={(e) => {
+                    const [penyedia, ...model] = e.target.value.split('|');
+                    void simpanProfil(e.target.value ? { penyedia_cadangan: penyedia as PenyediaId, model_cadangan: model.join('|') } : { penyedia_cadangan: null, model_cadangan: null });
+                  }}
+                >
+                  <option value="">Tidak ada</option>
+                  {pilihanCadangan.map(({ penyedia, m }) => (
+                    <option key={`${penyedia.id}|${m.id}`} value={`${penyedia.id}|${m.id}`}>
+                      {penyedia.nama} · {m.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-2 text-sm text-redup">
+                  Dipakai otomatis bila kuota harian model utama habis di tengah pembuatan. Paling aman memilih penyedia lain, mis. Groq atau OpenRouter yang juga gratis.
+                </p>
+              </div>
             </>
           ) : (
             <p className="text-[15px] text-isi">Model muncul setelah kunci berfungsi.</p>
@@ -224,26 +246,6 @@ export default function PengaturanAi() {
         <details className="border-y border-garis py-5">
           <summary className="cursor-pointer text-[17px]">Pengaturan lanjutan</summary>
           <div className="mt-6 space-y-8">
-            <div>
-              <Label htmlFor="model-cadangan">Model cadangan (bila batas penyedia utama tercapai)</Label>
-              <select
-                id="model-cadangan"
-                className="bidang mt-2"
-                value={profil.penyedia_cadangan && profil.model_cadangan ? `${profil.penyedia_cadangan}|${profil.model_cadangan}` : ''}
-                onChange={(e) => {
-                  const [penyedia, ...model] = e.target.value.split('|');
-                  void simpanProfil(e.target.value ? { penyedia_cadangan: penyedia as PenyediaId, model_cadangan: model.join('|') } : { penyedia_cadangan: null, model_cadangan: null });
-                }}
-              >
-                <option value="">Tidak ada</option>
-                {pilihanCadangan.map(({ penyedia, m }) => (
-                  <option key={`${penyedia.id}|${m.id}`} value={`${penyedia.id}|${m.id}`}>
-                    {penyedia.nama} · {m.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
                 <Label htmlFor="batas">Batas harian soal</Label>

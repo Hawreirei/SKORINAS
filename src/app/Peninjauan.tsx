@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { db } from '../db/skema';
 import type { Soal } from '../db/tipe';
@@ -12,10 +12,24 @@ import { usePesan } from '../komponen/Pesan';
 import { Peringatan } from '../komponen/Status';
 import { Chip, Panah, TautanTombol, Tombol } from '../komponen/Tombol';
 import { GantiSoal } from './GantiSoal';
-import { usePengatur, useJudulHalaman } from './kait';
+import { usePengatur, useJudulHalaman, useProfil } from './kait';
 import { KartuSoal, type AksiKartu } from './KartuSoal';
 import { formatBiaya, ringkasPaket } from './ringkas';
 import { SuntingSoal } from './SuntingSoal';
+
+function HitungMundur({ sampai, alasan }: { sampai: number; alasan: string }) {
+  const [kini, setKini] = useState(Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setKini(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const detik = Math.max(0, Math.ceil((sampai - kini) / 1000));
+  return (
+    <p className="mt-3 text-sm text-isi" role="status">
+      {alasan} Melanjutkan otomatis dalam {detik} detik. Tidak perlu menekan apa pun.
+    </p>
+  );
+}
 
 type Saring = 'semua' | 'perlu_telaah' | 'belum_disetujui' | 'ditolak';
 
@@ -26,6 +40,7 @@ export default function Peninjauan() {
   const kerja = useLiveQuery(() => db.pekerjaan_generasi.where('paket_id').equals(id).first(), [id]);
   const pemakaian = useLiveQuery(() => db.pemakaian_ai.where('paket_id').equals(id).toArray(), [id]);
   const status = usePengatur();
+  const profil = useProfil();
   const pesan = usePesan();
   const [saring, setSaring] = useState<Saring>('semua');
   const [dialog, setDialog] = useState<{ soal: Soal; aksi: AksiKartu } | null>(null);
@@ -105,7 +120,11 @@ export default function Peninjauan() {
           <div className="mt-8 border border-tinta p-5">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <span className="text-[17px] font-light">
-                {sedangDibuat ? `Membuat butir ${status.slotAktif ?? selesaiSlot + 1} dari ${slot.length}…` : `Dijeda · ${selesaiSlot} dari ${slot.length} butir selesai`}
+                {sedangDibuat
+                  ? status.menunggu
+                    ? `Menunggu batas penyedia pulih · butir ${status.slotAktif ?? selesaiSlot + 1} dari ${slot.length}`
+                    : `Membuat butir ${status.slotAktif ?? selesaiSlot + 1} dari ${slot.length}…`
+                  : `Dijeda · ${selesaiSlot} dari ${slot.length} butir selesai`}
               </span>
               {sedangDibuat ? (
                 <Tombol varian="hantu" onClick={() => pengatur.jeda()}>
@@ -116,8 +135,8 @@ export default function Peninjauan() {
                   <Tombol onClick={() => lanjutkan()} disabled={status.berjalan}>
                     Lanjutkan
                   </Tombol>
-                  {status.jenisGalat === 'batas' || kerja?.galat?.includes('Batas pemakaian') ? (
-                    <Tombol varian="hantu" onClick={() => lanjutkan(true)} disabled={status.berjalan}>
+                  {(status.paketId === id && status.jenisGalat === 'batas') || /kuota|batas pemakaian/i.test(kerja?.galat ?? '') ? (
+                    <Tombol varian="hantu" onClick={() => lanjutkan(true)} disabled={status.berjalan || !profil.model_cadangan}>
                       Pakai model cadangan
                     </Tombol>
                   ) : null}
@@ -127,15 +146,25 @@ export default function Peninjauan() {
             <div className="mt-4 h-1.5 bg-garis" aria-hidden="true">
               <div className="h-full bg-tinta transition-all" style={{ width: `${slot.length ? (selesaiSlot / slot.length) * 100 : 0}%` }} />
             </div>
+            {sedangDibuat && status.menunggu ? <HitungMundur sampai={status.menunggu.sampai} alasan={status.menunggu.alasan} /> : null}
+            {status.paketId === id && status.catatan ? <p className="mt-3 text-sm text-isi">{status.catatan}</p> : null}
             {!sedangDibuat && (kerja?.galat || status.pesan) ? (
-              <p className="mt-3 text-sm text-awas">
-                {status.paketId === id && status.pesan ? status.pesan : kerja?.galat}{' '}
-                {status.jenisGalat === 'kunci' || /kunci|model/i.test(kerja?.galat ?? '') ? (
-                  <Link to="/pengaturan/ai" className="underline">
-                    Pengaturan AI
-                  </Link>
+              <div className="mt-3 text-sm text-awas">
+                <p>
+                  {status.paketId === id && status.pesan ? status.pesan : kerja?.galat}{' '}
+                  {(status.paketId === id && (status.jenisGalat === 'kunci' || status.jenisGalat === 'batas' || status.jenisGalat === 'model')) || /kunci|model|kuota/i.test(kerja?.galat ?? '') ? (
+                    <Link to="/pengaturan/ai" className="underline">
+                      Buka Pengaturan AI
+                    </Link>
+                  ) : null}
+                </p>
+                {status.paketId === id && status.rinci ? (
+                  <details className="mt-2 text-redup">
+                    <summary className="mono cursor-pointer">Rincian dari penyedia</summary>
+                    <p className="mt-1 break-words">{status.rinci}</p>
+                  </details>
                 ) : null}
-              </p>
+              </div>
             ) : null}
             <p className="mt-3 text-sm text-redup">Setiap butir disimpan begitu lolos pemeriksaan. Bila tab tertutup, lanjutkan dari butir terakhir.</p>
           </div>
