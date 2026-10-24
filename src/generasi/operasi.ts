@@ -1,7 +1,7 @@
 import { hitungBiaya } from '../ai';
 import { modelDari, muatRegistri } from '../ai/registri';
 import { db } from '../db/skema';
-import type { IsiSoal, LogSoal, Slot, Soal } from '../db/tipe';
+import type { IsiSoal, JenisUraian, LogSoal, Slot, Soal } from '../db/tipe';
 import { sekarang, tanggalLokal, uuid } from '../db/util';
 import { bangkitkanGambar } from '../gambar';
 import { teksPolos } from '../matematika/teks';
@@ -135,6 +135,14 @@ export async function batalSetujui(soalId: string): Promise<void> {
   const s = await ambilSoal(soalId);
   await db.soal.update(soalId, { status_telaah: 'draf', diubah_pada: sekarang() });
   await log(soalId, 'setujui', s.status_telaah, 'draf');
+}
+
+/** Guru mengubah tanda jenis jawaban uraian. Hanya tata letak tempat jawaban yang berubah, jadi status tidak diulang. */
+export async function aturJenisUraian(soalId: string, jenis: JenisUraian): Promise<void> {
+  const s = await ambilSoal(soalId);
+  if (s.bentuk !== 'uraian' || s.isi_json.jenis_uraian === jenis) return;
+  await db.soal.update(soalId, { isi_json: { ...s.isi_json, jenis_uraian: jenis }, diubah_pada: sekarang() });
+  await log(soalId, 'jenis_uraian', s.isi_json.jenis_uraian ?? null, jenis);
 }
 
 export async function aturKunci(soalId: string, terkunci: boolean): Promise<void> {

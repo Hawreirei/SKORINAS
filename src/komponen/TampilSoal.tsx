@@ -26,31 +26,31 @@ export function TampilSoal({ isi, ringkas = false, besar = true }: { isi: IsiSoa
   const opsi = (Object.keys(isi.opsi ?? {}).sort() as HurufOpsi[]).map((h) => [h, isi.opsi![h]!] as const);
   return (
     <div>
-      <TeksSoal as="p" teks={isi.pokok} className={`mt-5 font-light leading-normal ${besar ? 'text-[19px] sm:text-[22px]' : 'text-[17px]'}`} />
-      {isi.terjemahan?.pokok ? <TeksSoal as="p" teks={isi.terjemahan.pokok} className="mt-2 text-[16px] font-light italic text-redup" /> : null}
-      {svg ? <GambarSvg svg={svg} className="mt-6" /> : null}
-      {galat ? <p className="mt-4 text-sm text-buruk">Gambar tidak dapat dibuat: {galat}</p> : null}
+      <TeksSoal as="p" teks={isi.pokok} className={`mt-4 leading-normal ${besar ? 'text-[18px] sm:text-[20px]' : 'text-[17px]'}`} />
+      {isi.terjemahan?.pokok ? <TeksSoal as="p" teks={isi.terjemahan.pokok} className="mt-2 text-[16px] italic text-redup" /> : null}
+      {svg ? <GambarSvg svg={svg} className="mt-5" /> : null}
+      {galat ? <p className="mt-4 text-base text-buruk">Gambar tidak dapat dibuat: {galat}</p> : null}
       {opsi.length ? (
-        <ol className="mt-6 grid list-none gap-3 p-0 sm:grid-cols-2">
+        <ol className="mt-5 grid list-none gap-3 p-0 sm:grid-cols-2">
           {opsi.map(([h, t]) => (
-            <li key={h} className={`flex items-center gap-3.5 border px-4 py-3.5 ${!ringkas && h === isi.kunci ? 'border-tinta' : 'border-garis-kuat'}`}>
-              <span className="mono">{h}</span>
+            <li key={h} className={`flex items-center gap-3 rounded-lg border px-4 py-3 ${!ringkas && h === isi.kunci ? 'border-baik bg-baik-latar/60' : 'border-garis-kuat'}`}>
+              <span className="font-extrabold text-judul">{h}</span>
               <TeksSoal teks={t} />
-              {isi.terjemahan?.opsi?.[h] ? <TeksSoal teks={isi.terjemahan.opsi[h]!} className="text-sm italic text-redup" /> : null}
+              {isi.terjemahan?.opsi?.[h] ? <TeksSoal teks={isi.terjemahan.opsi[h]!} className="text-base italic text-redup" /> : null}
             </li>
           ))}
         </ol>
       ) : null}
       {!ringkas ? (
         <>
-          <div className="mt-6 flex flex-wrap items-start gap-3">
-            <span className="mono shrink-0 bg-tinta px-3.5 py-2 text-di-tinta">{teksKunciLayar(isi)}</span>
-            {isi.bentuk === 'isian_singkat' || isi.bentuk === 'uraian' ? <TeksSoal as="span" teks={isi.kunci} className="pt-1 text-[15px] text-isi" /> : null}
+          <div className="mt-5 flex flex-wrap items-start gap-3">
+            <span className="shrink-0 rounded-md bg-utama px-3 py-1.5 text-base font-bold text-di-tinta">{teksKunciLayar(isi)}</span>
+            {isi.bentuk === 'isian_singkat' || isi.bentuk === 'uraian' ? <TeksSoal as="span" teks={isi.kunci} className="pt-1 text-base text-isi" /> : null}
           </div>
           {isi.rubrik?.length ? (
             <div className="mt-4">
-              <div className="mono text-redup">Rubrik</div>
-              <ul className="mt-2 list-disc pl-5 text-[15px] leading-relaxed text-isi">
+              <div className="text-base font-bold text-redup">Rubrik</div>
+              <ul className="mt-2 list-disc pl-5 text-base leading-relaxed text-isi">
                 {isi.rubrik.map((r, i) => (
                   <li key={i}>
                     <TeksSoal teks={r} />
@@ -60,8 +60,8 @@ export function TampilSoal({ isi, ringkas = false, besar = true }: { isi: IsiSoa
             </div>
           ) : null}
           <div className="mt-4">
-            <div className="mono text-redup">Pembahasan</div>
-            <ol className="mt-2 list-decimal pl-5 text-[15px] leading-relaxed text-isi">
+            <div className="text-base font-bold text-redup">Pembahasan</div>
+            <ol className="mt-2 list-decimal pl-5 text-base leading-relaxed text-isi">
               {isi.pembahasan.map((p, i) => (
                 <li key={i}>
                   <TeksSoal teks={p} />

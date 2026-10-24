@@ -1,21 +1,19 @@
 {
   "name": "gensoal",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run kurikulum && tsc -b && vite build",
+    "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "test": "vitest run",
-    "kurikulum": "node --experimental-strip-types scripts/bangun-kurikulum.ts",
     "uji-model": "tsx --tsconfig tsconfig.test.json scripts/uji-model.ts",
     "e2e": "node tests/e2e/alur-utama.cjs"
   },
   "dependencies": {
-    "@fontsource/inter-tight": "^5.3.0",
-    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/nunito-sans": "^5.3.0",
     "dexie": "^4.4.7",
     "dexie-react-hooks": "^4.4.0",
     "docx": "^9.14.0",

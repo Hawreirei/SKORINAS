@@ -10,8 +10,8 @@ export function PembaruanAplikasi() {
   } = useRegisterSW();
   if (!perluMuatUlang && !siapLuring) return null;
   return (
-    <div role="status" className="tanpa-cetak fixed bottom-4 left-4 right-4 z-40 flex flex-wrap items-center justify-between gap-4 border border-tinta bg-latar px-5 py-4 sm:left-auto sm:right-6 sm:max-w-md">
-      <span className="text-[15px]">{perluMuatUlang ? 'Versi baru GenSoal tersedia.' : 'GenSoal siap dipakai tanpa internet.'}</span>
+    <div role="status" className="tanpa-cetak fixed bottom-4 left-4 right-4 z-40 flex flex-wrap items-center justify-between gap-4 border border-utama bg-latar px-5 py-4 sm:left-auto sm:right-6 sm:max-w-md">
+      <span className="text-base">{perluMuatUlang ? 'Versi baru GenSoal tersedia.' : 'GenSoal siap dipakai tanpa internet.'}</span>
       <span className="flex gap-2">
         {perluMuatUlang ? (
           <Tombol ukuran="kecil" onClick={() => updateServiceWorker(true)}>

@@ -4,8 +4,6 @@ import { db } from '../db/skema';
 import { ID_PROFIL, profilBawaan } from '../db/profil';
 import type { Profil } from '../db/tipe';
 import { pengatur } from '../generasi/pengatur';
-import { muatIndeks } from '../kurikulum/muat';
-import type { IndeksKurikulum } from '../kurikulum/tipe';
 import { muatRegistri } from '../ai/registri';
 import type { Registri } from '../ai/tipe';
 
@@ -34,10 +32,6 @@ function useMuat<T>(muat: () => Promise<T>): { data: T | null; galat: string | n
     };
   }, [muat]);
   return { data, galat };
-}
-
-export function useIndeksKurikulum() {
-  return useMuat<IndeksKurikulum>(muatIndeks);
 }
 
 export function useRegistri() {

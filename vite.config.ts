@@ -45,13 +45,13 @@ export default defineConfig({
       manifest: {
         name: 'GenSoal',
         short_name: 'GenSoal',
-        description: 'Soal Kurikulum Merdeka yang kuncinya dihitung ulang, siap diunduh sebagai Word, PDF, atau LaTeX.',
+        description: 'Soal dari CP dan TP Anda yang kuncinya dihitung ulang, siap diunduh sebagai Word atau PDF.',
         lang: 'id',
         start_url: base,
         scope: base,
         display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#0b0c0e',
+        background_color: '#f5f7fa',
+        theme_color: '#2563eb',
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },

@@ -9,7 +9,6 @@ import { sekarang, tanggalLokal, uuid } from '../db/util';
 import { teksPolos } from '../matematika/teks';
 import { buatButir, type HasilButir, type Pengirim, type Percobaan } from './butir';
 import { rencanakanSlot } from './rencana';
-import { simpanTpKustom } from './tp-kustom';
 
 export interface ModelAktif {
   penyedia: PenyediaId;
@@ -55,7 +54,8 @@ export async function jumlahLolosHariIni(): Promise<number> {
 
 /** Buat paket dan rencana butir. Generasi dimulai terpisah lewat pengatur.mulai(). */
 export async function buatPaket(param: ParameterPaket, judul: string): Promise<string> {
-  const tp = await simpanTpKustom(param);
+  // TP ditulis guru di formulir; tiap TP diberi id agar soal dan kisi-kisi dapat merujuknya.
+  const tp = param.tp.map((x) => ({ ...x, id: x.id || uuid(), sumber: x.sumber ?? ('guru' as const), versi: x.versi ?? 1 }));
   const p: ParameterPaket = { ...param, tp };
   const slot = rencanakanSlot(p);
   const t = sekarang();
@@ -327,7 +327,7 @@ export async function pulihkanPekerjaanTertinggal(): Promise<void> {
   const daftar = await db.pekerjaan_generasi.where('status').equals('berjalan').toArray();
   for (const k of daftar) {
     for (const s of k.slot) if (s.status === 'berjalan') s.status = 'menunggu';
-    await db.pekerjaan_generasi.update(k.id, { status: 'dijeda', slot: k.slot, galat: 'Pembuatan terhenti karena tab ditutup. Lanjutkan dari butir terakhir.' });
+    await db.pekerjaan_generasi.update(k.id, { status: 'dijeda', slot: k.slot, galat: 'Pembuatan terhenti karena tab ditutup. Tekan Lanjutkan; soal yang sudah jadi tetap tersimpan.' });
     await db.paket_soal.update(k.paket_id, { status: 'dijeda' });
   }
 }

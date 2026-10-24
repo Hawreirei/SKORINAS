@@ -2,7 +2,7 @@ import type { IsiSoal, Rumpun, StatusMutu } from '../db/tipe';
 import type { Lingkup, Lokal } from '../verifikasi/angka';
 import type { HasilHitung } from '../verifikasi/matematika';
 
-/** Paket mata pelajaran: aturan verifikasi, templat gambar, dan gaya soal. Dibuka lewat paket_aktif di JSON kurikulum. */
+/** Paket mata pelajaran: aturan verifikasi, templat gambar, dan gaya soal. Dipilih dari rumpun yang ditebak dari nama mapel. */
 export interface PaketMapel {
   rumpun: Rumpun;
   nama: string;

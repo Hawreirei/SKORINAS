@@ -12,7 +12,7 @@ import { tanggalLokal } from '../db/util';
 import { BANTUAN } from '../bantuan/daftar';
 import { KepalaHalaman } from '../komponen/Kepala';
 import { usePesan } from '../komponen/Pesan';
-import { Label, Peringatan, Titik } from '../komponen/Status';
+import { Kartu, Label, NomorBagian, Peringatan, Titik } from '../komponen/Status';
 import { Tombol } from '../komponen/Tombol';
 import { useJudulHalaman, useProfil, useRegistri } from './kait';
 import { formatBiaya } from './ringkas';
@@ -26,13 +26,13 @@ function modelTersedia(p: PenyediaRegistri, k: KunciApi | undefined): BarisModel
 
 function Langkah({ nomor, judul, children, redup = false }: { nomor: string; judul: string; children: React.ReactNode; redup?: boolean }) {
   return (
-    <section className={`border-t border-garis py-8 ${redup ? 'opacity-50' : ''}`}>
-      <div className="flex items-baseline gap-4">
-        <span className="mono text-redup">{nomor}</span>
-        <h2 className="text-xl font-normal">{judul}</h2>
+    <Kartu pita={nomor === '02' ? 'kuning' : 'utama'} className={redup ? 'opacity-60' : ''}>
+      <div className="flex items-center gap-3">
+        <NomorBagian>{nomor}</NomorBagian>
+        <h2 className="text-[22px] font-extrabold text-judul">{judul}</h2>
       </div>
-      <div className="mt-5">{children}</div>
-    </section>
+      <div className="mt-4">{children}</div>
+    </Kartu>
   );
 }
 
@@ -58,7 +58,7 @@ export default function PengaturanAi() {
   }, [aktif, kunci?.kunci]);
 
   if (galatReg) return <div className="px-4 py-20 sm:px-16">Registri model tidak dapat dimuat: {galatReg}</div>;
-  if (!reg) return <div className="mono px-16 py-20 text-redup">Memuat…</div>;
+  if (!reg) return <div className="px-4 py-20 text-center text-redup">Memuat…</div>;
 
   const p = penyediaDari(reg, aktif)!;
   const tersedia = modelTersedia(p, kunci);
@@ -109,17 +109,17 @@ export default function PengaturanAi() {
   const lewatBatasBiaya = biayaHariIni !== null && biayaHariIni > profil.batas_biaya_usd;
 
   return (
-    <div className="mx-auto max-w-[880px] px-4 pb-24 pt-10 sm:px-8 lg:pt-14">
-      <KepalaHalaman label="Pengaturan · AI" judul="Kunci AI">
+    <div className="mx-auto max-w-[880px] px-4 pb-20 pt-8 sm:px-8 sm:pt-10">
+      <KepalaHalaman label="Pengaturan AI" judul="Kunci AI">
         Tempel kunci API dari satu penyedia AI, lalu GenSoal siap membuat soal. Kunci hanya tersimpan di peramban ini dan tidak ikut berkas cadangan.
       </KepalaHalaman>
 
-      <div className={`mt-8 flex items-start gap-3 border px-5 py-4 ${siap ? 'border-tinta' : 'border-garis-kuat bg-panel'}`} role="status">
+      <div className={`mt-6 flex items-start gap-3 rounded-lg border px-4 py-3 ${siap ? 'border-baik/40 bg-baik-latar text-baik' : 'border-awas/40 bg-awas-latar text-awas'}`} role="status">
         <Titik isi={siap} className="mt-2" />
         <span className="min-w-0 flex-1 text-[16px]">
           {siap ? (
             <>
-              Siap dipakai · <strong className="font-medium">{namaUtama?.nama}</strong> · {labelUtama}
+              Siap dipakai · <strong className="font-bold">{namaUtama?.nama}</strong> · {labelUtama}
             </>
           ) : (
             'Belum siap. Ikuti tiga langkah di bawah.'
@@ -127,7 +127,7 @@ export default function PengaturanAi() {
         </span>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-6 space-y-6">
         <Langkah nomor="01" judul="Pilih penyedia">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {reg.penyedia.map((x) => {
@@ -139,10 +139,10 @@ export default function PengaturanAi() {
                   type="button"
                   onClick={() => setPilih(x.id)}
                   aria-pressed={dipilih}
-                  className={`flex min-h-[72px] flex-col items-start justify-center gap-1.5 rounded-[2px] border px-4 py-3 text-left transition-colors ${dipilih ? 'border-tinta bg-tinta text-di-tinta' : 'border-garis-kuat hover:border-tinta'}`}
+                  className={`flex min-h-[72px] flex-col items-start justify-center gap-1 rounded-lg border px-4 py-3 text-left transition-colors ${dipilih ? 'border-utama bg-utama text-di-tinta' : 'border-garis-kuat bg-kartu hover:border-utama'}`}
                 >
-                  <span className="text-[16px]">{x.nama}</span>
-                  <span className={`mono ${dipilih ? 'opacity-80' : 'text-redup'}`}>
+                  <span className="text-[17px] font-bold">{x.nama}</span>
+                  <span className={`text-base ${dipilih ? 'opacity-90' : 'text-redup'}`}>
                     {x.tingkat_gratis ? 'Gratis' : 'Berbayar'}
                     {k?.status === 'berfungsi' ? ' · kunci ✓' : ''}
                   </span>
@@ -150,13 +150,13 @@ export default function PengaturanAi() {
               );
             })}
           </div>
-          <p className="mt-3 text-sm text-redup">Baru mulai? Google Gemini gratis tanpa kartu kredit.</p>
+          <p className="mt-3 text-base text-redup">Baru mulai? Google Gemini gratis tanpa kartu kredit.</p>
         </Langkah>
 
         <Langkah nomor="02" judul={`Tempel kunci ${p.nama}`}>
-          <p className="text-[15px] text-isi">
+          <p className="text-base text-isi">
             Belum punya kunci? Buat di{' '}
-            <a href={p.situs_kunci} target="_blank" rel="noreferrer noopener" className="underline">
+            <a href={p.situs_kunci} target="_blank" rel="noreferrer noopener" className="font-bold text-utama underline">
               {new URL(p.situs_kunci).host}
             </a>
             , salin, lalu tempel di sini.
@@ -173,9 +173,9 @@ export default function PengaturanAi() {
               value={teksKunci}
               onChange={(e) => setTeksKunci(e.target.value)}
               placeholder={p.awalan_kunci ? `${p.awalan_kunci}…` : 'Tempel kunci di sini'}
-              className="min-h-[52px] w-full rounded-[2px] border border-tinta bg-latar py-0 pl-4 pr-24 font-mono text-sm text-tinta"
+              className="bidang !pr-24 font-mono text-base"
             />
-            <button type="button" onClick={() => setLihat((l) => !l)} aria-pressed={lihat} className="mono absolute inset-y-0 right-0 px-4 text-redup hover:text-tinta">
+            <button type="button" onClick={() => setLihat((l) => !l)} aria-pressed={lihat} className="absolute inset-y-0 right-0 px-4 font-bold text-utama hover:underline">
               {lihat ? 'Sembunyi' : 'Lihat'}
             </button>
           </div>
@@ -183,14 +183,14 @@ export default function PengaturanAi() {
             {menguji ? 'Menguji…' : 'Simpan dan uji'}
           </Tombol>
           {kunci && kunci.status !== 'belum' ? (
-            <div className={`mt-4 flex items-start gap-2 text-[15px] ${kunci.status === 'gagal' ? 'text-buruk' : ''}`}>
+            <div className={`mt-4 flex items-start gap-2 text-base ${kunci.status === 'gagal' ? 'text-buruk' : ''}`}>
               <Titik isi={kunci.status === 'berfungsi'} className="mt-2" />
               <span>{kunci.status === 'berfungsi' ? 'Kunci berfungsi.' : kunci.pesan}</span>
             </div>
           ) : null}
-          <details className="mt-5 border border-garis px-5 py-4">
-            <summary className="cursor-pointer text-[15px]">Cara mendapatkan kunci</summary>
-            <ol className="mt-3 list-decimal pl-5 text-[15px] leading-[1.7] text-isi">
+          <details className="mt-5 rounded-lg border border-garis bg-panel px-4 py-3">
+            <summary className="cursor-pointer text-base font-bold">Cara mendapatkan kunci</summary>
+            <ol className="mt-3 list-decimal pl-5 text-base leading-[1.7] text-isi">
               {BANTUAN['kunci-api'].langkah.map((l) => (
                 <li key={l}>{l}</li>
               ))}
@@ -212,11 +212,11 @@ export default function PengaturanAi() {
                   </option>
                 ))}
               </select>
-              <p className="mt-3 text-sm text-redup">Pilihan pertama biasanya sudah tepat. Setiap soal tetap dihitung ulang oleh GenSoal, model mana pun yang dipakai.</p>
+              <p className="mt-3 text-base text-redup">Pilihan pertama biasanya sudah tepat. Setiap soal tetap dihitung ulang oleh GenSoal, model mana pun yang dipakai.</p>
               {batas ? (
-                <div className="mt-6 border border-garis px-5 py-4">
-                  <div className="text-[15px]">Batas pemakaian model ini</div>
-                  <p className="mt-1 text-sm text-redup">
+                <div className="mt-6 rounded-lg border border-garis bg-panel px-4 py-4">
+                  <div className="text-base font-bold">Batas pemakaian model ini</div>
+                  <p className="mt-1 text-base text-redup">
                     Samakan dengan angka di dasbor penyedia{aktif === 'gemini' ? ' (aistudio.google.com → Usage and billing)' : ''}. GenSoal memberi jeda antar permintaan agar tidak melewatinya. Kosongkan bila tidak dibatasi.
                   </p>
                   <div className="mt-4 grid grid-cols-2 gap-4">
@@ -229,7 +229,7 @@ export default function PengaturanAi() {
                       <input id="rpd" type="number" min={1} className="bidang mt-2" value={batas.rpd ?? ''} placeholder="tanpa batas" onChange={(e) => ubahBatas({ rpd: angkaAtauKosong(e.target.value) })} />
                     </div>
                   </div>
-                  <p className="mono mt-3 text-redup">
+                  <p className="mt-3 text-base font-semibold text-redup">
                     Terpakai hari ini: {terpakaiHariIni ?? 0}
                     {batas.rpd ? ` dari ${batas.rpd} permintaan` : ' permintaan'}
                     {batas.rpm ? ` · paling banyak ${batas.rpm} permintaan tiap 60 detik` : ''}
@@ -254,28 +254,28 @@ export default function PengaturanAi() {
                     </option>
                   ))}
                 </select>
-                <p className="mt-2 text-sm text-redup">
+                <p className="mt-2 text-base text-redup">
                   Dipakai otomatis bila kuota harian model utama habis di tengah pembuatan. Paling aman memilih penyedia lain, mis. Groq atau OpenRouter yang juga gratis.
                 </p>
               </div>
             </>
           ) : (
-            <p className="text-[15px] text-isi">Model muncul setelah kunci berfungsi.</p>
+            <p className="text-base text-isi">Model muncul setelah kunci berfungsi.</p>
           )}
-          <div className="mt-6 border border-garis bg-panel px-5 py-4 text-sm leading-relaxed text-isi">
-            <p>
-              <span className="mono text-redup">Biaya · </span>
+          <div className="mt-6 grid gap-3 text-base leading-relaxed text-isi sm:grid-cols-2">
+            <p className="rounded-lg border border-garis bg-panel px-4 py-3">
+              <span className="block font-bold text-redup">Biaya</span>
               {p.peringatan_biaya}
             </p>
-            <p className="mt-2">
-              <span className="mono text-redup">Privasi · </span>
+            <p className="rounded-lg border border-garis bg-panel px-4 py-3">
+              <span className="block font-bold text-redup">Privasi</span>
               {p.peringatan_privasi}
             </p>
           </div>
         </Langkah>
 
-        <details className="border-y border-garis py-5">
-          <summary className="cursor-pointer text-[17px]">Pengaturan lanjutan</summary>
+        <details className="rounded-xl border border-garis bg-kartu px-4 py-4 sm:px-6">
+          <summary className="cursor-pointer text-[18px] font-extrabold text-judul">Pengaturan lanjutan</summary>
           <div className="mt-6 space-y-8">
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
@@ -288,33 +288,32 @@ export default function PengaturanAi() {
               </div>
             </div>
             <div>
-              <p className="mono text-redup">
+              <p className="text-base font-semibold text-redup">
                 Hari ini: {lolosHariIni} soal lolos · {(pemakaian ?? []).length} permintaan · {formatBiaya(biayaHariIni)}
               </p>
               {lewatBatasBiaya ? <Peringatan className="mt-3">Perkiraan biaya hari ini melewati batas peringatan yang Anda atur.</Peringatan> : null}
-              <p className="mt-2 text-sm text-redup">Hanya soal yang lolos verifikasi yang mengurangi batas harian.</p>
+              <p className="mt-2 text-base text-redup">Hanya soal yang lolos verifikasi yang mengurangi batas harian.</p>
             </div>
 
             <div>
-              <div className="mono text-redup">Semua model {p.nama}</div>
-              <ul className="mt-3 border-t border-garis text-[15px]">
+              <div className="text-base font-bold text-redup">Semua model {p.nama}</div>
+              <ul className="mt-3 border-t border-garis text-base">
                 {gabungModel(p, kunci?.status === 'berfungsi' ? kunci.model_tersedia.map((id) => ({ id, nama: id })) : null).map((m) => (
                   <li key={m.id} className="flex flex-wrap justify-between gap-x-4 gap-y-1 border-b border-garis py-3">
                     <span className={m.tersedia === false ? 'text-redup' : ''}>{m.label}</span>
-                    <span className="mono text-redup">
-                      {LABEL_STATUS[m.status]} · golden set {m.registri?.golden.status ?? 'belum'}
+                    <span className="text-base text-redup">
+                      {LABEL_STATUS[m.status]}
                       {m.tersedia === false ? ' · tidak tersedia' : ''}
                     </span>
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-sm text-redup">Registri diperiksa {reg.diperiksa_pada}. Lencana "direkomendasikan" hanya diberikan setelah model lolos golden set.</p>
             </div>
 
             {kunci ? (
-              <button type="button" className="mono text-redup hover:text-buruk" onClick={hapusKunci}>
+              <Tombol varian="bahaya" onClick={hapusKunci}>
                 Hapus kunci {p.nama} dari perangkat ini
-              </button>
+              </Tombol>
             ) : null}
           </div>
         </details>

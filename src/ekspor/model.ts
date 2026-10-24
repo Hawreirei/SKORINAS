@@ -1,7 +1,8 @@
-import type { Bentuk, PaketSoal, Profil, Soal } from '../db/tipe';
-import { BENTUK_LABEL, KESUKARAN_LABEL, STATUS_MUTU_LABEL } from '../db/tipe';
+import type { Bentuk, CaraBenarSalah, PaketSoal, Profil, Soal } from '../db/tipe';
+import { BENTUK_LABEL, KESUKARAN_LABEL, STATUS_MUTU_LABEL, jenisUraian } from '../db/tipe';
 import { bangkitkanGambar } from '../gambar';
 import type { Gambar } from '../gambar/primitif';
+import { keSvg } from '../gambar/svg';
 import { teksPolos } from '../matematika/teks';
 import { paketUntuk } from '../paket';
 import { URUTAN_BENTUK } from '../generasi/rencana';
@@ -13,24 +14,43 @@ export interface OpsiEkspor {
   pembahasan: boolean;
 }
 
+/** Font dokumen Word dan PDF (rancangan v0.4): Times New Roman 12; PDF menanam Liberation Serif yang metriknya sama. */
+export const FONT_DOKUMEN = 'Times New Roman';
+export const UKURAN_DOKUMEN = 12;
+const FONT_SVG_DOKUMEN = "'Times New Roman', 'Liberation Serif', Tinos, serif";
+
+/**
+ * Tempat jawaban menurut pakem penulisan soal:
+ * isian singkat titik-titik (kotak bila jawabannya angka atau soal cerita), uraian penjelasan garis tulis
+ * sebanyak bobotnya (2 sampai 6), uraian hitungan kotak cara pengerjaan dan kotak jawaban akhir.
+ * Pilihan ganda dan benar-salah dijawab pada opsi atau tabel, jadi tanpa tempat jawaban terpisah.
+ */
+export type TempatJawab = { jenis: 'tidak_ada' } | { jenis: 'titik' } | { jenis: 'kotak' } | { jenis: 'garis'; jumlah: number } | { jenis: 'hitungan' };
+
 export interface ButirDok {
   nomor: number;
   soal: Soal;
   gambar: Gambar | null;
   svg: string | null;
-  /** Soal pendek tanpa gambar: boleh dua kolom. */
+  /** Soal pendek tanpa gambar: boleh dua kolom (hanya templat LaTeX). */
   sederhana: boolean;
-  /** Soal cerita atau uraian: kotak jawaban di bawah soal. */
+  /** Soal cerita atau uraian: kotak jawaban di bawah soal (templat LaTeX). */
   kotakJawaban: boolean;
   opsiPendek: boolean;
   /** Panjang opsi terpanjang (huruf polos), dasar tata letak opsi. */
   panjangOpsi: number;
+  tempat: TempatJawab;
 }
 
-/** Banyak opsi per baris: semua dalam satu baris bila pendek, dua per baris bila sedang, satu per baris bila panjang. */
+/** Banyak opsi per baris pada templat LaTeX: satu baris bila pendek, dua bila sedang, satu per baris bila panjang. */
 export function opsiPerBaris(b: ButirDok, jumlahOpsi: number): number {
   if (b.sederhana) return b.panjangOpsi <= 10 ? 2 : 1;
   return b.panjangOpsi <= 14 ? jumlahOpsi : b.panjangOpsi <= 32 ? 2 : 1;
+}
+
+/** Word dan PDF: opsi 2 kolom bila pendek, 1 kolom bila panjang. */
+export function kolomOpsi(b: ButirDok): 1 | 2 {
+  return b.panjangOpsi <= 30 ? 2 : 1;
 }
 
 export interface BagianDok {
@@ -38,6 +58,29 @@ export interface BagianDok {
   judul: string;
   petunjuk: string;
   butir: ButirDok[];
+}
+
+const ANGKA = /^[\d\s.,:/+\-−%°]+$/;
+
+/** Jawaban berupa bilangan (termasuk pecahan dan satuan pendek)? */
+export function jawabanAngka(kunci: string): boolean {
+  const s = teksPolos(kunci)
+    .replace(/\b(cm|mm|m|km|kg|g|l|ml|jam|menit|detik|rp|°c)\b\.?/gi, '')
+    .trim();
+  return s.length > 0 && s.length <= 20 && ANGKA.test(s) && /\d/.test(s);
+}
+
+/** Jumlah garis tulis uraian penjelasan dari bobot rubrik (skor dalam kurung), dibatasi 2 sampai 6. */
+export function jumlahGaris(rubrik: string[] | undefined): number {
+  const skor = (rubrik ?? []).map((r) => Number(r.match(/\((\d+)\)\s*$/)?.[1] ?? 1)).reduce((a, b) => a + b, 0);
+  return Math.max(2, Math.min(6, skor || (rubrik?.length ?? 0) + 1));
+}
+
+function tempatJawab(s: Soal, kata: number): TempatJawab {
+  const isi = s.isi_json;
+  if (isi.bentuk === 'isian_singkat') return jawabanAngka(isi.kunci) || kata > 25 ? { jenis: 'kotak' } : { jenis: 'titik' };
+  if (isi.bentuk === 'uraian') return jenisUraian(isi) === 'hitungan' ? { jenis: 'hitungan' } : { jenis: 'garis', jumlah: jumlahGaris(isi.rubrik) };
+  return { jenis: 'tidak_ada' };
 }
 
 export interface BarisKisi {
@@ -56,13 +99,16 @@ export interface DokumenSoal {
   mapel: string;
   kelas: number;
   fase: string;
+  cp: string;
   inggris: boolean;
+  cara_bs: CaraBenarSalah;
   kop: { sekolah: string; baris: string[]; alamat: string; logo: string | null } | null;
   identitas: string[];
   bagian: BagianDok[];
   kunci: { nomor: number; teks: string; rubrik?: string[] }[];
   pembahasan: { nomor: number; langkah: string[] }[];
   kisi: BarisKisi[];
+  /** Kelas, mapel, dan sumber TP yang dipakai; dicatat di kisi-kisi dan jejak berkas. */
   kurikulumLabel: string;
   jejak: string;
   opsi: OpsiEkspor;
@@ -75,12 +121,40 @@ const JUDUL_BAGIAN: Record<Bentuk, [string, string]> = {
   uraian: ['Uraian', 'Essay'],
 };
 
-const PETUNJUK: Record<Bentuk, [string, string]> = {
-  pilihan_ganda: ['Pilihlah satu jawaban yang paling tepat.', 'Choose the one best answer.'],
-  benar_salah: ['Tulislah B bila pernyataan benar dan S bila pernyataan salah.', 'Write T if the statement is true and F if it is false.'],
-  isian_singkat: ['Isilah titik-titik dengan jawaban yang tepat.', 'Fill in the blanks with the correct answer.'],
-  uraian: ['Jawablah pertanyaan berikut dengan langkah yang lengkap.', 'Answer the following questions and show your work.'],
-};
+/** Satu kalimat petunjuk cara menjawab untuk tiap bagian. */
+function petunjukBagian(bentuk: Bentuk, butir: ButirDok[], cara: CaraBenarSalah, en: boolean): string {
+  switch (bentuk) {
+    case 'pilihan_ganda': {
+      const huruf = [...new Set(butir.flatMap((b) => Object.keys(b.soal.isi_json.opsi ?? {})))].sort();
+      const daftar = huruf.length > 1 ? `${huruf.slice(0, -1).join(', ')}, ${en ? 'or' : 'atau'} ${huruf.at(-1)}` : huruf.join('');
+      return en ? `Choose the one best answer by putting a cross (X) on the letter ${daftar}.` : `Pilihlah satu jawaban yang paling tepat dengan memberi tanda silang (X) pada huruf ${daftar}.`;
+    }
+    case 'benar_salah':
+      return cara === 'lingkari'
+        ? en
+          ? 'Circle T if the statement is true or F if it is false.'
+          : 'Lingkarilah B bila pernyataan benar atau S bila pernyataan salah.'
+        : en
+          ? 'Put a tick (✓) in the True or False column for each statement.'
+          : 'Berilah tanda centang (✓) pada kolom Benar atau Salah untuk setiap pernyataan.';
+    case 'isian_singkat': {
+      const kotak = butir.some((b) => b.tempat.jenis === 'kotak');
+      const titik = butir.some((b) => b.tempat.jenis === 'titik');
+      const tempat = kotak && titik ? (en ? 'dotted line or box' : 'titik-titik atau kotak') : kotak ? (en ? 'box' : 'kotak') : en ? 'dotted line' : 'titik-titik';
+      return en ? `Write your answer on the ${tempat} provided.` : `Tuliskan jawabanmu pada ${tempat} yang tersedia.`;
+    }
+    case 'uraian': {
+      const garis = butir.some((b) => b.tempat.jenis === 'garis');
+      const hitung = butir.some((b) => b.tempat.jenis === 'hitungan');
+      if (garis && hitung)
+        return en
+          ? 'Work clearly. Questions asking for an explanation are answered on the lines. Calculations are done in the box, with the final answer written in the space below it.'
+          : 'Kerjakan dengan jelas. Soal yang meminta penjelasan dijawab pada garis. Soal hitungan dikerjakan pada kotak, hasil akhir ditulis pada kolom di bawahnya.';
+      if (hitung) return en ? 'Show your working in the box and write the final answer in the space below it.' : 'Kerjakan pada kotak cara pengerjaan, lalu tulis hasil akhir pada kolom di bawahnya.';
+      return en ? 'Answer clearly on the lines provided.' : 'Jawablah dengan jelas pada garis yang tersedia.';
+    }
+  }
+}
 
 const ROMAWI = ['A', 'B', 'C', 'D'];
 
@@ -100,7 +174,7 @@ export function teksKunci(s: Soal, inggris: boolean): string {
   }
 }
 
-/** Soal yang menghalangi ekspor: perlu telaah tetapi belum ditelaah guru, atau rumpun risiko tinggi tanpa centang sumber. */
+/** Soal yang menghalangi unduhan: "Mohon cek dulu" yang belum disetujui guru, atau rumpun risiko tinggi tanpa centang sumber. */
 export function penghalangEkspor(paket: PaketSoal, soal: Soal[]): Soal[] {
   const risiko = paketUntuk(paket.parameter_json.rumpun)?.risikoTinggi ?? false;
   return soal.filter((s) => s.status_mutu === 'perlu_telaah' && (s.status_telaah !== 'ditelaah_guru' || (risiko && !s.sumber_dicek)));
@@ -113,51 +187,47 @@ export function soalUntukEkspor(soal: Soal[]): Soal[] {
 export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Profil, opsi: OpsiEkspor, versiAplikasi: string): DokumenSoal {
   const p = paket.parameter_json;
   const inggris = p.bahasa === 'en';
+  const cara = p.cara_bs ?? 'centang';
   const soal = soalUntukEkspor(daftarSoal);
   let nomor = 0;
   const bagian: BagianDok[] = [];
   for (const bentuk of URUTAN_BENTUK) {
     const daftar = soal.filter((s) => s.bentuk === bentuk);
     if (!daftar.length) continue;
-    bagian.push({
-      bentuk,
-      judul: `${ROMAWI[bagian.length]}. ${JUDUL_BAGIAN[bentuk][inggris ? 1 : 0]}`,
-      petunjuk: PETUNJUK[bentuk][inggris ? 1 : 0],
-      butir: daftar.map((s) => {
-        nomor++;
-        let gambar: Gambar | null = null;
-        let svg: string | null = null;
-        if (s.isi_json.gambar) {
-          try {
-            const g = bangkitkanGambar(s.isi_json.gambar);
-            gambar = g.gambar;
-            svg = g.svg;
-          } catch {
-            /* gambar tidak sah sudah ditolak saat verifikasi */
-          }
+    const butir: ButirDok[] = daftar.map((s) => {
+      nomor++;
+      let gambar: Gambar | null = null;
+      let svg: string | null = null;
+      if (s.isi_json.gambar) {
+        try {
+          gambar = bangkitkanGambar(s.isi_json.gambar).gambar;
+          // Teks pada gambar memakai font dokumen.
+          svg = keSvg(gambar, { font: FONT_SVG_DOKUMEN });
+        } catch {
+          /* gambar tidak sah sudah ditolak saat verifikasi */
         }
-        const kata = jumlahKata(s.isi_json.pokok);
-        const panjangOpsi = Math.max(0, ...Object.values(s.isi_json.opsi ?? {}).map((o) => teksPolos(o ?? '').length));
-        const opsiPendek = panjangOpsi <= 18;
-        return {
-          nomor,
-          soal: s,
-          gambar,
-          svg,
-          sederhana: bentuk !== 'uraian' && !gambar && kata <= 25 && opsiPendek && !s.isi_json.terjemahan,
-          kotakJawaban: bentuk === 'uraian' || (bentuk === 'isian_singkat' && kata > 25),
-          opsiPendek,
-          panjangOpsi,
-        };
-      }),
+      }
+      const kata = jumlahKata(s.isi_json.pokok);
+      const panjangOpsi = Math.max(0, ...Object.values(s.isi_json.opsi ?? {}).map((o) => teksPolos(o ?? '').length));
+      const opsiPendek = panjangOpsi <= 18;
+      return {
+        nomor,
+        soal: s,
+        gambar,
+        svg,
+        sederhana: bentuk !== 'uraian' && !gambar && kata <= 25 && opsiPendek && !s.isi_json.terjemahan,
+        kotakJawaban: bentuk === 'uraian' || (bentuk === 'isian_singkat' && kata > 25),
+        opsiPendek,
+        panjangOpsi,
+        tempat: tempatJawab(s, kata),
+      };
     });
+    bagian.push({ bentuk, judul: `${ROMAWI[bagian.length]}. ${JUDUL_BAGIAN[bentuk][inggris ? 1 : 0]}`, petunjuk: petunjukBagian(bentuk, butir, cara, inggris), butir });
   }
   const semua = bagian.flatMap((b) => b.butir);
   const versiSoal = soal.length ? `${Math.min(...soal.map((s) => s.versi))}–${Math.max(...soal.map((s) => s.versi))}` : '-';
-  const kustom = p.tp.some((t) => t.sumber === 'kustom');
-  const kurikulumLabel = kustom
-    ? `${p.kurikulum_nama}${p.kurikulum_id === 'kustom' ? '' : ` ${p.kurikulum_versi}`} · TP kurikulum kustom`
-    : `${p.kurikulum_nama} ${p.kurikulum_versi}${p.kurikulum_dasar ? ` · ${p.kurikulum_dasar}` : ''}`;
+  // Paket dari versi 0.3 masih mencatat kurikulum resminya; paket baru memakai CP dan TP yang ditulis guru.
+  const kurikulumLabel = p.kurikulum_nama && p.tp.some((t) => t.sumber === 'resmi') ? `${p.kurikulum_nama} ${p.kurikulum_versi ?? ''}`.trim() : inggris ? "Teacher's learning objectives" : 'CP dan TP dari guru';
   const tanggal = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
   const jumlahPerluTelaah = soal.filter((s) => s.status_mutu === 'perlu_telaah').length;
   return {
@@ -165,7 +235,9 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
     mapel: p.mapel,
     kelas: p.kelas,
     fase: p.fase,
+    cp: p.cp,
     inggris,
+    cara_bs: cara,
     kop: opsi.kop
       ? { sekolah: profil.sekolah || (inggris ? 'SCHOOL NAME' : 'NAMA SEKOLAH'), baris: profil.kop_json.baris.filter(Boolean), alamat: profil.kop_json.alamat, logo: profil.logo_blob }
       : null,
@@ -176,7 +248,7 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
     kisi: semua.map((b) => ({
       nomor: b.nomor,
       tp: b.soal.tp.rumusan,
-      tp_kode: b.soal.tp.kode ?? (b.soal.tp.sumber === 'kustom' ? `kustom v${b.soal.tp.versi}` : ''),
+      tp_kode: b.soal.tp.kode ?? '',
       indikator: b.soal.isi_json.meta.indikator,
       level: b.soal.level_kognitif,
       kesukaran: KESUKARAN_LABEL[b.soal.kesukaran_rancangan],
@@ -184,7 +256,7 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
       status: STATUS_MUTU_LABEL[b.soal.status_mutu] + (b.soal.status_telaah === 'ditelaah_guru' ? ' · ditelaah guru' : ''),
     })),
     kurikulumLabel,
-    jejak: `GenSoal ${versiAplikasi} · versi soal ${versiSoal} · ${kurikulumLabel} · dibuat dengan bantuan AI${jumlahPerluTelaah ? `, ${jumlahPerluTelaah} soal ditelaah guru` : ''} · ${tanggal}`,
+    jejak: `GenSoal ${versiAplikasi} · versi soal ${versiSoal} · ${p.mapel} kelas ${p.kelas} · ${kurikulumLabel} · dibuat dengan bantuan AI${jumlahPerluTelaah ? `, ${jumlahPerluTelaah} soal dicek guru` : ''} · ${tanggal}`,
     opsi,
   };
 }

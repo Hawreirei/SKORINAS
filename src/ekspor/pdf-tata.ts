@@ -4,7 +4,8 @@ import { uraiTeks, type Simpul } from '../matematika/teks';
 // Penata huruf kecil untuk PDF: kata dan rumus (pecahan bertumpuk, pangkat, akar) diukur,
 // dipatah per baris, lalu digambar dengan font yang ditanam.
 
-export const FONT_PDF = 'InterTight';
+// Liberation Serif: metrik sama dengan Times New Roman, lisensi OFL sehingga boleh ditanam di PDF.
+export const FONT_PDF = 'LiberationSerif';
 
 export interface Kotak {
   w: number;
@@ -16,17 +17,19 @@ export interface Kotak {
 export interface GayaTeks {
   ukuran: number;
   tebal?: boolean;
+  miring?: boolean;
   warna?: [number, number, number];
 }
 
-const PENGGANTI: Record<string, string> = { '∠': 'sudut ', '∥': '//', '≅': '≈', '∈': 'anggota ', '⋯': '…', '∼': '~', '⊥': 'tegak lurus ', '∉': 'bukan anggota ', '∪': 'U', '∩': 'n', '∅': '{ }' };
+// Glif yang tidak ada di Liberation Serif diganti tulisan yang setara.
+const PENGGANTI: Record<string, string> = { '∠': 'sudut ', '△': 'segitiga ', '∥': '//', '≅': '≈', '∈': 'anggota ', '⋯': '…', '∼': '~', '⊥': 'tegak lurus ', '∉': 'bukan anggota ', '∪': 'U', '∅': '{ }', '✓': '√', '☐': '□' };
 
 export function amankan(s: string): string {
-  return s.replace(/[∠∥≅∈⋯∼⊥∉∪∩∅]/g, (c) => PENGGANTI[c] ?? c);
+  return s.replace(/[∠△∥≅∈⋯∼⊥∉∪∅✓☐]/g, (c) => PENGGANTI[c] ?? c);
 }
 
 function aturFont(doc: jsPDF, g: GayaTeks) {
-  doc.setFont(FONT_PDF, g.tebal ? 'bold' : 'normal');
+  doc.setFont(FONT_PDF, g.tebal ? 'bold' : g.miring ? 'italic' : 'normal');
   doc.setFontSize(g.ukuran);
 }
 
@@ -44,7 +47,7 @@ export function kotakTeks(doc: jsPDF, s: string, g: GayaTeks): Kotak {
     turun: g.ukuran * 0.24,
     gambar(d, x, y) {
       aturFont(d, g);
-      d.setTextColor(...(g.warna ?? [11, 12, 14]));
+      d.setTextColor(...(g.warna ?? [0, 0, 0]));
       d.text(teks, x, y);
     },
   };
@@ -100,7 +103,7 @@ export function kotakMath(doc: jsPDF, daftar: Simpul[], g: GayaTeks): Kotak {
           gambar(d, x, y) {
             atas.gambar(d, x + 1 + (w - atas.w) / 2, y - sumbu - sela - atas.turun);
             bawah.gambar(d, x + 1 + (w - bawah.w) / 2, y - sumbu + sela + bawah.naik);
-            d.setDrawColor(11, 12, 14);
+            d.setDrawColor(0, 0, 0);
             d.setLineWidth(Math.max(0.5, g.ukuran * 0.045));
             d.line(x + 1, y - sumbu, x + 1 + w, y - sumbu);
           },
@@ -131,7 +134,7 @@ export function kotakMath(doc: jsPDF, daftar: Simpul[], g: GayaTeks): Kotak {
           naik: isi.naik + 3,
           turun: isi.turun,
           gambar(d, x, y) {
-            d.setDrawColor(11, 12, 14);
+            d.setDrawColor(0, 0, 0);
             d.setLineWidth(0.6);
             const atas = y - isi.naik - 2;
             d.line(x, y - u * 0.3, x + u * 0.12, y - u * 0.36);

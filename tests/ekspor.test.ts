@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import JSZip from 'jszip';
 import { describe, expect, it } from 'vitest';
 import { buatDocx } from '../src/ekspor/docx';
-import { bangunDokumen, penghalangEkspor } from '../src/ekspor/model';
+import { bangunDokumen, jawabanAngka, jumlahGaris, penghalangEkspor } from '../src/ekspor/model';
 import { buatTex } from '../src/ekspor/tex';
 import { keLatex } from '../src/matematika/latex';
 import { paketUji, profilUji, soalUji } from './bantu-soal';
@@ -34,10 +34,43 @@ describe('model dokumen', () => {
     expect(semua.filter((b) => b.soal.bentuk === 'uraian').every((b) => b.kotakJawaban)).toBe(true);
     expect(semua.filter((b) => b.gambar).every((b) => !b.sederhana)).toBe(true);
   });
-  it('mencatat versi soal dan versi kurikulum', () => {
+  it('mencatat versi soal, kelas, mapel, dan sumber TP', () => {
     expect(d.jejak).toMatch(/versi soal 1–1/);
-    expect(d.jejak).toMatch(/Kurikulum Merdeka 2024\.1/);
+    expect(d.jejak).toMatch(/Matematika kelas 4/);
+    expect(d.jejak).toMatch(/CP dan TP dari guru/);
     expect(d.jejak).toMatch(/bantuan AI/);
+  });
+  it('mengikuti pakem: petunjuk per bagian dan tempat jawaban per bentuk', () => {
+    const [pg, bs, isian, uraian] = d.bagian;
+    expect(pg.judul).toBe('A. Pilihan Ganda');
+    expect(pg.petunjuk).toMatch(/tanda silang \(X\) pada huruf A, B, C, atau D/);
+    expect(bs.petunjuk).toMatch(/centang/);
+    expect(isian.butir.every((b) => b.tempat.jenis === 'titik' || b.tempat.jenis === 'kotak')).toBe(true);
+    for (const b of uraian.butir) {
+      const t = b.tempat;
+      expect(t.jenis === 'garis' || t.jenis === 'hitungan').toBe(true);
+      if (t.jenis === 'garis') {
+        expect(t.jumlah).toBeGreaterThanOrEqual(2);
+        expect(t.jumlah).toBeLessThanOrEqual(6);
+      }
+    }
+    const lingkari = bangunDokumen({ ...paketUji(), parameter_json: { ...paketUji().parameter_json, cara_bs: 'lingkari' } }, soalUji(), profilUji(), OPSI, '0.4.0');
+    expect(lingkari.bagian[1].petunjuk).toMatch(/Lingkarilah B/);
+  });
+  it('isian berjawaban angka mendapat kotak, uraian dibedakan penjelasan dan hitungan', () => {
+    expect(jawabanAngka('3/4')).toBe(true);
+    expect(jawabanAngka('$\\frac{7}{8}$')).toBe(true);
+    expect(jawabanAngka('12 cm')).toBe(true);
+    expect(jawabanAngka('persegi panjang')).toBe(false);
+    expect(jumlahGaris(['Menyatakan (1)', 'Menjelaskan (2)', 'Menghitung (1)'])).toBe(4);
+    expect(jumlahGaris(['a (5)', 'b (5)'])).toBe(6);
+    expect(jumlahGaris([])).toBe(2);
+    const s = soalUji().find((x) => x.bentuk === 'uraian')!;
+    const penjelasan = { ...s, isi_json: { ...s.isi_json, jenis_uraian: 'penjelasan' as const } };
+    const hitungan = { ...s, id: 'u2', urutan: 99, isi_json: { ...s.isi_json, jenis_uraian: 'hitungan' as const } };
+    const dd = bangunDokumen(paketUji(), [penjelasan, hitungan], profilUji(), OPSI, '0.4.0');
+    expect(dd.bagian[0].butir.map((b) => b.tempat.jenis)).toEqual(['garis', 'hitungan']);
+    expect(dd.bagian[0].petunjuk).toMatch(/penjelasan dijawab pada garis/);
   });
   it('menghalangi ekspor soal perlu telaah yang belum ditelaah', () => {
     const soal = soalUji().map((s) => ({ ...s, status_telaah: 'draf' as const }));
@@ -78,8 +111,15 @@ describe('Word', () => {
     const zip = await JSZip.loadAsync(await blob.arrayBuffer());
     const xml = await zip.file('word/document.xml')!.async('string');
     expect(xml).toContain('<m:f>');
-    expect(xml).toContain('Kunci Jawaban');
-    expect(xml).toContain('Kisi-kisi');
+    expect(xml).toContain('KUNCI JAWABAN');
+    expect(xml).toContain('KISI-KISI');
+    // Benar-salah sebagai tabel dengan kolom Benar dan Salah.
+    expect(xml).toMatch(/Pernyataan[\s\S]*Benar[\s\S]*Salah/);
+    // Font dan ukuran diatur di gaya dokumen, bukan per paragraf.
+    const gaya = await zip.file('word/styles.xml')!.async('string');
+    expect(gaya).toContain('Times New Roman');
+    expect(gaya).toMatch(/<w:sz w:val="24"\/>/);
+    expect(xml).not.toContain('w:rFonts');
     expect(dipanggil).toBe(soalUji().filter((s) => s.isi_json.gambar).length);
     expect(Object.keys(zip.files).some((f) => f.startsWith('word/media/'))).toBe(true);
   });
@@ -91,8 +131,9 @@ describe('PDF', () => {
     const d = bangunDokumen(paketUji(), soalUji(), profilUji(), OPSI, '0.3.0');
     let gambar = 0;
     const blob = await buatPdf(d, {
-      fontBiasa: readFileSync('public/fonts/InterTight-Regular.ttf').toString('base64'),
-      fontTebal: readFileSync('public/fonts/InterTight-SemiBold.ttf').toString('base64'),
+      fontBiasa: readFileSync('public/fonts/LiberationSerif-Regular.ttf').toString('base64'),
+      fontTebal: readFileSync('public/fonts/LiberationSerif-Bold.ttf').toString('base64'),
+      fontMiring: readFileSync('public/fonts/LiberationSerif-Italic.ttf').toString('base64'),
       gambarSvg: async (doc, _svg, x, y, w, h) => {
         gambar++;
         doc.rect(x, y, w, h);
@@ -101,6 +142,7 @@ describe('PDF', () => {
     const buf = Buffer.from(await blob.arrayBuffer());
     expect(buf.subarray(0, 5).toString()).toBe('%PDF-');
     expect(buf.toString('latin1')).toMatch(/FontFile2/);
+    expect(buf.toString('latin1')).toMatch(/LiberationSerif/);
     expect(gambar).toBe(soalUji().filter((s) => s.isi_json.gambar).length);
     if (process.env.PDF_KELUAR) writeFileSync(process.env.PDF_KELUAR, buf);
   }, 60000);

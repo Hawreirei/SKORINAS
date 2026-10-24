@@ -10,15 +10,12 @@ const MODEL = { penyedia: 'gemini' as const, model: 'uji', kunci: 'x' };
 
 function param(n: number, bentuk: ParameterPaket['bentuk'] = ['pilihan_ganda']): ParameterPaket {
   return {
-    kurikulum_id: 'merdeka-2024',
-    kurikulum_nama: 'Kurikulum Merdeka',
-    kurikulum_versi: '2024.1',
     kelas: 4,
     fase: 'B',
     mapel: 'Matematika',
     rumpun: 'matematika',
     cp: '',
-    tp: [{ id: '', rumusan: 'Peserta didik dapat menjumlahkan dua bilangan cacah sampai 1.000.', sumber: 'kustom', versi: 1 }],
+    tp: [{ id: '', rumusan: 'Peserta didik dapat menjumlahkan dua bilangan cacah sampai 1.000.', sumber: 'guru', versi: 1 }],
     n,
     persen: [30, 50, 20],
     bentuk,
@@ -26,6 +23,7 @@ function param(n: number, bentuk: ParameterPaket['bentuk'] = ['pilihan_ganda']):
     gaya: 'biasa',
     gambar: 'mati',
     materi: '',
+    cara_bs: 'centang',
   };
 }
 
@@ -152,16 +150,15 @@ describe('pengatur generasi', () => {
     expect(pengatur.ambil().pesan).toMatch(/Batas harian/);
   });
 
-  it('menyimpan TP kustom berversi', async () => {
+  it('memberi id pada TP yang ditulis guru tanpa menyimpan kurikulum', async () => {
     const p = param(1);
     const id1 = await buatPaket(p, 'Satu');
-    const paket1 = await db.paket_soal.get(id1);
-    const tp1 = paket1!.parameter_json.tp[0];
-    expect(tp1.versi).toBe(1);
-    const id2 = await buatPaket({ ...p, tp: [{ ...tp1, rumusan: tp1.rumusan + ' dengan cara bersusun' }] }, 'Dua');
-    const tp2 = (await db.paket_soal.get(id2))!.parameter_json.tp[0];
-    expect(tp2.versi).toBe(2);
-    expect(tp2.id).not.toBe(tp1.id);
-    expect(await db.tp_kustom.count()).toBe(2);
+    const tp1 = (await db.paket_soal.get(id1))!.parameter_json.tp[0];
+    expect(tp1.id).toMatch(/^[0-9a-f-]{36}$/);
+    expect(tp1.rumusan).toBe(p.tp[0].rumusan);
+    // TP yang sudah ber-id (dari pengaturan tersimpan) dipakai apa adanya.
+    const id2 = await buatPaket({ ...p, tp: [tp1] }, 'Dua');
+    expect((await db.paket_soal.get(id2))!.parameter_json.tp[0].id).toBe(tp1.id);
+    expect(db.tables.map((x) => x.name)).not.toContain('tp_kustom');
   });
 });

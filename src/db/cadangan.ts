@@ -1,5 +1,6 @@
 import type { GenSoalDb, TokoCadangan } from './skema';
-import { TOKO_CADANGAN } from './skema';
+import { lengkapiParameter, TOKO_CADANGAN, TOKO_USANG } from './skema';
+import type { PaketSoal, Preset } from './tipe';
 
 export const FORMAT_CADANGAN = 'gensoal';
 export const VERSI_CADANGAN = 1;
@@ -40,13 +41,19 @@ export function bacaCadangan(teks: string): BerkasCadangan {
     throw new Error('Versi cadangan lebih baru dari aplikasi ini. Perbarui aplikasi lalu coba lagi.');
   }
   if (!b.data || typeof b.data !== 'object') throw new Error('Isi cadangan kosong atau rusak.');
+  const data = b.data as Record<string, unknown[]>;
+  // Cadangan dari versi 0.3 memuat TP kustom; rancangan v0.4 tidak menyimpan kurikulum lagi.
+  for (const toko of TOKO_USANG) delete data[toko];
   for (const [toko, baris] of Object.entries(b.data)) {
     if (!(TOKO_CADANGAN as readonly string[]).includes(toko)) throw new Error(`Toko tidak dikenal: ${toko}`);
     if (!Array.isArray(baris)) throw new Error(`Toko ${toko} rusak.`);
   }
   // Kunci API tidak pernah boleh masuk lewat cadangan.
-  const data = b.data as Record<string, unknown[]>;
   if ('kunci_api' in data) delete data.kunci_api;
+  for (const toko of ['preset', 'paket_soal'] as const) {
+    const baris = data[toko] as (Preset | PaketSoal)[] | undefined;
+    if (baris) data[toko] = baris.map((x) => (x?.parameter_json ? { ...x, parameter_json: lengkapiParameter(x.parameter_json) } : x));
+  }
   return b as BerkasCadangan;
 }
 

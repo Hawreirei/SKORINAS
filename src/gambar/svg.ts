@@ -54,7 +54,7 @@ export interface OpsiSvg {
 
 /** SVG hitam putih dengan viewBox tetap; teks memakai font dokumen. */
 export function keSvg(g: Gambar, opsi: OpsiSvg = {}): string {
-  const font = opsi.font ?? "Inter Tight, Helvetica, Arial, sans-serif";
+  const font = opsi.font ?? "'Nunito Sans', Helvetica, Arial, sans-serif";
   const lebar = opsi.lebarTampil ?? g.lebar;
   const tinggi = (lebar / g.lebar) * g.tinggi;
   const defs =

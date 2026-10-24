@@ -48,19 +48,19 @@ export function GantiSoal({ soal, mode, selesai }: { soal: Soal; mode: 'ganti' |
           </Tombol>
         </div>
       ) : null}
-      {sibuk ? <p className="mono text-redup">{tunggu ?? 'Membuat dan memeriksa butir baru…'}</p> : null}
+      {sibuk ? <p className="text-base font-bold text-redup">{tunggu ?? 'Membuat dan memeriksa soal baru…'}</p> : null}
       {galat ? <Peringatan className="mb-4">{galat}</Peringatan> : null}
       {kandidat?.hasil.ok && kandidat.hasil.isi ? (
         <>
           <div className="grid gap-8 lg:grid-cols-2">
             <div>
-              <div className="mono text-redup">Versi lama · v{soal.versi}</div>
+              <div className="text-base font-bold text-redup">Versi lama · v{soal.versi}</div>
               <TampilSoal isi={soal.isi_json} besar={false} />
             </div>
             <div className="border-t border-garis pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-              <div className="mono">Versi baru · {kandidat.hasil.periksa?.status_mutu === 'perlu_telaah' ? 'perlu telaah' : 'terverifikasi'}</div>
+              <div className="font-semibold">Versi baru · {kandidat.hasil.periksa?.status_mutu === 'perlu_telaah' ? 'mohon cek dulu' : 'jawaban sudah dicek'}</div>
               <TampilSoal isi={kandidat.hasil.isi} besar={false} />
-              <p className="mono mt-4 text-redup">
+              <p className="font-semibold mt-4 text-redup">
                 {kandidat.model.model} · {formatBiaya(kandidat.biaya)}
               </p>
             </div>

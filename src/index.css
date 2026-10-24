@@ -2,42 +2,68 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Palet rancangan v0.4: latar abu kebiruan, kartu putih, biru sebagai warna utama,
+ * kuning sebagai ornamen, merah hanya untuk hapus dan batal. Pasangan teks dan latar
+ * dipilih dengan kontras setidaknya 4,5 : 1.
+ */
 :root {
-  --gs-bg: #ffffff;
-  --gs-ink: #0b0c0e;
+  --gs-bg: #f5f7fa;
+  --gs-card: #ffffff;
+  --gs-ink: #1f2937;
   --gs-on-ink: #ffffff;
-  --gs-body: #3d424a;
-  --gs-muted: #5b616b;
-  --gs-line: #e4e6e9;
-  --gs-line-strong: #c9cdd3;
-  --gs-soft: #f6f7f8;
-  --gs-panel: #fafbfb;
-  --gs-orbit: #d9dde2;
-  --gs-warn: #8a4b00;
-  --gs-warn-bg: #fff7ec;
-  --gs-bad: #a1261b;
+  --gs-body: #1f2937;
+  --gs-muted: #4b5563;
+  --gs-line: #d7dee8;
+  --gs-line-strong: #b4c0d0;
+  --gs-soft: #eef3fb;
+  --gs-panel: #f8fafd;
+  --gs-main: #2563eb;
+  --gs-main-dark: #1d4ed8;
+  --gs-main-soft: #dbeafe;
+  --gs-head: #1e3a5f;
+  --gs-yellow: #facc15;
+  --gs-yellow-soft: #fef3c7;
+  --gs-yellow-ink: #854d0e;
+  --gs-warn: #b45309;
+  --gs-warn-bg: #fef3c7;
+  --gs-good: #15803d;
+  --gs-good-bg: #dcfce7;
+  --gs-bad: #b91c1c;
+  --gs-bad-bg: #fee2e2;
   color-scheme: light;
 }
 
 .dark {
-  --gs-bg: #0c0d0f;
-  --gs-ink: #f1f2f4;
-  --gs-on-ink: #0b0c0e;
-  --gs-body: #c4c8ce;
-  --gs-muted: #8e949d;
-  --gs-line: #24272c;
-  --gs-line-strong: #3b3f46;
-  --gs-soft: #16181b;
-  --gs-panel: #131517;
-  --gs-orbit: #2a2e34;
-  --gs-warn: #f1b766;
-  --gs-warn-bg: #241a0c;
-  --gs-bad: #ff8a7a;
+  --gs-bg: #0f172a;
+  --gs-card: #162033;
+  --gs-ink: #e5e9f0;
+  --gs-on-ink: #ffffff;
+  --gs-body: #e5e9f0;
+  --gs-muted: #a7b1c2;
+  --gs-line: #2c3a52;
+  --gs-line-strong: #43536f;
+  --gs-soft: #1c2a42;
+  --gs-panel: #131c2e;
+  --gs-main: #3b82f6;
+  --gs-main-dark: #2563eb;
+  --gs-main-soft: #1e3a6b;
+  --gs-head: #c7d7f2;
+  --gs-yellow: #facc15;
+  --gs-yellow-soft: #3a3214;
+  --gs-yellow-ink: #fde68a;
+  --gs-warn: #fbbf24;
+  --gs-warn-bg: #3a2a0c;
+  --gs-good: #4ade80;
+  --gs-good-bg: #10301d;
+  --gs-bad: #f87171;
+  --gs-bad-bg: #3b1416;
   color-scheme: dark;
 }
 
 @theme inline {
   --color-latar: var(--gs-bg);
+  --color-kartu: var(--gs-card);
   --color-tinta: var(--gs-ink);
   --color-di-tinta: var(--gs-on-ink);
   --color-isi: var(--gs-body);
@@ -46,12 +72,22 @@
   --color-garis-kuat: var(--gs-line-strong);
   --color-lembut: var(--gs-soft);
   --color-panel: var(--gs-panel);
-  --color-orbit: var(--gs-orbit);
+  --color-utama: var(--gs-main);
+  --color-utama-tua: var(--gs-main-dark);
+  --color-utama-lembut: var(--gs-main-soft);
+  --color-judul: var(--gs-head);
+  --color-kuning: var(--gs-yellow);
+  --color-kuning-lembut: var(--gs-yellow-soft);
+  --color-kuning-tua: var(--gs-yellow-ink);
   --color-awas: var(--gs-warn);
   --color-awas-latar: var(--gs-warn-bg);
+  --color-baik: var(--gs-good);
+  --color-baik-latar: var(--gs-good-bg);
   --color-buruk: var(--gs-bad);
-  --font-sans: 'Inter Tight', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --color-buruk-latar: var(--gs-bad-bg);
+  --font-sans: 'Nunito Sans', system-ui, sans-serif;
+  --font-serif: 'Times New Roman', 'Liberation Serif', Tinos, serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
 }
 
 html,
@@ -63,26 +99,28 @@ body {
 body {
   margin: 0;
   font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Label huruf kapital berjarak, ciri desain GenSoal. */
+/* Label kecil di atas isian dan data pendukung. Huruf biasa, tanpa jarak lebar (rancangan v0.4). */
 .mono {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .judul-besar {
-  font-weight: 200;
-  letter-spacing: 0.015em;
-  text-transform: uppercase;
-  line-height: 1.02;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: var(--gs-head);
 }
 
 :focus-visible {
-  outline: 2px solid var(--gs-ink);
+  outline: 3px solid var(--gs-main);
   outline-offset: 2px;
 }
 
@@ -90,18 +128,18 @@ input.bidang,
 select.bidang,
 textarea.bidang {
   width: 100%;
-  min-height: 52px;
-  padding: 0 16px;
+  min-height: 48px;
+  padding: 0 14px;
   border: 1px solid var(--gs-line-strong);
-  border-radius: 2px;
+  border-radius: 8px;
   font: inherit;
   font-size: 16px;
-  background: var(--gs-bg);
+  background: var(--gs-card);
   color: var(--gs-ink);
   box-sizing: border-box;
 }
 textarea.bidang {
-  padding: 14px 16px;
+  padding: 12px 14px;
   line-height: 1.55;
   resize: vertical;
 }
@@ -109,12 +147,13 @@ input.bidang:focus,
 select.bidang:focus,
 textarea.bidang:focus {
   outline: none;
-  border-color: var(--gs-ink);
+  border-color: var(--gs-main);
+  box-shadow: 0 0 0 3px var(--gs-main-soft);
 }
 select.bidang {
   appearance: none;
   background-image: linear-gradient(45deg, transparent 50%, var(--gs-muted) 50%), linear-gradient(135deg, var(--gs-muted) 50%, transparent 50%);
-  background-position: calc(100% - 22px) 23px, calc(100% - 17px) 23px;
+  background-position: calc(100% - 22px) 21px, calc(100% - 17px) 21px;
   background-size: 5px 5px;
   background-repeat: no-repeat;
   padding-right: 40px;
@@ -123,7 +162,7 @@ select.bidang {
 input[type='checkbox'],
 input[type='radio'],
 input[type='range'] {
-  accent-color: var(--gs-ink);
+  accent-color: var(--gs-main);
 }
 
 /* Teks soal dengan rumus KaTeX. */

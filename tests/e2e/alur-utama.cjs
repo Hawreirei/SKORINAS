@@ -50,6 +50,7 @@ function butirPalsu(bentuk) {
     pokok: `${nama} berkata $\\frac{${a}}{${d}} + \\frac{${b}}{${d}} = \\frac{${a + b}}{${2 * d}}$ karena pembilang dan penyebut dijumlahkan (kasus ${i}). Nilailah pendapat ${nama} dan jelaskan alasanmu.`,
     kunci: `Pendapat ${nama} salah. Penyebut tetap ${d}, sehingga hasilnya $\\frac{${a + b}}{${d}}$.`,
     rubrik: ['Menyatakan pendapat salah (1)', 'Menjelaskan penyebut tetap (2)', `Menghitung $\\frac{${a + b}}{${d}}$ (1)`],
+    jenis_uraian: i % 2 ? 'penjelasan' : 'hitungan',
     pembahasan: ['Pecahan berpenyebut sama dijumlahkan pembilangnya saja.'],
     verifikasi: { tipe: 'ekspresi', ekspresi: `${a}/${d} + ${b}/${d}`, nilai: sum },
     gambar: null,
@@ -100,42 +101,50 @@ function butirPalsu(bentuk) {
   await page.selectOption('#model-cadangan', { index: 2 });
   await foto('02-pengaturan-ai');
 
-  // Buat soal
+  // Buat soal: tiga isian wajib, sisanya di Pengaturan lanjutan
   await page.goto(DASAR + '/soal/baru');
+  await page.waitForSelector('text=Langkah 1 dari 3');
+  await foto('03a-buat-soal-kosong');
   await page.selectOption('#kelas', '4');
-  await page.click('text=Ambil dari kurikulum resmi');
-  await page.waitForSelector('text=Masukkan ke formulir');
-  const kotak = page.locator('dialog input[type=checkbox]:not(:checked)');
-  await kotak.nth(1).check();
-  await kotak.nth(1).check();
-  await page.click('text=Masukkan ke formulir');
-  for (const b of ['Isian singkat', 'Benar-salah', 'Uraian']) await page.getByRole('button', { name: b }).click();
+  await page.fill('#mapel', 'Matematika');
+  await page.fill('#tp', 'Peserta didik dapat menjumlahkan dua pecahan berpenyebut sama.\nPeserta didik dapat membandingkan dua pecahan berpenyebut berbeda dengan menyamakan penyebutnya.');
   for (let k = 0; k < 2; k++) await page.getByRole('button', { name: 'Tambah jumlah soal' }).click();
-  await page.getByLabel('Simpan sebagai preset').check();
-  await page.fill('[aria-label="Nama preset"]', 'Matematika K4 · Pecahan');
+  await page.getByRole('button', { name: /Pengaturan lanjutan/ }).click();
+  for (const b of ['Isian singkat', 'Benar-salah', 'Uraian']) await page.getByRole('button', { name: b, exact: true }).click();
+  await page.getByLabel('Simpan pengaturan ini').check();
+  await page.fill('[aria-label="Nama pengaturan tersimpan"]', 'Matematika K4 · Pecahan');
   await page.fill('#judul', 'Penjumlahan pecahan');
   await foto('03-buat-soal');
-  await page.getByRole('button', { name: /Generate 12 soal/ }).click();
+  await page.getByRole('button', { name: /Buat 12 soal/ }).click();
   await page.waitForURL(/\/soal\/[0-9a-f-]+$/);
-  await page.waitForSelector('text=Lanjut ke ekspor');
+  await page.waitForSelector('text=Lanjut ke Unduh');
+  await page.waitForSelector('text=Langkah 2 dari 3');
   await page.waitForSelector('text=Melanjutkan otomatis dalam', { timeout: 30000 });
   await foto('04a-menunggu-batas');
   await page.waitForSelector('text=Menjaga batas per menit', { timeout: 120000 });
   await foto('04b-menjaga-batas');
-  await page.waitForFunction(() => !/Membuat butir|Menunggu batas|Menjaga batas/.test(document.body.innerText), null, { timeout: 400000 });
+  await page.waitForFunction(() => !/Membuat soal|Menunggu batas|Menjaga batas/.test(document.body.innerText), null, { timeout: 400000 });
   if (await page.locator('text=Dijeda').count()) throw new Error('Pembuatan terjeda padahal batas hanya per menit');
-  await foto('04-peninjauan');
+  await foto('04-periksa');
+  const urlPeriksa = page.url();
 
-  // Telaah soal uraian lalu ekspor
-  const telaah = page.getByRole('button', { name: 'Tandai sudah ditelaah' });
-  for (let n = await telaah.count(); n > 0; n = await telaah.count()) {
-    await telaah.first().click();
-    await page.waitForFunction((sisa) => document.querySelectorAll('button').length && [...document.querySelectorAll('button')].filter((b) => b.textContent === 'Tandai sudah ditelaah').length < sisa, n);
+  // Ubah tanda jenis jawaban satu soal uraian, lalu setujui soal "Mohon cek dulu"
+  const jenis = page.getByRole('radio', { name: /Penjelasan \(garis tulis\)/ });
+  if (await jenis.count()) await jenis.first().check();
+  await page.getByRole('button', { name: /^Mohon cek dulu ·/ }).click();
+  const setujui = page.getByRole('button', { name: 'Setujui', exact: true });
+  for (let n = await setujui.count(); n > 0; n = await setujui.count()) {
+    await setujui.first().click();
+    await page.waitForFunction((sisa) => [...document.querySelectorAll('button')].filter((b) => b.textContent === 'Setujui').length < sisa, n);
   }
-  await page.click('text=Lanjut ke ekspor');
+  await page.getByRole('button', { name: /^Semua ·/ }).click();
+  await page.click('text=Lanjut ke Unduh');
   await page.waitForSelector('text=Unduh Word');
-  await foto('05-ekspor');
+  await page.waitForSelector('text=Langkah 3 dari 3');
+  await foto('05-unduh');
+  const urlUnduh = page.url();
   for (const [fmt, label] of [['docx', 'Word'], ['pdf', 'PDF'], ['tex', 'LaTeX']]) {
+    if (fmt === 'tex') await page.click('text=Menu lanjutan');
     await page.getByRole('radio', { name: new RegExp(label) }).click();
     const [unduh] = await Promise.all([page.waitForEvent('download', { timeout: 30000 }), page.getByRole('button', { name: new RegExp(`^Unduh ${label}`) }).click()]);
     const tujuan = path.join(KELUAR, `soal.${fmt}`);
@@ -158,7 +167,13 @@ function butirPalsu(bentuk) {
   await hp.goto(DASAR + '/soal/baru');
   await hp.waitForSelector('h1');
   await hp.screenshot({ path: path.join(KELUAR, '09-buat-ponsel.png'), fullPage: true });
-  const lebar = await hp.evaluate(() => document.documentElement.scrollWidth);
+  let lebar = await hp.evaluate(() => document.documentElement.scrollWidth);
+  for (const [n, u] of [['09b-periksa-ponsel', urlPeriksa], ['09c-unduh-ponsel', urlUnduh]]) {
+    await hp.goto(u);
+    await hp.waitForSelector('h1');
+    await hp.screenshot({ path: path.join(KELUAR, `${n}.png`), fullPage: true });
+    lebar = Math.max(lebar, await hp.evaluate(() => document.documentElement.scrollWidth));
+  }
   console.log('lebar halaman ponsel', lebar);
 
   // Cadangan: unduh .gensoal

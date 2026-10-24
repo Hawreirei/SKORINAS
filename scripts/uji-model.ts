@@ -32,9 +32,9 @@ const jalurRegistri = 'public/models/registri.json';
 const registri = JSON.parse(readFileSync(jalurRegistri, 'utf8')) as Registri;
 
 const ACUAN: Pick<ParameterPaket, 'kelas' | 'fase' | 'cp' | 'tp'>[] = [
-  { kelas: 4, fase: 'B', cp: '', tp: [{ id: 'a', rumusan: 'Peserta didik dapat membandingkan dua pecahan berpenyebut berbeda dengan menyamakan penyebutnya.', sumber: 'resmi', versi: 'uji' }] },
-  { kelas: 5, fase: 'C', cp: '', tp: [{ id: 'b', rumusan: 'Peserta didik dapat menghitung luas segitiga, jajar genjang, dan trapesium.', sumber: 'resmi', versi: 'uji' }] },
-  { kelas: 3, fase: 'B', cp: '', tp: [{ id: 'c', rumusan: 'Peserta didik dapat menyelesaikan masalah uang dalam ribuan rupiah yang melibatkan penjumlahan dan pengurangan.', sumber: 'resmi', versi: 'uji' }] },
+  { kelas: 4, fase: 'B', cp: '', tp: [{ id: 'a', rumusan: 'Peserta didik dapat membandingkan dua pecahan berpenyebut berbeda dengan menyamakan penyebutnya.', sumber: 'guru', versi: 1 }] },
+  { kelas: 5, fase: 'C', cp: '', tp: [{ id: 'b', rumusan: 'Peserta didik dapat menghitung luas segitiga, jajar genjang, dan trapesium.', sumber: 'guru', versi: 1 }] },
+  { kelas: 3, fase: 'B', cp: '', tp: [{ id: 'c', rumusan: 'Peserta didik dapat menyelesaikan masalah uang dalam ribuan rupiah yang melibatkan penjumlahan dan pengurangan.', sumber: 'guru', versi: 1 }] },
 ];
 
 function mutan(isi: IsiSoal): IsiSoal[] {
@@ -54,7 +54,7 @@ async function ujiModel(penyedia: PenyediaId, model: string, kunci: string) {
   const bentuk: Bentuk[] = ['pilihan_ganda', 'isian_singkat', 'benar_salah'];
   for (let i = 0; i < jumlah; i++) {
     const acuan = ACUAN[i % ACUAN.length];
-    const param: ParameterPaket = { ...acuan, kurikulum_id: 'merdeka-2024', kurikulum_nama: 'Kurikulum Merdeka', kurikulum_versi: 'uji', mapel: 'Matematika', rumpun: 'matematika', n: 1, persen: [0, 100, 0], bentuk: [bentuk[i % bentuk.length]], bahasa: 'id', gaya: 'biasa', gambar: 'campuran', materi: '' };
+    const param: ParameterPaket = { ...acuan, cara_bs: 'centang', mapel: 'Matematika', rumpun: 'matematika', n: 1, persen: [0, 100, 0], bentuk: [bentuk[i % bentuk.length]], bahasa: 'id', gaya: 'biasa', gambar: 'campuran', materi: '' };
     const slot = rencanakanSlot(param)[0];
     try {
       const j = await a.kirim({ kunci, model, sistem: SISTEM, pesan: susunPesan({ param, slot, pokokLain: [], alasanGagal: [] }), suhu: 0.7 });

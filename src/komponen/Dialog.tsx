@@ -14,12 +14,12 @@ export function Dialog({ buka, tutup, judul, children, lebar = 720 }: { buka: bo
       onClose={tutup}
       onCancel={tutup}
       aria-label={judul}
-      className="m-auto max-h-[90vh] w-[calc(100%-32px)] overflow-auto border border-tinta bg-latar p-0 text-tinta backdrop:bg-black/40"
+      className="m-auto max-h-[90vh] w-[calc(100%-32px)] overflow-auto rounded-xl border border-garis bg-kartu p-0 text-tinta backdrop:bg-[#0f172a]/50"
       style={{ maxWidth: lebar }}
     >
-      <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-garis bg-latar px-6 py-4">
-        <h2 className="text-xl font-light">{judul}</h2>
-        <button type="button" onClick={tutup} className="mono min-h-11 px-2 text-redup hover:text-tinta" aria-label="Tutup">
+      <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b-[3px] border-kuning bg-kartu px-6 py-4">
+        <h2 className="text-[22px] font-extrabold text-judul">{judul}</h2>
+        <button type="button" onClick={tutup} className="min-h-11 rounded-lg border border-garis-kuat px-4 font-bold text-tinta hover:border-utama hover:text-utama" aria-label="Tutup">
           Tutup
         </button>
       </div>

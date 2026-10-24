@@ -32,11 +32,11 @@ export async function daftarRingkasan(batas?: number, terhapus = false): Promise
   return hasil;
 }
 
-export function labelStatusPaket(r: RingkasanPaket): { teks: string; isi: boolean } {
-  if (r.paket.status === 'membuat') return { teks: `${r.jumlah}/${r.paket.parameter_json.n} soal · Dibuat`, isi: false };
-  if (r.paket.status === 'dijeda') return { teks: `${r.jumlah}/${r.paket.parameter_json.n} soal · Dijeda`, isi: false };
-  if (r.belumDitelaah) return { teks: `${r.jumlah} soal · Perlu telaah`, isi: false };
-  return { teks: `${r.jumlah} soal · Terverifikasi`, isi: true };
+export function labelStatusPaket(r: RingkasanPaket): { teks: string; isi: boolean; nada: 'proses' | 'awas' | 'baik' } {
+  if (r.paket.status === 'membuat') return { teks: `${r.jumlah}/${r.paket.parameter_json.n} soal · Sedang dibuat`, isi: false, nada: 'proses' };
+  if (r.paket.status === 'dijeda') return { teks: `${r.jumlah}/${r.paket.parameter_json.n} soal · Dijeda`, isi: false, nada: 'awas' };
+  if (r.belumDitelaah) return { teks: `${r.jumlah} soal · ${r.belumDitelaah} mohon cek dulu`, isi: false, nada: 'awas' };
+  return { teks: `${r.jumlah} soal · Siap diunduh`, isi: true, nada: 'baik' };
 }
 
 export function formatTanggal(t: number | null): string {

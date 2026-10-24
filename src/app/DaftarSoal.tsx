@@ -23,11 +23,11 @@ export default function DaftarSoal() {
   const sisaHari = (t: number) => Math.max(0, Math.ceil((t + MASA_SAMPAH_MS - Date.now()) / 86400000));
 
   return (
-    <div className="mx-auto max-w-[1312px] px-4 pb-24 pt-10 sm:px-8 lg:px-16 lg:pt-14">
+    <div className="mx-auto max-w-[1100px] px-4 pb-20 pt-8 sm:px-8 sm:pt-10">
       <div className="flex flex-wrap items-end justify-between gap-6">
         <KepalaHalaman label="Paket soal di perangkat ini" judul="Soal saya" />
         <TautanTombol to="/soal/baru" ukuran="besar">
-          Buat soal baru <Panah />
+          Buat soal <Panah />
         </TautanTombol>
       </div>
       <div className="mt-10 flex flex-wrap items-center gap-3">
@@ -37,27 +37,27 @@ export default function DaftarSoal() {
         <Chip aktif={tab === 'sampah'} onClick={() => setTab('sampah')}>
           Tong sampah · {(paketSampah?.length ?? 0) + (soalSampah?.length ?? 0)}
         </Chip>
-        <Link to="/telaah" className="mono ml-2 text-redup hover:text-tinta">
-          Daftar perlu telaah
+        <Link to="/telaah" className="ml-2 font-bold text-utama hover:underline">
+          Semua soal "Mohon cek dulu"
         </Link>
         {tab === 'paket' ? <input className="bidang ml-auto !min-h-11 sm:!w-72" placeholder="Cari judul, mapel, TP" aria-label="Cari paket" value={cari} onChange={(e) => setCari(e.target.value)} /> : null}
       </div>
 
       {tab === 'paket' ? (
-        <div className="mt-8 border-t border-tinta">
-          {paket && !tersaring.length ? <p className="py-8 text-[17px] font-light text-isi">{q ? 'Tidak ada paket yang cocok.' : 'Belum ada paket soal.'}</p> : null}
+        <div className="mt-6 rounded-xl border border-garis border-t-4 border-t-utama bg-kartu p-4 sm:p-6 !py-1">
+          {paket && !tersaring.length ? <p className="py-8 text-[17px] text-isi">{q ? 'Tidak ada paket yang cocok.' : 'Belum ada paket soal.'}</p> : null}
           {tersaring.map((r) => {
             const st = labelStatusPaket(r);
             return (
-              <div key={r.paket.id} className="grid items-center gap-x-6 gap-y-2 border-b border-garis px-2 py-5 sm:grid-cols-[96px_minmax(0,1fr)_auto_auto]">
-                <span className="mono text-redup">Kelas {r.paket.parameter_json.kelas}</span>
+              <div key={r.paket.id} className="grid items-center gap-x-6 gap-y-2 border-b border-garis px-1 py-4 last:border-b-0 sm:grid-cols-[96px_minmax(0,1fr)_auto_auto]">
+                <span className="text-base font-bold text-redup">Kelas {r.paket.parameter_json.kelas}</span>
                 <Link to={`/soal/${r.paket.id}`} className="min-w-0 hover:underline">
-                  <span className="text-xl font-light">{r.paket.judul}</span>
-                  <span className="mono mt-1.5 block text-redup">
+                  <span className="text-[18px] font-bold">{r.paket.judul}</span>
+                  <span className="mt-0.5 block text-base text-redup">
                     {r.paket.parameter_json.mapel} · {formatTanggal(r.paket.dibuat_pada)}
                   </span>
                 </Link>
-                <span className="mono flex items-center gap-2">
+                <span className={`flex items-center gap-2 text-base font-bold ${st.nada === 'baik' ? 'text-baik' : st.nada === 'awas' ? 'text-awas' : 'text-utama'}`}>
                   <Titik isi={st.isi} />
                   {st.teks}
                 </span>
@@ -66,7 +66,7 @@ export default function DaftarSoal() {
                     Unduh
                   </TautanTombol>
                   <Tombol
-                    varian="hantu"
+                    varian="bahaya"
                     ukuran="kecil"
                     onClick={() => {
                       if (confirm('Pindahkan paket ini ke tong sampah? Dapat dipulihkan selama 30 hari.')) void hapusPaket(r.paket.id);
@@ -81,13 +81,13 @@ export default function DaftarSoal() {
         </div>
       ) : (
         <div className="mt-8">
-          <p className="text-[15px] text-isi">Isi tong sampah dikosongkan otomatis 30 hari setelah dihapus.</p>
-          <div className="mt-5 border-t border-tinta">
+          <p className="text-base text-isi">Isi tong sampah dikosongkan otomatis 30 hari setelah dihapus.</p>
+          <div className="mt-5 rounded-xl border border-garis border-t-4 border-t-utama bg-kartu p-4 sm:p-6 !py-1">
             {paketSampah?.map((r) => (
               <div key={r.paket.id} className="flex flex-wrap items-center justify-between gap-4 border-b border-garis px-2 py-4">
                 <span>
-                  <span className="text-lg font-light">Paket · {r.paket.judul}</span>
-                  <span className="mono block text-redup">{sisaHari(r.paket.dihapus_pada!)} hari lagi dihapus permanen</span>
+                  <span className="text-lg">Paket · {r.paket.judul}</span>
+                  <span className="font-semibold block text-redup">{sisaHari(r.paket.dihapus_pada!)} hari lagi dihapus permanen</span>
                 </span>
                 <Tombol varian="hantu" ukuran="kecil" onClick={() => pulihkanPaket(r.paket.id)}>
                   Pulihkan
@@ -97,8 +97,8 @@ export default function DaftarSoal() {
             {soalSampah?.map((s) => (
               <div key={s.id} className="flex flex-wrap items-center justify-between gap-4 border-b border-garis px-2 py-4">
                 <span className="min-w-0">
-                  <span className="text-[17px] font-light">Soal · {teksPolos(s.isi_json.pokok).slice(0, 100)}</span>
-                  <span className="mono block text-redup">{sisaHari(s.dihapus_pada!)} hari lagi dihapus permanen</span>
+                  <span className="text-[17px]">Soal · {teksPolos(s.isi_json.pokok).slice(0, 100)}</span>
+                  <span className="font-semibold block text-redup">{sisaHari(s.dihapus_pada!)} hari lagi dihapus permanen</span>
                 </span>
                 <Tombol varian="hantu" ukuran="kecil" onClick={() => pulihkanSoal(s.id)}>
                   Pulihkan

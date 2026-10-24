@@ -1,16 +1,10 @@
 import Dexie, { type EntityTable } from 'dexie';
-import type {
-  KunciApi,
-  LogSoal,
-  PaketSoal,
-  PekerjaanGenerasi,
-  PemakaianAi,
-  Preset,
-  Profil,
-  Soal,
-  SoalGambar,
-  TpKustom,
-} from './tipe';
+import type { KunciApi, LogSoal, PaketSoal, ParameterPaket, PekerjaanGenerasi, PemakaianAi, Preset, Profil, Soal, SoalGambar } from './tipe';
+
+/** Lengkapi parameter paket dari versi lama dengan nilai bawaan isian baru. */
+export function lengkapiParameter(p: ParameterPaket): ParameterPaket {
+  return { ...p, cara_bs: p.cara_bs ?? 'centang' };
+}
 
 export class GenSoalDb extends Dexie {
   profil!: EntityTable<Profil, 'id'>;
@@ -22,7 +16,6 @@ export class GenSoalDb extends Dexie {
   pekerjaan_generasi!: EntityTable<PekerjaanGenerasi, 'id'>;
   pemakaian_ai!: EntityTable<PemakaianAi, 'id'>;
   log_soal!: EntityTable<LogSoal, 'id'>;
-  tp_kustom!: EntityTable<TpKustom, 'id'>;
 
   constructor(nama = 'gensoal') {
     super(nama);
@@ -39,21 +32,27 @@ export class GenSoalDb extends Dexie {
       log_soal: 'id, soal_id, dibuat_pada',
       tp_kustom: 'id, garis_id, [mapel+kelas]',
     });
+    // Versi 2 (rancangan v0.4): aplikasi tidak lagi menyimpan kurikulum, jadi toko tp_kustom dihapus.
+    // TP yang dipakai soal sudah tersalin utuh di paket dan soal, sehingga tidak ada yang hilang.
+    // Parameter paket dan preset mendapat isian baru cara_bs.
+    this.version(2)
+      .stores({ tp_kustom: null })
+      .upgrade(async (tx) => {
+        await tx.table('preset').toCollection().modify((p: Preset) => {
+          p.parameter_json = lengkapiParameter(p.parameter_json);
+        });
+        await tx.table('paket_soal').toCollection().modify((p: PaketSoal) => {
+          p.parameter_json = lengkapiParameter(p.parameter_json);
+        });
+      });
   }
 }
 
 export const db = new GenSoalDb();
 
 /** Toko yang ikut berkas .gensoal. kunci_api sengaja tidak ada di sini. */
-export const TOKO_CADANGAN = [
-  'profil',
-  'preset',
-  'paket_soal',
-  'soal',
-  'soal_gambar',
-  'pekerjaan_generasi',
-  'pemakaian_ai',
-  'log_soal',
-  'tp_kustom',
-] as const;
+export const TOKO_CADANGAN = ['profil', 'preset', 'paket_soal', 'soal', 'soal_gambar', 'pekerjaan_generasi', 'pemakaian_ai', 'log_soal'] as const;
 export type TokoCadangan = (typeof TOKO_CADANGAN)[number];
+
+/** Toko yang pernah ada di berkas .gensoal versi lama; dilewati saat memulihkan. */
+export const TOKO_USANG = ['tp_kustom'] as const;

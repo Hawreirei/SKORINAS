@@ -1,10 +1,7 @@
-import '@fontsource/inter-tight/200.css';
-import '@fontsource/inter-tight/300.css';
-import '@fontsource/inter-tight/400.css';
-import '@fontsource/inter-tight/500.css';
-import '@fontsource/inter-tight/600.css';
-import '@fontsource/jetbrains-mono/400.css';
-import '@fontsource/jetbrains-mono/500.css';
+import '@fontsource/nunito-sans/400.css';
+import '@fontsource/nunito-sans/600.css';
+import '@fontsource/nunito-sans/700.css';
+import '@fontsource/nunito-sans/800.css';
 import 'katex/dist/katex.min.css';
 import './index.css';
 import { StrictMode } from 'react';

@@ -4,7 +4,6 @@ import { bacaCadangan, buatCadangan, hapusSemuaData, pulihkanCadangan, ringkasCa
 import { db } from '../db/skema';
 import { simpanProfil } from '../db/profil';
 import { unduhBlob, VERSI_APLIKASI } from '../ekspor/peramban';
-import { PanelBantuan } from '../komponen/Bantuan';
 import { KepalaHalaman } from '../komponen/Kepala';
 import { usePesan } from '../komponen/Pesan';
 import { Label, Peringatan } from '../komponen/Status';
@@ -15,14 +14,13 @@ import { formatTanggal } from './ringkas';
 
 const LABEL_TOKO: Record<string, string> = {
   profil: 'Profil',
-  preset: 'Preset',
+  preset: 'Pengaturan tersimpan',
   paket_soal: 'Paket soal',
   soal: 'Soal',
   soal_gambar: 'Gambar soal',
   pekerjaan_generasi: 'Pekerjaan generasi',
   pemakaian_ai: 'Catatan pemakaian AI',
   log_soal: 'Jejak suntingan',
-  tp_kustom: 'TP kustom',
 };
 
 export default function Cadangan() {
@@ -68,7 +66,7 @@ export default function Cadangan() {
 
   async function pulihkan(mode: 'gabung' | 'ganti') {
     if (!impor) return;
-    if (mode === 'ganti' && !confirm('Semua soal, preset, dan profil di perangkat ini akan diganti isi cadangan. Lanjutkan?')) return;
+    if (mode === 'ganti' && !confirm('Semua soal, pengaturan tersimpan, dan profil di perangkat ini akan diganti isi cadangan. Lanjutkan?')) return;
     await pulihkanCadangan(db, impor, mode);
     setImpor(null);
     pesan('Data dipulihkan dari cadangan.');
@@ -77,57 +75,57 @@ export default function Cadangan() {
   const mb = (n: number) => `${(n / 1024 / 1024).toFixed(1).replace('.', ',')} MB`;
 
   return (
-    <div className="mx-auto flex max-w-[1312px] flex-wrap px-4 pb-24 sm:px-8 lg:px-16">
-      <div className="min-w-0 flex-[999_1_560px] pt-10 lg:pr-12 lg:pt-14">
+    <div className="mx-auto max-w-[960px] px-4 pb-20 sm:px-8">
+      <div className="min-w-0 pt-8 sm:pt-10">
         <KepalaHalaman label="Data di perangkat ini" judul="Cadangan">
           Tanpa akun, cadangan adalah satu-satunya jalan memindah soal ke perangkat lain dan memulihkannya bila data situs terhapus. Kunci API tidak pernah ikut berkas cadangan.
         </KepalaHalaman>
 
-        <div className="mt-10 grid border-y border-garis sm:grid-cols-3">
+        <div className="mt-8 grid rounded-xl border border-garis border-t-4 border-t-utama bg-kartu px-4 sm:grid-cols-3 sm:px-6">
           <div className="py-6 pr-4">
-            <div className="mono text-redup">Ukuran data</div>
-            <div className="mt-3 text-2xl font-extralight">{ukuran ? mb(ukuran.pakai) : '—'}</div>
-            <div className="mono mt-1 text-redup">
+            <div className="text-base font-bold text-redup">Ukuran data</div>
+            <div className="mt-3 text-2xl font-bold">{ukuran ? mb(ukuran.pakai) : '—'}</div>
+            <div className="font-semibold mt-1 text-redup">
               {jumlah?.paket ?? 0} paket · {jumlah?.soal ?? 0} soal
             </div>
           </div>
           <div className="border-garis py-6 sm:border-l sm:pl-6">
-            <div className="mono text-redup">Cadangan terakhir</div>
-            <div className="mt-3 text-2xl font-extralight">{formatTanggal(profil.cadangan_terakhir)}</div>
+            <div className="text-base font-bold text-redup">Cadangan terakhir</div>
+            <div className="mt-3 text-2xl font-bold">{formatTanggal(profil.cadangan_terakhir)}</div>
           </div>
           <div className="border-garis py-6 sm:border-l sm:pl-6">
-            <div className="mono text-redup">Penyimpanan persisten</div>
-            <div className="mt-3 text-2xl font-extralight">{persisten === null ? 'Tidak didukung' : persisten ? 'Aktif' : 'Belum aktif'}</div>
+            <div className="text-base font-bold text-redup">Penyimpanan persisten</div>
+            <div className="mt-3 text-2xl font-bold">{persisten === null ? 'Tidak didukung' : persisten ? 'Aktif' : 'Belum aktif'}</div>
             {persisten === false ? (
-              <button type="button" className="mono mt-1 underline" onClick={async () => setPersisten(await mintaPenyimpananPersisten())}>
+              <button type="button" className="font-semibold mt-1 underline" onClick={async () => setPersisten(await mintaPenyimpananPersisten())}>
                 Minta sekarang
               </button>
             ) : null}
           </div>
         </div>
 
-        <section className="mt-10">
-          <h2 className="text-xl font-light">Ekspor</h2>
-          <p className="mt-2 text-[15px] text-isi">Unduh semua data guru sebagai satu berkas .gensoal (JSON). Disarankan setiap minggu.</p>
+        <section className="mt-6 rounded-xl border border-garis border-t-4 border-t-utama bg-kartu p-4 sm:p-6">
+          <h2 className="text-[22px] font-extrabold text-judul">Unduh cadangan</h2>
+          <p className="mt-2 text-base text-isi">Unduh semua data guru sebagai satu berkas .gensoal (JSON). Disarankan setiap minggu.</p>
           <Tombol ukuran="besar" className="mt-5" onClick={unduh}>
             Unduh berkas .gensoal
           </Tombol>
         </section>
 
-        <section className="mt-12 border-t border-garis pt-9">
-          <h2 className="text-xl font-light">Impor</h2>
-          <p className="mt-2 text-[15px] text-isi">Pulihkan data atau pindahkan dari perangkat lain.</p>
-          <label className="mono mt-5 inline-flex min-h-11 cursor-pointer items-center rounded-[2px] border border-garis-kuat px-5 hover:border-tinta">
+        <section className="mt-6 rounded-xl border border-garis border-t-4 border-t-kuning bg-kartu p-4 sm:p-6">
+          <h2 className="text-[22px] font-extrabold text-judul">Impor</h2>
+          <p className="mt-2 text-base text-isi">Pulihkan data atau pindahkan dari perangkat lain.</p>
+          <label className="font-semibold mt-5 inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-garis-kuat px-5 hover:border-utama">
             Pilih berkas .gensoal
             <input type="file" accept=".gensoal,application/json" className="sr-only" onChange={(e) => pilihBerkas(e.target.files?.[0])} />
           </label>
           {galat ? <Peringatan className="mt-4">{galat}</Peringatan> : null}
           {impor ? (
-            <div className="mt-5 border border-tinta p-5">
-              <div className="mono text-redup">
+            <div className="mt-5 border border-utama p-5">
+              <div className="text-base font-bold text-redup">
                 Cadangan {new Date(impor.dibuat_pada).toLocaleString('id-ID')} · GenSoal {impor.versi_aplikasi}
               </div>
-              <ul className="mt-3 grid gap-1 text-[15px] sm:grid-cols-2">
+              <ul className="mt-3 grid gap-1 text-base sm:grid-cols-2">
                 {Object.entries(ringkasCadangan(impor))
                   .filter(([, n]) => n > 0)
                   .map(([k, n]) => (
@@ -145,27 +143,27 @@ export default function Cadangan() {
                   Batal
                 </Tombol>
               </div>
-              <p className="mt-3 text-sm text-redup">Gabungkan: rekaman dengan id sama ditimpa, sisanya dipertahankan.</p>
+              <p className="mt-3 text-base text-redup">Gabungkan: rekaman dengan id sama ditimpa, sisanya dipertahankan.</p>
             </div>
           ) : null}
         </section>
 
-        <section className="mt-12 border-t border-garis pt-9">
-          <h2 className="text-xl font-light">Preset</h2>
+        <section className="mt-6 rounded-xl border border-garis border-t-4 border-t-kuning bg-kartu p-4 sm:p-6">
+          <h2 className="text-[22px] font-extrabold text-judul">Pengaturan tersimpan</h2>
           <ul className="mt-4 border-t border-garis">
             {preset?.map((p) => (
               <li key={p.id} className="flex items-center justify-between border-b border-garis py-3">
                 <span>{p.nama}</span>
-                <span className="mono text-redup">dipakai {formatTanggal(p.terakhir_dipakai)}</span>
+                <span className="text-base font-bold text-redup">dipakai {formatTanggal(p.terakhir_dipakai)}</span>
               </li>
             ))}
             {!preset?.length ? <li className="py-3 text-redup">Belum ada preset.</li> : null}
           </ul>
         </section>
 
-        <section className="mt-12 border-t border-buruk/40 pt-9">
-          <h2 className="text-xl font-light text-buruk">Hapus semua data</h2>
-          <p className="mt-2 text-[15px] text-isi">Menghapus semua soal, preset, profil, dan kunci API di peramban ini. Tidak dapat dibatalkan. Unduh cadangan lebih dulu.</p>
+        <section className="mt-6 rounded-xl border border-garis border-t-4 border-t-buruk bg-kartu p-4 sm:p-6">
+          <h2 className="text-xl text-buruk">Hapus semua data</h2>
+          <p className="mt-2 text-base text-isi">Menghapus semua soal, pengaturan tersimpan, profil, dan kunci API di peramban ini. Tidak dapat dibatalkan. Unduh cadangan lebih dulu.</p>
           <Label htmlFor="konfirmasi" className="mt-5">
             Ketik HAPUS untuk mengonfirmasi
           </Label>
@@ -186,9 +184,6 @@ export default function Cadangan() {
           </div>
         </section>
       </div>
-      <aside aria-label="Bantuan" className="w-full border-garis pt-12 lg:w-[320px] lg:border-l lg:pl-10 lg:pt-14">
-        <PanelBantuan id="cadangan" />
-      </aside>
     </div>
   );
 }

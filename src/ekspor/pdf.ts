@@ -1,8 +1,7 @@
 import { jsPDF } from 'jspdf';
 import type { HurufOpsi } from '../db/tipe';
-import { keSvg } from '../gambar/svg';
 import { FONT_PDF, gambarParagraf, lebarTeks, tataParagraf, tinggiParagraf, type Baris, type GayaTeks } from './pdf-tata';
-import { opsiPerBaris, type ButirDok, type DokumenSoal } from './model';
+import { UKURAN_DOKUMEN, kolomOpsi, type BagianDok, type ButirDok, type DokumenSoal } from './model';
 
 /** Gambar SVG vektor ke PDF. Di peramban memakai svg2pdf.js; disuntikkan agar dapat diuji. */
 export type GambarSvg = (doc: jsPDF, svg: string, x: number, y: number, w: number, h: number) => Promise<void>;
@@ -10,17 +9,19 @@ export type GambarSvg = (doc: jsPDF, svg: string, x: number, y: number, w: numbe
 export interface AsetPdf {
   fontBiasa: string;
   fontTebal: string;
+  fontMiring: string;
   gambarSvg: GambarSvg;
 }
 
 const A4 = { w: 595.28, h: 841.89 };
-const TEPI = { kiri: 50, kanan: 50, atas: 50, bawah: 60 };
+const TEPI = { kiri: 56.7, kanan: 56.7, atas: 56.7, bawah: 56.7 };
 const LEBAR = A4.w - TEPI.kiri - TEPI.kanan;
-const UKURAN = 14;
-const INDEN = 24;
-const ABU: [number, number, number] = [91, 97, 107];
+const UKURAN = UKURAN_DOKUMEN;
+const INDEN = 21.3; // 0,75 cm: nomor rata kiri, isi soal menggantung
+const ABU: [number, number, number] = [75, 85, 99];
+const KECIL = 9; // jejak berkas dan nomor halaman
 
-const g = (ukuran = UKURAN, tebal = false, warna?: [number, number, number]): GayaTeks => ({ ukuran, tebal, warna });
+const g = (o: Partial<GayaTeks> = {}): GayaTeks => ({ ukuran: UKURAN, ...o });
 
 class Penulis {
   y = TEPI.atas;
@@ -34,6 +35,7 @@ class Penulis {
     this.y = TEPI.atas;
   }
 
+  /** Pindah halaman bila tinggi h tidak muat, agar soal dan tempat jawabnya tidak terpisah. */
   ruang(h: number) {
     if (this.y + h > A4.h - TEPI.bawah && this.y > TEPI.atas + 1) this.halamanBaru();
   }
@@ -50,10 +52,10 @@ class Penulis {
     this.y += opsi.jarak ?? 0;
   }
 
-  garis(y: number, tebal = 0.8) {
-    this.doc.setDrawColor(11, 12, 14);
+  garis(y: number, tebal = 0.8, x1 = TEPI.kiri, x2 = A4.w - TEPI.kanan) {
+    this.doc.setDrawColor(0, 0, 0);
     this.doc.setLineWidth(tebal);
-    this.doc.line(TEPI.kiri, y, A4.w - TEPI.kanan, y);
+    this.doc.line(x1, y, x2, y);
   }
 }
 
@@ -65,109 +67,188 @@ function labelSejajar(doc: jsPDF, label: string, x: number, y: number, lebar: nu
 }
 
 function ukuranGambar(b: ButirDok, lebarTersedia: number): { w: number; h: number } {
-  const maks = Math.min(lebarTersedia, (b.gambar!.lebar / 520) * 312, 312);
-  const w = Math.max(110, maks);
+  // Tidak melebihi lebar kolom.
+  const w = Math.max(110, Math.min(lebarTersedia, (b.gambar!.lebar / 520) * 312, 312));
   return { w, h: (w * b.gambar!.tinggi) / b.gambar!.lebar };
 }
 
-/** Gambar (atau ukur bila gambar=false) satu butir pada lebar tertentu. Mengembalikan tinggi. */
-async function butir(p: Penulis, b: ButirDok, d: DokumenSoal, x: number, y: number, lebar: number, gambar: boolean): Promise<number> {
+function persegi(doc: jsPDF, x: number, y: number, w: number, h: number, tebal = 0.6) {
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(tebal);
+  doc.rect(x, y, w, h);
+}
+
+/** "Jawaban :" lalu kotak kecil di kanannya. Mengembalikan tinggi. */
+function labelKotak(doc: jsPDF, label: string, x: number, y: number, gambar: boolean): number {
+  const gt = g({ tebal: true });
+  const tinggi = 22;
+  if (gambar) {
+    const t = tataParagraf(doc, label, 200, gt);
+    gambarParagraf(doc, t, x, y + (tinggi - tinggiParagraf(t, gt)) / 2 + 1, gt);
+    persegi(doc, x + lebarTeks(doc, label, gt) + 8, y, 170, tinggi);
+  }
+  return tinggi;
+}
+
+/** Gambar (atau ukur bila gambar=false) satu butir pilihan ganda, isian, atau uraian. Mengembalikan tinggi. */
+async function butir(p: Penulis, b: ButirDok, d: DokumenSoal, x: number, y: number, gambar: boolean): Promise<number> {
   const doc = p.doc;
   const isi = b.soal.isi_json;
   const gaya = g();
+  const lebarIsi = LEBAR - INDEN;
+  const xi = x + INDEN;
   let cy = y;
-  const lebarIsi = lebar - INDEN;
-  const tandaBs = isi.bentuk === 'benar_salah' ? (d.inggris ? 'T  /  F' : 'B  /  S') : '';
-  const lebarBs = tandaBs ? lebarTeks(doc, tandaBs, gaya) + 16 : 0;
-  const pokok = tataParagraf(doc, isi.pokok, lebarIsi - lebarBs, gaya);
+  const pokok = tataParagraf(doc, isi.pokok, lebarIsi, gaya);
   if (gambar) {
     labelSejajar(doc, `${b.nomor}.`, x, cy, INDEN, gaya, pokok);
-    gambarParagraf(doc, pokok, x + INDEN, cy, gaya);
-    if (tandaBs) labelSejajar(doc, tandaBs, x + lebar - lebarBs + 16, cy, lebarBs, gaya, pokok);
+    gambarParagraf(doc, pokok, xi, cy, gaya);
   }
   cy += tinggiParagraf(pokok, gaya);
   if (isi.terjemahan?.pokok) {
-    const gt = g(UKURAN - 2, false, ABU);
+    const gt = g({ miring: true, warna: ABU });
     const t = tataParagraf(doc, isi.terjemahan.pokok, lebarIsi, gt);
-    if (gambar) gambarParagraf(doc, t, x + INDEN, cy, gt);
+    if (gambar) gambarParagraf(doc, t, xi, cy, gt);
     cy += tinggiParagraf(t, gt);
   }
+  // Gambar diletakkan di bawah teks soal.
   if (b.gambar && b.svg) {
     const u = ukuranGambar(b, lebarIsi);
     cy += 6;
-    if (gambar) await p.aset.gambarSvg(doc, keSvg(b.gambar, { font: FONT_PDF }), x + INDEN + (lebarIsi - u.w) / 2, cy, u.w, u.h);
+    if (gambar) await p.aset.gambarSvg(doc, b.svg, xi, cy, u.w, u.h);
     cy += u.h + 6;
   }
   if (isi.bentuk === 'pilihan_ganda' && isi.opsi) {
     const huruf = Object.keys(isi.opsi).sort() as HurufOpsi[];
-    const perBaris = opsiPerBaris(b, huruf.length);
-    const lebarSel = lebarIsi / perBaris;
-    cy += 4;
-    for (let mulai = 0; mulai < huruf.length; mulai += perBaris) {
+    const kolom = kolomOpsi(b);
+    const lebarSel = lebarIsi / kolom;
+    cy += 3;
+    for (let mulai = 0; mulai < huruf.length; mulai += kolom) {
       let tinggi = 0;
-      huruf.slice(mulai, mulai + perBaris).forEach((h, i) => {
-        const label = `${h}.`;
+      huruf.slice(mulai, mulai + kolom).forEach((h, i) => {
         const lebarLabel = 20;
-        const t = tataParagraf(doc, isi.opsi![h] ?? '', lebarSel - lebarLabel - 6, gaya);
-        const sx = x + INDEN + i * lebarSel;
+        const t = tataParagraf(doc, isi.opsi![h] ?? '', lebarSel - lebarLabel - 8, gaya);
+        const sx = xi + i * lebarSel;
         if (gambar) {
-          labelSejajar(doc, label, sx, cy, lebarLabel, gaya, t);
+          labelSejajar(doc, `${h}.`, sx, cy, lebarLabel, gaya, t);
           gambarParagraf(doc, t, sx + lebarLabel, cy, gaya);
         }
         tinggi = Math.max(tinggi, tinggiParagraf(t, gaya));
       });
-      cy += tinggi + 2;
+      cy += tinggi + 1;
     }
   }
-  if (b.kotakJawaban) {
-    const h = isi.bentuk === 'uraian' ? 130 : 64;
-    cy += 6;
-    if (gambar) {
-      doc.setDrawColor(11, 12, 14);
-      doc.setLineWidth(0.6);
-      doc.rect(x + INDEN, cy, lebarIsi, h);
-      gambarParagraf(doc, tataParagraf(doc, d.inggris ? 'Answer:' : 'Jawaban:', lebarIsi, g(9, false, ABU)), x + INDEN + 6, cy + 4, g(9, false, ABU));
+  const t = b.tempat;
+  const jawab = d.inggris ? 'Answer :' : 'Jawaban :';
+  if (t.jenis === 'titik') {
+    cy += 4;
+    const label = `${jawab} `;
+    const titik = '.'.repeat(Math.floor((lebarIsi * 0.62 - lebarTeks(doc, label, gaya)) / lebarTeks(doc, '.', gaya)));
+    const baris = tataParagraf(doc, label + titik, lebarIsi, gaya);
+    if (gambar) gambarParagraf(doc, baris, xi, cy, gaya);
+    cy += tinggiParagraf(baris, gaya);
+  } else if (t.jenis === 'kotak') {
+    cy += 5;
+    cy += labelKotak(doc, jawab, xi, cy, gambar);
+  } else if (t.jenis === 'garis') {
+    for (let i = 0; i < t.jumlah; i++) {
+      cy += 22;
+      if (gambar) p.garis(cy, 0.5, xi, x + LEBAR);
     }
-    cy += h;
+    cy += 4;
+  } else if (t.jenis === 'hitungan') {
+    cy += 6;
+    const h = 110;
+    if (gambar) {
+      persegi(doc, xi, cy, lebarIsi, h);
+      const gk = g({ ukuran: 10, warna: ABU });
+      gambarParagraf(doc, tataParagraf(doc, d.inggris ? 'Working :' : 'Cara pengerjaan :', lebarIsi, gk), xi + 5, cy + 4, gk);
+    }
+    cy += h + 8;
+    cy += labelKotak(doc, d.inggris ? 'Final answer :' : 'Jawaban akhir :', xi, cy, gambar);
   }
   return cy - y;
 }
 
-async function bagianSoal(p: Penulis, d: DokumenSoal) {
-  const kolom = (LEBAR - 24) / 2;
-  for (const bg of d.bagian) {
-    p.ruang(70);
-    p.y += 8;
-    p.paragraf(bg.judul, g(UKURAN, true), { jarak: 2 });
-    p.paragraf(bg.petunjuk, g(11, false, ABU), { jarak: 8 });
-    let i = 0;
-    while (i < bg.butir.length) {
-      const a = bg.butir[i];
-      const b2 = bg.butir[i + 1];
-      if (a.sederhana && b2?.sederhana) {
-        const ha = await butir(p, a, d, 0, 0, kolom, false);
-        const hb = await butir(p, b2, d, 0, 0, kolom, false);
-        p.ruang(Math.max(ha, hb));
-        await butir(p, a, d, TEPI.kiri, p.y, kolom, true);
-        await butir(p, b2, d, TEPI.kiri + kolom + 24, p.y, kolom, true);
-        p.y += Math.max(ha, hb) + 12;
-        i += 2;
-      } else {
-        const h = await butir(p, a, d, 0, 0, LEBAR, false);
-        p.ruang(h);
-        await butir(p, a, d, TEPI.kiri, p.y, LEBAR, true);
-        p.y += h + 12;
-        i += 1;
+/** Benar-salah: tabel No | Pernyataan | Benar | Salah, atau No | Pernyataan | Jawaban (lingkari B / S). */
+function tabelBenarSalah(p: Penulis, bg: BagianDok, d: DokumenSoal) {
+  const doc = p.doc;
+  const gaya = g();
+  const L = (id: string, en: string) => (d.inggris ? en : id);
+  const lingkari = d.cara_bs === 'lingkari';
+  const lebar = lingkari ? [34, LEBAR - 34 - 90, 90] : [34, LEBAR - 34 - 120, 60, 60];
+  const kepala = lingkari ? ['No', L('Pernyataan', 'Statement'), L('Jawaban', 'Answer')] : ['No', L('Pernyataan', 'Statement'), L('Benar', 'True'), L('Salah', 'False')];
+  const pad = 5;
+  const gambarBaris = (sel: (Baris[] | 'kotak' | null)[], h: number, latar: boolean, tengah: boolean[]) => {
+    let x = TEPI.kiri;
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.6);
+    sel.forEach((s, i) => {
+      if (latar) {
+        doc.setFillColor(242, 242, 242);
+        doc.rect(x, p.y, lebar[i], h, 'FD');
+      } else doc.rect(x, p.y, lebar[i], h);
+      if (s === 'kotak') persegi(doc, x + (lebar[i] - 10) / 2, p.y + (h - 10) / 2, 10, 10, 0.7);
+      else if (s) {
+        const th = tinggiParagraf(s, latar ? g({ tebal: true }) : gaya);
+        const gy = latar ? g({ tebal: true }) : gaya;
+        gambarParagraf(doc, s, x + pad, p.y + (h - th) / 2, gy, tengah[i] ? 'tengah' : 'kiri', lebar[i] - pad * 2);
       }
+      x += lebar[i];
+    });
+    p.y += h;
+  };
+  const gk = g({ tebal: true });
+  const tataKepala = kepala.map((k, i) => tataParagraf(doc, k, lebar[i] - pad * 2, gk));
+  const hKepala = Math.max(...tataKepala.map((t) => tinggiParagraf(t, gk))) + pad * 2;
+  const tengah = lebar.map((_, i) => i !== 1);
+  const baris = bg.butir.map((b) => {
+    const teks = b.soal.isi_json.terjemahan?.pokok ? `${b.soal.isi_json.pokok}\n${b.soal.isi_json.terjemahan.pokok}` : b.soal.isi_json.pokok;
+    const sel: (Baris[] | 'kotak' | null)[] = [tataParagraf(doc, String(b.nomor), lebar[0] - pad * 2, gaya), tataParagraf(doc, teks, lebar[1] - pad * 2, gaya)];
+    if (lingkari) sel.push(tataParagraf(doc, d.inggris ? 'T        F' : 'B        S', lebar[2] - pad * 2, gaya));
+    else sel.push('kotak', 'kotak');
+    const h = Math.max(22, tinggiParagraf(sel[1] as Baris[], gaya) + pad * 2);
+    return { sel, h };
+  });
+  p.ruang(hKepala + (baris[0]?.h ?? 0));
+  gambarBaris(tataKepala, hKepala, true, tengah);
+  for (const r of baris) {
+    if (p.y + r.h > A4.h - TEPI.bawah) {
+      p.halamanBaru();
+      gambarBaris(tataKepala, hKepala, true, tengah);
+    }
+    gambarBaris(r.sel, r.h, false, tengah);
+  }
+  p.y += 6;
+}
+
+async function bagianSoal(p: Penulis, d: DokumenSoal) {
+  for (const bg of d.bagian) {
+    // Judul bagian dan petunjuk tetap bersama soal pertamanya.
+    const judul = tataParagraf(p.doc, bg.judul, LEBAR, g({ tebal: true }));
+    const petunjuk = tataParagraf(p.doc, bg.petunjuk, LEBAR, g({ miring: true }));
+    const hAwal = bg.bentuk === 'benar_salah' ? 60 : await butir(p, bg.butir[0], d, 0, 0, false);
+    p.ruang(12 + tinggiParagraf(judul, g()) + tinggiParagraf(petunjuk, g()) + 8 + hAwal);
+    p.y += 12;
+    p.paragraf(bg.judul, g({ tebal: true }), { jarak: 1 });
+    p.paragraf(bg.petunjuk, g({ miring: true }), { jarak: 8 });
+    if (bg.bentuk === 'benar_salah') {
+      tabelBenarSalah(p, bg, d);
+      continue;
+    }
+    for (const b of bg.butir) {
+      const h = await butir(p, b, d, 0, 0, false);
+      p.ruang(h);
+      await butir(p, b, d, TEPI.kiri, p.y, true);
+      p.y += h + 10;
     }
   }
 }
 
 function tabelKisi(p: Penulis, d: DokumenSoal) {
   const doc = p.doc;
-  const gaya = g(8.5);
-  const gayaKepala = g(8.5, true);
-  const lebar = [24, 128, 168, 34, 52, 89].map((w) => (w / 495) * LEBAR);
+  const gaya = g();
+  const gayaKepala = g({ tebal: true });
+  const lebar = [24, 128, 160, 38, 60, 72].map((w) => (w / 482) * LEBAR);
   const kepala = ['No', 'TP', d.inggris ? 'Indicator' : 'Indikator', 'Level', d.inggris ? 'Difficulty' : 'Kesukaran', d.inggris ? 'Type' : 'Bentuk'];
   const pad = 4;
   const baris = (sel: string[], gy: GayaTeks) => {
@@ -177,11 +258,11 @@ function tabelKisi(p: Penulis, d: DokumenSoal) {
   };
   const gambarBaris = (r: ReturnType<typeof baris>, gy: GayaTeks, latar = false) => {
     let x = TEPI.kiri;
-    doc.setDrawColor(11, 12, 14);
+    doc.setDrawColor(0, 0, 0);
     doc.setLineWidth(0.5);
     r.tata.forEach((t, i) => {
       if (latar) {
-        doc.setFillColor(246, 247, 248);
+        doc.setFillColor(242, 242, 242);
         doc.rect(x, p.y, lebar[i], r.h, 'FD');
       } else doc.rect(x, p.y, lebar[i], r.h);
       gambarParagraf(doc, t, x + pad, p.y + pad, gy);
@@ -202,62 +283,76 @@ function tabelKisi(p: Penulis, d: DokumenSoal) {
   }
 }
 
-/** PDF lengkap langsung dari peramban: kop, soal, gambar vektor, kunci, pembahasan, kisi-kisi; font ditanam. */
-export async function buatPdf(d: DokumenSoal, aset: AsetPdf): Promise<Blob> {
-  const doc = new jsPDF({ unit: 'pt', format: 'a4', compress: true });
-  doc.addFileToVFS('InterTight-Regular.ttf', aset.fontBiasa);
-  doc.addFont('InterTight-Regular.ttf', FONT_PDF, 'normal');
-  doc.addFileToVFS('InterTight-SemiBold.ttf', aset.fontTebal);
-  doc.addFont('InterTight-SemiBold.ttf', FONT_PDF, 'bold');
-  doc.setProperties({ title: d.judul, subject: `${d.mapel} kelas ${d.kelas}`, creator: 'GenSoal', keywords: d.jejak });
-  const p = new Penulis(doc, aset);
+function kepalaDokumen(p: Penulis, d: DokumenSoal) {
+  const doc = p.doc;
   const L = (id: string, en: string) => (d.inggris ? en : id);
-
+  const mapelKelas = `${d.mapel} · ${L('Kelas', 'Grade')} ${d.kelas}`;
   if (d.kop) {
     const awal = p.y;
+    const gt = g({ tebal: true });
+    const lebarKanan = Math.min(200, lebarTeks(doc, mapelKelas, gt) + 4);
+    let x = TEPI.kiri;
     if (d.kop.logo) {
       try {
-        doc.addImage(d.kop.logo, TEPI.kiri, p.y, 54, 54);
+        doc.addImage(d.kop.logo, TEPI.kiri, p.y, 44, 44);
+        x += 52;
       } catch {
         /* logo rusak diabaikan */
       }
     }
-    p.paragraf(d.kop.sekolah.toUpperCase(), g(16, true), { rata: 'tengah' });
-    for (const b of d.kop.baris) p.paragraf(b, g(11), { rata: 'tengah' });
-    if (d.kop.alamat) p.paragraf(d.kop.alamat, g(9.5, false, ABU), { rata: 'tengah' });
-    p.y = Math.max(p.y, awal + (d.kop.logo ? 58 : 0)) + 6;
-    p.garis(p.y, 1.6);
-    p.garis(p.y + 2.5, 0.5);
-    p.y += 16;
+    const lebarKiri = LEBAR - (x - TEPI.kiri) - lebarKanan - 12;
+    p.paragraf(d.kop.sekolah.toUpperCase(), gt, { x, lebar: lebarKiri });
+    for (const b of d.kop.baris) p.paragraf(b, g(), { x, lebar: lebarKiri });
+    if (d.kop.alamat) p.paragraf(d.kop.alamat, g({ ukuran: 10, warna: ABU }), { x, lebar: lebarKiri });
+    const bawah = Math.max(p.y, awal + (x > TEPI.kiri ? 46 : 0));
+    const t = tataParagraf(doc, mapelKelas, lebarKanan, gt);
+    gambarParagraf(doc, t, A4.w - TEPI.kanan - lebarKanan, bawah - tinggiParagraf(t, gt), gt, 'kanan', lebarKanan);
+    p.y = bawah + 4;
+    p.garis(p.y, 1.2);
+    p.y += 12;
   }
-  p.paragraf(d.judul, g(15, true), { rata: 'tengah' });
-  p.paragraf(`${d.mapel} · ${L('Kelas', 'Grade')} ${d.kelas}`, g(11), { rata: 'tengah', jarak: 14 });
   if (d.identitas.length) {
     const n = d.identitas.length;
-    const lebarKolom = d.identitas.map((_, i) => (n === 1 ? LEBAR : i === 0 ? LEBAR * 0.44 : (LEBAR * 0.52) / (n - 1)));
+    const gi = g();
+    const lebarKolom = d.identitas.map((_, i) => (n === 1 ? LEBAR : i === 0 ? LEBAR * 0.45 : (LEBAR * 0.55) / (n - 1)));
     let x = TEPI.kiri;
-    const gi = g(11);
     d.identitas.forEach((f, i) => {
-      const label = `${f}:`;
-      const wl = lebarTeks(doc, label, gi) + 4;
+      const label = `${f} :`;
+      const wl = lebarTeks(doc, label, gi) + 5;
       gambarParagraf(doc, tataParagraf(doc, label, wl + 10, gi), x, p.y, gi);
-      doc.setDrawColor(11, 12, 14);
-      doc.setLineWidth(0.5);
-      doc.line(x + wl, p.y + 13, x + lebarKolom[i] - 10, p.y + 13);
-      x += lebarKolom[i] + (i === 0 ? LEBAR * 0.04 / Math.max(1, n - 1) : 0);
+      p.garis(p.y + 13, 0.5, x + wl, x + lebarKolom[i] - 14);
+      x += lebarKolom[i];
     });
-    p.y += 30;
+    p.y += 26;
   }
+  p.paragraf(d.judul.toUpperCase(), g({ tebal: true }), { rata: 'tengah', jarak: d.kop ? 4 : 0 });
+  if (!d.kop) p.paragraf(mapelKelas, g(), { rata: 'tengah', jarak: 4 });
+}
+
+/** PDF lengkap langsung dari peramban, Times New Roman 12 (Liberation Serif tertanam): kop, soal, gambar vektor, kunci, pembahasan, kisi-kisi. */
+export async function buatPdf(d: DokumenSoal, aset: AsetPdf): Promise<Blob> {
+  const doc = new jsPDF({ unit: 'pt', format: 'a4', compress: true });
+  doc.addFileToVFS('LiberationSerif-Regular.ttf', aset.fontBiasa);
+  doc.addFont('LiberationSerif-Regular.ttf', FONT_PDF, 'normal');
+  doc.addFileToVFS('LiberationSerif-Bold.ttf', aset.fontTebal);
+  doc.addFont('LiberationSerif-Bold.ttf', FONT_PDF, 'bold');
+  doc.addFileToVFS('LiberationSerif-Italic.ttf', aset.fontMiring);
+  doc.addFont('LiberationSerif-Italic.ttf', FONT_PDF, 'italic');
+  doc.setProperties({ title: d.judul, subject: `${d.mapel} kelas ${d.kelas}`, creator: 'GenSoal', keywords: d.jejak });
+  const p = new Penulis(doc, aset);
+  const L = (id: string, en: string) => (d.inggris ? en : id);
+
+  kepalaDokumen(p, d);
   await bagianSoal(p, d);
   p.y += 8;
-  p.paragraf(d.jejak, g(7.5, false, ABU));
+  p.paragraf(d.jejak, g({ ukuran: KECIL, warna: ABU }));
 
   if (d.opsi.kunci) {
     p.halamanBaru();
-    p.paragraf(L('Kunci Jawaban', 'Answer Key'), g(16, true), { jarak: 10 });
+    p.paragraf(L('KUNCI JAWABAN', 'ANSWER KEY'), g({ tebal: true }), { rata: 'tengah', jarak: 10 });
     const pendek = d.kunci.filter((k) => !k.rubrik?.length);
     const kolom = (LEBAR - 24) / 2;
-    const gk = g(11);
+    const gk = g();
     for (let i = 0; i < pendek.length; i += 2) {
       const sel = [pendek[i], pendek[i + 1]].filter(Boolean).map((k) => tataParagraf(doc, `${k.nomor}.  ${k.teks}`, kolom, gk));
       const h = Math.max(...sel.map((t) => tinggiParagraf(t, gk)));
@@ -267,25 +362,27 @@ export async function buatPdf(d: DokumenSoal, aset: AsetPdf): Promise<Blob> {
     }
     for (const k of d.kunci.filter((x) => x.rubrik?.length)) {
       p.y += 8;
+      p.ruang(60);
       p.paragraf(`${k.nomor}.  ${k.teks}`, gk, { jarak: 2 });
-      p.paragraf(L('Rubrik:', 'Rubric:'), g(10, true, ABU));
-      for (const r of k.rubrik!) p.paragraf(`–  ${r}`, g(10), { x: TEPI.kiri + 14, lebar: LEBAR - 14 });
+      p.paragraf(L('Rubrik:', 'Rubric:'), g({ tebal: true }));
+      for (const r of k.rubrik!) p.paragraf(`–  ${r}`, gk, { x: TEPI.kiri + INDEN, lebar: LEBAR - INDEN });
     }
   }
   if (d.opsi.pembahasan) {
     p.halamanBaru();
-    p.paragraf(L('Pembahasan', 'Worked Solutions'), g(16, true), { jarak: 10 });
+    p.paragraf(L('PEMBAHASAN', 'WORKED SOLUTIONS'), g({ tebal: true }), { rata: 'tengah', jarak: 10 });
     for (const pb of d.pembahasan) {
       p.ruang(40);
-      p.paragraf(`${pb.nomor}.`, g(11, true));
-      for (const l of pb.langkah) p.paragraf(`–  ${l}`, g(11), { x: TEPI.kiri + 14, lebar: LEBAR - 14 });
+      p.paragraf(`${pb.nomor}.`, g({ tebal: true }));
+      for (const l of pb.langkah) p.paragraf(`–  ${l}`, g(), { x: TEPI.kiri + INDEN, lebar: LEBAR - INDEN });
       p.y += 6;
     }
   }
   if (d.opsi.kisi) {
     p.halamanBaru();
-    p.paragraf(L('Kisi-kisi', 'Test Blueprint'), g(16, true), { jarak: 2 });
-    p.paragraf(`${d.kurikulumLabel} · ${d.mapel} · ${L('Kelas', 'Grade')} ${d.kelas} · ${L('Fase', 'Phase')} ${d.fase}`, g(9.5, false, ABU), { jarak: 10 });
+    p.paragraf(L('KISI-KISI', 'TEST BLUEPRINT'), g({ tebal: true }), { rata: 'tengah', jarak: 6 });
+    p.paragraf(`${d.mapel} · ${L('Kelas', 'Grade')} ${d.kelas} · ${L('Fase', 'Phase')} ${d.fase} · ${d.kurikulumLabel}`, g(), { jarak: 4 });
+    if (d.cp) p.paragraf(`CP: ${d.cp}`, g(), { jarak: 8 });
     tabelKisi(p, d);
   }
 
@@ -293,9 +390,9 @@ export async function buatPdf(d: DokumenSoal, aset: AsetPdf): Promise<Blob> {
   for (let i = 1; i <= total; i++) {
     doc.setPage(i);
     doc.setFont(FONT_PDF, 'normal');
-    doc.setFontSize(8.5);
+    doc.setFontSize(KECIL);
     doc.setTextColor(...ABU);
-    doc.text(`${i} / ${total}`, A4.w / 2, A4.h - 30, { align: 'center' });
+    doc.text(`${i} / ${total}`, A4.w / 2, A4.h - 28, { align: 'center' });
   }
   return doc.output('blob');
 }

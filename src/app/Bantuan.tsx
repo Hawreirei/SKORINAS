@@ -6,11 +6,11 @@ import { useJudulHalaman } from './kait';
 export default function Bantuan() {
   useJudulHalaman('Bantuan');
   return (
-    <div className="mx-auto max-w-[1312px] px-4 pb-24 pt-10 sm:px-8 lg:px-16 lg:pt-14">
+    <div className="mx-auto max-w-[1100px] px-4 pb-20 pt-8 sm:px-8 sm:pt-10">
       <KepalaHalaman label="Bantuan" judul="Cara memakai">
-        Satu tugas per video, dengan langkah teks di bawahnya. Bantuan yang sama juga tampil di layar terkait.
+        Satu tugas per video, dengan langkah teks di bawahnya.
       </KepalaHalaman>
-      <div className="mt-12 grid gap-12 border-t border-tinta pt-10 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {Object.keys(BANTUAN).map((id) => (
           <PanelBantuan key={id} id={id} />
         ))}

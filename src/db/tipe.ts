@@ -1,5 +1,5 @@
-// Bentuk data milik guru (IndexedDB) dan data kurikulum resmi (JSON bundel).
-// Nama kolom mengikuti docs/RANCANGAN.md bagian Model Data.
+// Bentuk data milik guru (IndexedDB). Aplikasi tidak membawa data kurikulum:
+// kelas, mapel, CP, dan TP diisi guru (docs/RANCANGAN.md v0.4, bagian Model Data).
 
 export type Bentuk = 'pilihan_ganda' | 'isian_singkat' | 'benar_salah' | 'uraian';
 export type Kesukaran = 'mudah' | 'sedang' | 'sulit';
@@ -10,6 +10,8 @@ export type Rumpun = 'matematika' | 'ipa' | 'bahasa' | 'ips' | 'pancasila_agama'
 export type BahasaSoal = 'id' | 'en' | 'dwibahasa';
 export type GayaSoal = 'biasa' | 'numerasi' | 'literasi' | 'hots';
 export type ModeGambar = 'terprogram' | 'mati' | 'campuran';
+export type JenisUraian = 'penjelasan' | 'hitungan';
+export type CaraBenarSalah = 'centang' | 'lingkari';
 export type PenyediaId = 'gemini' | 'openrouter' | 'groq' | 'mistral' | 'openai' | 'anthropic';
 
 export const BENTUK_LABEL: Record<Bentuk, string> = {
@@ -37,22 +39,37 @@ export const STATUS_MUTU_LABEL: Record<StatusMutu, string> = {
   ditolak: 'Ditolak',
 };
 
-/** Satu TP yang dipakai paket. Disalin utuh ke soal agar kisi-kisi lama tidak berubah diam-diam. */
+export const JENIS_URAIAN_LABEL: Record<JenisUraian, string> = { penjelasan: 'Penjelasan', hitungan: 'Hitungan' };
+
+/** Satu penanda per soal di layar guru. Status mutu dan status telaah tetap dua data terpisah. */
+export type PenandaSoal = 'dicek' | 'cek_dulu' | 'disetujui' | 'ditolak';
+
+export const PENANDA_LABEL: Record<PenandaSoal, string> = {
+  dicek: 'Jawaban sudah dicek',
+  cek_dulu: 'Mohon cek dulu',
+  disetujui: 'Disetujui',
+  ditolak: 'Ditolak',
+};
+
+export function penandaSoal(s: { status_mutu: StatusMutu; status_telaah: StatusTelaah }): PenandaSoal {
+  if (s.status_mutu === 'ditolak') return 'ditolak';
+  if (s.status_telaah === 'ditelaah_guru') return 'disetujui';
+  return s.status_mutu === 'perlu_telaah' ? 'cek_dulu' : 'dicek';
+}
+
+/** Satu TP yang dipakai paket, ditulis guru. Disalin utuh ke soal agar kisi-kisi lama tidak berubah diam-diam. */
 export interface TpDipakai {
   id: string;
   kode?: string;
   rumusan: string;
-  sumber: 'resmi' | 'kustom';
-  versi: number | string;
+  /** Data dari versi 0.3: 'resmi' bila diambil dari data kurikulum bundel. */
+  sumber?: 'resmi' | 'kustom' | 'guru';
+  versi?: number | string;
   induk_id?: string | null;
 }
 
-/** Isi formulir Buat soal. Dipakai sama persis oleh preset dan paket_soal.parameter_json. */
+/** Isi formulir Buat soal. Dipakai sama persis oleh pengaturan tersimpan (preset) dan paket_soal.parameter_json. */
 export interface ParameterPaket {
-  kurikulum_id: string;
-  kurikulum_nama: string;
-  kurikulum_versi: string;
-  kurikulum_dasar?: string;
   kelas: number;
   fase: string;
   mapel: string;
@@ -66,6 +83,13 @@ export interface ParameterPaket {
   gaya: GayaSoal;
   gambar: ModeGambar;
   materi: string;
+  /** Cara siswa menjawab benar-salah di berkas: centang kotak Benar/Salah atau lingkari B/S. */
+  cara_bs: CaraBenarSalah;
+  /** Data dari versi 0.3 (sebelum aplikasi berhenti membawa data kurikulum). Tidak diisi lagi. */
+  kurikulum_id?: string;
+  kurikulum_nama?: string;
+  kurikulum_versi?: string;
+  kurikulum_dasar?: string;
 }
 
 export type Verifikasi =
@@ -89,11 +113,18 @@ export interface IsiSoal {
   opsi?: Partial<Record<HurufOpsi, string>>;
   kunci: string;
   rubrik?: string[];
+  /** Hanya uraian: penjelasan dijawab pada garis, hitungan pada kotak cara pengerjaan dan jawaban akhir. */
+  jenis_uraian?: JenisUraian;
   pembahasan: string[];
   verifikasi: Verifikasi;
   gambar: GambarSoal | null;
   terjemahan?: { pokok: string; opsi?: Partial<Record<HurufOpsi, string>> } | null;
   meta: { tp: string; indikator: string; level: Level; kesukaran: Kesukaran };
+}
+
+/** Jenis jawaban uraian; soal lama tanpa penanda ditebak dari verifikasinya. */
+export function jenisUraian(isi: Pick<IsiSoal, 'jenis_uraian' | 'verifikasi'>): JenisUraian {
+  return isi.jenis_uraian ?? (isi.verifikasi.tipe === 'tidak_ada' ? 'penjelasan' : 'hitungan');
 }
 
 export interface Rekaman {
@@ -217,21 +248,8 @@ export interface PemakaianAi {
 export interface LogSoal {
   id: string;
   soal_id: string;
-  aksi: 'sunting' | 'ganti' | 'buat_ulang' | 'setujui' | 'telaah' | 'kunci' | 'buka_kunci' | 'hapus' | 'pulihkan' | 'tolak';
+  aksi: 'sunting' | 'ganti' | 'buat_ulang' | 'setujui' | 'telaah' | 'kunci' | 'buka_kunci' | 'hapus' | 'pulihkan' | 'tolak' | 'jenis_uraian';
   sebelum_json: unknown;
   sesudah_json: unknown;
   dibuat_pada: number;
-}
-
-/** TP kustom berversi. Mengubah rumusan membuat rekaman baru dengan garis_id yang sama. */
-export interface TpKustom extends Rekaman {
-  garis_id: string;
-  versi: number;
-  kurikulum_nama: string;
-  kelas: number;
-  mapel: string;
-  rumpun: Rumpun | null;
-  cp: string;
-  rumusan: string;
-  induk_id: string | null;
 }

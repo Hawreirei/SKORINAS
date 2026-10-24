@@ -1,4 +1,4 @@
-import type { Bentuk, GambarSoal, HurufOpsi, IsiSoal, Kesukaran, Level, Verifikasi } from '../db/tipe';
+import type { Bentuk, GambarSoal, HurufOpsi, IsiSoal, JenisUraian, Kesukaran, Level, Verifikasi } from '../db/tipe';
 
 export class GalatSkema extends Error {
   constructor(public readonly daftar: string[]) {
@@ -125,6 +125,7 @@ export function bacaIsiSoal(mentah: unknown, harapan: HarapanSkema): IsiSoal {
   let opsi: IsiSoal['opsi'];
   let kunci = '';
   let rubrik: string[] | undefined;
+  let jenis_uraian: JenisUraian | undefined;
   switch (harapan.bentuk) {
     case 'pilihan_ganda': {
       opsi = bacaOpsi(o.opsi, galat);
@@ -146,6 +147,9 @@ export function bacaIsiSoal(mentah: unknown, harapan: HarapanSkema): IsiSoal {
       const r = Array.isArray(o.rubrik) ? o.rubrik : typeof o.rubrik === 'string' ? [o.rubrik] : [];
       rubrik = r.map((x) => String(x).trim()).filter(Boolean);
       if (!rubrik.length) galat.push('rubrik wajib untuk soal uraian.');
+      // Penanda jenis jawaban tidak memblokir: bila model lupa, tebak dari verifikasi. Guru dapat mengubahnya di layar Periksa.
+      const j = String(o.jenis_uraian ?? '').trim().toLowerCase();
+      jenis_uraian = j === 'penjelasan' || j === 'hitungan' ? j : undefined;
       break;
     }
   }
@@ -153,6 +157,7 @@ export function bacaIsiSoal(mentah: unknown, harapan: HarapanSkema): IsiSoal {
   const pembahasan = pembahasanMentah.map((x) => String(x).trim()).filter(Boolean);
   if (!pembahasan.length) galat.push('pembahasan wajib, minimal satu langkah.');
   const verifikasi = bacaVerifikasi(o.verifikasi, galat);
+  if (harapan.bentuk === 'uraian' && !jenis_uraian) jenis_uraian = verifikasi.tipe === 'tidak_ada' ? 'penjelasan' : 'hitungan';
   const gambar = bacaGambar(o.gambar, galat);
   const meta = (o.meta ?? {}) as Record<string, unknown>;
   const indikator = typeof meta.indikator === 'string' ? meta.indikator.trim() : '';
@@ -171,6 +176,7 @@ export function bacaIsiSoal(mentah: unknown, harapan: HarapanSkema): IsiSoal {
     ...(opsi ? { opsi } : {}),
     kunci,
     ...(rubrik ? { rubrik } : {}),
+    ...(jenis_uraian ? { jenis_uraian } : {}),
     pembahasan,
     verifikasi,
     gambar,

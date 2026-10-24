@@ -20,6 +20,7 @@ const SKEMA = `{
   "opsi": {"A": "...", "B": "...", "C": "...", "D": "..."},   // hanya pilihan_ganda
   "kunci": "...",            // pilihan_ganda: huruf; benar_salah: "B" atau "S"; isian_singkat: jawaban singkat; uraian: jawaban model lengkap
   "rubrik": ["kriteria (skor)", "..."],   // hanya uraian
+  "jenis_uraian": "penjelasan" atau "hitungan",   // hanya uraian: penjelasan bila meminta alasan atau pernyataan, hitungan bila meminta perhitungan
   "pembahasan": ["langkah 1", "langkah 2"],
   "verifikasi": <lihat aturan verifikasi>,
   "gambar": null atau {"templat": "<id templat>", "parameter": {...}},
@@ -42,7 +43,7 @@ const PETUNJUK_BENTUK: Record<Bentuk, string> = {
   pilihan_ganda: 'Pilihan ganda dengan tepat satu jawaban benar.',
   isian_singkat: 'Isian singkat: jawaban satu bilangan, kata, atau tanda. Pokok diakhiri titik-titik "....".',
   benar_salah: 'Benar-salah: pokok berupa satu pernyataan (bukan pertanyaan). Kunci "B" atau "S".',
-  uraian: 'Uraian: soal cerita atau penalaran dengan jawaban model lengkap dan rubrik penskoran.',
+  uraian: 'Uraian: soal cerita atau penalaran dengan jawaban model lengkap dan rubrik penskoran. Isi "jenis_uraian": "penjelasan" bila siswa diminta memberi alasan atau pernyataan (dijawab pada garis), "hitungan" bila siswa diminta menghitung (dijawab pada kotak cara pengerjaan dan jawaban akhir).',
 };
 
 const GAYA: Record<ParameterPaket['gaya'], string> = {
@@ -74,8 +75,7 @@ export function susunPesan(k: KonteksPrompt): string {
   const gambarBoleh = p.gambar !== 'mati' && (paket?.templatGambar.length ?? 0) > 0;
   const bagian: string[] = [];
 
-  bagian.push(`## Konteks kurikulum
-- Kurikulum: ${p.kurikulum_nama}${p.kurikulum_dasar ? ` (${p.kurikulum_dasar})` : ''}
+  bagian.push(`## Konteks pembelajaran (diisi guru)
 - Kelas ${p.kelas}, fase ${p.fase}
 - Mata pelajaran: ${p.mapel}${paket ? ` (rumpun ${paket.nama})` : ''}
 ${p.cp.trim() ? `- Capaian pembelajaran: ${p.cp.trim()}` : ''}

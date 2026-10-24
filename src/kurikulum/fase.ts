@@ -1,5 +1,5 @@
-// Pemetaan bawaan Kurikulum Merdeka bila JSON kurikulum belum dimuat (mis. dalam uji).
-// Sumber kebenaran tetap tabel fase di public/kurikulum.
+// Pemetaan kelas ke fase Kurikulum Merdeka. Aplikasi tidak membawa data kurikulum (rancangan v0.4);
+// fase hanya dipakai untuk konteks prompt dan batas keterbacaan, bukan untuk memilih CP atau TP.
 const FASE_BAWAAN: [string, number, number][] = [
   ['A', 1, 2],
   ['B', 3, 4],

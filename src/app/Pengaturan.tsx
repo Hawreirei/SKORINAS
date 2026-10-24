@@ -54,11 +54,11 @@ export default function Pengaturan() {
   }
 
   return (
-    <div className="mx-auto max-w-[1000px] px-4 pb-24 pt-10 sm:px-8 lg:px-16 lg:pt-14">
+    <div className="mx-auto max-w-[960px] px-4 pb-20 pt-8 sm:px-8 sm:pt-10">
       <KepalaHalaman label="Pengaturan" judul="Profil dan kop">
         Satu profil per perangkat, tanpa akun. Kop dan identitas siswa dipakai di berkas Word, PDF, dan LaTeX. <Link to="/pengaturan/ai" className="underline">Pengaturan AI</Link> ada di halaman terpisah.
       </KepalaHalaman>
-      <div className="mt-10 grid gap-5 border-t border-garis pt-9 sm:grid-cols-2">
+      <div className="mt-8 grid gap-5 rounded-xl border border-garis border-t-4 border-t-utama bg-kartu p-4 sm:p-6 sm:grid-cols-2">
         <div>
           <Label htmlFor="nama">Nama guru</Label>
           <input id="nama" className="bidang mt-2" value={nama} onChange={(e) => setNama(e.target.value)} />
@@ -83,12 +83,12 @@ export default function Pengaturan() {
           <Label>Logo sekolah (PNG atau JPG, maks. 300 KB)</Label>
           <div className="mt-2 flex flex-wrap items-center gap-4">
             {profil.logo_blob ? <img src={profil.logo_blob} alt="Logo sekolah" className="size-16 border border-garis bg-white object-contain p-1" /> : null}
-            <label className="mono inline-flex min-h-11 cursor-pointer items-center rounded-[2px] border border-garis-kuat px-5 hover:border-tinta">
+            <label className="font-semibold inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-garis-kuat px-5 hover:border-utama">
               Pilih berkas
               <input type="file" accept="image/png,image/jpeg" className="sr-only" onChange={(e) => unggahLogo(e.target.files?.[0])} />
             </label>
             {profil.logo_blob ? (
-              <button type="button" className="mono text-redup hover:text-buruk" onClick={() => simpanProfil({ logo_blob: null })}>
+              <button type="button" className="text-base font-bold text-redup hover:text-buruk" onClick={() => simpanProfil({ logo_blob: null })}>
                 Hapus logo
               </button>
             ) : null}
@@ -99,8 +99,8 @@ export default function Pengaturan() {
         Simpan profil
       </Tombol>
 
-      <div className="mt-14 border-t border-garis pt-9">
-        <h2 className="text-xl font-light">Tampilan</h2>
+      <div className="mt-6 rounded-xl border border-garis border-t-4 border-t-kuning bg-kartu p-4 sm:p-6">
+        <h2 className="text-[22px] font-extrabold text-judul">Tampilan</h2>
         <div className="mt-4 flex flex-wrap gap-3">
           {(
             [

@@ -37,3 +37,20 @@ export const PAKET: Record<Rumpun, PaketMapel> = {
 export function paketUntuk(rumpun: Rumpun | null): PaketMapel | null {
   return rumpun ? PAKET[rumpun] : null;
 }
+
+// Mapel diketik guru, jadi rumpun (penentu pemeriksa jawaban) ditebak dari namanya.
+// Urutan penting: "Matematika" diperiksa sebelum kata umum lain.
+const POLA_RUMPUN: [Rumpun, RegExp][] = [
+  ['matematika', /matemati|\bmtk\b|\bmath/i],
+  ['ipa', /\bipas?\b|fisika|kimia|biologi|sains|science|ilmu pengetahuan alam/i],
+  ['pancasila_agama', /pancasila|\bppkn\b|\bpkn\b|agama|budi pekerti|kewarganegaraan|akidah|fikih|fiqih|quran|hadis|hadits|sejarah kebudayaan islam/i],
+  ['ips', /\bips\b|sejarah|geografi|ekonomi|sosiologi|antropologi|ilmu pengetahuan sosial/i],
+  ['bahasa', /bahasa|english|inggris|arab|jawa|sunda|mandarin|literasi/i],
+  ['seni_pjok_informatika', /seni|musik|tari|rupa|teater|\bpjok\b|jasmani|olahraga|informatika|prakarya|\btik\b|koding/i],
+];
+
+export function rumpunDariMapel(mapel: string): Rumpun | null {
+  const m = mapel.trim();
+  if (!m) return null;
+  return POLA_RUMPUN.find(([, pola]) => pola.test(m))?.[0] ?? null;
+}

@@ -8,7 +8,6 @@ const NAV = [
   { ke: '/', label: 'Beranda', akhir: true },
   { ke: '/soal/baru', label: 'Buat soal', akhir: true },
   { ke: '/soal', label: 'Soal saya', akhir: false },
-  { ke: '/kurikulum', label: 'Kurikulum', akhir: true },
   { ke: '/pengaturan/ai', label: 'Pengaturan AI', akhir: false },
   { ke: '/cadangan', label: 'Cadangan', akhir: true },
 ];
@@ -24,50 +23,52 @@ export function Kepala() {
   const pengatur = usePengatur();
   useEffect(() => setBuka(false), [pathname]);
   return (
-    <header className="tanpa-cetak relative z-20 border-b border-garis bg-latar/95 backdrop-blur">
-      <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-4 py-5 sm:px-8 lg:px-16 lg:py-7">
+    <header className="tanpa-cetak relative z-20 border-b-[3px] border-kuning bg-kartu">
+      <div className="mx-auto flex max-w-[1312px] items-center justify-between gap-4 px-4 py-3 sm:px-8 lg:py-4">
         <Link to="/" aria-label="GenSoal, beranda">
           <Logo />
         </Link>
-        <nav aria-label="Utama" className="hidden flex-wrap gap-x-8 gap-y-2 xl:flex">
-          {NAV.map((n) => (
-            <NavLink key={n.ke} to={n.ke} className={`mono ${aktif(pathname, n.ke, n.akhir) ? 'text-tinta' : 'text-redup hover:text-tinta'}`} aria-current={aktif(pathname, n.ke, n.akhir) ? 'page' : undefined}>
-              {n.label}
-            </NavLink>
-          ))}
+        <nav aria-label="Utama" className="hidden gap-1 lg:flex">
+          {NAV.map((n) => {
+            const a = aktif(pathname, n.ke, n.akhir);
+            return (
+              <NavLink
+                key={n.ke}
+                to={n.ke}
+                className={`relative rounded-lg px-3.5 py-2 text-base font-bold ${a ? 'text-utama after:absolute after:inset-x-3.5 after:-bottom-[9px] after:h-[3px] after:rounded-full after:bg-utama' : 'text-redup hover:bg-lembut hover:text-utama'}`}
+                aria-current={a ? 'page' : undefined}
+              >
+                {n.label}
+              </NavLink>
+            );
+          })}
         </nav>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {pengatur.berjalan ? (
-            <Link to={`/soal/${pengatur.paketId}`} className="mono hidden items-center gap-2.5 text-tinta sm:flex">
-              <span className="inline-block size-[7px] animate-pulse rounded-full bg-tinta" />
-              {pengatur.menunggu ? 'Menunggu batas penyedia' : 'Membuat soal'} {pengatur.slotAktif ? `· butir ${pengatur.slotAktif}` : ''}
+            <Link to={`/soal/${pengatur.paketId}`} className="hidden items-center gap-2 rounded-full bg-utama-lembut px-3 py-1.5 text-base font-bold text-utama-tua sm:flex dark:text-di-tinta">
+              <span className="inline-block size-2 animate-pulse rounded-full bg-utama" />
+              {pengatur.menunggu ? 'Menunggu batas penyedia' : 'Membuat soal'} {pengatur.slotAktif ? `· soal ${pengatur.slotAktif}` : ''}
             </Link>
           ) : (
-            <span className="mono hidden items-center gap-2.5 text-redup sm:flex">
-              <Titik />
+            <span className="hidden items-center gap-2 text-base font-semibold text-redup xl:flex">
+              <Titik className="text-utama" />
               Tersimpan di perangkat ini
             </span>
           )}
-          <button type="button" className="inline-flex size-11 items-center justify-center xl:hidden" aria-label="Menu" aria-expanded={buka} onClick={() => setBuka((b) => !b)}>
-            <svg aria-hidden="true" width="22" height="12" viewBox="0 0 22 12" stroke="currentColor" strokeWidth="1.4">
-              {buka ? <path d="M3 0l16 12M3 12L19 0" /> : <path d="M0 1h22M0 11h22" />}
+          <button type="button" className="inline-flex size-11 items-center justify-center rounded-lg text-judul hover:bg-lembut lg:hidden" aria-label="Menu" aria-expanded={buka} onClick={() => setBuka((b) => !b)}>
+            <svg aria-hidden="true" width="22" height="16" viewBox="0 0 22 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              {buka ? <path d="M4 1l14 14M4 15L18 1" /> : <path d="M1 2h20M1 8h20M1 14h20" />}
             </svg>
           </button>
         </div>
       </div>
       {buka ? (
-        <nav aria-label="Menu" className="border-t border-garis px-4 pb-4 sm:px-8 xl:hidden">
-          {NAV.map((n) => (
-            <NavLink key={n.ke} to={n.ke} className={`mono flex min-h-12 items-center border-b border-garis ${aktif(pathname, n.ke, n.akhir) ? 'text-tinta' : 'text-redup'}`}>
+        <nav aria-label="Menu" className="border-t border-garis px-4 pb-3 sm:px-8 lg:hidden">
+          {[...NAV, { ke: '/pengaturan', label: 'Profil dan kop', akhir: true }, { ke: '/bantuan', label: 'Bantuan', akhir: true }].map((n) => (
+            <NavLink key={n.ke} to={n.ke} className={`flex min-h-12 items-center border-b border-garis text-base font-bold last:border-b-0 ${aktif(pathname, n.ke, n.akhir) ? 'text-utama' : 'text-tinta'}`}>
               {n.label}
             </NavLink>
           ))}
-          <NavLink to="/pengaturan" className="mono flex min-h-12 items-center border-b border-garis text-redup">
-            Profil dan kop
-          </NavLink>
-          <NavLink to="/bantuan" className="mono flex min-h-12 items-center text-redup">
-            Bantuan
-          </NavLink>
         </nav>
       ) : null}
     </header>
@@ -76,20 +77,17 @@ export function Kepala() {
 
 export function Kaki() {
   return (
-    <footer className="tanpa-cetak border-t border-garis">
-      <div className="mono mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-4 px-4 py-6 text-redup sm:px-8 lg:px-16">
+    <footer className="tanpa-cetak border-t border-garis bg-kartu">
+      <div className="mx-auto flex max-w-[1312px] flex-wrap items-center justify-between gap-4 px-4 py-5 text-base text-redup sm:px-8">
         <span className="flex items-center gap-2">
-          <Titik />
+          <Titik className="text-utama" />
           Data tinggal di peramban ini · tanpa akun
         </span>
-        <span className="flex flex-wrap gap-6">
-          <Link to="/pengaturan" className="hover:text-tinta">
+        <span className="flex flex-wrap gap-5">
+          <Link to="/pengaturan" className="font-semibold hover:text-utama">
             Profil dan kop
           </Link>
-          <Link to="/telaah" className="hover:text-tinta">
-            Telaah
-          </Link>
-          <Link to="/bantuan" className="hover:text-tinta">
+          <Link to="/bantuan" className="font-semibold hover:text-utama">
             Bantuan
           </Link>
           <span>GenSoal {__VERSI_APLIKASI__}</span>
@@ -99,13 +97,58 @@ export function Kaki() {
   );
 }
 
-export function KepalaHalaman({ label, judul, ukuran = 'sedang', children }: { label: string; judul: string; ukuran?: 'besar' | 'sedang' | 'kecil'; children?: React.ReactNode }) {
-  const kelas = { besar: 'text-[44px] sm:text-[64px] lg:text-[72px]', sedang: 'text-[40px] sm:text-[56px] lg:text-[64px]', kecil: 'text-[34px] sm:text-[48px] lg:text-[56px]' }[ukuran];
+export function KepalaHalaman({ label, judul, children }: { label?: string; judul: string; ukuran?: 'besar' | 'sedang' | 'kecil'; children?: React.ReactNode }) {
   return (
     <div>
-      <div className="mono text-redup">{label}</div>
-      <h1 className={`judul-besar mt-3.5 ${kelas}`}>{judul}</h1>
-      {children ? <div className="mt-5 max-w-[620px] text-[17px] font-light leading-relaxed text-isi">{children}</div> : null}
+      {label ? <div className="text-base font-bold text-utama">{label}</div> : null}
+      <h1 className="judul-besar mt-1 text-[30px] sm:text-[36px]">{judul}</h1>
+      {children ? <div className="mt-2 max-w-[640px] text-[17px] leading-relaxed text-redup">{children}</div> : null}
     </div>
+  );
+}
+
+const LANGKAH = [
+  { nama: 'Buat', warna: 'bg-utama text-di-tinta', lembut: 'bg-utama-lembut text-utama-tua dark:text-di-tinta' },
+  { nama: 'Periksa', warna: 'bg-awas text-di-tinta', lembut: 'bg-awas-latar text-awas' },
+  { nama: 'Unduh', warna: 'bg-baik text-di-tinta', lembut: 'bg-baik-latar text-baik' },
+] as const;
+
+/** Penunjuk "Langkah n dari 3" yang selalu terlihat di layar Buat, Periksa, dan Unduh. */
+export function PenunjukLangkah({ langkah, paketId }: { langkah: 1 | 2 | 3; paketId?: string }) {
+  const tujuan = [null, paketId ? `/soal/${paketId}` : null, paketId ? `/soal/${paketId}/ekspor` : null];
+  return (
+    <nav aria-label="Langkah" className="tanpa-cetak border-b border-garis bg-kartu">
+      <div className="mx-auto flex max-w-[1312px] flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 sm:px-8">
+        <span className="text-base font-extrabold text-judul">
+          Langkah {langkah} dari 3
+        </span>
+        <ol className="flex items-center gap-1.5 sm:gap-2">
+          {LANGKAH.map((l, i) => {
+            const nomor = i + 1;
+            const kini = nomor === langkah;
+            const isi = (
+              <>
+                <span className={`inline-flex size-6 items-center justify-center rounded-full text-[14px] font-extrabold ${kini ? 'bg-kartu text-tinta' : l.warna}`}>{nomor}</span>
+                {l.nama}
+              </>
+            );
+            const kelas = `inline-flex min-h-9 items-center gap-1.5 rounded-full px-2.5 text-base font-bold sm:gap-2 sm:px-3 ${kini ? l.warna : nomor < langkah ? l.lembut : 'bg-panel text-redup'}`;
+            const ke = tujuan[i];
+            return (
+              <li key={l.nama} className="flex items-center gap-1.5 sm:gap-2" aria-current={kini ? 'step' : undefined}>
+                {i ? <span aria-hidden="true" className="hidden h-px w-4 bg-garis-kuat sm:block" /> : null}
+                {ke && !kini ? (
+                  <Link to={ke} className={`${kelas} hover:underline`}>
+                    {isi}
+                  </Link>
+                ) : (
+                  <span className={kelas}>{isi}</span>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    </nav>
   );
 }
