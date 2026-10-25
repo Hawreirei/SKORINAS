@@ -1,5 +1,7 @@
 # Rancangan penyederhanaan tampilan (25 Oktober 2026)
 
+> **Catatan v0.5.** Bagian tentang tombol Setujui, penanda status, saringan "Mohon cek dulu", dan penunjuk "Langkah n dari 3" di bawah ini sudah digantikan keputusan pemilik pada `docs/RANCANGAN-UI.md`: semuanya dihapus (tahap UI-00, issue #14).
+
 Permintaan pemilik: "beberapa tampilan sekarang malah jadi terlalu repot; buat lebih sederhana dan tetap mudah dinavigasi." Dokumen ini mencatat masalah yang ditemukan, prinsip perbaikan, dan perubahan per layar. Alur Buat, Periksa, Unduh, istilah di layar, palet warna, dan data tidak berubah.
 
 ## Temuan pada tampilan v0.4

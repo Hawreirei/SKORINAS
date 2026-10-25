@@ -32,13 +32,13 @@ Kebijakan keamanan konten juga disisipkan sebagai `<meta>` saat build, karena Gi
 | F-04 | Komposisi tiga kategori, sisa terbesar | Selesai; diuji untuk semua n 5–50 dan semua kelipatan 5 |
 | F-05 | PG, isian singkat, benar-salah, uraian | Selesai |
 | F-06 | Generasi JSON terstruktur lewat adaptor | Selesai: Gemini, OpenRouter, Groq, Mistral, OpenAI, Anthropic |
-| F-07 | Verifikasi hitung, kaidah butir, duplikasi, status mutu | Selesai (Matematika); rumpun lain bertanda "Mohon cek dulu" |
+| F-07 | Verifikasi hitung, kaidah butir, duplikasi, status mutu | Selesai (Matematika); rumpun lain berketerangan "Kunci tidak dicek otomatis" |
 | F-08 | Sepuluh templat gambar terprogram | Selesai; SVG di layar/PDF, PNG 300 dpi di Word, TikZ di LaTeX |
 | F-09 | Sunting, kunci, ganti, buat ulang per butir | Selesai |
 | F-10 | Kisi-kisi, kunci, pembahasan otomatis | Selesai |
 | F-11 | Unduh Word dan PDF (Times New Roman 12, pakem penulisan soal); LaTeX di menu lanjutan | Selesai (v0.4); tampilan cetak sebagai cadangan |
 | F-12 | Cadangan .gensoal, pengingat, penyimpanan persisten | Selesai |
-| F-13 | Periksa: satu penanda per soal, Setujui, gerbang unduh | Selesai (v0.4) |
+| F-13 | Periksa: satu penanda per soal, Setujui, gerbang unduh | Dihapus pada v0.5; dikerjakan di UI-00 (#14) |
 | F-14 | Kunci API milik guru, uji kunci, peringatan biaya dan privasi | Selesai |
 | F-15 | CP dan TP ditulis di layar Buat | Selesai (v0.4) |
 | F-16 | Registri model berlencana + daftar langsung penyedia | Selesai; golden set per model belum dijalankan dengan kunci asli |

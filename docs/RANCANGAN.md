@@ -6,13 +6,15 @@ GenSoal adalah aplikasi web yang membuat soal dari kelas, mata pelajaran, CP, da
 
 > **Perubahan v0.4 (24 Oktober 2026).** Antarmuka berwarna dan terkelompok dengan 3 layar kerja (Buat, Periksa, Unduh), 3 isian wajib, istilah sehari-hari, satu penanda per soal, ekspor Word dan PDF memakai Times New Roman 12 dengan pakem penulisan soal tetap, dan aplikasi tidak lagi membawa data kurikulum. Rincian: bagian Arah Visual, Rancangan Layar, Pakem Penulisan Soal, dan Mesin Gambar dan Ekspor. Arsitektur, penyimpanan lokal, dan kunci API tidak berubah.
 
+> **Perubahan v0.5 (25 Oktober 2026).** Atas keputusan pemilik: tidak ada lagi persetujuan guru (tombol Setujui, penanda "Disetujui", dan gerbang unduh), penanda status per soal ("Jawaban sudah dicek", "Mohon cek dulu"), tabel istilah wajib, dan penunjuk "Langkah n dari 3". Soal yang lolos pemeriksaan otomatis langsung siap diunduh; soal yang kuncinya tidak dapat dicek otomatis hanya diberi satu kalimat keterangan. Rancangan tampilan lanjutan ada di `docs/RANCANGAN-UI.md`.
+
 ## Ringkasan dan Prinsip Desain
 
 Enam prinsip berikut menjadi pegangan setiap keputusan teknis. Bila ada fitur atau solusi yang bertentangan dengannya, fitur itu ditunda atau dirancang ulang.
 
 1. **CP dan TP guru dulu, AI kemudian.** Soal dihasilkan dari kelas, mapel, CP, dan TP yang diisi guru, tidak dari ingatan bebas model. Aplikasi tidak membawa data kurikulum.
 2. **Verifikasi sebelum tampil.** Soal yang kuncinya tidak lolos pemeriksaan otomatis tidak pernah sampai ke layar guru.
-3. **Draf sampai disetujui guru.** Setiap soal melewati status draf lalu disetujui. Soal yang kuncinya tidak dapat dicek otomatis ("Mohon cek dulu") tidak dapat diunduh sebelum disetujui.
+3. **Guru yang memutuskan, tanpa langkah persetujuan.** Soal yang lolos pemeriksaan langsung dapat diunduh (v0.5). Soal yang kuncinya tidak dapat dicek otomatis diberi keterangan singkat "Kunci tidak dicek otomatis" agar guru membacanya sekali sebelum dipakai; keterangan itu tidak menghalangi unduhan.
 4. **Gambar dihitung, bukan ditebak.** Diagram yang menuntut presisi dibuat dari parameter soal, bukan digambar model gambar.
 5. **Modular per mata pelajaran.** Setiap mata pelajaran punya paket sendiri (aturan verifikasi, templat gambar, gaya soal) yang dapat dibuka atau ditutup tanpa mengubah inti aplikasi.
 6. **Lokal dulu.** Tanpa akun: soal dan pengaturan tersimpan tinggal di peramban guru, dokumen diunduh langsung dari perangkat, dan hanya permintaan ke model AI yang melewati server.
@@ -58,7 +60,7 @@ Tanpa akun, tidak ada peran yang ditegakkan oleh sistem: siapa pun yang membuka 
 | --- | --- | --- | --- |
 | Guru | Membuat, menyunting, menyetujui, dan mengekspor soal | Semua data di peramban perangkatnya; pindah perangkat lewat berkas .gensoal | MVP |
 | Pengembang | Merawat registri model dan golden set per model | Lewat repositori dan rilis aplikasi, bukan layar admin | MVP |
-| Validator isi | Menelaah soal rumpun berisiko tinggi | Ditunda; pada MVP guru mengecek sendiri soal bertanda "Mohon cek dulu" | V2 |
+| Validator isi | Menelaah soal rumpun berisiko tinggi | Ditunda; pada MVP guru membaca sendiri soal yang kuncinya tidak dicek otomatis | V2 |
 | Koordinator dan admin sekolah | Bank soal bersama, kop sekolah, kuota sekolah | Memerlukan server dan akun; ditunda | V2 |
 
 ## Lingkup Rilis
@@ -79,7 +81,7 @@ MVP dibatasi pada satu jalur lengkap: dari isian kelas, mapel, CP, dan TP sampai
 | F-10 | Kisi-kisi, kunci, dan pembahasan otomatis | MVP |
 | F-11 | Unduh langsung Word (.docx) dan PDF (Times New Roman 12, pakem penulisan soal) dari peramban; LaTeX (.tex) di menu lanjutan | MVP |
 | F-12 | Cadangan dan pemulihan: ekspor dan impor berkas .gensoal, pengingat cadangan, penyimpanan persisten | MVP |
-| F-13 | Periksa: satu penanda per soal ("Jawaban sudah dicek" atau "Mohon cek dulu"), tombol Setujui, dan gerbang unduh | MVP |
+| F-13 | ~~Periksa: penanda per soal, tombol Setujui, dan gerbang unduh~~ dihapus pada v0.5: soal yang lolos langsung siap diunduh; soal tanpa cek otomatis hanya diberi keterangan | Dihapus |
 | F-14 | Pengaturan AI: kunci API milik guru, banyak penyedia, uji kunci, peringatan biaya dan privasi per penyedia | MVP |
 | F-15 | CP dan TP ditulis langsung di layar Buat (dua kolom teks) dan tersimpan di Pengaturan tersimpan; tidak ada editor kurikulum | MVP |
 | F-16 | Registri model: daftar model per penyedia dengan lencana (direkomendasikan, stabil, pratinjau, usang) dan daftar model langsung dari penyedia | MVP |
@@ -106,25 +108,25 @@ Alur utama berjalan dari formulir sampai ekspor, dengan verifikasi otomatis di t
 
 &#91;embedded content: alur pembuatan soal · 6 langkah, 1 keputusan\]
 
-Soal yang gagal verifikasi dibuat ulang otomatis (maksimal tiga kali) dan hanya soal yang lolos yang mengurangi batas harian. Soal bertanda "Mohon cek dulu" baru dapat diunduh setelah guru menekan Setujui.
+Soal yang gagal verifikasi dibuat ulang otomatis (maksimal tiga kali) dan hanya soal yang lolos yang mengurangi batas harian. Soal yang tampil langsung dapat diunduh (v0.5).
 
 ### Alur pendukung
 
-- Cek mandiri: buka daftar "Mohon cek dulu" (Soal saya), baca soal beserta kunci dan sumbernya, lalu Setujui, sunting, atau hapus.
+- Membaca soal tanpa cek otomatis: soal bertanda "Kunci tidak dicek otomatis" dibaca guru di halaman paket, lalu dipakai, disunting, atau dihapus. Tidak ada langkah persetujuan.
 - Cadangan: ekspor berkas .gensoal secara berkala, atau impor untuk memulihkan dan memindah perangkat.
 - Mengganti satu butir: pilih butir, buat ulang dengan kategori yang sama, bandingkan dengan versi lama, lalu terima atau kembalikan.
 
 ## Rancangan Layar
 
-Semua pekerjaan guru dipadatkan menjadi 3 layar berurutan: **Buat, Periksa, Unduh**. Penunjuk "Langkah n dari 3" selalu terlihat di atas ketiganya, dan tiap langkah memakai satu warna sehingga mata tahu sedang berada di mana.
+Pekerjaan guru berjalan dari layar Buat ke halaman paket soal, lalu ke Unduh. Sejak v0.5 tidak ada penunjuk "Langkah n dari 3": halaman paket menaruh tombol Unduh di kepala halaman, dan layar Unduh punya tautan kembali ke paketnya.
 
 | Layar | Rute | Elemen utama | Aksi |
 | --- | --- | --- | --- |
 | Beranda | / | Satu tombol besar "Buat soal" dan daftar soal terakhir; pengingat memasang kunci bila belum ada | Mulai buat soal, buka soal |
-| Langkah 1 · Buat | /soal/baru | Pengaturan tersimpan (satu pilihan); Kelas, mapel, dan jumlah soal; CP dan TP; Pengaturan lanjutan (tertutup) | Buat soal, simpan pengaturan, Batal |
-| Langkah 2 · Periksa | /soal/\[id\] | Daftar soal dengan gambar, kunci, pembahasan; satu penanda per soal; tanda jenis jawaban uraian; status paket | Setujui, sunting, ganti soal, buat ulang, hapus |
-| Langkah 3 · Unduh | /soal/\[id\]/ekspor | Pilih Word atau PDF; berkas yang diunduh (lembar soal dengan atau tanpa kop, kunci jawaban dengan atau tanpa pembahasan, kisi-kisi), masing-masing berkas terpisah; pratinjau tiap berkas; menu lanjutan berisi .tex dan tampilan cetak | Unduh semua berkas terpilih, atau satu berkas saja |
-| Soal saya | /soal | Paket soal, tong sampah, tautan ke semua soal "Mohon cek dulu" | Buka, unduh, hapus, pulihkan |
+| Buat soal | /soal/baru | Pengaturan tersimpan (satu pilihan); Kelas, mapel, dan jumlah soal; CP dan TP; Pengaturan lanjutan (tertutup) | Buat soal, simpan pengaturan, Batal |
+| Paket soal | /soal/\[id\] | Daftar soal dengan gambar, kunci, pembahasan; keterangan "Kunci tidak dicek otomatis" bila perlu; tanda jenis jawaban uraian; kemajuan pembuatan | Unduh, sunting, ganti soal, buat ulang, hapus |
+| Unduh | /soal/\[id\]/ekspor | Pilih Word atau PDF; berkas yang diunduh (lembar soal dengan atau tanpa kop, kunci jawaban dengan atau tanpa pembahasan, kisi-kisi), masing-masing berkas terpisah; pratinjau tiap berkas; menu lanjutan berisi .tex dan tampilan cetak | Unduh semua berkas terpilih, atau satu berkas saja |
+| Soal saya | /soal | Paket soal dan tong sampah | Buka, unduh, hapus, pulihkan |
 | Pengaturan AI | /pengaturan/ai | Tiga langkah: pilih penyedia, tempel kunci, pilih model; batas pemakaian; biaya dan privasi | Simpan dan uji kunci, pilih model utama dan cadangan |
 | Cadangan | /cadangan | Ukuran data, cadangan terakhir, penyimpanan persisten, pengaturan tersimpan | Unduh dan impor .gensoal, hapus semua data |
 | Profil dan kop | /pengaturan | Nama sekolah, kop, logo, identitas siswa, mode gelap | Simpan |
@@ -139,32 +141,23 @@ Menu atas berisi Beranda, Buat soal, Soal saya, Pengaturan AI, dan Cadangan. Pro
 4. **Pengaturan lanjutan** tertutup secara bawaan: komposisi mudah/sedang/sulit (bawaan 30/50/20, saling terkunci pada 100%), bentuk soal, cara menjawab benar-salah (centang kotak atau lingkari B/S), bahasa, gaya, soal bergambar, teks materi tempel, dan judul paket.
 5. **Bilah bawah:** ringkasan kelas dan mapel, tombol Batal (merah), dan tombol utama "Buat n soal". "Simpan pengaturan ini" (dengan nama) ada di akhir Pengaturan lanjutan. Pembuatan dimulai langsung dan mengarah ke layar Periksa.
 
-Mapel diketik guru; rumpun mapel (penentu pemeriksa jawaban) ditebak dari namanya. Mapel yang belum punya pemeriksa otomatis menghasilkan soal bertanda "Mohon cek dulu".
+Mapel diketik guru; rumpun mapel (penentu pemeriksa jawaban) ditebak dari namanya. Mapel yang belum punya pemeriksa otomatis menghasilkan soal berketerangan "Kunci tidak dicek otomatis".
 
 Pembuatan soal berjalan dari peramban butir demi butir, dan setiap butir yang lolos langsung disimpan di IndexedDB. Bila tab tertutup di tengah jalan, guru melanjutkan dari butir terakhir yang tersimpan.
 
-### Aturan layar Periksa
+### Aturan halaman paket soal
 
-- Satu penanda per soal: **Jawaban sudah dicek** (status mutu terverifikasi), **Mohon cek dulu** (perlu telaah), atau **Disetujui** (sudah disetujui guru). Status mutu (diatur sistem) dan status telaah (diatur guru) tetap dua data terpisah.
-- Satu tombol **Setujui** per soal, di samping Sunting; aksi lain (ganti, buat ulang, hapus) di menu Lainnya. Soal "Mohon cek dulu" tidak dapat diunduh sebelum disetujui; "Setujui semua yang sudah dicek" tersedia di status paket. Di ponsel, ringkasan dan "Lanjut ke Unduh" ada di bilah bawah tetap.
+- Tidak ada penanda status per soal dan tidak ada tombol Setujui (v0.5). Soal dengan status mutu `perlu_telaah` hanya diberi satu kalimat "Kunci tidak dicek otomatis" tanpa menghalangi unduhan. Kolom `status_mutu` dan `status_telaah` tetap disimpan apa adanya.
+- Per soal terlihat tombol Sunting; aksi lain (ganti, buat ulang, hapus) di menu Lainnya. Tombol Unduh di kepala halaman, dan di ponsel juga di bilah bawah tetap.
 - Setiap soal uraian membawa tanda jenis jawaban (penjelasan atau hitungan). AI mengisinya saat membuat soal, dan guru dapat mengubahnya di sini.
 
-### Istilah di layar
+### Bahasa di layar
 
-| Istilah lama | Istilah baru di layar |
-| --- | --- |
-| Terverifikasi hitung | Jawaban sudah dicek |
-| Perlu telaah | Mohon cek dulu |
-| Sudah disetujui | Disetujui |
-| Preset | Pengaturan tersimpan |
-| Generate | Buat soal |
-| Peninjauan | Periksa |
-| Ekspor | Unduh |
-| Golden set, registri model | Tidak tampil di layar guru |
+Pakai bahasa Indonesia sehari-hari yang singkat; tidak ada daftar istilah wajib (v0.5). Kata teknis atau bahasa Inggris (generate, preset, ekspor, token, RPM) tidak dipakai di label utama, hanya di petunjuk atau Pengaturan lanjutan bila perlu. Golden set dan registri model tidak tampil di layar guru.
 
 ### Arah visual
 
-Terang dan ramah: latar abu kebiruan lembut, kartu putih, dan warna untuk tiap langkah. Gaya hitam-putih, orbit, garis tipis, dan label huruf besar berjarak lebar ditinggalkan.
+Terang dan ramah: latar abu kebiruan lembut, kartu putih, dan sedikit warna yang bermakna. Gaya hitam-putih, orbit, garis tipis, dan label huruf besar berjarak lebar ditinggalkan.
 
 1. Menu atas di atas garis kuning, jelas berbeda dari area kerja.
 2. Setiap kelompok isian berada dalam satu kartu putih dengan pita berwarna di atasnya. Nomor kelompok berlatar kuning tidak dipakai lagi (penyederhanaan 25 Oktober, `docs/PENYEDERHANAAN-UI.md`).
@@ -176,10 +169,10 @@ Terang dan ramah: latar abu kebiruan lembut, kartu putih, dan warna untuk tiap l
 | --- | --- | --- |
 | Latar halaman | Abu kebiruan lembut | #F5F7FA |
 | Kartu | Putih, garis tepi abu | #FFFFFF, #D7DEE8 |
-| Warna utama, Langkah 1: Buat | Biru | #2563EB |
+| Warna utama: tombol, tautan, sedang dibuat | Biru | #2563EB |
 | Ornamen | Kuning | #FACC15 |
-| Langkah 2: Periksa, Mohon cek dulu | Kuning-oranye | #B45309 pada #FEF3C7 |
-| Langkah 3: Unduh, Jawaban sudah dicek | Hijau | #15803D pada #DCFCE7 |
+| Peringatan: kuota hampir habis, dijeda, kunci tidak dicek otomatis | Kuning-oranye | #B45309 pada #FEF3C7 |
+| Berhasil: siap diunduh, tersimpan | Hijau | #15803D pada #DCFCE7 |
 | Judul | Biru tua | #1E3A5F |
 | Teks utama | Abu tua | #1F2937 |
 | Teks pendukung | Abu sedang | #4B5563 |
@@ -189,7 +182,7 @@ Semua pasangan teks dan latar berkontras setidaknya 4,5 banding 1. Warna tidak b
 
 ### Bantuan
 
-Bantuan ada di halaman Bantuan (kaki halaman dan menu ponsel), bukan di layar kerja: tidak ada panel video atau tanda tanya di layar Buat, Periksa, Unduh, Pengaturan AI, dan Cadangan. Langkah memasang kunci tetap tersedia sebagai bagian lipat di Pengaturan AI.
+Bantuan ada di halaman Bantuan (kaki halaman dan menu ponsel), bukan di layar kerja: tidak ada panel video atau tanda tanya di layar Buat, paket soal, Unduh, Pengaturan AI, dan Cadangan. Langkah memasang kunci tetap tersedia sebagai bagian lipat di Pengaturan AI.
 
 Aturan video: satu tugas per video, 1 sampai 3 menit, dengan teks terjemahan dan langkah teks di bawahnya. Video disematkan dari daftar putar tidak terdaftar; aplikasi tetap berjalan tanpa internet, hanya videonya yang tidak.
 
@@ -199,7 +192,7 @@ Aplikasi tidak membawa data kurikulum dan tidak memiliki fitur menulis kurikulum
 
 - Soal dibuat langsung dari kelas, mapel, CP, dan TP yang diisi. Jumlah soal dibagi merata ke tiap TP.
 - Fase dihitung dari kelas (pemetaan fase Kurikulum Merdeka) hanya untuk konteks prompt dan batas keterbacaan.
-- Rumpun mapel ditebak dari nama mapel dan menentukan pemeriksa; bila tidak dikenali, soal bertanda "Mohon cek dulu".
+- Rumpun mapel ditebak dari nama mapel dan menentukan pemeriksa; bila tidak dikenali, soal berketerangan "Kunci tidak dicek otomatis".
 - TP yang dipakai disalin utuh ke paket dan soal, sehingga kisi-kisi lama tidak berubah diam-diam.
 - Kisi-kisi dan jejak berkas mencatat kelas, mapel, CP, dan TP yang dipakai.
 
@@ -233,7 +226,7 @@ Semua data milik guru (pengaturan tersimpan, paket, soal, profil) disimpan di In
 - Kolom status\_mutu bernilai: terverifikasi\_hitung, terverifikasi\_aturan, perlu\_telaah, ditolak.
 - Kolom status\_telaah bernilai: draf, ditelaah\_guru, ditolak. Status divalidasi oleh validator ditunda sampai ada server.
 - Soal menyimpan salinan TP yang dipakainya, sehingga mengubah TP di pengaturan tersimpan tidak mengubah soal lama.
-- Penanda di layar dihitung dari dua kolom: Disetujui bila status\_telaah ditelaah\_guru; selain itu Mohon cek dulu bila status\_mutu perlu\_telaah, atau Jawaban sudah dicek bila terverifikasi.
+- Sejak v0.5 layar hanya memakai status\_mutu: perlu\_telaah menampilkan keterangan "Kunci tidak dicek otomatis". status\_telaah tetap disimpan agar data dan cadangan lama terbaca, tetapi tidak dipakai di layar atau gerbang unduh.
 - Soal uraian menyimpan `jenis_uraian` (penjelasan atau hitungan) di isi\_json.
 - Tanpa Row Level Security: seluruh data tinggal di perangkat. Konsekuensinya, kehilangan data peramban berarti kehilangan soal, sehingga cadangan .gensoal dan permintaan penyimpanan persisten (navigator.storage.persist) menjadi bagian MVP.
 - Hapus bersifat lunak (dihapus\_pada) untuk soal dan paket, dengan tong sampah yang dikosongkan setelah 30 hari.
@@ -291,7 +284,7 @@ Kolom `verifikasi` diisi model sebagai instruksi pemeriksaan yang dijalankan kod
 | IPS, Pancasila, Agama | Penambatan pada bahan rujukan terkurasi dengan kutipan sumber; telaah guru wajib | perlu\_telaah | V1 |
 | Seni, PJOK, Informatika | Rubrik kinerja; eksekusi kode untuk soal pemrograman | terverifikasi\_aturan | V1 |
 
-Soal berstatus `perlu_telaah` tidak dapat diekspor sebelum guru menyetujuinya dan, untuk rumpun risiko tinggi, mencentang bahwa kutipan sumber sudah diperiksa.
+Soal berstatus `perlu_telaah` dapat diunduh tanpa persetujuan (v0.5); di layar ia diberi keterangan "Kunci tidak dicek otomatis", dan untuk rumpun risiko tinggi keterangan itu meminta guru membaca kutipan sumber.
 
 ### Kontrak instruksi ke model
 
@@ -483,7 +476,7 @@ MVP dikerjakan dalam tujuh sprint dua mingguan, sekitar 14 minggu bila Anda beke
 | S1 | Formulir, komposisi, dan preset | F-03, F-04, F-15 | Uji unit komposisi lulus untuk semua n dari 5 sampai 50 dan semua kombinasi persentase kelipatan 5; jumlah selalu sama dengan n; guru dapat menulis CP dan TP langsung di layar Buat, menyimpannya sebagai pengaturan tersimpan, dan membuat soal dengan satu klik |
 | S2 | Generasi dan verifikasi | F-05, F-06, F-07 | 100 soal acuan: semua kunci benar lolos; 100% soal yang sengaja diberi kunci salah ditolak; soal ditolak diganti otomatis; golden set dijalankan pada tiap model di registri |
 | S3 | Gambar terprogram | F-08 | Sepuluh templat, masing-masing dengan lima kasus uji; gambar dan kunci selalu konsisten; tercetak jelas hitam putih |
-| S4 | Periksa, pengaturan AI | F-09, F-13, F-14, F-16, F-17 | Guru dapat menyunting dan mengganti soal; soal "Mohon cek dulu" tidak dapat diunduh sebelum disetujui; kunci API tersimpan lokal dan lolos uji kunci pada sedikitnya dua penyedia; biaya tercatat per soal; halaman bantuan terpasang |
+| S4 | Periksa, pengaturan AI | F-09, F-13, F-14, F-16, F-17 | Guru dapat menyunting dan mengganti soal; soal tanpa cek otomatis diberi keterangan (gerbang unduh dihapus pada v0.5); kunci API tersimpan lokal dan lolos uji kunci pada sedikitnya dua penyedia; biaya tercatat per soal; halaman bantuan terpasang |
 | S5 | Unduh, dokumen turunan, dan cadangan | F-10, F-11, F-12 | docx terbuka di Word dan PDF terunduh langsung dengan Times New Roman 12 mengikuti pakem penulisan soal, lengkap dengan rumus, gambar, kop, kisi-kisi, dan kunci; .tex terkompilasi tanpa galat; pecahan bertumpuk; impor .gensoal memulihkan semua data |
 | S6 | Pilot internal | Semua F MVP | Anda dan tiga guru (termasuk uji dengan 3 orang awam: catat titik berhenti mereka) membuat soal untuk ujian nyata; daftar perbaikan prioritas terkumpul; tidak ada soal salah kunci lolos |
 
@@ -502,7 +495,7 @@ Kepercayaan guru adalah risiko terbesar, jadi mutu diukur dengan data, bukan kes
 
 ### Gerbang pembukaan mata pelajaran
 
-Pemeriksa otomatis untuk satu rumpun mapel boleh diaktifkan (sehingga soalnya bertanda "Jawaban sudah dicek") bila seluruh syarat berikut terpenuhi. Sebelum itu soal rumpun tersebut tetap bertanda "Mohon cek dulu".
+Pemeriksa otomatis untuk satu rumpun mapel boleh diaktifkan (sehingga soalnya tidak lagi berketerangan "Kunci tidak dicek otomatis") bila seluruh syarat berikut terpenuhi. Sebelum itu soal rumpun tersebut tetap berketerangan demikian.
 
 - [ ] Golden set lulus 100% pada pemeriksa mapel itu.
 - [ ] Sampel sedikitnya 200 soal hasil generasi telah ditelaah guru penguji, dengan kunci salah atau tidak sesuai TP di bawah 1% untuk rumpun terverifikasi hitung, dan di bawah 5% untuk rumpun lain sebelum telaah guru.

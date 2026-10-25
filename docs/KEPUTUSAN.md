@@ -92,3 +92,15 @@ Permintaan pemilik: beberapa tampilan terlalu repot. Rancangan lengkap, temuan, 
 | Pengaturan AI | Bila kunci sudah berfungsi: kartu "Siap dipakai" dengan pilihan model dan tombol "Ganti penyedia atau kunci". Model cadangan dan batas RPM/RPD pindah ke Pengaturan lanjutan | Guru yang sudah siap tidak perlu melihat tiga langkah lagi |
 | Cadangan | Satu kartu: ringkasan data, "Unduh berkas .gensoal" (utama) dan "Pulihkan dari berkas". Daftar pengaturan tersimpan dan Hapus semua data dilipat | Aksi utama menonjol; aksi berbahaya tidak sejajar dengan aksi sehari-hari |
 | Kepala | "Tersimpan di perangkat ini" hanya di kaki halaman | Pengulangan |
+
+## Rancangan UI/UX v0.5 (25 Oktober 2026)
+
+Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Persetujuan guru | Dihapus: tombol Setujui, "Setujui semua yang sudah dicek", penanda "Disetujui", dan gerbang unduh (F-13). Soal yang lolos pemeriksaan langsung siap diunduh | Keputusan pemilik: langkah persetujuan terasa merepotkan |
+| Penanda status per soal | "Jawaban sudah dicek" dan "Mohon cek dulu" tidak tampil lagi sebagai lencana, saringan, atau halaman `/telaah`. Soal `perlu_telaah` hanya diberi satu kalimat "Kunci tidak dicek otomatis. Baca sekali sebelum dipakai." | Keputusan pemilik. Kalimat itu dipertahankan agar guru tetap tahu soal mana yang kuncinya tidak dihitung ulang, tanpa menambah langkah |
+| Tabel istilah wajib | Diganti aturan singkat "Bahasa di layar": bahasa sehari-hari, tanpa kata teknis atau bahasa Inggris di label utama. `AGENTS.md` butir 8 disesuaikan | Keputusan pemilik |
+| Penunjuk "Langkah n dari 3" | Dihapus bersama warna per langkah. Halaman paket menaruh tombol Unduh di kepala; layar Unduh punya tautan kembali | Keputusan pemilik |
+| Data status | `status_mutu` dan `status_telaah` tetap disimpan; tidak ada versi Dexie baru | Cadangan lama tetap terbaca; status mutu masih dipakai untuk kalimat keterangan dan kisi-kisi |
