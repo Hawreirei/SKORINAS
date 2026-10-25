@@ -1,10 +1,12 @@
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { db } from '../db/skema';
 import { KepalaHalaman } from '../komponen/Kepala';
 import { Kartu, LencanaStatus } from '../komponen/Status';
 import { Panah, TautanTombol } from '../komponen/Tombol';
 import { useJudulHalaman, usePengatur } from './kait';
+import { langkahAwalTersembunyi, sembunyikanLangkahAwal, sudahUnduh } from './langkah-awal';
 import { daftarRingkasan, formatTanggal, statusRingkasan, teksJumlah, type RingkasanPaket } from './ringkas';
 
 export function BarisPaket({ r }: { r: RingkasanPaket }) {
@@ -27,12 +29,77 @@ export function BarisPaket({ r }: { r: RingkasanPaket }) {
   );
 }
 
-/** Beranda sederhana: satu tombol besar "Buat soal" dan daftar soal terakhir. */
+interface Langkah {
+  judul: string;
+  ket: string;
+  ke: string;
+  aksi: string;
+  selesai: boolean;
+}
+
+/** Tiga langkah untuk guru baru; kartu hilang setelah semuanya selesai atau disembunyikan. */
+function LangkahAwal({ langkah, sembunyikan }: { langkah: Langkah[]; sembunyikan: () => void }) {
+  const berikut = langkah.findIndex((l) => !l.selesai);
+  return (
+    <Kartu pita="kuning" aria-labelledby="judul-langkah-awal" className="mt-8">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <h2 id="judul-langkah-awal" className="text-[22px] font-extrabold text-judul">
+          Langkah awal
+        </h2>
+        <button type="button" className="min-h-10 text-base font-bold text-redup hover:text-utama hover:underline" onClick={sembunyikan}>
+          Sembunyikan
+        </button>
+      </div>
+      <ol className="mt-3 space-y-2">
+        {langkah.map((l, i) => {
+          const kini = i === berikut;
+          return (
+            <li key={l.judul} aria-current={kini ? 'step' : undefined} className={`flex items-start gap-3 rounded-lg border px-3 py-3 sm:px-4 ${kini ? 'border-utama bg-utama-lembut/40' : 'border-garis'}`}>
+              {l.selesai ? (
+                <span aria-hidden="true" className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-baik-latar text-baik">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2.5 8.5l3.5 3.5 7.5-8" />
+                  </svg>
+                </span>
+              ) : (
+                <span aria-hidden="true" className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full text-base font-extrabold ${kini ? 'bg-utama text-di-tinta' : 'bg-lembut text-redup'}`}>
+                  {i + 1}
+                </span>
+              )}
+              <span className="min-w-0 flex-1">
+                <span className={`block text-[17px] font-bold ${l.selesai ? 'text-redup' : 'text-tinta'}`}>
+                  {i + 1}. {l.judul}
+                  {l.selesai ? <span className="ml-2 text-base font-bold text-baik">Selesai</span> : null}
+                </span>
+                {!l.selesai ? <span className="block text-base text-redup">{l.ket}</span> : null}
+              </span>
+              {kini ? (
+                <Link to={l.ke} className="inline-flex min-h-10 shrink-0 items-center text-base font-bold text-utama hover:underline">
+                  {l.aksi}
+                </Link>
+              ) : null}
+            </li>
+          );
+        })}
+      </ol>
+    </Kartu>
+  );
+}
+
+/** Beranda sederhana: satu tombol besar "Buat soal", kartu Langkah awal untuk guru baru, dan daftar soal terakhir. */
 export function Beranda() {
   useJudulHalaman('');
   const terbaru = useLiveQuery(() => daftarRingkasan(5), []);
   const kunci = useLiveQuery(() => db.kunci_api.toArray(), []);
-  const tanpaKunci = kunci !== undefined && !kunci.some((k) => k.kunci);
+  const adaPaket = useLiveQuery(async () => (await db.paket_soal.count()) > 0, []);
+  const [tersembunyi, setTersembunyi] = useState(langkahAwalTersembunyi);
+  const paketTerakhir = terbaru?.[0]?.paket.id;
+  const langkah: Langkah[] = [
+    { judul: 'Pasang kunci AI', ket: 'Tempel kunci dari penyedia AI pilihan Anda; beberapa penyedia gratis.', ke: '/pengaturan/ai', aksi: 'Pasang kunci', selesai: !!kunci?.some((k) => k.kunci && k.status === 'berfungsi') },
+    { judul: 'Buat soal pertama', ket: 'Isi kelas, mapel, dan jumlah soal.', ke: '/soal/baru', aksi: 'Buat soal', selesai: !!adaPaket },
+    { judul: 'Unduh soal', ket: 'Unduh sebagai Word atau PDF, lengkap dengan kunci dan kisi-kisi.', ke: paketTerakhir ? `/soal/${paketTerakhir}/ekspor` : '/soal', aksi: 'Unduh', selesai: sudahUnduh() },
+  ];
+  const tampilLangkah = kunci !== undefined && adaPaket !== undefined && !tersembunyi && langkah.some((l) => !l.selesai);
 
   return (
     <div className="mx-auto max-w-[960px] px-4 pb-20 pt-10 sm:px-8 sm:pt-14">
@@ -47,15 +114,14 @@ export function Beranda() {
         </TautanTombol>
       </KepalaHalaman>
 
-      {tanpaKunci ? (
-        <Kartu pita="kuning" className="mt-8 flex flex-wrap items-center justify-between gap-4">
-          <span className="text-base">
-            <strong>Sebelum mulai:</strong> pasang kunci API dari penyedia AI pilihan Anda. Beberapa penyedia gratis.
-          </span>
-          <TautanTombol to="/pengaturan/ai" varian="garis">
-            Pasang kunci
-          </TautanTombol>
-        </Kartu>
+      {tampilLangkah ? (
+        <LangkahAwal
+          langkah={langkah}
+          sembunyikan={() => {
+            sembunyikanLangkahAwal();
+            setTersembunyi(true);
+          }}
+        />
       ) : null}
 
       <Kartu as="section" aria-label="Soal terakhir" className="mt-10">
@@ -66,7 +132,13 @@ export function Beranda() {
           </Link>
         </div>
         {terbaru === undefined ? null : terbaru.length === 0 ? (
-          <p className="py-4 text-base text-redup">Belum ada soal. Tekan "Buat soal" untuk membuat paket pertama; semuanya tersimpan di perangkat ini.</p>
+          <p className="py-4 text-base text-redup">
+            Belum ada soal. Tekan{' '}
+            <Link to="/soal/baru" className="font-bold text-utama underline">
+              Buat soal
+            </Link>{' '}
+            untuk membuat paket pertama; semuanya tersimpan di perangkat ini.
+          </p>
         ) : (
           terbaru.map((r) => <BarisPaket key={r.paket.id} r={r} />)
         )}

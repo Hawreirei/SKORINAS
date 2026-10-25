@@ -102,6 +102,10 @@ function butirPalsu(bentuk) {
   await page.goto(DASAR + '/');
   await page.waitForSelector('h1');
   await foto('01-beranda-kosong');
+  // Langkah awal (UI-10): tiga langkah, langkah pertama aktif.
+  const langkahAwal = page.getByRole('region', { name: 'Langkah awal' });
+  if (!(await langkahAwal.count())) galat.push('beranda kosong tanpa kartu "Langkah awal"');
+  else if (!/Pasang kunci AI/.test((await langkahAwal.locator('[aria-current="step"]').textContent()) ?? '')) galat.push('langkah aktif pertama bukan "Pasang kunci AI"');
 
   // Tanpa kunci AI: layar Buat tetap dapat diisi, tombol utama mengarah ke Pengaturan AI (UI-06).
   await page.goto(DASAR + '/soal/baru');
@@ -116,6 +120,10 @@ function butirPalsu(bentuk) {
   await page.click('text=Pengaturan lanjutan');
   await page.selectOption('#model-cadangan', { index: 2 });
   await foto('02-pengaturan-ai');
+  await page.goto(DASAR + '/');
+  await langkahAwal.getByText('Selesai').first().waitFor();
+  if (!/Buat soal pertama/.test((await langkahAwal.locator('[aria-current="step"]').textContent()) ?? '')) galat.push('setelah kunci terpasang, langkah aktif bukan "Buat soal pertama"');
+  await foto('01b-beranda-langkah', { fullPage: false });
 
   // Buat soal: tiga isian wajib, sisanya di Pengaturan lanjutan
   await page.goto(DASAR + '/soal/baru');
@@ -271,6 +279,7 @@ function butirPalsu(bentuk) {
   await page.waitForSelector('text=Penjumlahan pecahan');
   if (!(await page.getByText('Siap diunduh').count())) galat.push('beranda tanpa lencana "Siap diunduh"');
   await foto('07-beranda');
+  if (await page.getByRole('region', { name: 'Langkah awal' }).count()) galat.push('kartu "Langkah awal" masih tampil setelah ketiga langkah selesai');
   await utamaTerlihat(page, 'Beranda');
   await page.goto(DASAR + '/soal');
   await page.waitForSelector('h1');

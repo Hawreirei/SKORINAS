@@ -197,3 +197,12 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | Baris paket | Judul tebal (seluruh baris membuka paket), keterangan "Kelas · mapel · tanggal · jumlah", `LencanaStatus`, dan menu ⋯ (Buka, Unduh, Buat paket serupa, Ubah judul…, Hapus…) | Tautan Unduh dan Hapus per baris diganti satu menu |
 | Ubah judul | Dialog sempit dengan isian "Judul paket"; Enter atau Simpan menyimpan | Komponen UI-05 |
 | Empty state | "Belum ada paket soal. Buat paket pertama" (tautan), "Tidak ada paket yang cocok dengan pencarian" dengan "Hapus pencarian", dan pesan per saringan | Prinsip rekap: empty state menunjukkan aksi berikutnya |
+
+## UI-10 Beranda (issue #11)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Kartu Langkah awal | Tiga langkah bernomor: Pasang kunci AI, Buat soal pertama, Unduh soal. Langkah berikutnya diberi `aria-current="step"`, bingkai biru, dan satu tautan aksi; langkah selesai bertanda ✓ "Selesai" | Menggantikan kartu "Sebelum mulai"; guru baru melihat urutan kerja tanpa penunjuk "Langkah n dari 3" di layar kerja (v0.5) |
+| Kapan selesai | Kunci: ada kunci berstatus berfungsi. Soal: ada paket (termasuk di tong sampah). Unduh: tanda per perangkat `gensoal:sudah-unduh` di `localStorage` yang ditulis setelah unduhan berhasil | Tidak menambah tabel atau versi Dexie |
+| Menghilang | Kartu tidak tampil setelah ketiga langkah selesai atau setelah "Sembunyikan" (`gensoal:langkah-awal-tersembunyi`) | Beranda guru lama tetap ringkas |
+| Soal terakhir | Tetap lima paket terbaru; empty state menautkan ke Buat soal | Tidak berubah |
