@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Pemberitahuan } from './Formulir';
 
 export function Titik({ isi = true, className = '' }: { isi?: boolean; className?: string }) {
   return <span aria-hidden="true" className={`inline-block size-2 shrink-0 rounded-full border border-current ${isi ? 'bg-current' : 'bg-transparent'} ${className}`} />;
@@ -16,11 +17,12 @@ export function Kotak({ children, className = '' }: { children: ReactNode; class
   return <div className={`rounded-lg border border-garis bg-panel p-4 text-base leading-relaxed text-isi ${className}`}>{children}</div>;
 }
 
+/** Pemberitahuan bernada awas; dipertahankan agar layar lama tetap jalan (UI-02). */
 export function Peringatan({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div role="status" className={`rounded-lg border border-awas/40 bg-awas-latar px-4 py-3 text-base leading-relaxed text-awas ${className}`}>
+    <Pemberitahuan nada="awas" className={className}>
       {children}
-    </div>
+    </Pemberitahuan>
   );
 }
 

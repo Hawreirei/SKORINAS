@@ -114,3 +114,15 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | `bidang` sebagai utilitas | Dahulu CSS biasa di luar lapisan Tailwind, sehingga kelas tambahan seperti `font-extrabold text-judul` pada kotak jumlah soal tidak pernah berlaku. Kini berlaku: angka jumlah soal tampil tebal dan biru tua sesuai kelas yang sudah tertulis | Perilaku yang dimaksud kode; satu-satunya perubahan tampilan yang terlihat di tangkapan e2e |
 | Tema tanpa kedipan | `public/tema.js` dimuat tanpa `defer` di `<head>` lewat `%BASE_URL%tema.js`, membaca cermin `localStorage` `gensoal:tema`. Cermin ditulis `terapkanTema()` (dipanggil saat aplikasi dibuka, saat tema diubah, setelah pulihkan cadangan, dan setelah hapus semua data). Profil di IndexedDB tetap sumber utama; bila cermin kosong atau `localStorage` ditolak, perilaku lama berlaku | Skrip sebaris ditolak CSP `script-src 'self'`; berkas terpisah tidak memerlukan pelonggaran CSP |
 | Angka tabular | `tabular-nums` pada isian angka (lewat `bidang`), jumlah dan komposisi soal, biaya, kuota, hitungan tab, dan ringkasan cadangan | Angka tidak bergeser saat berubah |
+
+## UI-02 Komponen formulir dan pemberitahuan (issue #3)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Letak dan nama | `src/komponen/Formulir.tsx`: `Bidang` (dengan `IsianTeks`, `IsianAngka`, `IsianPanjang`, `PilihanDaftar`), `Pilihan`, `PilihanBanyak`, `Sakelar`, `BagianLipat`, `Pemberitahuan` | Satu tempat untuk pola formulir; layar disusun ulang di UI-06, UI-08, UI-11 |
+| `IsianAngka` | Teks dengan `inputMode="numeric"`, bukan `type="number"` | Sama dengan kotak jumlah soal: guru dapat menghapus lalu mengetik ulang tanpa angka dipaksa |
+| Warna `Pemberitahuan` | Satu pasangan token teks/latar per nada (`WARNA_NADA`) untuk mode terang dan gelap; info memakai `--gs-head` di atas `--gs-main-soft`. Kontras diuji dari token asli `src/index.css`: terang info 9,43, awas 4,51, galat 5,30, berhasil 4,57; gelap 7,71, 8,30, 5,85, 8,24 | Satu sumber, diuji otomatis |
+| `Peringatan` | Menjadi pembungkus `Pemberitahuan nada="awas"` (mendapat ikon segitiga) | Layar lama tetap jalan tanpa diubah |
+| Status `BagianLipat` | Disimpan di `localStorage` `gensoal:lipat:<kunci>` bila prop `ingat` diisi | Kenyamanan per perangkat; tidak mengubah skema Dexie |
+| Uji komponen | `tests/*.test.tsx` dengan lingkungan jsdom per berkas, `react-dom/client` dan `act` dari React 19, tanpa pustaka tambahan | Pola Vitest diperluas ke `.tsx` di `vite.config.ts` |
+| Temuan untuk UI-12 | Teks putih di atas biru utama mode gelap (#3b82f6) berkontras 3,68 : 1, di bawah 4,5. Berlaku untuk semua tombol utama dan chip aktif di mode gelap, sudah ada sebelum UI-02 | Diselesaikan di UI-12 (#13) bersama audit kontras mode gelap |
