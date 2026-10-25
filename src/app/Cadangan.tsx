@@ -5,6 +5,7 @@ import { db } from '../db/skema';
 import { ambilProfil, simpanProfil } from '../db/profil';
 import { unduhBlob, VERSI_APLIKASI } from '../ekspor/peramban';
 import { KepalaHalaman } from '../komponen/Kepala';
+import { useKonfirmasi } from '../komponen/Konfirmasi';
 import { usePesan } from '../komponen/Pesan';
 import { Kartu, Label, Peringatan } from '../komponen/Status';
 import { kelasTombol, Tombol } from '../komponen/Tombol';
@@ -27,6 +28,7 @@ export default function Cadangan() {
   useJudulHalaman('Cadangan');
   const profil = useProfil();
   const pesan = usePesan();
+  const tanya = useKonfirmasi();
   const [ukuran, setUkuran] = useState<{ pakai: number; kuota: number } | null>(null);
   const [persisten, setPersisten] = useState<boolean | null>(null);
   const [impor, setImpor] = useState<BerkasCadangan | null>(null);
@@ -66,7 +68,11 @@ export default function Cadangan() {
 
   async function pulihkan(mode: 'gabung' | 'ganti') {
     if (!impor) return;
-    if (mode === 'ganti' && !confirm('Semua soal, pengaturan tersimpan, dan profil di perangkat ini akan diganti isi cadangan. Lanjutkan?')) return;
+    if (
+      mode === 'ganti' &&
+      !(await tanya({ judul: 'Ganti semua data dengan isi cadangan?', pesan: 'Semua soal, pengaturan tersimpan, dan profil di perangkat ini diganti isi berkas cadangan. Tidak dapat dibatalkan; unduh cadangan data sekarang lebih dulu bila perlu.', aksi: 'Ganti semua data', bahaya: true }))
+    )
+      return;
     await pulihkanCadangan(db, impor, mode);
     terapkanTema((await ambilProfil()).tema);
     setImpor(null);
@@ -132,7 +138,7 @@ export default function Cadangan() {
             <div className="mt-5 flex flex-wrap gap-3">
               <Tombol onClick={() => pulihkan('gabung')}>Gabungkan</Tombol>
               <Tombol varian="garis" onClick={() => pulihkan('ganti')}>
-                Ganti semua data
+                Ganti semua data…
               </Tombol>
               <Tombol varian="hantu" onClick={() => setImpor(null)}>
                 Batal

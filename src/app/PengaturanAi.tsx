@@ -11,6 +11,7 @@ import type { KunciApi, PenyediaId } from '../db/tipe';
 import { tanggalLokal } from '../db/util';
 import { BANTUAN } from '../bantuan/daftar';
 import { KepalaHalaman } from '../komponen/Kepala';
+import { useKonfirmasi } from '../komponen/Konfirmasi';
 import { usePesan } from '../komponen/Pesan';
 import { Kartu, Label, Peringatan, Titik } from '../komponen/Status';
 import { Tombol } from '../komponen/Tombol';
@@ -40,6 +41,7 @@ export default function PengaturanAi() {
   const { data: reg, galat: galatReg } = useRegistri();
   const profil = useProfil();
   const pesan = usePesan();
+  const konfirmasi = useKonfirmasi();
   const daftarKunci = useLiveQuery(() => db.kunci_api.toArray(), []);
   const pemakaian = useLiveQuery(() => db.pemakaian_ai.where('tanggal').equals(tanggalLokal()).toArray(), []);
   const [pilih, setPilih] = useState<PenyediaId | null>(null);
@@ -100,7 +102,7 @@ export default function PengaturanAi() {
   }
 
   async function hapusKunci() {
-    if (!confirm(`Hapus kunci ${p.nama} dari perangkat ini?`)) return;
+    if (!(await konfirmasi({ judul: `Hapus kunci ${p.nama}?`, pesan: `Kunci dihapus dari peramban ini. GenSoal tidak dapat membuat soal dengan ${p.nama} sampai kuncinya dipasang lagi.`, aksi: 'Hapus kunci', bahaya: true }))) return;
     await db.kunci_api.delete(aktif);
     if (profil.penyedia_utama === aktif) await simpanProfil({ penyedia_utama: null, model_utama: null });
     if (profil.penyedia_cadangan === aktif) await simpanProfil({ penyedia_cadangan: null, model_cadangan: null });
@@ -331,7 +333,7 @@ export default function PengaturanAi() {
 
             {kunci ? (
               <Tombol varian="bahaya" onClick={hapusKunci}>
-                Hapus kunci {p.nama} dari perangkat ini
+                Hapus kunci {p.nama} dari perangkat ini…
               </Tombol>
             ) : null}
           </div>

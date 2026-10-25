@@ -147,3 +147,12 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | Label di atas judul | Dihapus bila hanya mengulang nama menu ("Pengaturan", "Bantuan"); dipertahankan bila informatif ("Kelas 4 · Matematika", "Kelas 1–12 · tanpa akun") | Mengurangi pengulangan |
 | Tautan kembali Unduh | "← Kembali ke soal"; judul paket ada di subjudul | Lebih jelas bagi guru daripada hanya judul paket |
 | Tombol menu ponsel | Ikon dengan teks "Menu" / "Tutup", `aria-controls` ke menu | Mudah dikenali guru |
+
+## UI-05 Dialog, menu Lainnya, dan konfirmasi (issue #6)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| `Dialog` | `<dialog>` bawaan dengan judul lewat `aria-labelledby`, `ukuran` sempit/sedang/lebar (480/720/1100 px), slot `kaki` untuk tombol rata kanan, fokus kembali ke pemicu, dan fokus awal ke elemen `data-fokus-awal`. Buka/tutup membaca atribut `open` | Escape dan jebakan fokus tetap dari peramban; atribut `open` juga berlaku di jsdom untuk uji |
+| `MenuLainnya` | Butir `false`/`null` dilewati; fokus ke butir pertama saat dibuka; panah atas/bawah, Home, End; Escape menutup dan mengembalikan fokus ke tombol; Tab dan klik di luar menutup. Varian `ikon` ("⋯") tetap bernama lewat `aria-label` | Pola menu yang dapat dipakai dengan papan ketik; varian ⋯ untuk baris Soal saya (UI-09) |
+| Konfirmasi | `PenyediaKonfirmasi` di `App` dan `useKonfirmasi()` yang mengembalikan `Promise<boolean>`. Fokus awal di Batal (garis biru); tombol aksi merah garis untuk hapus/ganti data. Kelima `window.confirm` diganti; judulnya menyebut item ("Hapus soal 12?", 'Hapus paket "…"?', 'Hapus pengaturan tersimpan "…"?', "Hapus kunci Google Gemini?", "Ganti semua data dengan isi cadangan?") dan pesannya menyebut akibat | Teks berbahasa Indonesia yang konsisten, tidak bergantung pada bahasa peramban |
+| Elipsis | Tombol yang membuka dialog diberi "…": Sunting…, Ganti soal…, Buat ulang dengan catatan…, Hapus soal…, Hapus…, Hapus pengaturan ini…, Hapus kunci … dari perangkat ini…, Ganti semua data… | Guru tahu akan ada langkah berikutnya sebelum data berubah |

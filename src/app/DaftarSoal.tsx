@@ -5,6 +5,7 @@ import { db } from '../db/skema';
 import { MASA_SAMPAH_MS } from '../db/sampah';
 import { hapusPaket, pulihkanPaket, pulihkanSoal } from '../generasi/operasi';
 import { KepalaHalaman } from '../komponen/Kepala';
+import { useKonfirmasi } from '../komponen/Konfirmasi';
 import { Kartu, LencanaStatus } from '../komponen/Status';
 import { Chip, Panah, TautanTombol, Tombol } from '../komponen/Tombol';
 import { useJudulHalaman, usePengatur } from './kait';
@@ -17,6 +18,7 @@ export default function DaftarSoal() {
   const [cari, setCari] = useState('');
   const paket = useLiveQuery(() => daftarRingkasan(), []);
   const pengatur = usePengatur();
+  const konfirmasi = useKonfirmasi();
   const paketSampah = useLiveQuery(() => daftarRingkasan(undefined, true), []);
   const soalSampah = useLiveQuery(() => db.soal.filter((s) => s.dihapus_pada != null).toArray(), []);
   const q = cari.trim().toLowerCase();
@@ -69,11 +71,12 @@ export default function DaftarSoal() {
                     type="button"
                     className="inline-flex min-h-10 items-center text-redup hover:text-buruk hover:underline"
                     aria-label={`Hapus paket ${r.paket.judul}`}
-                    onClick={() => {
-                      if (confirm('Pindahkan paket ini ke tong sampah? Dapat dipulihkan selama 30 hari.')) void hapusPaket(r.paket.id);
+                    onClick={async () => {
+                      const ya = await konfirmasi({ judul: `Hapus paket "${r.paket.judul}"?`, pesan: `${teksJumlah(r)} pindah ke tong sampah dan dapat dipulihkan selama 30 hari.`, aksi: 'Hapus paket', bahaya: true });
+                      if (ya) await hapusPaket(r.paket.id);
                     }}
                   >
-                    Hapus
+                    Hapus…
                   </button>
                 </span>
               </div>

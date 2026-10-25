@@ -160,6 +160,25 @@ function butirPalsu(bentuk) {
   await page.keyboard.press('Escape');
   if (await page.getByRole('menuitem').count()) galat.push('menu Lainnya tidak tertutup dengan Escape');
 
+  // Hapus soal lewat menu Lainnya dan dialog konfirmasi, lalu pulihkan dari tong sampah (UI-05).
+  const jumlahSoal = () => page.locator('article[id^="soal-"]').count();
+  const sebelumHapus = await jumlahSoal();
+  await page.getByRole('button', { name: 'Lainnya' }).last().click();
+  await page.getByRole('menuitem', { name: 'Hapus soal…' }).click();
+  const dialogHapus = page.getByRole('dialog', { name: /^Hapus soal \d+\?$/ });
+  await dialogHapus.waitFor();
+  if ((await page.evaluate(() => document.activeElement?.textContent)) !== 'Batal') galat.push('fokus awal konfirmasi bukan di tombol Batal');
+  await foto('04c-konfirmasi-hapus', { fullPage: false });
+  await dialogHapus.getByRole('button', { name: 'Hapus soal', exact: true }).click();
+  await page.waitForFunction((n) => document.querySelectorAll('article[id^="soal-"]').length === n - 1, sebelumHapus);
+  await page.goto(DASAR + '/soal');
+  await page.getByRole('button', { name: /^Tong sampah ·/ }).click();
+  await page.getByRole('button', { name: 'Pulihkan' }).first().click();
+  // Tunggu pemulihan tersimpan sebelum pindah halaman.
+  await page.getByText('Tong sampah kosong.').waitFor();
+  await page.goto(urlPeriksa);
+  await page.waitForFunction((n) => document.querySelectorAll('article[id^="soal-"]').length === n, sebelumHapus, { timeout: 15000 });
+
   // Ubah tanda jenis jawaban satu soal uraian. Tanpa persetujuan (v0.5): soal uraian hanya diberi
   // keterangan, tidak ada tombol Setujui atau penunjuk langkah, dan Unduh langsung aktif.
   const jenis = page.getByRole('radio', { name: /Penjelasan \(garis tulis\)/ });

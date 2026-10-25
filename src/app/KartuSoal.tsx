@@ -2,6 +2,7 @@ import type { JenisUraian, Soal } from '../db/tipe';
 import { BENTUK_LABEL, KESUKARAN_LABEL, jenisUraian } from '../db/tipe';
 import { aturJenisUraian, aturKunci, hapusSoal } from '../generasi/operasi';
 import { Kartu } from '../komponen/Status';
+import { useKonfirmasi } from '../komponen/Konfirmasi';
 import { MenuLainnya } from '../komponen/MenuLainnya';
 import { PembahasanSoal, TampilSoal } from '../komponen/TampilSoal';
 import { Tombol } from '../komponen/Tombol';
@@ -16,6 +17,7 @@ export function KartuSoal({ soal, nomor, risikoTinggi, aksi }: { soal: Soal; nom
   const terkunci = soal.terkunci;
   const jenis = soal.bentuk === 'uraian' ? jenisUraian(soal.isi_json) : null;
   const tanpaCek = soal.status_mutu === 'perlu_telaah';
+  const konfirmasi = useKonfirmasi();
   return (
     <Kartu as="article" pita={tanpaCek ? 'awas' : 'utama'} id={`soal-${soal.id}`} aria-labelledby={`nomor-${soal.id}`}>
       <div className="flex min-w-0 items-baseline gap-3">
@@ -76,7 +78,7 @@ export function KartuSoal({ soal, nomor, risikoTinggi, aksi }: { soal: Soal; nom
       ) : null}
       <div className="mt-5 grid grid-cols-2 gap-2 border-t border-garis pt-4 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
         <Tombol varian="hantu" className="!px-3 sm:!px-5" onClick={() => aksi('sunting')} disabled={terkunci}>
-          Sunting
+          Sunting…
         </Tombol>
         {terkunci ? (
           <Tombol varian="hantu" className="!px-3 sm:!px-5" onClick={() => aturKunci(soal.id, false)}>
@@ -85,13 +87,14 @@ export function KartuSoal({ soal, nomor, risikoTinggi, aksi }: { soal: Soal; nom
         ) : (
           <MenuLainnya
             butir={[
-              { label: 'Ganti soal', onClick: () => aksi('ganti') },
-              { label: 'Buat ulang dengan catatan', onClick: () => aksi('buat_ulang') },
+              { label: 'Ganti soal…', onClick: () => aksi('ganti') },
+              { label: 'Buat ulang dengan catatan…', onClick: () => aksi('buat_ulang') },
               {
-                label: 'Hapus soal',
+                label: 'Hapus soal…',
                 bahaya: true,
-                onClick: () => {
-                  if (confirm('Pindahkan soal ini ke tong sampah? Dapat dipulihkan selama 30 hari.')) void hapusSoal(soal.id);
+                onClick: async () => {
+                  const ya = await konfirmasi({ judul: `Hapus soal ${nomor}?`, pesan: 'Soal pindah ke tong sampah di Soal saya dan dapat dipulihkan selama 30 hari.', aksi: 'Hapus soal', bahaya: true });
+                  if (ya) await hapusSoal(soal.id);
                 },
               },
             ]}

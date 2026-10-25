@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { Kaki, Kepala } from '../komponen/Kepala';
+import { PenyediaKonfirmasi } from '../komponen/Konfirmasi';
 import { PenyediaPesan } from '../komponen/Pesan';
 import { PembaruanAplikasi } from './PembaruanAplikasi';
 import { Beranda } from './Beranda';
@@ -37,25 +38,27 @@ function Tata() {
 export function App() {
   return (
     <PenyediaPesan>
-      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-        <Routes>
-          <Route path="/soal/:id/cetak" element={<Suspense fallback={null}><Cetak /></Suspense>} />
-          <Route element={<Tata />}>
-            <Route index element={<Beranda />} />
-            <Route path="soal/baru" element={<BuatSoal />} />
-            <Route path="soal" element={<DaftarSoal />} />
-            <Route path="soal/:id" element={<Peninjauan />} />
-            <Route path="soal/:id/ekspor" element={<Ekspor />} />
-            {/* Halaman telaah dihapus pada v0.5; tautan lama diarahkan ke Soal saya. */}
-            <Route path="telaah" element={<Navigate to="/soal" replace />} />
-            <Route path="pengaturan" element={<Pengaturan />} />
-            <Route path="pengaturan/ai" element={<PengaturanAi />} />
-            <Route path="cadangan" element={<Cadangan />} />
-            <Route path="bantuan" element={<Bantuan />} />
-            <Route path="*" element={<TidakDitemukan />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <PenyediaKonfirmasi>
+        <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+          <Routes>
+            <Route path="/soal/:id/cetak" element={<Suspense fallback={null}><Cetak /></Suspense>} />
+            <Route element={<Tata />}>
+              <Route index element={<Beranda />} />
+              <Route path="soal/baru" element={<BuatSoal />} />
+              <Route path="soal" element={<DaftarSoal />} />
+              <Route path="soal/:id" element={<Peninjauan />} />
+              <Route path="soal/:id/ekspor" element={<Ekspor />} />
+              {/* Halaman telaah dihapus pada v0.5; tautan lama diarahkan ke Soal saya. */}
+              <Route path="telaah" element={<Navigate to="/soal" replace />} />
+              <Route path="pengaturan" element={<Pengaturan />} />
+              <Route path="pengaturan/ai" element={<PengaturanAi />} />
+              <Route path="cadangan" element={<Cadangan />} />
+              <Route path="bantuan" element={<Bantuan />} />
+              <Route path="*" element={<TidakDitemukan />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </PenyediaKonfirmasi>
     </PenyediaPesan>
   );
 }

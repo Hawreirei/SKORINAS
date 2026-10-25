@@ -12,6 +12,7 @@ import { faseDariKelas } from '../kurikulum/fase';
 import { nilaiTp } from '../kurikulum/pemeriksa-tp';
 import { paketUntuk, rumpunDariMapel } from '../paket';
 import { KepalaHalaman } from '../komponen/Kepala';
+import { useKonfirmasi } from '../komponen/Konfirmasi';
 import { usePesan } from '../komponen/Pesan';
 import { Kartu, Label, Peringatan } from '../komponen/Status';
 import { Chip, Panah, Tombol } from '../komponen/Tombol';
@@ -134,6 +135,7 @@ export default function BuatSoal() {
   const [cari] = useSearchParams();
   const navigasi = useNavigate();
   const pesan = usePesan();
+  const konfirmasi = useKonfirmasi();
   const profil = useProfil();
   const preset = useLiveQuery(() => db.preset.orderBy('terakhir_dipakai').reverse().toArray(), []);
   const mapelLama = useLiveQuery(async () => [...new Set((await db.paket_soal.toArray()).map((p) => p.parameter_json.mapel).filter(Boolean))].slice(0, 30), []);
@@ -296,12 +298,13 @@ export default function BuatSoal() {
                 type="button"
                 className="min-h-12 px-2 text-base font-bold text-buruk hover:underline"
                 onClick={async () => {
-                  if (!confirm('Hapus pengaturan tersimpan ini? Paket soal yang sudah dibuat tidak terpengaruh.')) return;
+                  const nama = preset.find((p) => p.id === presetId)?.nama ?? '';
+                  if (!(await konfirmasi({ judul: `Hapus pengaturan tersimpan "${nama}"?`, pesan: 'Isian ini tidak lagi dapat dipilih. Paket soal yang sudah dibuat tidak terpengaruh.', aksi: 'Hapus pengaturan', bahaya: true }))) return;
                   await db.preset.delete(presetId);
                   muatPreset(null);
                 }}
               >
-                Hapus pengaturan ini
+                Hapus pengaturan ini…
               </button>
             ) : null}
           </div>
