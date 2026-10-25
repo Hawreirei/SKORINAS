@@ -103,8 +103,13 @@ function butirPalsu(bentuk) {
   await page.waitForSelector('h1');
   await foto('01-beranda-kosong');
 
+  // Tanpa kunci AI: layar Buat tetap dapat diisi, tombol utama mengarah ke Pengaturan AI (UI-06).
+  await page.goto(DASAR + '/soal/baru');
+  await page.waitForSelector('text=Pasang kunci AI dulu agar GenSoal dapat membuat soal');
+  await page.locator('aside').getByRole('button', { name: /Pasang kunci AI dulu/ }).click();
+  await page.waitForURL(/\/pengaturan\/ai$/);
+
   // Pengaturan AI: tempel kunci, uji, pilih model
-  await page.goto(DASAR + '/pengaturan/ai');
   await page.fill('#kunci', 'AIzaUJI-palsu-1234567890');
   await page.getByRole('button', { name: 'Simpan dan uji' }).click();
   await page.waitForSelector('text=Siap dipakai');
@@ -121,11 +126,19 @@ function butirPalsu(bentuk) {
   await page.fill('#mapel', 'Matematika');
   await page.fill('#tp', 'Peserta didik dapat menjumlahkan dua pecahan berpenyebut sama.\nPeserta didik dapat membandingkan dua pecahan berpenyebut berbeda dengan menyamakan penyebutnya.');
   await page.fill('#jumlah', '12');
+  // Panel Rencana menghitung permintaan sebelum tombol ditekan; isian tersimpan sebagai draf.
+  await page.locator('aside[aria-label="Rencana"]').getByText('12–16').waitFor();
+  await page.reload();
+  await page.waitForSelector('h1:has-text("Buat soal")');
+  const draf = await page.evaluate(() => ['#kelas', '#mapel', '#jumlah'].map((q) => document.querySelector(q).value));
+  if (draf.join('|') !== '4|Matematika|12') galat.push(`draf layar Buat tidak pulih setelah muat ulang: ${draf.join('|')}`);
   await page.getByRole('button', { name: /Pengaturan lanjutan/ }).click();
   for (const b of ['Isian singkat', 'Benar-salah', 'Uraian']) await page.getByRole('button', { name: b, exact: true }).click();
   await page.getByLabel('Simpan pengaturan ini').check();
-  await page.fill('[aria-label="Nama pengaturan tersimpan"]', 'Matematika K4 · Pecahan');
+  await page.fill('#nama-preset', 'Matematika K4 · Pecahan');
   await page.fill('#judul', 'Penjumlahan pecahan');
+  // Gulir ke atas agar kepala dan panel Rencana yang lengket tergambar di tempatnya pada tangkapan penuh.
+  await page.evaluate(() => window.scrollTo(0, 0));
   await foto('03-buat-soal');
   await page.getByRole('button', { name: /Buat 12 soal/ }).click();
   await page.waitForURL(/\/soal\/[0-9a-f-]+$/);
