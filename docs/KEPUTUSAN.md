@@ -126,3 +126,13 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | Status `BagianLipat` | Disimpan di `localStorage` `gensoal:lipat:<kunci>` bila prop `ingat` diisi | Kenyamanan per perangkat; tidak mengubah skema Dexie |
 | Uji komponen | `tests/*.test.tsx` dengan lingkungan jsdom per berkas, `react-dom/client` dan `act` dari React 19, tanpa pustaka tambahan | Pola Vitest diperluas ke `.tsx` di `vite.config.ts` |
 | Temuan untuk UI-12 | Teks putih di atas biru utama mode gelap (#3b82f6) berkontras 3,68 : 1, di bawah 4,5. Berlaku untuk semua tombol utama dan chip aktif di mode gelap, sudah ada sebelum UI-02 | Diselesaikan di UI-12 (#13) bersama audit kontras mode gelap |
+
+## UI-03 Peta status paket (issue #4)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Peta pusat | `src/app/status.ts`: Sedang dibuat, Menunggu batas penyedia, Dijeda, Perlu perhatian, Siap diunduh. Warna dari nada `Pemberitahuan` (info, awas, awas, galat, berhasil), jadi kontrasnya ikut teruji | Satu tempat untuk label dan warna; layar hanya memakai `LencanaStatus`, `BilahKemajuan`, dan `pitaStatus` |
+| "Menjaga batas per menit" | Tetap **Sedang dibuat** (biru), bukan Menunggu | Jeda itu diatur GenSoal sendiri dan bagian normal pembuatan; **Menunggu batas penyedia** hanya saat penyedia menolak karena batas |
+| Perlu perhatian | Paket dijeda karena galat kunci, model, jaringan, atau server, atau paket selesai dengan soal yang gagal dibuat. Jeda karena kuota, batas, tab ditutup, atau jeda manual tetap **Dijeda** | Galat di IndexedDB hanya berupa pesan; jenisnya dibaca dari pesan (semua pesan kuota dan batas memuat "kuota" atau "batas"), dan jenis dari pengatur di tab yang sama didahulukan. Data tersimpan tidak diubah |
+| Ringkasan paket | `RingkasanPaket` ikut membawa jumlah slot gagal dan galat terakhir dari `pekerjaan_generasi`; jumlah soal pindah ke baris keterangan ("5 dari 12 soal", "12 soal · 2 gagal dibuat") | Lencana cukup berisi status |
+| Pembaca layar | Bilah kemajuan `role="progressbar"` dengan `aria-valuetext` "n dari m soal selesai"; lencana dan rincian kemajuan dalam `aria-live="polite"`. Hitung mundur tidak lagi `role="status"` | Hitung mundur yang diumumkan tiap detik terlalu bising |

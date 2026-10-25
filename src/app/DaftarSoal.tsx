@@ -5,10 +5,10 @@ import { db } from '../db/skema';
 import { MASA_SAMPAH_MS } from '../db/sampah';
 import { hapusPaket, pulihkanPaket, pulihkanSoal } from '../generasi/operasi';
 import { KepalaHalaman } from '../komponen/Kepala';
-import { Kartu, Titik } from '../komponen/Status';
+import { Kartu, LencanaStatus } from '../komponen/Status';
 import { Chip, Panah, TautanTombol, Tombol } from '../komponen/Tombol';
-import { useJudulHalaman } from './kait';
-import { daftarRingkasan, formatTanggal, labelStatusPaket } from './ringkas';
+import { useJudulHalaman, usePengatur } from './kait';
+import { daftarRingkasan, formatTanggal, statusRingkasan, teksJumlah } from './ringkas';
 import { teksPolos } from '../matematika/teks';
 
 export default function DaftarSoal() {
@@ -16,6 +16,7 @@ export default function DaftarSoal() {
   const [tab, setTab] = useState<'paket' | 'sampah'>('paket');
   const [cari, setCari] = useState('');
   const paket = useLiveQuery(() => daftarRingkasan(), []);
+  const pengatur = usePengatur();
   const paketSampah = useLiveQuery(() => daftarRingkasan(undefined, true), []);
   const soalSampah = useLiveQuery(() => db.soal.filter((s) => s.dihapus_pada != null).toArray(), []);
   const q = cari.trim().toLowerCase();
@@ -44,19 +45,18 @@ export default function DaftarSoal() {
         <Kartu as="div" className="mt-6 !py-1">
           {paket && !tersaring.length ? <p className="py-8 text-[17px] text-isi">{q ? 'Tidak ada paket yang cocok.' : 'Belum ada paket soal.'}</p> : null}
           {tersaring.map((r) => {
-            const st = labelStatusPaket(r);
+            const st = statusRingkasan(r, pengatur);
             return (
               <div key={r.paket.id} className="grid items-center gap-x-6 gap-y-2 border-b border-garis px-1 py-4 last:border-b-0 sm:grid-cols-[96px_minmax(0,1fr)_auto_auto]">
                 <span className="text-base font-bold text-redup">Kelas {r.paket.parameter_json.kelas}</span>
                 <Link to={`/soal/${r.paket.id}`} className="min-w-0 hover:underline">
                   <span className="text-[18px] font-bold">{r.paket.judul}</span>
-                  <span className="mt-0.5 block text-base text-redup">
-                    {r.paket.parameter_json.mapel} · {formatTanggal(r.paket.dibuat_pada)}
+                  <span className="mt-0.5 block text-base text-redup tabular-nums">
+                    {r.paket.parameter_json.mapel} · {formatTanggal(r.paket.dibuat_pada)} · {teksJumlah(r)}
                   </span>
                 </Link>
-                <span className={`flex items-center gap-2 text-base font-bold ${st.nada === 'baik' ? 'text-baik' : st.nada === 'awas' ? 'text-awas' : 'text-utama'}`}>
-                  <Titik isi={st.isi} />
-                  {st.teks}
+                <span>
+                  <LencanaStatus status={st} />
                 </span>
                 <span className="flex gap-4 text-base font-bold">
                   <Link to={`/soal/${r.paket.id}/ekspor`} className="inline-flex min-h-10 items-center text-utama hover:underline">

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Logo } from './Logo';
-import { Titik } from './Status';
+import { LencanaStatus, Titik } from './Status';
+import { menungguPenyedia } from '../app/status';
 import { usePengatur } from '../app/kait';
 
 const NAV = [
@@ -45,9 +46,8 @@ export function Kepala() {
         </nav>
         <div className="flex items-center gap-3">
           {pengatur.berjalan ? (
-            <Link to={`/soal/${pengatur.paketId}`} className="hidden items-center gap-2 rounded-full bg-utama-lembut px-3 py-1.5 text-base font-bold text-utama-tua sm:flex dark:text-di-tinta">
-              <span className="inline-block size-2 animate-pulse rounded-full bg-utama" />
-              {pengatur.menunggu ? 'Menunggu batas penyedia' : 'Membuat soal'} {pengatur.slotAktif ? `· soal ${pengatur.slotAktif}` : ''}
+            <Link to={`/soal/${pengatur.paketId}`} className="hidden rounded-full hover:underline sm:block" aria-label={`Buka paket yang ${menungguPenyedia(pengatur.menunggu) ? 'menunggu batas penyedia' : 'sedang dibuat'}${pengatur.slotAktif ? `, soal ${pengatur.slotAktif}` : ''}`}>
+              <LencanaStatus status={menungguPenyedia(pengatur.menunggu) ? 'menunggu' : 'membuat'}>{pengatur.slotAktif ? ` · soal ${pengatur.slotAktif}` : ''}</LencanaStatus>
             </Link>
           ) : null}
           <button type="button" className="inline-flex size-11 items-center justify-center rounded-lg text-judul hover:bg-lembut lg:hidden" aria-label="Menu" aria-expanded={buka} onClick={() => setBuka((b) => !b)}>

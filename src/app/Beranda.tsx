@@ -1,30 +1,26 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
 import { db } from '../db/skema';
-import { Kartu, Titik } from '../komponen/Status';
+import { Kartu, LencanaStatus } from '../komponen/Status';
 import { Panah, TautanTombol } from '../komponen/Tombol';
-import { useJudulHalaman } from './kait';
-import { daftarRingkasan, formatTanggal, labelStatusPaket, type RingkasanPaket } from './ringkas';
-
-const NADA = { proses: 'text-utama', awas: 'text-awas', baik: 'text-baik' } as const;
+import { useJudulHalaman, usePengatur } from './kait';
+import { daftarRingkasan, formatTanggal, statusRingkasan, teksJumlah, type RingkasanPaket } from './ringkas';
 
 export function BarisPaket({ r }: { r: RingkasanPaket }) {
-  const st = labelStatusPaket(r);
+  const st = statusRingkasan(r, usePengatur());
   return (
     <Link to={`/soal/${r.paket.id}`} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-garis px-1 py-4 last:border-b-0 hover:bg-lembut sm:px-3">
       <span className="min-w-0">
         <span className="block text-[17px] font-bold text-tinta">{r.paket.judul}</span>
-        <span className="mt-0.5 block text-base text-redup">
-          Kelas {r.paket.parameter_json.kelas} · {r.paket.parameter_json.mapel} · {formatTanggal(r.paket.dibuat_pada)}
+        <span className="mt-0.5 block text-base text-redup tabular-nums">
+          Kelas {r.paket.parameter_json.kelas} · {r.paket.parameter_json.mapel} · {formatTanggal(r.paket.dibuat_pada)} · {teksJumlah(r)}
         </span>
-        <span className={`mt-1 flex items-center gap-2 text-base font-bold sm:hidden ${NADA[st.nada]}`}>
-          <Titik isi={st.isi} />
-          {st.teks}
+        <span className="mt-2 block sm:hidden">
+          <LencanaStatus status={st} />
         </span>
       </span>
-      <span className={`hidden items-center gap-2 text-base font-bold sm:flex ${NADA[st.nada]}`}>
-        <Titik isi={st.isi} />
-        {st.teks}
+      <span className="hidden sm:block">
+        <LencanaStatus status={st} />
       </span>
     </Link>
   );

@@ -120,9 +120,12 @@ function butirPalsu(bentuk) {
   await page.locator('aside').getByRole('link', { name: /Unduh/ }).waitFor();
   await page.waitForSelector('text=Melanjutkan otomatis dalam', { timeout: 30000 });
   await foto('04a-menunggu-batas');
+  // Bilah kemajuan dapat dibaca pembaca layar (UI-03).
+  const bilah = page.getByRole('progressbar', { name: 'Kemajuan pembuatan soal' });
+  if (!(await bilah.count()) || !/dari \d+ soal selesai/.test((await bilah.getAttribute('aria-valuetext')) ?? '')) galat.push('bilah kemajuan tanpa role progressbar atau aria-valuetext');
   await page.waitForSelector('text=Menjaga batas per menit', { timeout: 120000 });
   await foto('04b-menjaga-batas');
-  await page.waitForFunction(() => !/Membuat soal|Menunggu batas|Menjaga batas/.test(document.body.innerText), null, { timeout: 400000 });
+  await page.waitForFunction(() => !/Membuat soal|Sedang dibuat|Menunggu batas|Menjaga batas/.test(document.body.innerText), null, { timeout: 400000 });
   if (await page.locator('text=Dijeda').count()) throw new Error('Pembuatan terjeda padahal batas hanya per menit');
   await foto('04-periksa');
   const urlPeriksa = page.url();
@@ -175,6 +178,7 @@ function butirPalsu(bentuk) {
   await foto('06-cetak');
   await page.goto(DASAR + '/');
   await page.waitForSelector('text=Penjumlahan pecahan');
+  if (!(await page.getByText('Siap diunduh').count())) galat.push('beranda tanpa lencana "Siap diunduh"');
   await foto('07-beranda');
   const hp = await ctx.newPage();
   await hp.setViewportSize({ width: 390, height: 844 });

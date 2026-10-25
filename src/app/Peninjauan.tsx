@@ -8,7 +8,8 @@ import { pengatur } from '../generasi/pengatur';
 import { paketUntuk } from '../paket';
 import { Dialog } from '../komponen/Dialog';
 import { usePesan } from '../komponen/Pesan';
-import { Kartu, Peringatan } from '../komponen/Status';
+import { BilahKemajuan, Kartu, LencanaStatus, Peringatan, pitaStatus } from '../komponen/Status';
+import { menungguPenyedia, statusPaket } from './status';
 import { Panah, TautanTombol, Tombol } from '../komponen/Tombol';
 import { GantiSoal } from './GantiSoal';
 import { usePengatur, useJudulHalaman, useProfil } from './kait';
@@ -24,7 +25,7 @@ function HitungMundur({ sampai, alasan }: { sampai: number; alasan: string }) {
   }, []);
   const detik = Math.max(0, Math.ceil((sampai - kini) / 1000));
   return (
-    <p className="mt-3 text-base text-isi" role="status">
+    <p className="mt-3 text-base text-isi tabular-nums">
       {alasan} Melanjutkan otomatis dalam {detik} detik. Tidak perlu menekan apa pun.
     </p>
   );
@@ -55,6 +56,16 @@ export default function Peninjauan() {
   const slot = kerja?.slot ?? [];
   const selesaiSlot = slot.filter((s) => s.status === 'lolos' || s.status === 'gagal').length;
   const gagalSlot = slot.filter((s) => s.status === 'gagal');
+  const st = statusPaket({ paketId: id, status: paket.status, gagal: gagalSlot.length, galat: kerja?.galat ?? null, pengatur: status });
+  const nomorAktif = status.slotAktif ?? selesaiSlot + 1;
+  const rinciKemajuan = sedangDibuat
+    ? status.menunggu
+      ? // Lencana sudah berbunyi "Menunggu batas penyedia"; jeda yang diatur GenSoal sendiri disebut terpisah.
+        `${menungguPenyedia(status.menunggu) ? '' : 'Menjaga batas per menit · '}soal ${nomorAktif} dari ${slot.length}`
+      : `Membuat soal ${nomorAktif} dari ${slot.length}…`
+    : menyelesaikan
+      ? 'Menyimpan soal terakhir…'
+      : null;
   const komposisi = (['mudah', 'sedang', 'sulit'] as const).map((k) => `${KESUKARAN_LABEL[k]} ${aktif.filter((s) => s.kesukaran_rancangan === k).length}`).join(' · ');
   const totalBiaya = (pemakaian ?? []).reduce<number | null>((a, x) => (a === null || x.perkiraan_biaya === null ? null : a + x.perkiraan_biaya), 0);
   const totalToken = (pemakaian ?? []).reduce((a, x) => a + x.token_masuk + x.token_keluar, 0);
@@ -115,17 +126,12 @@ export default function Peninjauan() {
           </div>
 
           {paket.status !== 'siap' || sedangDibuat ? (
-            <Kartu pita="utama" className="mt-6">
+            <Kartu pita={pitaStatus(st)} className="mt-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <span className="text-[18px] font-bold">
-                  {sedangDibuat
-                    ? status.menunggu
-                      ? `${status.menunggu.alasan.startsWith('Menjaga') ? 'Menjaga batas per menit' : 'Menunggu batas penyedia pulih'} · soal ${status.slotAktif ?? selesaiSlot + 1} dari ${slot.length}`
-                      : `Membuat soal ${status.slotAktif ?? selesaiSlot + 1} dari ${slot.length}…`
-                    : menyelesaikan
-                      ? `Menyimpan · ${selesaiSlot} dari ${slot.length} soal selesai`
-                      : `Dijeda · ${selesaiSlot} dari ${slot.length} soal selesai`}
-                </span>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2" aria-live="polite">
+                  <LencanaStatus status={st} />
+                  {rinciKemajuan ? <span className="text-base font-semibold text-isi tabular-nums">{rinciKemajuan}</span> : null}
+                </div>
                 {menyelesaikan ? null : sedangDibuat ? (
                   <Tombol varian="hantu" onClick={() => pengatur.jeda()}>
                     Jeda
@@ -143,13 +149,11 @@ export default function Peninjauan() {
                   </span>
                 )}
               </div>
-              <div className="mt-4 h-2 overflow-hidden rounded-full bg-utama-lembut" aria-hidden="true">
-                <div className="h-full rounded-full bg-utama transition-all" style={{ width: `${slot.length ? (selesaiSlot / slot.length) * 100 : 0}%` }} />
-              </div>
+              <BilahKemajuan selesai={selesaiSlot} total={slot.length} menunggu={st === 'menunggu'} className="mt-4" />
               {sedangDibuat && status.menunggu ? <HitungMundur sampai={status.menunggu.sampai} alasan={status.menunggu.alasan} /> : null}
               {status.paketId === id && status.catatan ? <p className="mt-3 text-base text-isi">{status.catatan}</p> : null}
               {!sedangDibuat && (kerja?.galat || status.pesan) ? (
-                <div className="mt-3 text-base text-awas">
+                <div className="mt-3 text-base text-isi">
                   <p>
                     {status.paketId === id && status.pesan ? status.pesan : kerja?.galat}{' '}
                     {(status.paketId === id && (status.jenisGalat === 'kunci' || status.jenisGalat === 'batas' || status.jenisGalat === 'model')) || /kunci|model|kuota/i.test(kerja?.galat ?? '') ? (
