@@ -7,9 +7,7 @@ export default function Bantuan() {
   useJudulHalaman('Bantuan');
   return (
     <div className="mx-auto max-w-[1100px] px-4 pb-20 pt-8 sm:px-8 sm:pt-10">
-      <KepalaHalaman label="Bantuan" judul="Cara memakai">
-        Satu tugas per video, dengan langkah teks di bawahnya.
-      </KepalaHalaman>
+      <KepalaHalaman judul="Bantuan" subjudul="Satu tugas per video, dengan langkah teks di bawahnya." />
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {Object.keys(BANTUAN).map((id) => (
           <PanelBantuan key={id} id={id} />

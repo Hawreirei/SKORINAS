@@ -25,12 +25,15 @@ export default function DaftarSoal() {
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 pb-20 pt-8 sm:px-8 sm:pt-10">
-      <div className="flex flex-wrap items-end justify-between gap-6">
-        <KepalaHalaman judul="Soal saya" />
-        <TautanTombol to="/soal/baru" ukuran="besar">
-          Buat soal <Panah />
-        </TautanTombol>
-      </div>
+      <KepalaHalaman
+        judul="Soal saya"
+        subjudul="Paket soal yang tersimpan di perangkat ini."
+        aksi={
+          <TautanTombol to="/soal/baru" ukuran="besar" className="w-full sm:w-auto">
+            Buat soal <Panah />
+          </TautanTombol>
+        }
+      />
       <div className="mt-8 flex flex-wrap items-center gap-3">
         <Chip aktif={tab === 'paket'} onClick={() => setTab('paket')} className="tabular-nums">
           Paket · {paket?.length ?? 0}

@@ -60,6 +60,17 @@ function butirPalsu(bentuk) {
 
 (async () => {
   const browser = await chromium.launch();
+  // Satu tombol utama terlihat tanpa menggulir di laptop (UI-04).
+  const utamaTerlihat = async (pg, layar) => {
+    await pg.evaluate(() => window.scrollTo(0, 0));
+    const ada = await pg.evaluate(() =>
+      [...document.querySelectorAll('.tombol-utama')].some((el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0 && r.top >= 0 && r.bottom <= window.innerHeight;
+      }),
+    );
+    if (!ada) galat.push(`${layar}: tombol utama tidak terlihat tanpa menggulir`);
+  };
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 1000 }, acceptDownloads: true });
   const page = await ctx.newPage();
   const galat = [];
@@ -105,6 +116,7 @@ function butirPalsu(bentuk) {
   await page.goto(DASAR + '/soal/baru');
   await page.waitForSelector('h1:has-text("Buat soal")');
   await foto('03a-buat-soal-kosong');
+  await utamaTerlihat(page, 'Buat soal');
   await page.selectOption('#kelas', '4');
   await page.fill('#mapel', 'Matematika');
   await page.fill('#tp', 'Peserta didik dapat menjumlahkan dua pecahan berpenyebut sama.\nPeserta didik dapat membandingkan dua pecahan berpenyebut berbeda dengan menyamakan penyebutnya.');
@@ -128,6 +140,17 @@ function butirPalsu(bentuk) {
   await page.waitForFunction(() => !/Membuat soal|Sedang dibuat|Menunggu batas|Menjaga batas/.test(document.body.innerText), null, { timeout: 400000 });
   if (await page.locator('text=Dijeda').count()) throw new Error('Pembuatan terjeda padahal batas hanya per menit');
   await foto('04-periksa');
+  await utamaTerlihat(page, 'halaman paket');
+  // Kepala lengket di laptop; soal yang dilompati tidak tertutup kepala (UI-04).
+  const letak = await page.evaluate(async () => {
+    const kepala = document.querySelector('header');
+    const soal = document.querySelectorAll('article[id^="soal-"]')[6];
+    soal.scrollIntoView();
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    return { kepalaAtas: kepala.getBoundingClientRect().top, kepalaBawah: kepala.getBoundingClientRect().bottom, soalAtas: soal.getBoundingClientRect().top, gulir: window.scrollY };
+  });
+  if (letak.gulir < 500 || Math.abs(letak.kepalaAtas) > 1) galat.push(`kepala tidak lengket saat digulir: ${JSON.stringify(letak)}`);
+  if (letak.soalAtas < letak.kepalaBawah) galat.push(`soal tertutup kepala lengket: ${JSON.stringify(letak)}`);
   const urlPeriksa = page.url();
 
   // Aksi jarang dipakai ada di menu Lainnya; Escape menutupnya.
@@ -150,6 +173,7 @@ function butirPalsu(bentuk) {
   await page.waitForSelector('text=Unduh 3 berkas Word');
   await page.getByRole('link', { name: /Kembali ke soal/ }).waitFor();
   await foto('05-unduh');
+  await utamaTerlihat(page, 'Unduh');
   const urlUnduh = page.url();
   for (const [fmt, label] of [['docx', 'Word'], ['pdf', 'PDF'], ['tex', 'LaTeX']]) {
     if (fmt === 'tex') await page.click('text=Menu lanjutan');
@@ -180,6 +204,10 @@ function butirPalsu(bentuk) {
   await page.waitForSelector('text=Penjumlahan pecahan');
   if (!(await page.getByText('Siap diunduh').count())) galat.push('beranda tanpa lencana "Siap diunduh"');
   await foto('07-beranda');
+  await utamaTerlihat(page, 'Beranda');
+  await page.goto(DASAR + '/soal');
+  await page.waitForSelector('h1');
+  await utamaTerlihat(page, 'Soal saya');
   const hp = await ctx.newPage();
   await hp.setViewportSize({ width: 390, height: 844 });
   await hp.goto(DASAR + '/');
@@ -193,6 +221,13 @@ function butirPalsu(bentuk) {
     await hp.goto(u);
     await hp.waitForSelector('h1');
     await hp.screenshot({ path: path.join(KELUAR, `${n}.png`), fullPage: true });
+    if (n === '09b-periksa-ponsel') {
+      const bawah = await hp.evaluate(() => {
+        window.scrollTo(0, 1500);
+        return document.querySelector('header').getBoundingClientRect().bottom;
+      });
+      if (bawah > 0) galat.push('kepala lengket di ponsel, seharusnya ikut tergulir');
+    }
     lebar = Math.max(lebar, await hp.evaluate(() => document.documentElement.scrollWidth));
   }
   console.log('lebar halaman ponsel', lebar);

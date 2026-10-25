@@ -77,7 +77,7 @@ export default function Cadangan() {
 
   return (
     <div className="mx-auto max-w-[800px] px-4 pb-20 pt-8 sm:px-8 sm:pt-10">
-      <KepalaHalaman judul="Cadangan">Tanpa akun, berkas cadangan adalah satu-satunya cara memindah soal ke perangkat lain atau memulihkannya. Kunci API tidak ikut berkas cadangan.</KepalaHalaman>
+      <KepalaHalaman judul="Cadangan" subjudul="Tanpa akun, berkas cadangan adalah satu-satunya cara memindah soal ke perangkat lain atau memulihkannya. Kunci API tidak ikut berkas cadangan." />
 
       <Kartu className="mt-6">
         <dl className="grid gap-4 tabular-nums sm:grid-cols-3">

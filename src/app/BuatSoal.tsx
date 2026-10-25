@@ -271,7 +271,7 @@ export default function BuatSoal() {
   return (
     <div>
       <div className="mx-auto max-w-[880px] px-4 pb-16 pt-8 sm:px-8 sm:pt-10">
-        <KepalaHalaman judul="Buat soal">Cukup isi kelas, mapel, dan jumlah soal. Sisanya sudah terisi otomatis.</KepalaHalaman>
+        <KepalaHalaman judul="Buat soal" subjudul="Cukup isi kelas, mapel, dan jumlah soal. Sisanya sudah terisi otomatis." />
 
         {preset && preset.length ? (
           <div className="mt-6 flex flex-wrap items-end gap-3">

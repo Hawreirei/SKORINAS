@@ -7,6 +7,7 @@ import { KESUKARAN_LABEL } from '../db/tipe';
 import { pengatur } from '../generasi/pengatur';
 import { paketUntuk } from '../paket';
 import { Dialog } from '../komponen/Dialog';
+import { KepalaHalaman } from '../komponen/Kepala';
 import { usePesan } from '../komponen/Pesan';
 import { BilahKemajuan, Kartu, LencanaStatus, Peringatan, pitaStatus } from '../komponen/Status';
 import { menungguPenyedia, statusPaket } from './status';
@@ -94,36 +95,38 @@ export default function Peninjauan() {
     <div>
       <div className="mx-auto flex max-w-[1240px] gap-x-10 px-4 sm:px-8">
         <div className="min-w-0 flex-1 pb-10 pt-8 sm:pt-10 lg:pb-16">
-          <div className="text-base font-bold text-utama">
-            Kelas {p.kelas} · {p.mapel}
-          </div>
-          {judulBaru === null ? (
-            <h1 className="judul-besar mt-1 text-[30px] sm:text-[36px]">
-              {paket.judul}{' '}
-              <button type="button" className="align-middle text-base font-bold text-utama hover:underline" onClick={() => setJudulBaru(paket.judul)}>
-                Ubah judul
-              </button>
-            </h1>
-          ) : (
-            <form
-              className="mt-2 flex flex-wrap gap-3"
-              onSubmit={async (e) => {
-                e.preventDefault();
-                if (judulBaru.trim()) await db.paket_soal.update(id, { judul: judulBaru.trim() });
-                setJudulBaru(null);
-              }}
-            >
-              <input className="bidang max-w-xl" aria-label="Judul paket" value={judulBaru} onChange={(e) => setJudulBaru(e.target.value)} autoFocus />
-              <Tombol type="submit" varian="garis">
-                Simpan
-              </Tombol>
-            </form>
-          )}
-          <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-base text-redup tabular-nums">
-            <span>{aktif.length} soal</span>
-            <span>{komposisi}</span>
-            <span>Dibuat dengan bantuan AI</span>
-          </div>
+          <KepalaHalaman
+            label={`Kelas ${p.kelas} · ${p.mapel}`}
+            judul={
+              judulBaru === null ? (
+                <>
+                  {paket.judul}{' '}
+                  <button type="button" className="align-middle text-base font-bold text-utama hover:underline" onClick={() => setJudulBaru(paket.judul)}>
+                    Ubah judul
+                  </button>
+                </>
+              ) : (
+                paket.judul
+              )
+            }
+            subjudul={<span className="tabular-nums">{`${aktif.length} soal · ${komposisi} · Dibuat dengan bantuan AI`}</span>}
+          >
+            {judulBaru !== null ? (
+              <form
+                className="mt-3 flex flex-wrap gap-3"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (judulBaru.trim()) await db.paket_soal.update(id, { judul: judulBaru.trim() });
+                  setJudulBaru(null);
+                }}
+              >
+                <input className="bidang max-w-xl" aria-label="Judul paket" value={judulBaru} onChange={(e) => setJudulBaru(e.target.value)} autoFocus />
+                <Tombol type="submit" varian="garis">
+                  Simpan
+                </Tombol>
+              </form>
+            ) : null}
+          </KepalaHalaman>
 
           {paket.status !== 'siap' || sedangDibuat ? (
             <Kartu pita={pitaStatus(st)} className="mt-6">
@@ -195,7 +198,7 @@ export default function Peninjauan() {
         </div>
 
         <aside aria-label="Paket ini" className="hidden w-[300px] shrink-0 pb-14 pt-10 lg:block">
-          <Kartu className="sticky top-6">
+          <Kartu className="sticky top-[calc(var(--tinggi-kepala,76px)+1.5rem)]">
             <h2 className="text-[20px] font-extrabold text-judul">Paket ini</h2>
             <p className="mt-2 text-base text-isi">{aktif.length ? `${aktif.length} soal siap diunduh.` : 'Belum ada soal.'}</p>
             <TautanTombol to={`/soal/${id}/ekspor`} ukuran="besar" className={`mt-4 w-full ${bisaUnduh ? '' : 'pointer-events-none opacity-40'}`} aria-disabled={!bisaUnduh}>

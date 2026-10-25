@@ -130,9 +130,10 @@ export default function PengaturanAi() {
 
   return (
     <div className="mx-auto max-w-[800px] px-4 pb-20 pt-8 sm:px-8 sm:pt-10">
-      <KepalaHalaman judul="Pengaturan AI">
-        {ringkas ? 'GenSoal sudah terhubung ke penyedia AI. Kunci hanya tersimpan di peramban ini.' : 'Tempel kunci API dari satu penyedia AI, lalu GenSoal siap membuat soal. Kunci hanya tersimpan di peramban ini dan tidak ikut berkas cadangan.'}
-      </KepalaHalaman>
+      <KepalaHalaman
+        judul="Pengaturan AI"
+        subjudul={ringkas ? 'GenSoal sudah terhubung ke penyedia AI. Kunci hanya tersimpan di peramban ini.' : 'Tempel kunci API dari satu penyedia AI, lalu GenSoal siap membuat soal. Kunci hanya tersimpan di peramban ini dan tidak ikut berkas cadangan.'}
+      />
 
       <div className="mt-6 space-y-6">
         {ringkas ? (

@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import { db } from '../db/skema';
 import { bangunDokumen, berkasDipilih, JENIS_BERKAS_LABEL, soalUntukEkspor, type JenisBerkas, type OpsiEkspor } from '../ekspor/model';
 import { ekspor, type FormatEkspor } from '../ekspor/peramban';
+import { KepalaHalaman } from '../komponen/Kepala';
 import { LembarCetak } from '../komponen/LembarCetak';
 import { usePesan } from '../komponen/Pesan';
 import { Kartu, Peringatan } from '../komponen/Status';
@@ -78,13 +79,7 @@ export default function Ekspor() {
     <div>
       <div className="mx-auto flex max-w-[1240px] flex-wrap gap-x-10 px-4 sm:px-8">
         <div className="min-w-0 flex-[1_1_440px] pb-10 pt-8 sm:pt-10 lg:pb-16">
-          <Link to={`/soal/${id}`} className="inline-flex min-h-10 items-center gap-2 text-base font-bold text-utama hover:underline">
-            <span aria-hidden="true">←</span> Kembali ke soal
-          </Link>
-          <h1 className="judul-besar mt-1 text-[30px] sm:text-[36px]">Unduh</h1>
-          <p className="mt-1 text-base text-redup">
-            {paket.judul} · {aktif.length} soal
-          </p>
+          <KepalaHalaman kembali={{ ke: `/soal/${id}`, label: 'Kembali ke soal' }} judul="Unduh" subjudul={`${paket.judul} · ${aktif.length} soal. Berkas dibuat di perangkat ini.`} />
 
           <Kartu className="mt-6">
             <h2 className="text-[20px] font-extrabold text-judul">Format</h2>

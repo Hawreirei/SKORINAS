@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
 import { db } from '../db/skema';
+import { KepalaHalaman } from '../komponen/Kepala';
 import { Kartu, LencanaStatus } from '../komponen/Status';
 import { Panah, TautanTombol } from '../komponen/Tombol';
 import { useJudulHalaman, usePengatur } from './kait';
@@ -35,12 +36,16 @@ export function Beranda() {
 
   return (
     <div className="mx-auto max-w-[960px] px-4 pb-20 pt-10 sm:px-8 sm:pt-14">
-      <div className="text-base font-bold text-utama">Kelas 1–12 · tanpa akun</div>
-      <h1 className="judul-besar mt-2 text-[34px] sm:text-[44px]">Buat soal yang kuncinya sudah dicek.</h1>
-      <p className="mt-3 max-w-[620px] text-[17px] leading-relaxed text-redup">Isi kelas, mapel, dan jumlah soal. GenSoal membuat soalnya, menghitung ulang kuncinya, lalu Anda unduh sebagai Word atau PDF.</p>
-      <TautanTombol to="/soal/baru" ukuran="besar" className="mt-7 w-full !min-h-16 !text-[19px] sm:w-auto sm:!px-10">
-        Buat soal <Panah />
-      </TautanTombol>
+      <KepalaHalaman
+        besar
+        label="Kelas 1–12 · tanpa akun"
+        judul="Buat soal yang kuncinya sudah dicek."
+        subjudul="Isi kelas, mapel, dan jumlah soal. GenSoal membuat soalnya, menghitung ulang kuncinya, lalu Anda unduh sebagai Word atau PDF."
+      >
+        <TautanTombol to="/soal/baru" ukuran="besar" className="mt-7 w-full !min-h-16 !text-[19px] sm:w-auto sm:!px-10">
+          Buat soal <Panah />
+        </TautanTombol>
+      </KepalaHalaman>
 
       {tanpaKunci ? (
         <Kartu pita="kuning" className="mt-8 flex flex-wrap items-center justify-between gap-4">

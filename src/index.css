@@ -96,6 +96,16 @@ body {
   color: var(--gs-ink);
 }
 
+/* Kepala lengket di layar lebar (UI-04): lompatan ke #soal-… berhenti di bawahnya. --tinggi-kepala diukur di Kepala. */
+html {
+  scroll-padding-top: 1rem;
+}
+@media (width >= 64rem) {
+  html {
+    scroll-padding-top: calc(var(--tinggi-kepala, 76px) + 1rem);
+  }
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);

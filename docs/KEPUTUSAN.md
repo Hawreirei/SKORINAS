@@ -136,3 +136,14 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | Perlu perhatian | Paket dijeda karena galat kunci, model, jaringan, atau server, atau paket selesai dengan soal yang gagal dibuat. Jeda karena kuota, batas, tab ditutup, atau jeda manual tetap **Dijeda** | Galat di IndexedDB hanya berupa pesan; jenisnya dibaca dari pesan (semua pesan kuota dan batas memuat "kuota" atau "batas"), dan jenis dari pengatur di tab yang sama didahulukan. Data tersimpan tidak diubah |
 | Ringkasan paket | `RingkasanPaket` ikut membawa jumlah slot gagal dan galat terakhir dari `pekerjaan_generasi`; jumlah soal pindah ke baris keterangan ("5 dari 12 soal", "12 soal · 2 gagal dibuat") | Lencana cukup berisi status |
 | Pembaca layar | Bilah kemajuan `role="progressbar"` dengan `aria-valuetext` "n dari m soal selesai"; lencana dan rincian kemajuan dalam `aria-live="polite"`. Hitung mundur tidak lagi `role="status"` | Hitung mundur yang diumumkan tiap detik terlalu bising |
+
+## UI-04 Kerangka halaman (issue #5)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Kepala lengket | Hanya di layar ≥ 1024 px (`lg:sticky`), latar kartu 90% dengan blur. Di ponsel ikut tergulir | Layar Buat dan halaman paket sudah memakai bilah bawah tetap di ponsel; dua bilah tetap memakan layar sempit |
+| Tinggi kepala | Diukur dengan `ResizeObserver` di `Kepala` dan dicatat sebagai `--tinggi-kepala`; dipakai `scroll-padding-top` (lompatan ke `#soal-…`) dan `top` kartu samping halaman paket | Tidak bergantung pada angka tetap bila huruf atau isi kepala berubah |
+| `KepalaHalaman` | Prop `kembali`, `label`, `judul`, `subjudul`, `aksi` (kanan di layar lebar, di bawah judul di ponsel), `besar` (beranda), dan `children` untuk isi tambahan. Semua halaman memakainya, termasuk halaman paket, Unduh, beranda, Bantuan, dan 404 | Satu pola kepala |
+| Label di atas judul | Dihapus bila hanya mengulang nama menu ("Pengaturan", "Bantuan"); dipertahankan bila informatif ("Kelas 4 · Matematika", "Kelas 1–12 · tanpa akun") | Mengurangi pengulangan |
+| Tautan kembali Unduh | "← Kembali ke soal"; judul paket ada di subjudul | Lebih jelas bagi guru daripada hanya judul paket |
+| Tombol menu ponsel | Ikon dengan teks "Menu" / "Tutup", `aria-controls` ke menu | Mudah dikenali guru |

@@ -55,9 +55,14 @@ export default function Pengaturan() {
 
   return (
     <div className="mx-auto max-w-[960px] px-4 pb-20 pt-8 sm:px-8 sm:pt-10">
-      <KepalaHalaman label="Pengaturan" judul="Profil dan kop">
-        Satu profil per perangkat, tanpa akun. Kop dan identitas siswa dipakai di berkas Word, PDF, dan LaTeX. <Link to="/pengaturan/ai" className="underline">Pengaturan AI</Link> ada di halaman terpisah.
-      </KepalaHalaman>
+      <KepalaHalaman
+        judul="Profil dan kop"
+        subjudul={
+          <>
+            Satu profil per perangkat, tanpa akun. Kop dan identitas siswa dipakai di berkas Word, PDF, dan LaTeX. <Link to="/pengaturan/ai" className="underline">Pengaturan AI</Link> ada di halaman terpisah.
+          </>
+        }
+      />
       <Kartu as="div" className="mt-8 grid gap-5 sm:grid-cols-2">
         <div>
           <Label htmlFor="nama">Nama guru</Label>
