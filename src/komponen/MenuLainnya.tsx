@@ -14,8 +14,9 @@ export interface ButirMenu {
  * Saat dibuka, fokus pindah ke butir pertama; panah atas/bawah, Home, dan End berpindah butir;
  * Escape menutup dan mengembalikan fokus ke tombol; klik di luar atau Tab menutup.
  * `ikon` menampilkan tombol "⋯" (untuk baris daftar); `label` tetap menjadi namanya bagi pembaca layar.
+ * `arah="bawah"` membuka daftar ke bawah, rata kanan (untuk menu di kepala halaman).
  */
-export function MenuLainnya({ butir, label = 'Lainnya', ikon = false, className = '' }: { butir: (ButirMenu | false | null | undefined)[]; label?: string; ikon?: boolean; className?: string }) {
+export function MenuLainnya({ butir, label = 'Lainnya', ikon = false, arah = 'atas', className = '' }: { butir: (ButirMenu | false | null | undefined)[]; label?: string; ikon?: boolean; arah?: 'atas' | 'bawah'; className?: string }) {
   const [buka, setBuka] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const pemicu = useRef<HTMLButtonElement>(null);
@@ -86,7 +87,7 @@ export function MenuLainnya({ butir, label = 'Lainnya', ikon = false, className 
         )}
       </button>
       {buka ? (
-        <div role="menu" aria-labelledby={idTombol} className="absolute right-0 bottom-full z-20 mb-2 min-w-52 overflow-hidden rounded-lg border border-garis bg-kartu py-1 shadow-lg sm:right-auto sm:left-0">
+        <div role="menu" aria-labelledby={idTombol} className={`absolute right-0 z-20 min-w-52 overflow-hidden rounded-lg border border-garis bg-kartu py-1 shadow-lg ${arah === 'bawah' ? 'top-full mt-2' : 'bottom-full mb-2 sm:right-auto sm:left-0'}`}>
           {daftar.map((b) => (
             <button
               key={b.label}

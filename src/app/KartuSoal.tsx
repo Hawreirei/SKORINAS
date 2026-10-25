@@ -19,7 +19,7 @@ export function KartuSoal({ soal, nomor, risikoTinggi, aksi }: { soal: Soal; nom
   const tanpaCek = soal.status_mutu === 'perlu_telaah';
   const konfirmasi = useKonfirmasi();
   return (
-    <Kartu as="article" pita={tanpaCek ? 'awas' : 'utama'} id={`soal-${soal.id}`} aria-labelledby={`nomor-${soal.id}`}>
+    <Kartu as="article" pita={tanpaCek ? 'awas' : 'utama'} id={`soal-${soal.id}`} aria-labelledby={`nomor-${soal.id}`} tabIndex={-1}>
       <div className="flex min-w-0 items-baseline gap-3">
         <span id={`nomor-${soal.id}`} className="text-[22px] font-extrabold text-judul">
           {nomor}.

@@ -167,3 +167,13 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | Gerbang kunci AI | Tanpa kunci yang terpasang untuk penyedia utama, `Pemberitahuan` di atas formulir dan tombol utama berbunyi "Pasang kunci AI dulu" yang membuka Pengaturan AI. Tidak ada pengalihan paksa | Isian tidak hilang (draf) |
 | Draf | `localStorage` `gensoal:draf-buat`: isian, judul, pengaturan tersimpan terpilih, dan pilihan simpan; dihapus setelah paket dibuat atau lewat "Kosongkan isian". `?ulang=` dan `?preset=` didahulukan | Tanpa versi Dexie baru; kenyamanan per perangkat |
 | Komponen | Kesukaran (Bawaan, Lebih mudah, Lebih sulit, Atur sendiri) dan cara menjawab benar-salah memakai `Pilihan`; bentuk soal `PilihanBanyak`; Pengaturan lanjutan `BagianLipat` dengan status buka diingat; simpan pengaturan `Sakelar`. Petunjuk menjelaskan akibat (mis. "Lebih sulit: … pembuatan bisa lebih lama") | Komponen UI-02 |
+
+## UI-07 Halaman paket soal (issue #8)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Satu tombol utama | Laptop: **Unduh** di kepala halaman, kartu samping tanpa tombol utama. Ponsel: Unduh di bilah bawah tetap, tombol di kepala disembunyikan. Menu Lainnya kepala halaman (Ubah judul…, Buat paket serupa) tampil di semua lebar dan terbuka ke bawah | Tepat satu tombol pekat di setiap lebar layar (diuji e2e) |
+| Navigasi nomor soal | Laptop: kisi lima kolom di kartu samping yang lengket ("Lompat ke soal"), dengan biaya AI di bawahnya. Ponsel: baris yang dapat digeser di atas daftar. Nomor soal yang kuncinya tidak dicek otomatis bertitik kuning-oranye dan berlabel "Soal n, kunci tidak dicek otomatis". Klik menggulir halus (atau langsung bila pengguna memilih gerak dikurangi) dan memindah fokus ke kartu soal | Kartu samping sudah lengket di laptop; deret di atas daftar akan ikut tergulir |
+| Ubah judul | Dari menu Lainnya; formulir di bawah judul dengan Simpan dan Batal | Tautan "Ubah judul" di samping judul dihapus agar kepala halaman bersih |
+| Jeda | "Jeda dan simpan", berubah menjadi "Menjeda…" sampai pengatur berhenti | Menjelaskan bahwa soal yang sudah jadi tetap tersimpan |
+| Peringatan menutup tab | `beforeunload` hanya selama paket ini sedang dibuat di tab ini | Tab tertutup menjeda pembuatan; peringatan mencegah jeda tanpa sengaja |

@@ -142,9 +142,16 @@ function butirPalsu(bentuk) {
   await foto('03-buat-soal');
   await page.getByRole('button', { name: /Buat 12 soal/ }).click();
   await page.waitForURL(/\/soal\/[0-9a-f-]+$/);
-  await page.locator('aside').getByRole('link', { name: /Unduh/ }).waitFor();
+  await page.getByRole('link', { name: 'Unduh', exact: true }).waitFor();
   await page.waitForSelector('text=Melanjutkan otomatis dalam', { timeout: 30000 });
   await foto('04a-menunggu-batas');
+  // Selama paket dibuat, menutup tab memunculkan peringatan (UI-07).
+  const ingatkanTutup = () => page.evaluate(() => {
+    const e = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(e);
+    return e.defaultPrevented;
+  });
+  if (!(await ingatkanTutup())) galat.push('tidak ada peringatan beforeunload saat paket dibuat');
   // Bilah kemajuan dapat dibaca pembaca layar (UI-03).
   const bilah = page.getByRole('progressbar', { name: 'Kemajuan pembuatan soal' });
   if (!(await bilah.count()) || !/dari \d+ soal selesai/.test((await bilah.getAttribute('aria-valuetext')) ?? '')) galat.push('bilah kemajuan tanpa role progressbar atau aria-valuetext');
@@ -154,6 +161,18 @@ function butirPalsu(bentuk) {
   if (await page.locator('text=Dijeda').count()) throw new Error('Pembuatan terjeda padahal batas hanya per menit');
   await foto('04-periksa');
   await utamaTerlihat(page, 'halaman paket');
+  if (await ingatkanTutup()) galat.push('peringatan beforeunload masih aktif setelah pembuatan selesai');
+  // Hanya satu tombol utama berwarna pekat yang tampil.
+  const jumlahUtama = (pg) => pg.evaluate(() => [...document.querySelectorAll('.tombol-utama')].filter((el) => el.getClientRects().length > 0).length);
+  if ((await jumlahUtama(page)) !== 1) galat.push(`halaman paket laptop: ${await jumlahUtama(page)} tombol utama tampil`);
+  // Nomor soal melompat ke kartunya tanpa tertutup kepala lengket.
+  await page.locator('aside').getByRole('button', { name: /^Soal 9(,|$)/ }).click();
+  await page.waitForFunction(() => {
+    const el = document.querySelectorAll('article[id^="soal-"]')[8];
+    const atas = el.getBoundingClientRect().top;
+    const kepala = document.querySelector('header').getBoundingClientRect().bottom;
+    return document.activeElement === el && atas >= kepala - 1 && atas < kepala + 60;
+  }, null, { timeout: 5000 }).catch(() => galat.push('klik nomor soal 9 tidak melompat ke kartunya'));
   // Kepala lengket di laptop; soal yang dilompati tidak tertutup kepala (UI-04).
   const letak = await page.evaluate(async () => {
     const kepala = document.querySelector('header');
@@ -167,7 +186,13 @@ function butirPalsu(bentuk) {
   const urlPeriksa = page.url();
 
   // Aksi jarang dipakai ada di menu Lainnya; Escape menutupnya.
+  // Menu Lainnya di kepala halaman: ubah judul dan buat paket serupa (UI-07).
+  // Menu kepala halaman ada sebelum menu kartu soal di urutan halaman.
   await page.getByRole('button', { name: 'Lainnya' }).first().click();
+  await page.getByRole('menuitem', { name: 'Ubah judul…' }).waitFor();
+  if (!(await page.getByRole('menuitem', { name: 'Buat paket serupa' }).count())) galat.push('menu kepala halaman tanpa "Buat paket serupa"');
+  await page.keyboard.press('Escape');
+  await page.locator('article[id^="soal-"]').first().getByRole('button', { name: 'Lainnya' }).click();
   await page.getByRole('menuitem', { name: 'Ganti soal' }).waitFor();
   if (!(await page.getByRole('menuitem', { name: 'Hapus soal' }).isVisible())) galat.push('menu Lainnya tidak memuat Hapus soal');
   await page.keyboard.press('Escape');
@@ -176,7 +201,7 @@ function butirPalsu(bentuk) {
   // Hapus soal lewat menu Lainnya dan dialog konfirmasi, lalu pulihkan dari tong sampah (UI-05).
   const jumlahSoal = () => page.locator('article[id^="soal-"]').count();
   const sebelumHapus = await jumlahSoal();
-  await page.getByRole('button', { name: 'Lainnya' }).last().click();
+  await page.locator('article[id^="soal-"]').last().getByRole('button', { name: 'Lainnya' }).click();
   await page.getByRole('menuitem', { name: 'Hapus soal…' }).click();
   const dialogHapus = page.getByRole('dialog', { name: /^Hapus soal \d+\?$/ });
   await dialogHapus.waitFor();
@@ -199,7 +224,7 @@ function butirPalsu(bentuk) {
   if (!(await page.getByText('Kunci tidak dicek otomatis').count())) galat.push('soal uraian tanpa keterangan "Kunci tidak dicek otomatis"');
   if (await page.getByRole('button', { name: /Setujui/ }).count()) galat.push('tombol Setujui masih ada');
   if (/Mohon cek dulu|Disetujui|Langkah \d dari 3/.test(await page.locator('body').innerText())) galat.push('penanda status atau penunjuk langkah masih tampil');
-  const tautanUnduh = page.locator('aside').getByRole('link', { name: /Unduh/ });
+  const tautanUnduh = page.getByRole('link', { name: 'Unduh', exact: true });
   if ((await tautanUnduh.getAttribute('aria-disabled')) === 'true') galat.push('Unduh tidak aktif padahal paket sudah selesai');
   await tautanUnduh.click();
   await page.waitForSelector('text=Unduh 3 berkas Word');
@@ -254,6 +279,7 @@ function butirPalsu(bentuk) {
     await hp.waitForSelector('h1');
     await hp.screenshot({ path: path.join(KELUAR, `${n}.png`), fullPage: true });
     if (n === '09b-periksa-ponsel') {
+      if ((await jumlahUtama(hp)) !== 1) galat.push(`halaman paket ponsel: ${await jumlahUtama(hp)} tombol utama tampil`);
       const bawah = await hp.evaluate(() => {
         window.scrollTo(0, 1500);
         return document.querySelector('header').getBoundingClientRect().bottom;
