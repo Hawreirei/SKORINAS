@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { adaptorUntuk } from '../ai';
 import { batasEfektif, kunciModel, permintaanHariIni } from '../ai/laju';
 import { GalatAi } from '../ai/galat';
@@ -10,10 +10,11 @@ import { simpanProfil } from '../db/profil';
 import type { KunciApi, PenyediaId } from '../db/tipe';
 import { tanggalLokal } from '../db/util';
 import { BANTUAN } from '../bantuan/daftar';
+import { BagianLipat, IsianAngka, Pemberitahuan, PilihanDaftar } from '../komponen/Formulir';
 import { KepalaHalaman } from '../komponen/Kepala';
 import { useKonfirmasi } from '../komponen/Konfirmasi';
 import { usePesan } from '../komponen/Pesan';
-import { Kartu, Label, Peringatan, Titik } from '../komponen/Status';
+import { BarisBahaya, Kartu, Label, ZonaBerbahaya } from '../komponen/Status';
 import { Tombol } from '../komponen/Tombol';
 import { useJudulHalaman, useProfil, useRegistri } from './kait';
 import { formatBiaya } from './ringkas';
@@ -25,7 +26,7 @@ function modelTersedia(p: PenyediaRegistri, k: KunciApi | undefined): BarisModel
   return gabungModel(p, k.model_tersedia.map((id) => ({ id, nama: id }))).filter((m) => m.tersedia);
 }
 
-function Langkah({ nomor, judul, children, redup = false }: { nomor: number; judul: string; children: React.ReactNode; redup?: boolean }) {
+function Langkah({ nomor, judul, children, redup = false }: { nomor: number; judul: string; children: ReactNode; redup?: boolean }) {
   return (
     <Kartu className={redup ? 'opacity-60' : ''}>
       <h2 className="text-[20px] font-extrabold text-judul">
@@ -72,7 +73,6 @@ export default function PengaturanAi() {
     if (!modelDipilih || !batas) return;
     void simpanProfil({ batas_model: { ...profil.batas_model, [kunciModel(aktif, modelDipilih)]: { ...batas, ...u } } });
   };
-  const angkaAtauKosong = (v: string) => (v.trim() === '' ? null : Math.max(1, Math.round(Number(v)) || 1));
 
   // Model cadangan boleh dari penyedia mana pun yang kuncinya berfungsi.
   const pilihanCadangan = reg.penyedia.flatMap((x) => modelTersedia(x, daftarKunci?.find((k) => k.penyedia === x.id)).map((m) => ({ penyedia: x, m })));
@@ -114,20 +114,16 @@ export default function PengaturanAi() {
 
   const ringkas = siap && !gantiKunci;
   const pilihModel = (
-    <>
-      <Label htmlFor="model-utama">Model yang dipakai</Label>
-      <select id="model-utama" className="bidang mt-2" value={modelDipilih} onChange={(e) => simpanProfil({ penyedia_utama: aktif, model_utama: e.target.value })}>
-        {!modelDipilih ? <option value="">Pilih model…</option> : null}
-        {tersedia.map((m) => (
-          <option key={m.id} value={m.id}>
-            {m.label}
-            {m.status !== 'stabil' ? ` (${LABEL_STATUS[m.status]})` : ''}
-            {m.registri?.catatan ? ` · ${m.registri.catatan}` : ''}
-          </option>
-        ))}
-      </select>
-      <p className="mt-2 text-base text-redup">Pilihan pertama biasanya sudah tepat. Setiap soal tetap dihitung ulang oleh GenSoal, model mana pun yang dipakai.</p>
-    </>
+    <PilihanDaftar id="model-utama" label="Model yang dipakai" petunjuk="Pilihan pertama biasanya sudah tepat. Setiap soal tetap dihitung ulang oleh GenSoal, model mana pun yang dipakai." value={modelDipilih} onChange={(e) => simpanProfil({ penyedia_utama: aktif, model_utama: e.target.value })}>
+      {!modelDipilih ? <option value="">Pilih model…</option> : null}
+      {tersedia.map((m) => (
+        <option key={m.id} value={m.id}>
+          {m.label}
+          {m.status !== 'stabil' ? ` (${LABEL_STATUS[m.status]})` : ''}
+          {m.registri?.catatan ? ` · ${m.registri.catatan}` : ''}
+        </option>
+      ))}
+    </PilihanDaftar>
   );
 
   return (
@@ -139,16 +135,13 @@ export default function PengaturanAi() {
 
       <div className="mt-6 space-y-6">
         {ringkas ? (
-          <Kartu pita="baik">
-            <div className="flex items-start gap-3 text-baik" role="status">
-              <Titik className="mt-2" />
-              <span className="min-w-0 flex-1 text-[17px]">
-                Siap dipakai · <strong className="font-bold">{namaUtama?.nama}</strong>
-              </span>
-            </div>
-            <div className="mt-4">{pilihModel}</div>
+          <Kartu pita="baik" aria-label="Penyedia AI">
+            <Pemberitahuan nada="berhasil">
+              Siap dipakai · <strong className="font-bold">{namaUtama?.nama}</strong>
+            </Pemberitahuan>
+            <div className="mt-5">{pilihModel}</div>
             <div className="mt-5 flex flex-wrap items-center gap-3">
-              <Tombol varian="hantu" onClick={() => setGantiKunci(true)}>
+              <Tombol varian="garis" onClick={() => setGantiKunci(true)}>
                 Ganti penyedia atau kunci
               </Tombol>
             </div>
@@ -159,12 +152,9 @@ export default function PengaturanAi() {
         ) : (
           <>
             {!siap ? (
-              <div className="flex items-start gap-3 rounded-lg border border-awas/40 bg-awas-latar px-4 py-3 text-awas" role="status">
-                <Titik isi={false} className="mt-2" />
-                <span className="min-w-0 flex-1">Belum siap. Ikuti tiga langkah di bawah.</span>
-              </div>
+              <Pemberitahuan nada="awas">Belum siap. Ikuti tiga langkah di bawah.</Pemberitahuan>
             ) : (
-              <button type="button" className="text-base font-bold text-utama hover:underline" onClick={() => { setGantiKunci(false); setPilih(null); }}>
+              <button type="button" className="min-h-11 text-base font-bold text-utama hover:underline" onClick={() => { setGantiKunci(false); setPilih(null); }}>
                 ← Kembali tanpa mengganti
               </button>
             )}
@@ -214,7 +204,9 @@ export default function PengaturanAi() {
                     value={teksKunci}
                     onChange={(e) => setTeksKunci(e.target.value)}
                     placeholder={p.awalan_kunci ? `${p.awalan_kunci}…` : 'Tempel kunci di sini'}
-                    className="bidang !pr-24 font-mono text-base"
+                    aria-invalid={kunci?.status === 'gagal' ? true : undefined}
+                    aria-describedby={kunci && kunci.status !== 'belum' ? 'kunci-hasil' : undefined}
+                    className={`bidang !pr-24 font-mono text-base ${kunci?.status === 'gagal' ? '!border-buruk' : ''}`}
                   />
                   <button type="button" onClick={() => setLihat((l) => !l)} aria-pressed={lihat} className="absolute inset-y-0 right-0 px-4 font-bold text-utama hover:underline">
                     {lihat ? 'Sembunyi' : 'Lihat'}
@@ -224,15 +216,14 @@ export default function PengaturanAi() {
                   {menguji ? 'Menguji…' : 'Simpan dan uji'}
                 </Tombol>
               </div>
-              {kunci && kunci.status !== 'belum' ? (
-                <div className={`mt-4 flex items-start gap-2 text-base ${kunci.status === 'gagal' ? 'text-buruk' : ''}`}>
-                  <Titik isi={kunci.status === 'berfungsi'} className="mt-2" />
-                  <span>{kunci.status === 'berfungsi' ? 'Kunci berfungsi.' : kunci.pesan}</span>
+              {kunci && kunci.status !== 'belum' && !menguji ? (
+                <div id="kunci-hasil" className="mt-4">
+                  {kunci.status === 'berfungsi' ? <Pemberitahuan nada="berhasil">Kunci berfungsi · {kunci.model_tersedia.length} model tersedia.</Pemberitahuan> : <Pemberitahuan nada="galat">{kunci.pesan}</Pemberitahuan>}
                 </div>
               ) : null}
               <details className="mt-4">
-                <summary className="cursor-pointer text-base font-bold text-utama">Cara mendapatkan kunci</summary>
-                <ol className="mt-3 list-decimal pl-5 text-base leading-[1.7] text-isi">
+                <summary className="min-h-11 cursor-pointer py-2 text-base font-bold text-utama">Cara mendapatkan kunci</summary>
+                <ol className="mt-2 list-decimal pl-5 text-base leading-[1.7] text-isi">
                   {BANTUAN['kunci-api'].langkah.map((l) => (
                     <li key={l}>{l}</li>
                   ))}
@@ -249,76 +240,62 @@ export default function PengaturanAi() {
           </>
         )}
 
-        <details className="rounded-xl border border-garis bg-kartu px-4 py-4 sm:px-6">
-          <summary className="cursor-pointer text-[18px] font-extrabold text-judul">Pengaturan lanjutan</summary>
-          <p className="mt-1 text-base text-redup">Model cadangan, batas pemakaian, dan batas harian.</p>
-          <div className="mt-6 space-y-8">
+        <BagianLipat judul="Pengaturan lanjutan" ringkasan="Model cadangan, batas pemakaian, dan batas harian." ingat="ai-lanjutan">
+          <div className="space-y-8">
             {tersedia.length ? (
-              <div>
-                <Label htmlFor="model-cadangan">Model cadangan (opsional)</Label>
-                <select
-                  id="model-cadangan"
-                  className="bidang mt-2"
-                  value={profil.penyedia_cadangan && profil.model_cadangan ? `${profil.penyedia_cadangan}|${profil.model_cadangan}` : ''}
-                  onChange={(e) => {
-                    const [penyedia, ...model] = e.target.value.split('|');
-                    void simpanProfil(e.target.value ? { penyedia_cadangan: penyedia as PenyediaId, model_cadangan: model.join('|') } : { penyedia_cadangan: null, model_cadangan: null });
-                  }}
-                >
-                  <option value="">Tidak ada</option>
-                  {pilihanCadangan.map(({ penyedia, m }) => (
-                    <option key={`${penyedia.id}|${m.id}`} value={`${penyedia.id}|${m.id}`}>
-                      {penyedia.nama} · {m.label}
-                    </option>
-                  ))}
-                </select>
-                <p className="mt-2 text-base text-redup">Dipakai otomatis bila kuota harian model utama habis di tengah pembuatan. Paling aman memilih penyedia lain, mis. Groq atau OpenRouter yang juga gratis.</p>
-              </div>
+              <PilihanDaftar
+                id="model-cadangan"
+                label="Model cadangan (opsional)"
+                petunjuk="Dipakai otomatis bila kuota harian model utama habis di tengah pembuatan. Paling aman memilih penyedia lain, mis. Groq atau OpenRouter yang juga gratis."
+                value={profil.penyedia_cadangan && profil.model_cadangan ? `${profil.penyedia_cadangan}|${profil.model_cadangan}` : ''}
+                onChange={(e) => {
+                  const [penyedia, ...model] = e.target.value.split('|');
+                  void simpanProfil(e.target.value ? { penyedia_cadangan: penyedia as PenyediaId, model_cadangan: model.join('|') } : { penyedia_cadangan: null, model_cadangan: null });
+                }}
+              >
+                <option value="">Tidak ada</option>
+                {pilihanCadangan.map(({ penyedia, m }) => (
+                  <option key={`${penyedia.id}|${m.id}`} value={`${penyedia.id}|${m.id}`}>
+                    {penyedia.nama} · {m.label}
+                  </option>
+                ))}
+              </PilihanDaftar>
             ) : null}
 
             {batas ? (
-              <div>
-                <div className="text-base font-bold">Batas pemakaian {labelUtama && modelDipilih === profil.model_utama ? labelUtama : 'model ini'}</div>
+              <fieldset>
+                <legend className="text-base font-bold text-tinta">Batas pemakaian {labelUtama && modelDipilih === profil.model_utama ? labelUtama : 'model ini'}</legend>
                 <p className="mt-1 text-base text-redup">
-                  Samakan dengan angka di dasbor penyedia{aktif === 'gemini' ? ' (aistudio.google.com → Usage and billing)' : ''}. Kosongkan bila tidak dibatasi.
+                  Samakan dengan angka di dasbor penyedia{aktif === 'gemini' ? ' (aistudio.google.com → Usage and billing)' : ''}. GenSoal menunggu sendiri agar tidak melewatinya.
                 </p>
-                <div className="mt-3 grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="rpm">Per menit (RPM)</Label>
-                    <input id="rpm" type="number" min={1} className="bidang mt-2" value={batas.rpm ?? ''} placeholder="tanpa batas" onChange={(e) => ubahBatas({ rpm: angkaAtauKosong(e.target.value) })} />
-                  </div>
-                  <div>
-                    <Label htmlFor="rpd">Per hari (RPD)</Label>
-                    <input id="rpd" type="number" min={1} className="bidang mt-2" value={batas.rpd ?? ''} placeholder="tanpa batas" onChange={(e) => ubahBatas({ rpd: angkaAtauKosong(e.target.value) })} />
-                  </div>
+                <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                  <IsianAngkaSimpan id="rpm" label="Per menit (RPM)" petunjuk="Kosongkan bila tidak dibatasi." nilai={batas.rpm} bolehKosong simpan={(rpm) => ubahBatas({ rpm })} />
+                  <IsianAngkaSimpan
+                    id="rpd"
+                    label="Per hari (RPD)"
+                    petunjuk={<span className="tabular-nums">Terpakai hari ini: {terpakaiHariIni ?? 0}{batas.rpd ? ` dari ${batas.rpd}` : ''} permintaan.</span>}
+                    nilai={batas.rpd}
+                    bolehKosong
+                    simpan={(rpd) => ubahBatas({ rpd })}
+                  />
                 </div>
-                <p className="mt-2 text-base text-redup tabular-nums">
-                  Terpakai hari ini: {terpakaiHariIni ?? 0}
-                  {batas.rpd ? ` dari ${batas.rpd} permintaan` : ' permintaan'}.
-                </p>
-              </div>
+              </fieldset>
             ) : null}
 
             <div className="grid gap-5 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="batas">Batas harian soal</Label>
-                <input id="batas" type="number" min={1} max={5000} className="bidang mt-2" value={profil.batas_harian} onChange={(e) => simpanProfil({ batas_harian: Math.max(1, Number(e.target.value) || 1) })} />
-              </div>
-              <div>
-                <Label htmlFor="biaya">Peringatan biaya harian (US$)</Label>
-                <input id="biaya" type="number" min={0} step={0.1} className="bidang mt-2" value={profil.batas_biaya_usd} onChange={(e) => simpanProfil({ batas_biaya_usd: Math.max(0, Number(e.target.value) || 0) })} />
-              </div>
+              <IsianAngkaSimpan id="batas" label="Batas harian soal" petunjuk="Pembuatan dijeda setelah sebanyak ini soal lolos dalam sehari." nilai={profil.batas_harian} simpan={(n) => simpanProfil({ batas_harian: Math.min(5000, n ?? 1) })} />
+              <IsianAngkaSimpan id="biaya" label="Peringatan biaya harian (US$)" petunjuk="Hanya peringatan di layar Buat; pembuatan tidak dihentikan." nilai={profil.batas_biaya_usd} desimal simpan={(n) => simpanProfil({ batas_biaya_usd: n ?? 0 })} />
             </div>
             <div>
               <p className="text-base text-redup tabular-nums">
                 Hari ini: {lolosHariIni} soal lolos · {(pemakaian ?? []).length} permintaan · {formatBiaya(biayaHariIni)}. Hanya soal yang lolos verifikasi yang mengurangi batas harian.
               </p>
-              {lewatBatasBiaya ? <Peringatan className="mt-3">Perkiraan biaya hari ini melewati batas peringatan yang Anda atur.</Peringatan> : null}
+              {lewatBatasBiaya ? <Pemberitahuan nada="awas" className="mt-3">Perkiraan biaya hari ini melewati batas peringatan yang Anda atur.</Pemberitahuan> : null}
             </div>
 
             <details>
-              <summary className="cursor-pointer text-base font-bold text-redup">Semua model {p.nama}</summary>
-              <ul className="mt-3 border-t border-garis text-base">
+              <summary className="min-h-11 cursor-pointer py-2 text-base font-bold text-redup">Semua model {p.nama}</summary>
+              <ul className="mt-2 border-t border-garis text-base">
                 {gabungModel(p, kunci?.status === 'berfungsi' ? kunci.model_tersedia.map((id) => ({ id, nama: id })) : null).map((m) => (
                   <li key={m.id} className="flex flex-wrap justify-between gap-x-4 gap-y-1 border-b border-garis py-3">
                     <span className={m.tersedia === false ? 'text-redup' : ''}>{m.label}</span>
@@ -330,15 +307,66 @@ export default function PengaturanAi() {
                 ))}
               </ul>
             </details>
-
-            {kunci ? (
-              <Tombol varian="bahaya" onClick={hapusKunci}>
-                Hapus kunci {p.nama} dari perangkat ini…
-              </Tombol>
-            ) : null}
           </div>
-        </details>
+        </BagianLipat>
+
+        {kunci ? (
+          <ZonaBerbahaya>
+            <BarisBahaya
+              judul={`Hapus kunci ${p.nama}`}
+              ket={`Kunci dihapus dari peramban ini. Soal tidak dapat dibuat dengan ${p.nama} sampai kuncinya dipasang lagi.`}
+              aksi={
+                <Tombol varian="bahaya" onClick={hapusKunci} className="w-full sm:w-auto">
+                  Hapus kunci…
+                </Tombol>
+              }
+            />
+          </ZonaBerbahaya>
+        ) : null}
       </div>
     </div>
+  );
+}
+
+/**
+ * Isian angka yang tersimpan langsung selama nilainya sah. Teks tetap milik isian, sehingga guru dapat
+ * menghapus lalu mengetik ulang; saat fokus lepas, isian menampilkan nilai tersimpan.
+ */
+function IsianAngkaSimpan({ id, label, petunjuk, nilai, simpan, bolehKosong = false, desimal = false }: { id: string; label: string; petunjuk: ReactNode; nilai: number | null; simpan: (n: number | null) => void; bolehKosong?: boolean; desimal?: boolean }) {
+  const tampil = (n: number | null) => (n === null ? '' : desimal ? String(n).replace('.', ',') : String(n));
+  const [teks, setTeks] = useState(tampil(nilai));
+  const fokus = useRef(false);
+  // Nilai dapat berubah dari luar (mis. pindah model); jangan menimpa ketikan yang sedang berlangsung.
+  useEffect(() => {
+    if (!fokus.current) setTeks(tampil(nilai));
+  }, [nilai]);
+  const baca = (t: string): number | null | undefined => {
+    if (t.trim() === '') return bolehKosong ? null : undefined;
+    const n = Number(t.replace(',', '.'));
+    if (!Number.isFinite(n) || n < 0) return undefined;
+    return desimal ? n : Math.max(1, Math.round(n));
+  };
+  const hasil = baca(teks);
+  return (
+    <IsianAngka
+      id={id}
+      label={label}
+      petunjuk={petunjuk}
+      galat={hasil === undefined ? (bolehKosong ? 'Isi dengan angka, atau kosongkan.' : 'Isi dengan angka.') : undefined}
+      inputMode={desimal ? 'decimal' : 'numeric'}
+      placeholder={bolehKosong ? 'tanpa batas' : undefined}
+      kelasIsian="tabular-nums"
+      value={teks}
+      onChange={(e) => {
+        setTeks(e.target.value);
+        const n = baca(e.target.value);
+        if (n !== undefined) simpan(n);
+      }}
+      onFocus={() => (fokus.current = true)}
+      onBlur={() => {
+        fokus.current = false;
+        setTeks(tampil(nilai));
+      }}
+    />
   );
 }

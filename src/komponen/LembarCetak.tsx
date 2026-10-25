@@ -120,6 +120,36 @@ function KepalaLampiran({ d, judul }: { d: DokumenSoal; judul: string }) {
   );
 }
 
+/** Kop sekolah dan baris identitas siswa di halaman pertama lembar soal; juga dipakai pratinjau di Profil dan kop. */
+export function KopLembar({ kop, identitas, mapelKelas }: { kop: DokumenSoal['kop']; identitas: string[]; mapelKelas: string }) {
+  return (
+    <>
+      {kop ? (
+        <div className="flex items-end gap-[0.8em] border-b-[1.5px] border-black pb-[0.3em]">
+          {kop.logo ? <img src={kop.logo} alt="" className="size-[3.2em] object-contain" /> : null}
+          <div className="min-w-0 flex-1">
+            <div className="font-bold">{kop.sekolah.toUpperCase()}</div>
+            {kop.baris.map((b) => (
+              <div key={b}>{b}</div>
+            ))}
+            {kop.alamat ? <div className="text-[0.85em] text-[#4b5563]">{kop.alamat}</div> : null}
+          </div>
+          <div className="shrink-0 font-bold">{mapelKelas}</div>
+        </div>
+      ) : null}
+      {identitas.length ? (
+        <div className="mt-[0.7em] flex gap-[1.2em]">
+          {identitas.map((f, i) => (
+            <span key={f} className="flex items-end gap-[0.3em]" style={{ flex: i === 0 ? 2 : 1 }}>
+              {f} : <span className="mb-[0.25em] flex-1 border-b border-black" />
+            </span>
+          ))}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 /** Satu berkas (lembar soal, kunci jawaban, atau kisi-kisi) sebagai HTML: pratinjau di layar Unduh dan tampilan cetak peramban. Mengikuti pakem Word dan PDF (Times New Roman). */
 export function LembarCetak({ d, hanyaHalamanPertama = false }: { d: DokumenSoal; hanyaHalamanPertama?: boolean }) {
   const L = (id: string, en: string) => (d.inggris ? en : id);
@@ -129,28 +159,7 @@ export function LembarCetak({ d, hanyaHalamanPertama = false }: { d: DokumenSoal
     <div className="lembar kertas">
       {d.berkas === 'soal' ? (
         <>
-      {d.kop ? (
-        <div className="flex items-end gap-[0.8em] border-b-[1.5px] border-black pb-[0.3em]">
-          {d.kop.logo ? <img src={d.kop.logo} alt="" className="size-[3.2em] object-contain" /> : null}
-          <div className="min-w-0 flex-1">
-            <div className="font-bold">{d.kop.sekolah.toUpperCase()}</div>
-            {d.kop.baris.map((b) => (
-              <div key={b}>{b}</div>
-            ))}
-            {d.kop.alamat ? <div className="text-[0.85em] text-[#4b5563]">{d.kop.alamat}</div> : null}
-          </div>
-          <div className="shrink-0 font-bold">{mapelKelas}</div>
-        </div>
-      ) : null}
-      {d.identitas.length ? (
-        <div className="mt-[0.7em] flex gap-[1.2em]">
-          {d.identitas.map((f, i) => (
-            <span key={f} className="flex items-end gap-[0.3em]" style={{ flex: i === 0 ? 2 : 1 }}>
-              {f} : <span className="mb-[0.25em] flex-1 border-b border-black" />
-            </span>
-          ))}
-        </div>
-      ) : null}
+      <KopLembar kop={d.kop} identitas={d.identitas} mapelKelas={mapelKelas} />
       <div className="mt-[0.8em] text-center font-bold">{d.judul.toUpperCase()}</div>
       {!d.kop ? <div className="text-center">{mapelKelas}</div> : null}
       {bagian.map((bg) => (

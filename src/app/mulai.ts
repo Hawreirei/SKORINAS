@@ -24,6 +24,15 @@ export function terapkanTema(tema: 'sistem' | 'terang' | 'gelap') {
   }
 }
 
+/** Hapus semua simpanan per perangkat GenSoal di localStorage (draf, pilihan unduh, lipatan, Langkah awal, cermin tema). */
+export function hapusSimpananPerangkat() {
+  try {
+    for (const k of Object.keys(localStorage)) if (k.startsWith('gensoal:')) localStorage.removeItem(k);
+  } catch {
+    // Abaikan bila localStorage ditolak; tidak ada yang tersimpan.
+  }
+}
+
 /** Tugas saat aplikasi dibuka: pekerjaan tertinggal, sampah lama, tema, penyimpanan persisten. */
 export function mulaiAplikasi() {
   void (async () => {

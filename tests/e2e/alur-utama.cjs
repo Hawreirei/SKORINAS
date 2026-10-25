@@ -336,6 +336,12 @@ function butirPalsu(bentuk) {
     }
     lebar = Math.max(lebar, await hp.evaluate(() => document.documentElement.scrollWidth));
   }
+  for (const [n, u] of [['13a-profil-ponsel', '/pengaturan'], ['13b-pengaturan-ai-ponsel', '/pengaturan/ai'], ['13c-cadangan-ponsel', '/cadangan']]) {
+    await hp.goto(DASAR + u);
+    await hp.waitForSelector('h1');
+    await hp.screenshot({ path: path.join(KELUAR, `${n}.png`), fullPage: true });
+    lebar = Math.max(lebar, await hp.evaluate(() => document.documentElement.scrollWidth));
+  }
   console.log('lebar halaman ponsel', lebar);
 
   // Halaman "Mohon cek dulu" dihapus; tautan lama diarahkan ke Soal saya.
@@ -349,6 +355,38 @@ function butirPalsu(bentuk) {
   const isi = JSON.parse(fs.readFileSync(path.join(KELUAR, 'cadangan.gensoal'), 'utf8'));
   console.log('cadangan soal', isi.data.soal.length, 'kunci_api ikut?', 'kunci_api' in isi.data, JSON.stringify(isi).includes('AIzaUJI'));
   await foto('10-cadangan');
+
+  // Profil dan kop (UI-11): pratinjau kop mengikuti isian; simpan memberi umpan balik di samping tombol.
+  await page.goto(DASAR + '/pengaturan');
+  await page.waitForSelector('h1:has-text("Profil dan kop")');
+  await page.fill('#sekolah', 'SD Negeri Uji');
+  await page.fill('#identitas', 'Nama, Kelas, No. absen');
+  if (!(await page.locator('figure').getByText('SD NEGERI UJI').count())) galat.push('pratinjau kop tidak mengikuti isian');
+  await page.getByRole('button', { name: 'Simpan profil' }).click();
+  await page.getByText('Profil tersimpan.').waitFor();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await foto('12-profil');
+  await page.fill('#nama', 'Bu Uji');
+  if (await page.getByText('Profil tersimpan.').count()) galat.push('"Profil tersimpan." tetap tampil setelah isian diubah');
+
+  // Pengaturan AI (UI-11): hapus kunci di Zona berbahaya, kartu terakhir.
+  await page.goto(DASAR + '/pengaturan/ai');
+  await page.getByRole('heading', { name: 'Zona berbahaya' }).waitFor();
+  await foto('02b-pengaturan-ai-siap');
+
+  // Cadangan (UI-11): hapus semua data meminta konfirmasi; Batal tidak menghapus apa pun.
+  await page.goto(DASAR + '/cadangan');
+  const dlgHapus = page.getByRole('dialog', { name: 'Hapus semua data di perangkat ini?' });
+  await page.getByRole('button', { name: 'Hapus semua data…' }).click();
+  await dlgHapus.getByRole('button', { name: 'Batal' }).click();
+  await dlgHapus.waitFor({ state: 'hidden' });
+  if (!(await page.getByText(/^[1-9]\d* paket · \d+ soal$/).count())) galat.push('Batal di konfirmasi hapus semua data tetap menghapus data');
+  await page.getByRole('button', { name: 'Hapus semua data…' }).click();
+  await foto('10b-konfirmasi-hapus-semua', { fullPage: false });
+  await dlgHapus.getByRole('button', { name: 'Hapus semua data' }).click();
+  await page.getByText('0 paket · 0 soal').waitFor();
+  await page.goto(DASAR + '/');
+  await page.getByRole('region', { name: 'Langkah awal' }).waitFor();
 
   const padat = Math.max(...waktuKirim.map((t) => waktuKirim.filter((u) => u >= t && u < t + 60000).length));
   console.log('permintaan terbanyak dalam 60 detik:', padat, '(batas 5)');

@@ -206,3 +206,13 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | Kapan selesai | Kunci: ada kunci berstatus berfungsi. Soal: ada paket (termasuk di tong sampah). Unduh: tanda per perangkat `gensoal:sudah-unduh` di `localStorage` yang ditulis setelah unduhan berhasil | Tidak menambah tabel atau versi Dexie |
 | Menghilang | Kartu tidak tampil setelah ketiga langkah selesai atau setelah "Sembunyikan" (`gensoal:langkah-awal-tersembunyi`) | Beranda guru lama tetap ringkas |
 | Soal terakhir | Tetap lima paket terbaru; empty state menautkan ke Buat soal | Tidak berubah |
+
+## UI-11 Pengaturan AI, Profil dan kop, Cadangan (issue #12)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Susunan | Ketiga layar memakai kartu per bagian (`KartuBagian`, judul h2) dan diakhiri kartu **Zona berbahaya** berjudul merah (`ZonaBerbahaya`, `BarisBahaya`) | Satu pola; aksi yang menghapus data selalu di tempat yang sama |
+| Hapus semua data | Tombol "Hapus semua data…" membuka dialog konfirmasi yang menyebut jumlah paket dan soal. Isian "Ketik HAPUS" dihapus | Rancangan UI meminta `DialogKonfirmasi`; Batal menjadi fokus awal sehingga Enter tidak menghapus. Selain IndexedDB, simpanan `gensoal:*` di `localStorage` (draf, pilihan unduh, Langkah awal) ikut dikosongkan |
+| Profil dan kop | Kartu Guru dan sekolah, Kop lembar soal (dengan pratinjau `kertas` yang memakai komponen kop yang sama dengan pratinjau Unduh, `KopLembar`), tombol Simpan profil dengan `Pemberitahuan` berhasil "Profil tersimpan." di sampingnya, dan kartu Tampilan dengan `Pilihan` Ikuti sistem · Terang · Gelap | Umpan balik di tempat; pesan hilang lagi saat isian diubah sehingga tidak menyesatkan. Galat logo tampil di bawah isiannya, bukan pesan melayang |
+| Pengaturan AI | "Siap dipakai", "Kunci berfungsi · n model tersedia", galat uji kunci, dan "Belum siap" memakai `Pemberitahuan`. Pengaturan lanjutan memakai `BagianLipat` (status buka diingat). Isian angka tersimpan langsung selama sah; teks tetap milik isian sehingga dapat dikosongkan lalu diketik ulang, dengan petunjuk akibat (mis. "Pembuatan dijeda setelah sebanyak ini soal lolos dalam sehari") | Sebelumnya mengosongkan batas harian langsung menjadi 1 |
+| Cadangan | Kartu Data di perangkat ini (ringkasan, unduh, pulihkan), kartu Pengaturan tersimpan dengan tombol Hapus… per baris (konfirmasi), lalu Zona berbahaya | Pengaturan tersimpan kini dapat dihapus tanpa membuka layar Buat |

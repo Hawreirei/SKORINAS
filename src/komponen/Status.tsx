@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { Pemberitahuan, WARNA_NADA } from './Formulir';
 import { STATUS_PAKET, type StatusPaket } from '../app/status';
 
@@ -34,6 +34,41 @@ export function Kartu({ children, pita = 'utama', className = '', as: Tag = 'sec
     <Tag className={`kartu ${warna} ${className}`} {...props}>
       {children}
     </Tag>
+  );
+}
+
+/** Kartu bagian dengan judul h2; dipakai layar pengaturan (rancangan UI v0.5, UI-11). */
+export function KartuBagian({ judul, ket, pita, children, className = '' }: { judul: ReactNode; ket?: ReactNode; pita?: 'utama' | 'kuning' | 'baik' | 'awas' | 'buruk' | 'tanpa'; children: ReactNode; className?: string }) {
+  const id = useId();
+  return (
+    <Kartu pita={pita} aria-labelledby={id} className={className}>
+      <h2 id={id} className={`text-[20px] font-extrabold ${pita === 'buruk' ? 'text-buruk' : 'text-judul'}`}>
+        {judul}
+      </h2>
+      {ket ? <p className="mt-1 text-base text-redup">{ket}</p> : null}
+      <div className="mt-5">{children}</div>
+    </Kartu>
+  );
+}
+
+/** Aksi yang menghapus data selalu di kartu terakhir berjudul merah (UI-11). Isi: satu atau lebih `BarisBahaya`. */
+export function ZonaBerbahaya({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return (
+    <KartuBagian judul="Zona berbahaya" pita="buruk" className={className}>
+      <div className="divide-y divide-garis">{children}</div>
+    </KartuBagian>
+  );
+}
+
+export function BarisBahaya({ judul, ket, aksi }: { judul: ReactNode; ket: ReactNode; aksi: ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-4 first:pt-0 last:pb-0">
+      <div className="min-w-0 flex-1 basis-72">
+        <div className="text-[17px] font-bold text-tinta">{judul}</div>
+        <p className="mt-0.5 text-base text-redup">{ket}</p>
+      </div>
+      <div className="w-full sm:w-auto">{aksi}</div>
+    </div>
   );
 }
 
