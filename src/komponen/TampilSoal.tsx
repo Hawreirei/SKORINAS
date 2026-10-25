@@ -20,10 +20,42 @@ export function teksKunciLayar(isi: IsiSoal): string {
   return 'Kunci';
 }
 
-/** Tampilan satu soal: pokok, gambar, opsi, kunci, pembahasan, rubrik. */
-export function TampilSoal({ isi, ringkas = false, besar = true }: { isi: IsiSoal; ringkas?: boolean; besar?: boolean }) {
+/** Rubrik dan pembahasan satu soal. */
+export function PembahasanSoal({ isi }: { isi: IsiSoal }) {
+  return (
+    <>
+      {isi.rubrik?.length ? (
+        <div className="mt-4">
+          <div className="text-base font-bold text-redup">Rubrik</div>
+          <ul className="mt-2 list-disc pl-5 text-base leading-relaxed text-isi">
+            {isi.rubrik.map((r, i) => (
+              <li key={i}>
+                <TeksSoal teks={r} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      <div className="mt-4">
+        <div className="text-base font-bold text-redup">Pembahasan</div>
+        <ol className="mt-2 list-decimal pl-5 text-base leading-relaxed text-isi">
+          {isi.pembahasan.map((p, i) => (
+            <li key={i}>
+              <TeksSoal teks={p} />
+            </li>
+          ))}
+        </ol>
+      </div>
+    </>
+  );
+}
+
+/** Tampilan satu soal: pokok, gambar, opsi, kunci, dan (kecuali `tanpaPembahasan`) rubrik serta pembahasan. */
+export function TampilSoal({ isi, ringkas = false, besar = true, tanpaPembahasan = false }: { isi: IsiSoal; ringkas?: boolean; besar?: boolean; tanpaPembahasan?: boolean }) {
   const { svg, galat } = useSvgSoal(isi);
   const opsi = (Object.keys(isi.opsi ?? {}).sort() as HurufOpsi[]).map((h) => [h, isi.opsi![h]!] as const);
+  // Opsi pendek tetap dua kolom di ponsel agar kartu soal tidak memanjang.
+  const opsiPendek = !isi.terjemahan?.opsi && opsi.every(([, t]) => t.replace(/\\[a-z]+|[{}$]/g, '').length <= 24);
   return (
     <div>
       <TeksSoal as="p" teks={isi.pokok} className={`mt-4 leading-normal ${besar ? 'text-[18px] sm:text-[20px]' : 'text-[17px]'}`} />
@@ -31,44 +63,33 @@ export function TampilSoal({ isi, ringkas = false, besar = true }: { isi: IsiSoa
       {svg ? <GambarSvg svg={svg} className="mt-5" /> : null}
       {galat ? <p className="mt-4 text-base text-buruk">Gambar tidak dapat dibuat: {galat}</p> : null}
       {opsi.length ? (
-        <ol className="mt-5 grid list-none gap-3 p-0 sm:grid-cols-2">
+        <ol className={`mt-5 grid list-none gap-2 p-0 sm:grid-cols-2 sm:gap-3 ${opsiPendek ? 'grid-cols-2' : ''}`}>
           {opsi.map(([h, t]) => (
-            <li key={h} className={`flex items-center gap-3 rounded-lg border px-4 py-3 ${!ringkas && h === isi.kunci ? 'border-baik bg-baik-latar/60' : 'border-garis-kuat'}`}>
+            <li key={h} className={`flex items-center gap-3 rounded-lg border px-3 py-2 sm:px-4 sm:py-3 ${!ringkas && h === isi.kunci ? 'border-baik bg-baik-latar/60' : 'border-garis-kuat'}`}>
               <span className="font-extrabold text-judul">{h}</span>
               <TeksSoal teks={t} />
               {isi.terjemahan?.opsi?.[h] ? <TeksSoal teks={isi.terjemahan.opsi[h]!} className="text-base italic text-redup" /> : null}
+              {!ringkas && h === isi.kunci ? (
+                <span className="ml-auto inline-flex shrink-0 items-center gap-1 text-base font-bold text-baik">
+                  <svg aria-hidden="true" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2.5 8.5l3.5 3.5 7.5-8" />
+                  </svg>
+                  Kunci
+                </span>
+              ) : null}
             </li>
           ))}
         </ol>
       ) : null}
       {!ringkas ? (
         <>
-          <div className="mt-5 flex flex-wrap items-start gap-3">
-            <span className="shrink-0 rounded-md bg-utama px-3 py-1.5 text-base font-bold text-di-tinta">{teksKunciLayar(isi)}</span>
-            {isi.bentuk === 'isian_singkat' || isi.bentuk === 'uraian' ? <TeksSoal as="span" teks={isi.kunci} className="pt-1 text-base text-isi" /> : null}
-          </div>
-          {isi.rubrik?.length ? (
-            <div className="mt-4">
-              <div className="text-base font-bold text-redup">Rubrik</div>
-              <ul className="mt-2 list-disc pl-5 text-base leading-relaxed text-isi">
-                {isi.rubrik.map((r, i) => (
-                  <li key={i}>
-                    <TeksSoal teks={r} />
-                  </li>
-                ))}
-              </ul>
+          {isi.bentuk === 'pilihan_ganda' && opsi.length ? null : (
+            <div className="mt-5 flex flex-wrap items-start gap-3">
+              <span className="shrink-0 rounded-md bg-utama-isi px-3 py-1.5 text-base font-bold text-di-tinta">{teksKunciLayar(isi)}</span>
+              {isi.bentuk === 'isian_singkat' || isi.bentuk === 'uraian' ? <TeksSoal as="span" teks={isi.kunci} className="pt-1 text-base text-isi" /> : null}
             </div>
-          ) : null}
-          <div className="mt-4">
-            <div className="text-base font-bold text-redup">Pembahasan</div>
-            <ol className="mt-2 list-decimal pl-5 text-base leading-relaxed text-isi">
-              {isi.pembahasan.map((p, i) => (
-                <li key={i}>
-                  <TeksSoal teks={p} />
-                </li>
-              ))}
-            </ol>
-          </div>
+          )}
+          {tanpaPembahasan ? null : <PembahasanSoal isi={isi} />}
         </>
       ) : null}
     </div>

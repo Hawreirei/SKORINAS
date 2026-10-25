@@ -5,7 +5,10 @@
 /*
  * Palet rancangan v0.4: latar abu kebiruan, kartu putih, biru sebagai warna utama,
  * kuning sebagai ornamen, merah hanya untuk hapus dan batal. Pasangan teks dan latar
- * dipilih dengan kontras setidaknya 4,5 : 1.
+ * dipilih dengan kontras setidaknya 4,5 : 1 (diuji di tests/kontras.test.ts).
+ * --gs-main untuk teks, tautan, garis, dan fokus; --gs-main-fill untuk latar berisi teks putih
+ * (tombol utama, opsi terpilih). Di mode gelap keduanya berbeda: biru terang terbaca di kartu gelap,
+ * biru pekat terbaca dengan teks putih (UI-12).
  */
 :root {
   --gs-bg: #f5f7fa;
@@ -20,6 +23,8 @@
   --gs-panel: #f8fafd;
   --gs-main: #2563eb;
   --gs-main-dark: #1d4ed8;
+  --gs-main-fill: #2563eb;
+  --gs-main-fill-hover: #1d4ed8;
   --gs-main-soft: #dbeafe;
   --gs-head: #1e3a5f;
   --gs-yellow: #facc15;
@@ -45,8 +50,10 @@
   --gs-line-strong: #43536f;
   --gs-soft: #1c2a42;
   --gs-panel: #131c2e;
-  --gs-main: #3b82f6;
+  --gs-main: #6aa8fb;
   --gs-main-dark: #2563eb;
+  --gs-main-fill: #2563eb;
+  --gs-main-fill-hover: #1d4ed8;
   --gs-main-soft: #1e3a6b;
   --gs-head: #c7d7f2;
   --gs-yellow: #facc15;
@@ -75,6 +82,7 @@
   --color-utama: var(--gs-main);
   --color-utama-tua: var(--gs-main-dark);
   --color-utama-lembut: var(--gs-main-soft);
+  --color-utama-isi: var(--gs-main-fill);
   --color-judul: var(--gs-head);
   --color-kuning: var(--gs-yellow);
   --color-kuning-lembut: var(--gs-yellow-soft);
@@ -94,6 +102,16 @@ html,
 body {
   background: var(--gs-bg);
   color: var(--gs-ink);
+}
+
+/* Kepala lengket di layar lebar (UI-04): lompatan ke #soal-… berhenti di bawahnya. --tinggi-kepala diukur di Kepala. */
+html {
+  scroll-padding-top: 1rem;
+}
+@media (width >= 64rem) {
+  html {
+    scroll-padding-top: calc(var(--tinggi-kepala, 76px) + 1rem);
+  }
 }
 
 body {
@@ -124,39 +142,126 @@ body {
   outline-offset: 2px;
 }
 
-input.bidang,
-select.bidang,
-textarea.bidang {
+/*
+ * Utilitas bersama (rancangan UI v0.5, UI-01): satu sumber gaya untuk kartu, tombol, isian, dan kertas.
+ * Warna pita kartu diatur lewat variabel (--pita), jadi urutan kelas tidak dapat menimpa tebal pitanya.
+ */
+@utility kartu {
+  border: 1px solid var(--gs-line);
+  border-top: 4px solid var(--pita, var(--gs-line));
+  border-radius: 0.75rem;
+  background-color: var(--gs-card);
+  padding: 1rem;
+  @media (width >= 40rem) {
+    padding: 1.5rem;
+  }
+}
+
+/* pita-utama, pita-kuning, pita-baik, pita-awas, pita-buruk, pita-garis. */
+@utility pita-* {
+  --pita: --value(--color-*);
+}
+
+@utility tombol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+}
+@utility tombol-utama {
+  border-color: var(--gs-main-fill);
+  background-color: var(--gs-main-fill);
+  color: var(--gs-on-ink);
+  @media (hover: hover) {
+    &:hover {
+      border-color: var(--gs-main-fill-hover);
+      background-color: var(--gs-main-fill-hover);
+    }
+  }
+}
+@utility tombol-garis {
+  border-color: var(--gs-main);
+  background-color: var(--gs-card);
+  color: var(--gs-main);
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--gs-soft);
+    }
+  }
+}
+@utility tombol-hantu {
+  border-color: var(--gs-line-strong);
+  background-color: var(--gs-card);
+  color: var(--gs-ink);
+  @media (hover: hover) {
+    &:hover {
+      border-color: var(--gs-main);
+      color: var(--gs-main);
+    }
+  }
+}
+@utility tombol-bahaya {
+  border-color: var(--gs-bad);
+  background-color: var(--gs-card);
+  color: var(--gs-bad);
+  @media (hover: hover) {
+    &:hover {
+      background-color: var(--gs-bad-bg);
+    }
+  }
+}
+
+@utility bidang {
+  box-sizing: border-box;
   width: 100%;
   min-height: 48px;
   padding: 0 14px;
   border: 1px solid var(--gs-line-strong);
   border-radius: 8px;
-  font: inherit;
+  font-family: inherit;
   font-size: 16px;
-  background: var(--gs-card);
+  font-weight: inherit;
+  line-height: inherit;
+  background-color: var(--gs-card);
   color: var(--gs-ink);
-  box-sizing: border-box;
+  &:focus {
+    outline: none;
+    border-color: var(--gs-main);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--gs-main) 35%, transparent);
+  }
+  /* Angka sejajar lebar agar tidak bergeser saat diketik. */
+  &:is([type='number'], [inputmode='numeric']) {
+    font-variant-numeric: tabular-nums;
+  }
+  &:is(textarea) {
+    padding: 12px 14px;
+    line-height: 1.55;
+    resize: vertical;
+  }
+  &:is(select) {
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--gs-muted) 50%), linear-gradient(135deg, var(--gs-muted) 50%, transparent 50%);
+    background-position: calc(100% - 22px) 21px, calc(100% - 17px) 21px;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+    padding-right: 40px;
+  }
 }
-textarea.bidang {
-  padding: 12px 14px;
-  line-height: 1.55;
-  resize: vertical;
-}
-input.bidang:focus,
-select.bidang:focus,
-textarea.bidang:focus {
-  outline: none;
-  border-color: var(--gs-main);
-  box-shadow: 0 0 0 3px var(--gs-main-soft);
-}
-select.bidang {
-  appearance: none;
-  background-image: linear-gradient(45deg, transparent 50%, var(--gs-muted) 50%), linear-gradient(135deg, var(--gs-muted) 50%, transparent 50%);
-  background-position: calc(100% - 22px) 21px, calc(100% - 17px) 21px;
-  background-size: 5px 5px;
-  background-repeat: no-repeat;
-  padding-right: 40px;
+
+/* Lembar dokumen: selalu hitam di atas putih dengan huruf serif, juga di mode gelap. */
+@utility kertas {
+  background-color: #fff;
+  color: #000;
+  color-scheme: light;
+  font-family: var(--font-serif);
 }
 
 input[type='checkbox'],

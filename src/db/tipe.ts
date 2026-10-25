@@ -41,22 +41,6 @@ export const STATUS_MUTU_LABEL: Record<StatusMutu, string> = {
 
 export const JENIS_URAIAN_LABEL: Record<JenisUraian, string> = { penjelasan: 'Penjelasan', hitungan: 'Hitungan' };
 
-/** Satu penanda per soal di layar guru. Status mutu dan status telaah tetap dua data terpisah. */
-export type PenandaSoal = 'dicek' | 'cek_dulu' | 'disetujui' | 'ditolak';
-
-export const PENANDA_LABEL: Record<PenandaSoal, string> = {
-  dicek: 'Jawaban sudah dicek',
-  cek_dulu: 'Mohon cek dulu',
-  disetujui: 'Disetujui',
-  ditolak: 'Ditolak',
-};
-
-export function penandaSoal(s: { status_mutu: StatusMutu; status_telaah: StatusTelaah }): PenandaSoal {
-  if (s.status_mutu === 'ditolak') return 'ditolak';
-  if (s.status_telaah === 'ditelaah_guru') return 'disetujui';
-  return s.status_mutu === 'perlu_telaah' ? 'cek_dulu' : 'dicek';
-}
-
 /** Satu TP yang dipakai paket, ditulis guru. Disalin utuh ke soal agar kisi-kisi lama tidak berubah diam-diam. */
 export interface TpDipakai {
   id: string;
@@ -248,6 +232,7 @@ export interface PemakaianAi {
 export interface LogSoal {
   id: string;
   soal_id: string;
+  /** 'setujui' dan 'telaah' hanya ada di log lama (sebelum v0.5); tetap diterima agar cadangan lama terbaca. */
   aksi: 'sunting' | 'ganti' | 'buat_ulang' | 'setujui' | 'telaah' | 'kunci' | 'buka_kunci' | 'hapus' | 'pulihkan' | 'tolak' | 'jenis_uraian';
   sebelum_json: unknown;
   sesudah_json: unknown;

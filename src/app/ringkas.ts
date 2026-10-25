@@ -1,26 +1,25 @@
 import { db } from '../db/skema';
-import type { PaketSoal, Soal } from '../db/tipe';
+import type { PaketSoal, PekerjaanGenerasi, Soal } from '../db/tipe';
+import { statusPaket, type KeadaanPengatur, type StatusPaket } from './status';
 
 export interface RingkasanPaket {
   paket: PaketSoal;
   jumlah: number;
-  terverifikasi: number;
-  perluTelaah: number;
-  belumDitelaah: number;
   ditolak: number;
-  disetujui: number;
+  /** Slot yang gagal dibuat setelah dicoba ulang. */
+  gagal: number;
+  /** Galat terakhir pekerjaan pembuatan. */
+  galat: string | null;
 }
 
-export function ringkasPaket(paket: PaketSoal, soal: Soal[]): RingkasanPaket {
+export function ringkasPaket(paket: PaketSoal, soal: Soal[], kerja?: PekerjaanGenerasi): RingkasanPaket {
   const aktif = soal.filter((s) => s.dihapus_pada == null && s.status_mutu !== 'ditolak');
   return {
     paket,
     jumlah: aktif.length,
-    terverifikasi: aktif.filter((s) => s.status_mutu === 'terverifikasi_hitung' || s.status_mutu === 'terverifikasi_aturan').length,
-    perluTelaah: aktif.filter((s) => s.status_mutu === 'perlu_telaah').length,
-    belumDitelaah: aktif.filter((s) => s.status_mutu === 'perlu_telaah' && s.status_telaah !== 'ditelaah_guru').length,
     ditolak: soal.filter((s) => s.status_mutu === 'ditolak').length,
-    disetujui: aktif.filter((s) => s.status_telaah === 'ditelaah_guru').length,
+    gagal: kerja?.slot.filter((s) => s.status === 'gagal').length ?? 0,
+    galat: kerja?.galat ?? null,
   };
 }
 
@@ -28,15 +27,19 @@ export async function daftarRingkasan(batas?: number, terhapus = false): Promise
   let paket = (await db.paket_soal.orderBy('dibuat_pada').reverse().toArray()).filter((p) => (terhapus ? p.dihapus_pada != null : p.dihapus_pada == null));
   if (batas) paket = paket.slice(0, batas);
   const hasil: RingkasanPaket[] = [];
-  for (const p of paket) hasil.push(ringkasPaket(p, await db.soal.where('paket_id').equals(p.id).toArray()));
+  for (const p of paket) hasil.push(ringkasPaket(p, await db.soal.where('paket_id').equals(p.id).toArray(), await db.pekerjaan_generasi.where('paket_id').equals(p.id).first()));
   return hasil;
 }
 
-export function labelStatusPaket(r: RingkasanPaket): { teks: string; isi: boolean; nada: 'proses' | 'awas' | 'baik' } {
-  if (r.paket.status === 'membuat') return { teks: `${r.jumlah}/${r.paket.parameter_json.n} soal · Sedang dibuat`, isi: false, nada: 'proses' };
-  if (r.paket.status === 'dijeda') return { teks: `${r.jumlah}/${r.paket.parameter_json.n} soal · Dijeda`, isi: false, nada: 'awas' };
-  if (r.belumDitelaah) return { teks: `${r.jumlah} soal · ${r.belumDitelaah} mohon cek dulu`, isi: false, nada: 'awas' };
-  return { teks: `${r.jumlah} soal · Siap diunduh`, isi: true, nada: 'baik' };
+/** Status paket untuk baris daftar, dari peta pusat (src/app/status.ts). */
+export function statusRingkasan(r: RingkasanPaket, pengatur?: KeadaanPengatur | null): StatusPaket {
+  return statusPaket({ paketId: r.paket.id, status: r.paket.status, gagal: r.gagal, galat: r.galat, pengatur });
+}
+
+/** Jumlah soal di baris daftar; paket yang belum selesai menyebut targetnya. */
+export function teksJumlah(r: RingkasanPaket): string {
+  if (r.paket.status !== 'siap') return `${r.jumlah} dari ${r.paket.parameter_json.n} soal`;
+  return r.gagal ? `${r.jumlah} soal · ${r.gagal} gagal dibuat` : `${r.jumlah} soal`;
 }
 
 export function formatTanggal(t: number | null): string {

@@ -11,9 +11,26 @@ export async function mintaPenyimpananPersisten(): Promise<boolean> {
   return ok;
 }
 
+/** Cermin tema di localStorage, dibaca public/tema.js sebelum render pertama agar tidak berkedip. */
+export const KUNCI_CERMIN_TEMA = 'gensoal:tema';
+
 export function terapkanTema(tema: 'sistem' | 'terang' | 'gelap') {
   const gelap = tema === 'gelap' || (tema === 'sistem' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.classList.toggle('dark', gelap);
+  try {
+    localStorage.setItem(KUNCI_CERMIN_TEMA, tema);
+  } catch {
+    // localStorage dapat ditolak (mode privat); tema tetap dari profil, hanya kedipan yang tidak dicegah.
+  }
+}
+
+/** Hapus semua simpanan per perangkat GenSoal di localStorage (draf, pilihan unduh, lipatan, Langkah awal, cermin tema). */
+export function hapusSimpananPerangkat() {
+  try {
+    for (const k of Object.keys(localStorage)) if (k.startsWith('gensoal:')) localStorage.removeItem(k);
+  } catch {
+    // Abaikan bila localStorage ditolak; tidak ada yang tersimpan.
+  }
 }
 
 /** Tugas saat aplikasi dibuka: pekerjaan tertinggal, sampah lama, tema, penyimpanan persisten. */

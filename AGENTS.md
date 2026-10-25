@@ -7,7 +7,7 @@
 5. Fitur dianggap selesai bila: `npm test` lulus, `npm run typecheck` tanpa galat, layar diperiksa di lebar ponsel (390 px) dan laptop (`npm run e2e`), dan kriteria selesai sprint terpenuhi.
 6. Bila rancangan ambigu atau bertentangan, berhenti dan catat pertanyaan di `docs/KEPUTUSAN.md`, jangan menebak.
 7. Aplikasi tidak membawa data kurikulum (rancangan v0.4): kelas, mapel, CP, dan TP selalu dari isian guru. Jangan menulis CP atau TP di kode.
-8. Istilah di layar guru mengikuti tabel "Istilah di layar" di rancangan (Buat soal, Periksa, Unduh, Jawaban sudah dicek, Mohon cek dulu, Disetujui, Pengaturan tersimpan).
+8. Teks di layar guru memakai bahasa Indonesia sehari-hari yang singkat (rancangan, bagian "Bahasa di layar"). Tidak ada langkah persetujuan, penanda status per soal, atau penunjuk "Langkah n dari 3" (v0.5); rancangan tampilan ada di `docs/RANCANGAN-UI.md`.
 
 ## Peta modul
 

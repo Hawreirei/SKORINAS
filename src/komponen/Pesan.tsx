@@ -20,7 +20,7 @@ export function PenyediaPesan({ children }: { children: ReactNode }) {
       {children}
       <div aria-live="polite" className="tanpa-cetak pointer-events-none fixed inset-x-4 top-20 z-50 sm:top-auto sm:bottom-4 flex flex-col items-center gap-2 sm:left-6 sm:right-auto sm:items-start">
         {daftar.map((p) => (
-          <div key={p.id} className={`pointer-events-auto max-w-md rounded-lg border px-5 py-3 text-base font-semibold shadow-lg ${p.jenis === 'galat' ? 'border-buruk bg-buruk-latar text-buruk' : 'border-judul bg-judul text-di-tinta'}`}>
+          <div key={p.id} className={`pointer-events-auto max-w-md rounded-lg border px-5 py-3 text-base font-semibold shadow-lg ${p.jenis === 'galat' ? 'border-buruk bg-buruk-latar text-buruk' : 'border-judul bg-judul text-latar'}`}>
             {p.teks}
           </div>
         ))}

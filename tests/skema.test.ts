@@ -2,7 +2,6 @@ import Dexie from 'dexie';
 import { describe, expect, it } from 'vitest';
 import { bacaCadangan } from '../src/db/cadangan';
 import { GenSoalDb } from '../src/db/skema';
-import { penandaSoal } from '../src/db/tipe';
 import { rumpunDariMapel } from '../src/paket';
 
 describe('migrasi skema versi 2 (rancangan v0.4)', () => {
@@ -47,13 +46,11 @@ describe('migrasi skema versi 2 (rancangan v0.4)', () => {
   });
 });
 
-describe('satu penanda per soal', () => {
-  it('menggabungkan status mutu dan status telaah', () => {
-    expect(penandaSoal({ status_mutu: 'terverifikasi_hitung', status_telaah: 'draf' })).toBe('dicek');
-    expect(penandaSoal({ status_mutu: 'perlu_telaah', status_telaah: 'draf' })).toBe('cek_dulu');
-    expect(penandaSoal({ status_mutu: 'perlu_telaah', status_telaah: 'ditelaah_guru' })).toBe('disetujui');
-    expect(penandaSoal({ status_mutu: 'terverifikasi_hitung', status_telaah: 'ditelaah_guru' })).toBe('disetujui');
-    expect(penandaSoal({ status_mutu: 'ditolak', status_telaah: 'ditolak' })).toBe('ditolak');
+describe('data persetujuan lama (sebelum v0.5)', () => {
+  it('cadangan berisi soal yang pernah disetujui tetap dapat dibaca', () => {
+    const soal = { id: 's1', paket_id: 'k1', status_mutu: 'perlu_telaah', status_telaah: 'ditelaah_guru', sumber_dicek: true };
+    const b = bacaCadangan(JSON.stringify({ format: 'gensoal', versi: 1, versi_aplikasi: '0.4.0', dibuat_pada: '', data: { soal: [soal] } }));
+    expect(b.data.soal).toEqual([soal]);
   });
 });
 

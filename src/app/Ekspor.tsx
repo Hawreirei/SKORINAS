@@ -1,41 +1,36 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { db } from '../db/skema';
-import { bangunDokumen, berkasDipilih, JENIS_BERKAS_LABEL, penghalangEkspor, soalUntukEkspor, type JenisBerkas, type OpsiEkspor } from '../ekspor/model';
+import { bangunDokumen, berkasDipilih, JENIS_BERKAS_LABEL, soalUntukEkspor, type JenisBerkas, type OpsiEkspor } from '../ekspor/model';
 import { ekspor, type FormatEkspor } from '../ekspor/peramban';
-import { PenunjukLangkah } from '../komponen/Kepala';
+import { KepalaHalaman } from '../komponen/Kepala';
 import { LembarCetak } from '../komponen/LembarCetak';
 import { usePesan } from '../komponen/Pesan';
-import { Kartu, Peringatan } from '../komponen/Status';
-import { Chip, kelasTombol, Tombol } from '../komponen/Tombol';
+import { BagianLipat, Pemberitahuan, Pilihan, Sakelar } from '../komponen/Formulir';
+import { Kartu } from '../komponen/Status';
+import { kelasTombol, Tombol } from '../komponen/Tombol';
 import { useJudulHalaman, useProfil } from './kait';
+import { tandaiSudahUnduh } from './langkah-awal';
 
-const FORMAT: { id: FormatEkspor; nama: string; tombol: string; ket: string; ext: string }[] = [
-  { id: 'docx', nama: 'Word (.docx)', tombol: 'Word', ket: 'Dapat disunting di Word. Times New Roman 12, pecahan bertumpuk.', ext: '.docx' },
-  { id: 'pdf', nama: 'PDF', tombol: 'PDF', ket: 'Siap cetak. Times New Roman 12, rumus dan gambar tajam.', ext: '.pdf' },
-  { id: 'tex', nama: 'LaTeX (.tex)', tombol: 'LaTeX', ket: 'Berkas sumber untuk dikompilasi sendiri di Overleaf atau TeX lokal.', ext: '.tex' },
+const FORMAT: { id: FormatEkspor; nama: string; tombol: string; ket: string }[] = [
+  { id: 'docx', nama: 'Word', tombol: 'Word', ket: 'Bisa disunting' },
+  { id: 'pdf', nama: 'PDF', tombol: 'PDF', ket: 'Siap cetak' },
+  { id: 'tex', nama: 'LaTeX', tombol: 'LaTeX', ket: 'Berkas .tex' },
 ];
 
-function PilihFormat({ f, dipilih, pilih }: { f: (typeof FORMAT)[number]; dipilih: boolean; pilih: () => void }) {
-  return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={dipilih}
-      onClick={pilih}
-      className={`grid w-full grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-4 rounded-lg border px-4 py-4 text-left ${dipilih ? 'border-utama bg-utama-lembut/60' : 'border-garis bg-kartu hover:border-utama'}`}
-    >
-      <span className="inline-flex size-5 items-center justify-center rounded-full border-2 border-utama">
-        <span className={`size-2.5 rounded-full bg-utama ${dipilih ? 'opacity-100' : 'opacity-0'}`} />
-      </span>
-      <span>
-        <span className="block text-[20px] font-extrabold text-judul">{f.nama}</span>
-        <span className="mt-0.5 block text-base text-redup">{f.ket}</span>
-      </span>
-      <span className="text-base font-bold text-redup">{f.ext}</span>
-    </button>
-  );
+/** Format dan berkas terakhir diingat per perangkat agar unduhan berikutnya cukup satu ketukan. */
+const KUNCI_PILIHAN = 'gensoal:pilihan-unduh';
+const OPSI_BAWAAN: OpsiEkspor = { kop: true, kunci: true, kisi: true, pembahasan: false };
+
+function bacaPilihan(): { format: FormatEkspor; opsi: OpsiEkspor } {
+  try {
+    const p = JSON.parse(localStorage.getItem(KUNCI_PILIHAN) ?? 'null') as { format?: FormatEkspor; opsi?: Partial<OpsiEkspor> } | null;
+    const format = p?.format && FORMAT.some((f) => f.id === p.format) ? p.format : 'docx';
+    return { format, opsi: { ...OPSI_BAWAAN, ...(p?.opsi ?? {}) } };
+  } catch {
+    return { format: 'docx', opsi: OPSI_BAWAAN };
+  }
 }
 
 export default function Ekspor() {
@@ -44,12 +39,21 @@ export default function Ekspor() {
   const soal = useLiveQuery(() => db.soal.where('paket_id').equals(id).toArray(), [id]);
   const profil = useProfil();
   const pesan = usePesan();
-  const [format, setFormat] = useState<FormatEkspor>('docx');
-  const [opsi, setOpsi] = useState<OpsiEkspor>({ kop: true, kunci: true, kisi: true, pembahasan: false });
+  const [awal] = useState(bacaPilihan);
+  const [format, setFormat] = useState<FormatEkspor>(awal.format);
+  const [opsi, setOpsi] = useState<OpsiEkspor>(awal.opsi);
   const [sibuk, setSibuk] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
+  const [terunduh, setTerunduh] = useState<string[] | null>(null);
   const [lihat, setLihat] = useState<JenisBerkas>('soal');
   useJudulHalaman(paket ? `Unduh · ${paket.judul}` : 'Unduh');
+  useEffect(() => {
+    try {
+      localStorage.setItem(KUNCI_PILIHAN, JSON.stringify({ format, opsi }));
+    } catch {
+      // localStorage dapat ditolak (mode privat); pilihan kembali ke bawaan lain kali.
+    }
+  }, [format, opsi]);
 
   const pratinjau: JenisBerkas = berkasDipilih(opsi).includes(lihat) ? lihat : 'soal';
   const dok = useMemo(() => (paket && soal ? bangunDokumen(paket, soal, profil, opsi, pratinjau) : null), [paket, soal, profil, opsi, pratinjau]);
@@ -57,16 +61,18 @@ export default function Ekspor() {
   if (!paket || !dok) return <div className="px-4 py-20 sm:px-8">Paket tidak ditemukan.</div>;
 
   const aktif = soalUntukEkspor(soal);
-  const penghalang = penghalangEkspor(paket, aktif);
-  const halaman = { soal: 1 + Math.floor(aktif.length / 6), kunci: 1 + (opsi.pembahasan ? 1 + Math.floor(aktif.length / 10) : 0), kisi: 1 + Math.floor(aktif.length / 8) }[pratinjau];
+  const halamanPembahasan = 1 + Math.floor(aktif.length / 10);
+  const halaman = { soal: 1 + Math.floor(aktif.length / 6), kunci: 1 + (opsi.pembahasan ? halamanPembahasan : 0), kisi: 1 + Math.floor(aktif.length / 8) }[pratinjau];
   const pilihan = FORMAT.find((f) => f.id === format)!;
   const daftar = berkasDipilih(opsi);
-  const terhalang = sibuk || penghalang.length > 0 || !aktif.length;
+  const terhalang = sibuk || !aktif.length;
+  const ubahOpsi = (u: Partial<OpsiEkspor>) => setOpsi((o) => ({ ...o, ...u }));
 
   /** Lembar soal, kunci jawaban, dan kisi-kisi diunduh sebagai berkas terpisah, berurutan. */
   async function unduh(berkas: JenisBerkas[]) {
     setSibuk(true);
     setGalat(null);
+    setTerunduh(null);
     try {
       const nama: string[] = [];
       for (const [i, b] of berkas.entries()) {
@@ -74,7 +80,9 @@ export default function Ekspor() {
         if (i) await new Promise((s) => setTimeout(s, 400));
         nama.push((await ekspor(format, paket!, soal!, profil, opsi, b)).nama);
       }
-      pesan(nama.length > 1 ? `${nama.length} berkas terunduh: ${nama.join(', ')}.` : `${nama[0]} terunduh.`);
+      setTerunduh(nama);
+      tandaiSudahUnduh();
+      pesan(nama.length > 1 ? `${nama.length} berkas terunduh.` : `${nama[0]} terunduh.`);
     } catch (e) {
       setGalat(`${(e as Error).message} Anda dapat memakai tampilan cetak peramban sebagai cadangan.`);
     } finally {
@@ -84,94 +92,85 @@ export default function Ekspor() {
 
   return (
     <div>
-      <PenunjukLangkah langkah={3} paketId={id} />
-      <div className="mx-auto flex max-w-[1312px] flex-wrap gap-x-10 px-4 sm:px-8">
-        <div className="min-w-0 flex-[1_1_480px] pb-16 pt-8 sm:pt-10">
-          <div className="text-base font-bold text-utama">
-            <Link to={`/soal/${id}`} className="hover:underline">
-              {paket.judul}
-            </Link>{' '}
-            · {aktif.length} soal
-          </div>
-          <h1 className="judul-besar mt-1 text-[30px] sm:text-[36px]">Unduh</h1>
-          <p className="mt-2 max-w-[520px] text-[17px] leading-relaxed text-redup">Berkas dibuat langsung di perangkat ini. Tidak ada yang diunggah ke server.</p>
+      <div className="mx-auto flex max-w-[1240px] flex-wrap gap-x-10 px-4 sm:px-8">
+        <div className="min-w-0 flex-[1_1_440px] pb-10 pt-8 sm:pt-10 lg:pb-16">
+          <KepalaHalaman kembali={{ ke: `/soal/${id}`, label: 'Kembali ke soal' }} judul="Unduh" subjudul={`${paket.judul} · ${aktif.length} soal. Berkas dibuat di perangkat ini.`} />
 
-          {penghalang.length ? (
-            <Peringatan className="mt-6">
-              {penghalang.length} soal masih "Mohon cek dulu". <Link to={`/soal/${id}`} className="font-bold underline">Setujui dulu di layar Periksa</Link>.
-            </Peringatan>
-          ) : null}
+          <Kartu className="mt-6">
+            <Pilihan
+              label={<span className="text-[20px] font-extrabold text-judul">Format</span>}
+              nilai={format}
+              ubah={setFormat}
+              opsi={FORMAT.filter((f) => f.id !== 'tex' || format === 'tex').map((f) => ({ nilai: f.id, label: f.nama, keterangan: f.ket }))}
+            />
 
-          <Kartu pita="utama" className="mt-6">
-            <h2 className="text-[20px] font-extrabold text-judul">Pilih format</h2>
-            <div role="radiogroup" aria-label="Format berkas" className="mt-3 space-y-3">
-              {FORMAT.filter((f) => f.id !== 'tex' || format === 'tex').map((f) => (
-                <PilihFormat key={f.id} f={f} dipilih={format === f.id} pilih={() => setFormat(f.id)} />
-              ))}
+            <h2 className="mt-7 text-[20px] font-extrabold text-judul">Berkas</h2>
+            <p className="mt-1 text-base text-redup">Setiap berkas diunduh terpisah.</p>
+            <div className="mt-2 divide-y divide-garis">
+              <div className="grid gap-x-6 py-2 sm:grid-cols-[200px_minmax(0,1fr)]">
+                <p className="flex min-h-10 items-center gap-3 text-base font-bold text-tinta">
+                  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-utama">
+                    <path d="M2.5 8.5l3.5 3.5 7.5-8" />
+                  </svg>
+                  <span>
+                    Lembar soal <span className="font-normal text-redup">(selalu)</span>
+                  </span>
+                </p>
+                <Sakelar className="pl-8 sm:pl-0" label="dengan kop sekolah" checked={opsi.kop} ubah={(kop) => ubahOpsi({ kop })} />
+              </div>
+              <div className="grid gap-x-6 py-2 sm:grid-cols-[200px_minmax(0,1fr)]">
+                <Sakelar label="Kunci jawaban" checked={opsi.kunci} ubah={(kunci) => ubahOpsi({ kunci })} />
+                <Sakelar
+                  className="pl-8 sm:pl-0"
+                  label="dengan pembahasan"
+                  petunjuk={`Menambah sekitar ${halamanPembahasan} halaman.`}
+                  checked={opsi.pembahasan}
+                  disabled={!opsi.kunci}
+                  ubah={(pembahasan) => ubahOpsi({ pembahasan })}
+                />
+              </div>
+              <div className="py-2">
+                <Sakelar label="Kisi-kisi" checked={opsi.kisi} ubah={(kisi) => ubahOpsi({ kisi })} />
+              </div>
             </div>
-          </Kartu>
-
-          <Kartu pita="kuning" className="mt-6">
-            <h2 className="text-[20px] font-extrabold text-judul">Berkas yang diunduh</h2>
-            <p className="mt-1 text-base text-redup">Kunci jawaban dan kisi-kisi dibuat sebagai berkas tersendiri, terpisah dari lembar soal.</p>
-            <ul className="mt-2">
-              {(
-                [
-                  ['soal', null, 'kop', 'Kop sekolah dan identitas siswa'],
-                  ['kunci', 'kunci', 'pembahasan', 'Sertakan pembahasan'],
-                  ['kisi', 'kisi', null, null],
-                ] as [JenisBerkas, keyof OpsiEkspor | null, keyof OpsiEkspor | null, string | null][]
-              ).map(([b, pilih, tambahan, labelTambahan]) => {
-                const dipakai = !pilih || opsi[pilih];
-                return (
-                  <li key={b} className="border-b border-garis py-3 last:border-b-0">
-                    <div className="flex items-center justify-between gap-3">
-                      <label className="flex items-center gap-3 text-[17px] font-bold">
-                        <input
-                          type="checkbox"
-                          className="size-5"
-                          checked={dipakai}
-                          disabled={!pilih}
-                          aria-label={JENIS_BERKAS_LABEL[b]}
-                          onChange={(e) => pilih && setOpsi((o) => ({ ...o, [pilih]: e.target.checked }))}
-                        />
-                        {JENIS_BERKAS_LABEL[b]}
-                      </label>
-                      <Tombol varian="hantu" ukuran="kecil" disabled={terhalang || !dipakai} onClick={() => unduh([b])} aria-label={`Unduh ${JENIS_BERKAS_LABEL[b].toLowerCase()} saja`}>
-                        Unduh ini saja
-                      </Tombol>
-                    </div>
-                    {tambahan && labelTambahan ? (
-                      <label className={`mt-2 ml-8 flex items-center gap-3 text-base ${dipakai ? '' : 'opacity-50'}`}>
-                        <input type="checkbox" className="size-5" disabled={!dipakai} checked={opsi[tambahan]} onChange={(e) => setOpsi((o) => ({ ...o, [tambahan]: e.target.checked }))} />
-                        {labelTambahan}
-                      </label>
-                    ) : null}
-                  </li>
-                );
-              })}
-            </ul>
             {opsi.kop && !profil.sekolah ? (
-              <p className="mt-2 text-base text-redup">
-                Kop memakai "Nama sekolah". <Link to="/pengaturan" className="font-bold text-utama underline">Isi profil sekolah</Link>.
-              </p>
+              <Pemberitahuan nada="info" className="mt-3">
+                Nama sekolah di kop belum diisi.{' '}
+                <Link to="/pengaturan" className="font-bold underline">
+                  Isi profil sekolah
+                </Link>
+              </Pemberitahuan>
+            ) : null}
+
+            {galat ? (
+              <Pemberitahuan nada="galat" className="mt-5">
+                {galat}
+              </Pemberitahuan>
+            ) : null}
+            <button type="button" onClick={() => unduh(daftar)} disabled={terhalang} className={`${kelasTombol('utama', 'besar')} mt-5 w-full`}>
+              <svg aria-hidden="true" width="16" height="18" viewBox="0 0 14 16" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M7 1v10M3 7l4 4 4-4M1 15h12" />
+              </svg>
+              {sibuk ? 'Membuat berkas…' : daftar.length > 1 ? `Unduh ${daftar.length} berkas ${pilihan.tombol}` : `Unduh ${pilihan.tombol}`}
+            </button>
+            {terunduh ? (
+              <Pemberitahuan nada="berhasil" className="mt-3">
+                {terunduh.length > 1 ? `${terunduh.length} berkas terunduh: ` : 'Terunduh: '}
+                {terunduh.join(', ')}.
+              </Pemberitahuan>
+            ) : daftar.length > 1 ? (
+              <p className="mt-2 text-base text-redup">Bila peramban bertanya, izinkan mengunduh beberapa berkas.</p>
             ) : null}
           </Kartu>
 
-          {galat ? <Peringatan className="mt-6">{galat}</Peringatan> : null}
-          <button type="button" onClick={() => unduh(daftar)} disabled={terhalang} className={`${kelasTombol('utama', 'besar')} mt-6 w-full`}>
-            <svg aria-hidden="true" width="16" height="18" viewBox="0 0 14 16" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path d="M7 1v10M3 7l4 4 4-4M1 15h12" />
-            </svg>
-            {sibuk ? 'Membuat berkas…' : daftar.length > 1 ? `Unduh ${daftar.length} berkas ${pilihan.tombol}` : `Unduh ${pilihan.tombol}`}
-          </button>
-          {daftar.length > 1 ? <p className="mt-2 text-base text-redup">Bila peramban bertanya, izinkan mengunduh beberapa berkas.</p> : null}
-
-          <details className="mt-6 rounded-lg border border-garis bg-kartu px-4 py-3">
-            <summary className="cursor-pointer text-base font-bold text-redup">Menu lanjutan</summary>
-            <div className="mt-3 space-y-3">
-              <PilihFormat f={FORMAT[2]} dipilih={format === 'tex'} pilih={() => setFormat('tex')} />
-              <p className="text-base text-redup">Berkas .tex memakai templatnya sendiri dan tidak mengubah font Word atau PDF.</p>
+          <BagianLipat judul="Menu lanjutan" ringkasan="LaTeX dan tampilan cetak peramban" ingat="unduh-lanjutan" className="mt-6">
+            <div className="space-y-4">
+              <div>
+                <Tombol varian="garis" onClick={() => setFormat('tex')} disabled={format === 'tex'}>
+                  {format === 'tex' ? 'LaTeX (.tex) terpilih' : 'Pilih format LaTeX (.tex)'}
+                </Tombol>
+                <p className="mt-2 text-base text-redup">Berkas sumber untuk dikompilasi sendiri di Overleaf atau TeX lokal; memakai templatnya sendiri.</p>
+              </div>
               <p className="text-base">
                 Tampilan cetak peramban:{' '}
                 {daftar.map((b, i) => (
@@ -184,30 +183,27 @@ export default function Ekspor() {
                 ))}
               </p>
             </div>
-          </details>
+          </BagianLipat>
         </div>
 
-        <section aria-label="Pratinjau halaman" className="min-w-0 flex-[1_1_440px] pb-16 lg:pt-10">
+        <section aria-label="Pratinjau halaman" className="min-w-0 flex-[1_1_400px] pb-16 lg:pt-10">
           <Kartu pita="tanpa">
-            <div className="flex justify-between text-base font-bold text-redup">
-              <span>Pratinjau · {JENIS_BERKAS_LABEL[pratinjau].toLowerCase()}</span>
-              <span>Halaman 1 dari ±{halaman}</span>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              {daftar.length > 1 ? (
+                <Pilihan className="min-w-0 flex-1" labelTersembunyi label="Berkas yang dipratinjau" nilai={pratinjau} ubah={setLihat} opsi={daftar.map((b) => ({ nilai: b, label: JENIS_BERKAS_LABEL[b] }))} />
+              ) : (
+                <span className="text-base font-bold text-redup">Pratinjau · {JENIS_BERKAS_LABEL[pratinjau].toLowerCase()}</span>
+              )}
+              <span className="text-base text-redup tabular-nums">±{halaman} halaman</span>
             </div>
-            {daftar.length > 1 ? (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {daftar.map((b) => (
-                  <Chip key={b} aktif={pratinjau === b} onClick={() => setLihat(b)} className="!min-h-10 !px-3">
-                    {JENIS_BERKAS_LABEL[b]}
-                  </Chip>
-                ))}
-              </div>
-            ) : null}
-            <div className="mt-4 flex justify-center rounded-lg bg-lembut p-3 sm:p-8">
-              <div className="aspect-[210/297] w-full max-w-[440px] overflow-hidden border border-garis bg-white px-[8%] py-[8%] text-[8.5px] leading-[1.4] shadow-sm sm:text-[10px]">
+            <div className="mt-4 flex justify-center rounded-lg bg-lembut p-3 sm:p-6">
+              <div className="aspect-[210/297] w-full max-w-[440px] overflow-hidden border border-garis kertas px-[8%] py-[8%] text-[8.5px] leading-[1.4] shadow-sm sm:text-[10px]">
                 <LembarCetak d={dok} hanyaHalamanPertama={pratinjau === 'soal'} />
               </div>
             </div>
-            <p className="mt-3 text-base text-redup">Setiap berkas diunduh terpisah. Kisi-kisi mencatat kelas, mapel, CP, dan TP yang dipakai.</p>
+            <Tombol varian="hantu" className="mt-4 w-full" disabled={terhalang} onClick={() => unduh([pratinjau])}>
+              Unduh {JENIS_BERKAS_LABEL[pratinjau].toLowerCase()} saja ({pilihan.tombol})
+            </Tombol>
           </Kartu>
         </section>
       </div>

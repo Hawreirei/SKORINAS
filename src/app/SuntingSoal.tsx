@@ -136,7 +136,7 @@ export function SuntingSoal({ soal, selesai }: { soal: Soal; selesai: () => void
               <option value="ekspresi">Ekspresi = nilai</option>
               <option value="perbandingan">Perbandingan</option>
               <option value="urutan">Urutan</option>
-              <option value="tidak_ada">Tidak dapat dihitung (mohon cek dulu)</option>
+              <option value="tidak_ada">Tidak dapat dihitung (kunci tidak dicek otomatis)</option>
             </select>
             {verifikasi.tipe === 'ekspresi' ? (
               <div className="grid grid-cols-2 gap-3">
@@ -175,7 +175,7 @@ export function SuntingSoal({ soal, selesai }: { soal: Soal; selesai: () => void
         {hasil ? (
           hasil.lolos ? (
             <div className="border border-utama px-5 py-4 text-base">
-              Lolos pemeriksaan · {hasil.status_mutu === 'perlu_telaah' ? 'mohon cek dulu' : 'jawaban sudah dicek'}
+              Lolos pemeriksaan · {hasil.status_mutu === 'perlu_telaah' ? 'kunci tidak dicek otomatis' : 'kunci sudah dihitung ulang'}
               {hasil.catatan.length ? <span className="mt-1 block text-redup">{hasil.catatan.join(' ')}</span> : null}
             </div>
           ) : (

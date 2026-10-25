@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Logo } from './Logo';
-import { Titik } from './Status';
+import { LencanaStatus, Titik } from './Status';
+import { menungguPenyedia } from '../app/status';
 import { usePengatur } from '../app/kait';
 
 const NAV = [
@@ -13,7 +14,7 @@ const NAV = [
 ];
 
 function aktif(path: string, ke: string, akhir: boolean) {
-  if (ke === '/soal') return path === '/soal' || (path.startsWith('/soal/') && !path.startsWith('/soal/baru')) || path === '/telaah';
+  if (ke === '/soal') return path === '/soal' || (path.startsWith('/soal/') && !path.startsWith('/soal/baru'));
   return akhir ? path === ke : path.startsWith(ke);
 }
 
@@ -21,9 +22,21 @@ export function Kepala() {
   const { pathname } = useLocation();
   const [buka, setBuka] = useState(false);
   const pengatur = usePengatur();
+  const kepala = useRef<HTMLElement>(null);
   useEffect(() => setBuka(false), [pathname]);
+  // Tinggi kepala dicatat sebagai --tinggi-kepala agar lompatan ke #soal-… dan elemen lengket di bawahnya
+  // tidak tertutup kepala yang lengket di layar lebar (src/index.css).
+  useEffect(() => {
+    const el = kepala.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ukur = () => document.documentElement.style.setProperty('--tinggi-kepala', `${el.offsetHeight}px`);
+    ukur();
+    const ro = new ResizeObserver(ukur);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   return (
-    <header className="tanpa-cetak relative z-20 border-b-[3px] border-kuning bg-kartu">
+    <header ref={kepala} className="tanpa-cetak relative z-20 border-b-[3px] border-kuning bg-kartu lg:sticky lg:top-0 lg:bg-kartu/90 lg:backdrop-blur">
       <div className="mx-auto flex max-w-[1312px] items-center justify-between gap-4 px-4 py-3 sm:px-8 lg:py-4">
         <Link to="/" aria-label="GenSoal, beranda">
           <Logo />
@@ -45,25 +58,20 @@ export function Kepala() {
         </nav>
         <div className="flex items-center gap-3">
           {pengatur.berjalan ? (
-            <Link to={`/soal/${pengatur.paketId}`} className="hidden items-center gap-2 rounded-full bg-utama-lembut px-3 py-1.5 text-base font-bold text-utama-tua sm:flex dark:text-di-tinta">
-              <span className="inline-block size-2 animate-pulse rounded-full bg-utama" />
-              {pengatur.menunggu ? 'Menunggu batas penyedia' : 'Membuat soal'} {pengatur.slotAktif ? `· soal ${pengatur.slotAktif}` : ''}
+            <Link to={`/soal/${pengatur.paketId}`} className="hidden rounded-full hover:underline sm:block" aria-label={`Buka paket yang ${menungguPenyedia(pengatur.menunggu) ? 'menunggu batas penyedia' : 'sedang dibuat'}${pengatur.slotAktif ? `, soal ${pengatur.slotAktif}` : ''}`}>
+              <LencanaStatus status={menungguPenyedia(pengatur.menunggu) ? 'menunggu' : 'membuat'}>{pengatur.slotAktif ? ` · soal ${pengatur.slotAktif}` : ''}</LencanaStatus>
             </Link>
-          ) : (
-            <span className="hidden items-center gap-2 text-base font-semibold text-redup xl:flex">
-              <Titik className="text-utama" />
-              Tersimpan di perangkat ini
-            </span>
-          )}
-          <button type="button" className="inline-flex size-11 items-center justify-center rounded-lg text-judul hover:bg-lembut lg:hidden" aria-label="Menu" aria-expanded={buka} onClick={() => setBuka((b) => !b)}>
-            <svg aria-hidden="true" width="22" height="16" viewBox="0 0 22 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+          ) : null}
+          <button type="button" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-garis-kuat px-3 text-base font-bold text-judul hover:bg-lembut lg:hidden" aria-expanded={buka} aria-controls="menu-ponsel" onClick={() => setBuka((b) => !b)}>
+            <svg aria-hidden="true" width="18" height="14" viewBox="0 0 22 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
               {buka ? <path d="M4 1l14 14M4 15L18 1" /> : <path d="M1 2h20M1 8h20M1 14h20" />}
             </svg>
+            {buka ? 'Tutup' : 'Menu'}
           </button>
         </div>
       </div>
       {buka ? (
-        <nav aria-label="Menu" className="border-t border-garis px-4 pb-3 sm:px-8 lg:hidden">
+        <nav id="menu-ponsel" aria-label="Menu" className="border-t border-garis px-4 pb-3 sm:px-8 lg:hidden">
           {[...NAV, { ke: '/pengaturan', label: 'Profil dan kop', akhir: true }, { ke: '/bantuan', label: 'Bantuan', akhir: true }].map((n) => (
             <NavLink key={n.ke} to={n.ke} className={`flex min-h-12 items-center border-b border-garis text-base font-bold last:border-b-0 ${aktif(pathname, n.ke, n.akhir) ? 'text-utama' : 'text-tinta'}`}>
               {n.label}
@@ -97,58 +105,42 @@ export function Kaki() {
   );
 }
 
-export function KepalaHalaman({ label, judul, children }: { label?: string; judul: string; ukuran?: 'besar' | 'sedang' | 'kecil'; children?: React.ReactNode }) {
+/**
+ * Kepala setiap halaman (rancangan UI v0.5, UI-04): tautan kembali bila perlu, label, judul, satu kalimat
+ * penjelas, dan aksi utama di kanan (di bawah judul pada layar sempit). `children` untuk isi tambahan di bawahnya.
+ */
+export function KepalaHalaman({
+  kembali,
+  label,
+  judul,
+  subjudul,
+  aksi,
+  besar = false,
+  children,
+}: {
+  kembali?: { ke: string; label: string };
+  label?: ReactNode;
+  judul: ReactNode;
+  subjudul?: ReactNode;
+  aksi?: ReactNode;
+  /** Judul lebih besar, hanya untuk beranda. */
+  besar?: boolean;
+  children?: ReactNode;
+}) {
   return (
-    <div>
-      {label ? <div className="text-base font-bold text-utama">{label}</div> : null}
-      <h1 className="judul-besar mt-1 text-[30px] sm:text-[36px]">{judul}</h1>
-      {children ? <div className="mt-2 max-w-[640px] text-[17px] leading-relaxed text-redup">{children}</div> : null}
-    </div>
-  );
-}
-
-const LANGKAH = [
-  { nama: 'Buat', warna: 'bg-utama text-di-tinta', lembut: 'bg-utama-lembut text-utama-tua dark:text-di-tinta' },
-  { nama: 'Periksa', warna: 'bg-awas text-di-tinta', lembut: 'bg-awas-latar text-awas' },
-  { nama: 'Unduh', warna: 'bg-baik text-di-tinta', lembut: 'bg-baik-latar text-baik' },
-] as const;
-
-/** Penunjuk "Langkah n dari 3" yang selalu terlihat di layar Buat, Periksa, dan Unduh. */
-export function PenunjukLangkah({ langkah, paketId }: { langkah: 1 | 2 | 3; paketId?: string }) {
-  const tujuan = [null, paketId ? `/soal/${paketId}` : null, paketId ? `/soal/${paketId}/ekspor` : null];
-  return (
-    <nav aria-label="Langkah" className="tanpa-cetak border-b border-garis bg-kartu">
-      <div className="mx-auto flex max-w-[1312px] flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 sm:px-8">
-        <span className="text-base font-extrabold text-judul">
-          Langkah {langkah} dari 3
-        </span>
-        <ol className="flex items-center gap-1.5 sm:gap-2">
-          {LANGKAH.map((l, i) => {
-            const nomor = i + 1;
-            const kini = nomor === langkah;
-            const isi = (
-              <>
-                <span className={`inline-flex size-6 items-center justify-center rounded-full text-[14px] font-extrabold ${kini ? 'bg-kartu text-tinta' : l.warna}`}>{nomor}</span>
-                {l.nama}
-              </>
-            );
-            const kelas = `inline-flex min-h-9 items-center gap-1.5 rounded-full px-2.5 text-base font-bold sm:gap-2 sm:px-3 ${kini ? l.warna : nomor < langkah ? l.lembut : 'bg-panel text-redup'}`;
-            const ke = tujuan[i];
-            return (
-              <li key={l.nama} className="flex items-center gap-1.5 sm:gap-2" aria-current={kini ? 'step' : undefined}>
-                {i ? <span aria-hidden="true" className="hidden h-px w-4 bg-garis-kuat sm:block" /> : null}
-                {ke && !kini ? (
-                  <Link to={ke} className={`${kelas} hover:underline`}>
-                    {isi}
-                  </Link>
-                ) : (
-                  <span className={kelas}>{isi}</span>
-                )}
-              </li>
-            );
-          })}
-        </ol>
+    <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
+      <div className="min-w-0 max-w-[760px]">
+        {kembali ? (
+          <Link to={kembali.ke} className="inline-flex min-h-10 items-center gap-2 text-base font-bold text-utama hover:underline">
+            <span aria-hidden="true">←</span> {kembali.label}
+          </Link>
+        ) : null}
+        {label ? <div className="text-base font-bold text-utama">{label}</div> : null}
+        <h1 className={`judul-besar mt-1 ${besar ? 'text-[34px] sm:text-[44px]' : 'text-[30px] sm:text-[36px]'}`}>{judul}</h1>
+        {subjudul ? <div className="mt-2 max-w-[640px] text-[17px] leading-relaxed text-redup">{subjudul}</div> : null}
+        {children}
       </div>
-    </nav>
+      {aksi ? <div className="flex w-full flex-wrap gap-3 sm:w-auto">{aksi}</div> : null}
+    </div>
   );
 }

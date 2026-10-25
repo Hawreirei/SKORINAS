@@ -63,7 +63,7 @@ export function periksaSoal(isi: IsiSoal, k: KonteksPeriksa): HasilPeriksa {
   else if (hitung.hasil === 'lolos' && isi.bentuk !== 'uraian' && paket) status_mutu = paket.statusLolos;
   else {
     status_mutu = 'perlu_telaah';
-    catatan.unshift(isi.bentuk === 'uraian' ? 'Soal uraian: periksa kunci dan rubrik sebelum diekspor.' : hitung.alasan);
+    catatan.unshift(isi.bentuk === 'uraian' ? 'Soal uraian: kunci dan rubrik tidak dicek otomatis.' : hitung.alasan);
   }
   return { lolos, status_mutu, alasan, catatan, hitung, svg };
 }

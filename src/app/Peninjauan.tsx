@@ -1,22 +1,22 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { db } from '../db/skema';
 import type { Soal } from '../db/tipe';
 import { KESUKARAN_LABEL } from '../db/tipe';
-import { setujui } from '../generasi/operasi';
-import { PenunjukLangkah } from '../komponen/Kepala';
-import { penghalangEkspor } from '../ekspor/model';
 import { pengatur } from '../generasi/pengatur';
 import { paketUntuk } from '../paket';
 import { Dialog } from '../komponen/Dialog';
+import { KepalaHalaman } from '../komponen/Kepala';
+import { MenuLainnya } from '../komponen/MenuLainnya';
 import { usePesan } from '../komponen/Pesan';
-import { Kartu, LencanaPenanda, Peringatan } from '../komponen/Status';
-import { Chip, Panah, TautanTombol, Tombol } from '../komponen/Tombol';
+import { BilahKemajuan, Kartu, LencanaStatus, Peringatan, pitaStatus } from '../komponen/Status';
+import { menungguPenyedia, statusPaket } from './status';
+import { Panah, TautanTombol, Tombol } from '../komponen/Tombol';
 import { GantiSoal } from './GantiSoal';
 import { usePengatur, useJudulHalaman, useProfil } from './kait';
 import { KartuSoal, type AksiKartu } from './KartuSoal';
-import { formatBiaya, ringkasPaket } from './ringkas';
+import { formatBiaya } from './ringkas';
 import { SuntingSoal } from './SuntingSoal';
 
 function HitungMundur({ sampai, alasan }: { sampai: number; alasan: string }) {
@@ -27,13 +27,46 @@ function HitungMundur({ sampai, alasan }: { sampai: number; alasan: string }) {
   }, []);
   const detik = Math.max(0, Math.ceil((sampai - kini) / 1000));
   return (
-    <p className="mt-3 text-base text-isi" role="status">
+    <p className="mt-3 text-base text-isi tabular-nums">
       {alasan} Melanjutkan otomatis dalam {detik} detik. Tidak perlu menekan apa pun.
     </p>
   );
 }
 
-type Saring = 'semua' | 'cek_dulu' | 'belum_disetujui' | 'ditolak';
+/** Lompat ke kartu soal; kepala lengket diperhitungkan lewat scroll-padding-top (UI-04). */
+function lompatKe(soalId: string) {
+  const el = document.getElementById(`soal-${soalId}`);
+  if (!el) return;
+  const kurangiGerak = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  el.scrollIntoView({ behavior: kurangiGerak ? 'auto' : 'smooth', block: 'start' });
+  el.focus({ preventScroll: true });
+}
+
+/** Deret nomor soal; soal yang kuncinya tidak dicek otomatis bertitik kuning-oranye. */
+function NavigasiNomor({ soal, susun }: { soal: Soal[]; susun: 'kisi' | 'baris' }) {
+  return (
+    <nav aria-label="Nomor soal">
+      <ol className={susun === 'kisi' ? 'grid grid-cols-5 gap-2' : 'flex gap-2 overflow-x-auto pb-1'}>
+        {soal.map((s, i) => {
+          const tanpaCek = s.status_mutu === 'perlu_telaah';
+          return (
+            <li key={s.id} className="shrink-0">
+              <button
+                type="button"
+                onClick={() => lompatKe(s.id)}
+                aria-label={`Soal ${i + 1}${tanpaCek ? ', kunci tidak dicek otomatis' : ''}`}
+                className={`relative inline-flex size-11 items-center justify-center rounded-lg border bg-kartu text-base font-bold tabular-nums hover:border-utama hover:text-utama ${tanpaCek ? 'border-awas/60' : 'border-garis-kuat'}`}
+              >
+                {i + 1}
+                {tanpaCek ? <span aria-hidden="true" className="absolute right-1 top-1 size-2 rounded-full bg-awas" /> : null}
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
 
 export default function Peninjauan() {
   const { id = '' } = useParams();
@@ -44,30 +77,54 @@ export default function Peninjauan() {
   const status = usePengatur();
   const profil = useProfil();
   const pesan = usePesan();
-  const [saring, setSaring] = useState<Saring>('semua');
+  const navigasi = useNavigate();
   const [dialog, setDialog] = useState<{ soal: Soal; aksi: AksiKartu } | null>(null);
   const [judulBaru, setJudulBaru] = useState<string | null>(null);
-  useJudulHalaman(paket ? `Periksa · ${paket.judul}` : 'Periksa');
+  const [menjeda, setMenjeda] = useState(false);
+  useJudulHalaman(paket ? paket.judul : 'Paket soal');
+  const berjalanDiSini = status.berjalan && status.paketId === id;
+  useEffect(() => {
+    if (!berjalanDiSini) {
+      setMenjeda(false);
+      return;
+    }
+    // Ingatkan sebelum tab ditutup selama paket ini dibuat; soal yang sudah jadi tetap tersimpan.
+    const ingatkan = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', ingatkan);
+    return () => window.removeEventListener('beforeunload', ingatkan);
+  }, [berjalanDiSini]);
 
   const aktif = useMemo(() => (semua ?? []).filter((s) => s.dihapus_pada == null && s.status_mutu !== 'ditolak').sort((a, b) => a.urutan - b.urutan), [semua]);
-  const ditolak = useMemo(() => (semua ?? []).filter((s) => s.status_mutu === 'ditolak' && s.dihapus_pada == null), [semua]);
   if (paket === undefined || semua === undefined) return <div className="px-4 py-20 text-center text-redup">Memuat…</div>;
   if (!paket) return <div className="px-4 py-20 sm:px-8">Paket tidak ditemukan. <Link to="/soal" className="font-bold text-utama underline">Kembali ke Soal saya</Link></div>;
 
   const p = paket.parameter_json;
-  const r = ringkasPaket(paket, semua);
   const risiko = paketUntuk(p.rumpun)?.risikoTinggi ?? false;
-  const penghalang = penghalangEkspor(paket, aktif);
-  const sedangDibuat = status.berjalan && status.paketId === id;
+  const sedangDibuat = berjalanDiSini;
+  // Pengatur sudah berhenti tetapi status paket di IndexedDB belum terbaca ulang: jangan sempat menampilkan "Dijeda".
+  const menyelesaikan = !sedangDibuat && paket.status === 'membuat';
   const slot = kerja?.slot ?? [];
   const selesaiSlot = slot.filter((s) => s.status === 'lolos' || s.status === 'gagal').length;
   const gagalSlot = slot.filter((s) => s.status === 'gagal');
+  const st = statusPaket({ paketId: id, status: paket.status, gagal: gagalSlot.length, galat: kerja?.galat ?? null, pengatur: status });
+  const nomorAktif = status.slotAktif ?? selesaiSlot + 1;
+  const rinciKemajuan = sedangDibuat
+    ? status.menunggu
+      ? // Lencana sudah berbunyi "Menunggu batas penyedia"; jeda yang diatur GenSoal sendiri disebut terpisah.
+        `${menungguPenyedia(status.menunggu) ? '' : 'Menjaga batas per menit · '}soal ${nomorAktif} dari ${slot.length}`
+      : `Membuat soal ${nomorAktif} dari ${slot.length}…`
+    : menyelesaikan
+      ? 'Menyimpan soal terakhir…'
+      : null;
   const komposisi = (['mudah', 'sedang', 'sulit'] as const).map((k) => `${KESUKARAN_LABEL[k]} ${aktif.filter((s) => s.kesukaran_rancangan === k).length}`).join(' · ');
   const totalBiaya = (pemakaian ?? []).reduce<number | null>((a, x) => (a === null || x.perkiraan_biaya === null ? null : a + x.perkiraan_biaya), 0);
   const totalToken = (pemakaian ?? []).reduce((a, x) => a + x.token_masuk + x.token_keluar, 0);
 
-  const ditampilkan = saring === 'ditolak' ? ditolak : aktif.filter((s) => (saring === 'cek_dulu' ? s.status_mutu === 'perlu_telaah' && s.status_telaah !== 'ditelaah_guru' : saring === 'belum_disetujui' ? s.status_telaah !== 'ditelaah_guru' : true));
-  const dicekBelumDisetujui = aktif.filter((s) => s.status_mutu !== 'perlu_telaah' && s.status_telaah !== 'ditelaah_guru');
+  // Tidak ada gerbang persetujuan (rancangan v0.5): paket dapat diunduh begitu punya soal.
+  const bisaUnduh = aktif.length > 0;
 
   async function lanjutkan(pakaiCadangan = false) {
     try {
@@ -88,53 +145,68 @@ export default function Peninjauan() {
 
   return (
     <div>
-      <PenunjukLangkah langkah={2} paketId={id} />
-      <div className="mx-auto flex max-w-[1312px] flex-wrap gap-x-10 px-4 sm:px-8">
-        <div className="min-w-0 flex-[999_1_640px] pb-16 pt-8 sm:pt-10">
-          <div className="text-base font-bold text-utama">
-            Kelas {p.kelas} · {p.mapel}
-          </div>
-          {judulBaru === null ? (
-            <h1 className="judul-besar mt-1 text-[30px] sm:text-[36px]">
-              {paket.judul}{' '}
-              <button type="button" className="align-middle text-base font-bold text-utama hover:underline" onClick={() => setJudulBaru(paket.judul)}>
-                Ubah judul
-              </button>
-            </h1>
-          ) : (
-            <form
-              className="mt-2 flex flex-wrap gap-3"
-              onSubmit={async (e) => {
-                e.preventDefault();
-                if (judulBaru.trim()) await db.paket_soal.update(id, { judul: judulBaru.trim() });
-                setJudulBaru(null);
-              }}
-            >
-              <input className="bidang max-w-xl" aria-label="Judul paket" value={judulBaru} onChange={(e) => setJudulBaru(e.target.value)} autoFocus />
-              <Tombol type="submit" varian="garis">
-                Simpan
-              </Tombol>
-            </form>
-          )}
-          <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-base text-redup">
-            <span>{aktif.length} soal</span>
-            <span>{komposisi}</span>
-            <span>Dibuat dengan bantuan AI</span>
-          </div>
+      <div className="mx-auto flex max-w-[1240px] gap-x-10 px-4 sm:px-8">
+        <div className="min-w-0 flex-1 pb-10 pt-8 sm:pt-10 lg:pb-16">
+          <KepalaHalaman
+            label={`Kelas ${p.kelas} · ${p.mapel}`}
+            judul={paket.judul}
+            aksi={
+              <>
+                {/* Di ponsel tombol Unduh ada di bilah bawah; hanya satu tombol utama yang terlihat. */}
+                <span className="hidden lg:block">
+                  <TautanTombol to={`/soal/${id}/ekspor`} ukuran="besar" className={bisaUnduh ? '' : 'pointer-events-none opacity-40'} aria-disabled={!bisaUnduh}>
+                    Unduh <Panah />
+                  </TautanTombol>
+                </span>
+                <MenuLainnya
+                  arah="bawah"
+                  className="lg:pt-1"
+                  butir={[
+                    { label: 'Ubah judul…', onClick: () => setJudulBaru(paket.judul) },
+                    { label: 'Buat paket serupa', onClick: () => navigasi(`/soal/baru?ulang=${id}`) },
+                  ]}
+                />
+              </>
+            }
+            subjudul={<span className="tabular-nums">{`${aktif.length} soal · ${komposisi} · Dibuat dengan bantuan AI`}</span>}
+          >
+            {judulBaru !== null ? (
+              <form
+                className="mt-3 flex flex-wrap gap-3"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (judulBaru.trim()) await db.paket_soal.update(id, { judul: judulBaru.trim() });
+                  setJudulBaru(null);
+                }}
+              >
+                <input className="bidang max-w-xl" aria-label="Judul paket" value={judulBaru} onChange={(e) => setJudulBaru(e.target.value)} autoFocus />
+                <Tombol type="submit" varian="garis">
+                  Simpan
+                </Tombol>
+                <Tombol varian="hantu" onClick={() => setJudulBaru(null)}>
+                  Batal
+                </Tombol>
+              </form>
+            ) : null}
+          </KepalaHalaman>
 
           {paket.status !== 'siap' || sedangDibuat ? (
-            <Kartu pita="utama" className="mt-6">
+            <Kartu pita={pitaStatus(st)} className="mt-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <span className="text-[18px] font-bold">
-                  {sedangDibuat
-                    ? status.menunggu
-                      ? `${status.menunggu.alasan.startsWith('Menjaga') ? 'Menjaga batas per menit' : 'Menunggu batas penyedia pulih'} · soal ${status.slotAktif ?? selesaiSlot + 1} dari ${slot.length}`
-                      : `Membuat soal ${status.slotAktif ?? selesaiSlot + 1} dari ${slot.length}…`
-                    : `Dijeda · ${selesaiSlot} dari ${slot.length} soal selesai`}
-                </span>
-                {sedangDibuat ? (
-                  <Tombol varian="hantu" onClick={() => pengatur.jeda()}>
-                    Jeda
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2" aria-live="polite">
+                  <LencanaStatus status={st} />
+                  {rinciKemajuan ? <span className="text-base font-semibold text-isi tabular-nums">{rinciKemajuan}</span> : null}
+                </div>
+                {menyelesaikan ? null : sedangDibuat ? (
+                  <Tombol
+                    varian="hantu"
+                    disabled={menjeda}
+                    onClick={() => {
+                      setMenjeda(true);
+                      pengatur.jeda();
+                    }}
+                  >
+                    {menjeda ? 'Menjeda…' : 'Jeda dan simpan'}
                   </Tombol>
                 ) : (
                   <span className="flex flex-wrap gap-2">
@@ -149,13 +221,11 @@ export default function Peninjauan() {
                   </span>
                 )}
               </div>
-              <div className="mt-4 h-2 overflow-hidden rounded-full bg-utama-lembut" aria-hidden="true">
-                <div className="h-full rounded-full bg-utama transition-all" style={{ width: `${slot.length ? (selesaiSlot / slot.length) * 100 : 0}%` }} />
-              </div>
+              <BilahKemajuan selesai={selesaiSlot} total={slot.length} menunggu={st === 'menunggu'} className="mt-4" />
               {sedangDibuat && status.menunggu ? <HitungMundur sampai={status.menunggu.sampai} alasan={status.menunggu.alasan} /> : null}
               {status.paketId === id && status.catatan ? <p className="mt-3 text-base text-isi">{status.catatan}</p> : null}
               {!sedangDibuat && (kerja?.galat || status.pesan) ? (
-                <div className="mt-3 text-base text-awas">
+                <div className="mt-3 text-base text-isi">
                   <p>
                     {status.paketId === id && status.pesan ? status.pesan : kerja?.galat}{' '}
                     {(status.paketId === id && (status.jenisGalat === 'kunci' || status.jenisGalat === 'batas' || status.jenisGalat === 'model')) || /kunci|model|kuota/i.test(kerja?.galat ?? '') ? (
@@ -172,7 +242,7 @@ export default function Peninjauan() {
                   ) : null}
                 </div>
               ) : null}
-              <p className="mt-3 text-base text-redup">Setiap soal disimpan begitu lolos pemeriksaan. Bila tab tertutup, lanjutkan dari soal terakhir.</p>
+              {!sedangDibuat && !menyelesaikan ? <p className="mt-3 text-base text-redup">Soal yang sudah jadi tetap tersimpan. Tekan Lanjutkan untuk membuat sisanya.</p> : null}
             </Kartu>
           ) : null}
 
@@ -185,111 +255,57 @@ export default function Peninjauan() {
             </Peringatan>
           ) : null}
 
-          <div className="mt-8 flex flex-wrap gap-2">
-            <Chip aktif={saring === 'semua'} onClick={() => setSaring('semua')}>
-              Semua · {aktif.length}
-            </Chip>
-            <Chip aktif={saring === 'cek_dulu'} onClick={() => setSaring('cek_dulu')}>
-              Mohon cek dulu · {r.belumDitelaah}
-            </Chip>
-            <Chip aktif={saring === 'belum_disetujui'} onClick={() => setSaring('belum_disetujui')}>
-              Belum disetujui · {aktif.length - r.disetujui}
-            </Chip>
-            {ditolak.length ? (
-              <Chip aktif={saring === 'ditolak'} onClick={() => setSaring('ditolak')}>
-                Ditolak otomatis · {ditolak.length}
-              </Chip>
-            ) : null}
-          </div>
+          {aktif.length > 1 ? (
+            <div className="mt-6 lg:hidden">
+              <NavigasiNomor soal={aktif} susun="baris" />
+            </div>
+          ) : null}
 
-          <div className="mt-5 space-y-6">
-            {saring === 'ditolak' ? (
+          <div className="mt-6 space-y-4 sm:space-y-6">
+            {aktif.length === 0 ? (
               <Kartu pita="tanpa">
-                <p className="text-base text-isi">Soal ini gagal pemeriksaan otomatis tiga kali dan tidak pernah dipakai. Ditampilkan hanya sebagai jejak.</p>
-                {ditolak.map((s) => (
-                  <details key={s.id} className="border-b border-garis py-3 last:border-b-0">
-                    <summary className="cursor-pointer text-base font-semibold">
-                      Soal {s.urutan} · {s.catatan_mutu[s.catatan_mutu.length - 1] ?? 'ditolak'}
-                    </summary>
-                    <ul className="mt-2 list-disc pl-5 text-base text-redup">
-                      {s.catatan_mutu.map((c, i) => (
-                        <li key={i}>{c}</li>
-                      ))}
-                    </ul>
-                  </details>
-                ))}
-              </Kartu>
-            ) : ditampilkan.length === 0 ? (
-              <Kartu pita="tanpa">
-                <p className="text-[17px] text-isi">{sedangDibuat ? 'Soal pertama sedang dibuat dan diperiksa…' : 'Tidak ada soal pada saringan ini.'}</p>
+                <p className="text-[17px] text-isi">{sedangDibuat ? 'Soal pertama sedang dibuat dan diperiksa…' : 'Belum ada soal di paket ini.'}</p>
               </Kartu>
             ) : (
-              ditampilkan.map((s) => <KartuSoal key={s.id} soal={s} nomor={aktif.indexOf(s) + 1} risikoTinggi={risiko} aksi={(a) => setDialog({ soal: s, aksi: a })} />)
+              aktif.map((s, i) => <KartuSoal key={s.id} soal={s} nomor={i + 1} risikoTinggi={risiko} aksi={(a) => setDialog({ soal: s, aksi: a })} />)
             )}
           </div>
         </div>
 
-        <aside aria-label="Status paket" className="w-full shrink-0 pb-14 lg:w-[320px] lg:pt-10">
-          <Kartu pita="kuning" className="lg:sticky lg:top-6">
-            <h2 className="text-[20px] font-extrabold text-judul">Status paket</h2>
-            <div className="mt-3">
-              {(
-                [
-                  ['dicek', r.terverifikasi - aktif.filter((s) => s.status_mutu !== 'perlu_telaah' && s.status_telaah === 'ditelaah_guru').length],
-                  ['cek_dulu', r.belumDitelaah],
-                  ['disetujui', r.disetujui],
-                ] as const
-              ).map(([pn, n]) => (
-                <div key={pn} className="flex items-center justify-between gap-3 border-b border-garis py-3">
-                  <LencanaPenanda penanda={pn} />
-                  <span className="text-[22px] font-extrabold">{n}</span>
-                </div>
-              ))}
-              {r.ditolak ? (
-                <div className="flex items-center justify-between gap-3 border-b border-garis py-3 text-base text-redup">
-                  <span>Ditolak otomatis</span>
-                  <span className="text-[18px] font-bold">{r.ditolak}</span>
-                </div>
-              ) : null}
-              <div className="flex items-center justify-between gap-3 py-3 text-base text-redup">
-                <span>Biaya AI</span>
-                <span className="text-right">
-                  {formatBiaya(totalBiaya)}
-                  <span className="block">{totalToken.toLocaleString('id-ID')} token</span>
-                </span>
+        <aside aria-label="Paket ini" className="hidden w-[300px] shrink-0 pb-14 pt-10 lg:block">
+          <Kartu className="sticky top-[calc(var(--tinggi-kepala,76px)+1.5rem)] max-h-[calc(100vh-var(--tinggi-kepala,76px)-3rem)] overflow-auto">
+            <h2 className="text-[20px] font-extrabold text-judul">Lompat ke soal</h2>
+            {aktif.length ? (
+              <div className="mt-3">
+                <NavigasiNomor soal={aktif} susun="kisi" />
+                {aktif.some((s) => s.status_mutu === 'perlu_telaah') ? (
+                  <p className="mt-3 flex items-center gap-2 text-base text-redup">
+                    <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-awas" />
+                    Kunci tidak dicek otomatis
+                  </p>
+                ) : null}
               </div>
-            </div>
-            <p className="mt-2 text-base leading-normal text-isi">
-              {penghalang.length ? `${penghalang.length} soal masih "Mohon cek dulu". Soal itu baru bisa diunduh setelah Anda setujui.` : 'Soal "Mohon cek dulu" baru bisa diunduh setelah Anda setujui.'}
+            ) : (
+              <p className="mt-2 text-base text-isi">Belum ada soal.</p>
+            )}
+            <p className="mt-4 border-t border-garis pt-3 text-base text-redup tabular-nums">
+              Biaya AI: {formatBiaya(totalBiaya)} · {totalToken.toLocaleString('id-ID')} token
             </p>
-            {penghalang.length ? (
-              <Tombol varian="hantu" className="mt-4 w-full" onClick={() => setSaring('cek_dulu')}>
-                Tampilkan yang perlu dicek
-              </Tombol>
-            ) : null}
-            {dicekBelumDisetujui.length ? (
-              <Tombol
-                varian="garis"
-                className="mt-3 w-full"
-                onClick={async () => {
-                  for (const s of dicekBelumDisetujui) await setujui(s.id);
-                  pesan(`${dicekBelumDisetujui.length} soal disetujui.`);
-                }}
-              >
-                Setujui semua yang sudah dicek
-              </Tombol>
-            ) : null}
-            <TautanTombol to={`/soal/${id}/ekspor`} ukuran="besar" className={`mt-4 w-full ${penghalang.length || !aktif.length ? 'pointer-events-none opacity-40' : ''}`} aria-disabled={penghalang.length > 0 || !aktif.length}>
-              Lanjut ke Unduh <Panah />
-            </TautanTombol>
-            <Link to={`/soal/baru?ulang=${id}`} className="mt-4 block text-base font-bold text-utama hover:underline">
-              Buat paket serupa
-            </Link>
           </Kartu>
         </aside>
       </div>
 
-      <Dialog buka={!!dialog} tutup={() => setDialog(null)} judul={dialog?.aksi === 'sunting' ? 'Sunting soal' : dialog?.aksi === 'ganti' ? 'Ganti soal' : 'Buat ulang'} lebar={1100}>
+      {/* Ponsel dan tablet: ringkasan dan langkah berikutnya selalu terlihat di bawah. */}
+      <div className="tanpa-cetak sticky bottom-0 z-10 border-t border-garis bg-kartu shadow-[0_-4px_16px_rgba(15,23,42,0.08)] lg:hidden">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-8">
+          <span className="min-w-0 text-base font-bold text-isi tabular-nums">{aktif.length ? `${aktif.length} soal` : 'Belum ada soal'}</span>
+          <TautanTombol to={`/soal/${id}/ekspor`} className={`shrink-0 ${bisaUnduh ? '' : 'pointer-events-none opacity-40'}`} aria-disabled={!bisaUnduh}>
+            Unduh <Panah />
+          </TautanTombol>
+        </div>
+      </div>
+
+      <Dialog buka={!!dialog} tutup={() => setDialog(null)} judul={dialog?.aksi === 'sunting' ? 'Sunting soal' : dialog?.aksi === 'ganti' ? 'Ganti soal' : 'Buat ulang'} ukuran="lebar">
         {dialog?.aksi === 'sunting' ? <SuntingSoal key={dialog.soal.id} soal={dialog.soal} selesai={() => setDialog(null)} /> : null}
         {dialog && dialog.aksi !== 'sunting' ? <GantiSoal key={dialog.soal.id + dialog.aksi} soal={dialog.soal} mode={dialog.aksi} selesai={() => setDialog(null)} /> : null}
       </Dialog>
