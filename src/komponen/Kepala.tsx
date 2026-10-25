@@ -49,12 +49,7 @@ export function Kepala() {
               <span className="inline-block size-2 animate-pulse rounded-full bg-utama" />
               {pengatur.menunggu ? 'Menunggu batas penyedia' : 'Membuat soal'} {pengatur.slotAktif ? `· soal ${pengatur.slotAktif}` : ''}
             </Link>
-          ) : (
-            <span className="hidden items-center gap-2 text-base font-semibold text-redup xl:flex">
-              <Titik className="text-utama" />
-              Tersimpan di perangkat ini
-            </span>
-          )}
+          ) : null}
           <button type="button" className="inline-flex size-11 items-center justify-center rounded-lg text-judul hover:bg-lembut lg:hidden" aria-label="Menu" aria-expanded={buka} onClick={() => setBuka((b) => !b)}>
             <svg aria-hidden="true" width="22" height="16" viewBox="0 0 22 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               {buka ? <path d="M4 1l14 14M4 15L18 1" /> : <path d="M1 2h20M1 8h20M1 14h20" />}

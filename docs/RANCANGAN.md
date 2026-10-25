@@ -121,7 +121,7 @@ Semua pekerjaan guru dipadatkan menjadi 3 layar berurutan: **Buat, Periksa, Undu
 | Layar | Rute | Elemen utama | Aksi |
 | --- | --- | --- | --- |
 | Beranda | / | Satu tombol besar "Buat soal" dan daftar soal terakhir; pengingat memasang kunci bila belum ada | Mulai buat soal, buka soal |
-| Langkah 1 · Buat | /soal/baru | Pengaturan tersimpan; Kelas dan mapel; CP dan TP; Jumlah soal; Pengaturan lanjutan (tertutup) | Buat soal, simpan pengaturan, Batal |
+| Langkah 1 · Buat | /soal/baru | Pengaturan tersimpan (satu pilihan); Kelas, mapel, dan jumlah soal; CP dan TP; Pengaturan lanjutan (tertutup) | Buat soal, simpan pengaturan, Batal |
 | Langkah 2 · Periksa | /soal/\[id\] | Daftar soal dengan gambar, kunci, pembahasan; satu penanda per soal; tanda jenis jawaban uraian; status paket | Setujui, sunting, ganti soal, buat ulang, hapus |
 | Langkah 3 · Unduh | /soal/\[id\]/ekspor | Pilih Word atau PDF; berkas yang diunduh (lembar soal dengan atau tanpa kop, kunci jawaban dengan atau tanpa pembahasan, kisi-kisi), masing-masing berkas terpisah; pratinjau tiap berkas; menu lanjutan berisi .tex dan tampilan cetak | Unduh semua berkas terpilih, atau satu berkas saja |
 | Soal saya | /soal | Paket soal, tong sampah, tautan ke semua soal "Mohon cek dulu" | Buka, unduh, hapus, pulihkan |
@@ -137,7 +137,7 @@ Menu atas berisi Beranda, Buat soal, Soal saya, Pengaturan AI, dan Cadangan. Pro
 2. **Pengaturan tersimpan** (dahulu preset) dipilih di bagian atas dan mengisi semua isian sekaligus; hanya tampil bila sudah ada.
 3. **CP dan TP** berupa dua kolom teks; satu TP satu baris; jumlah soal dibagi ke tiap TP. Boleh dikosongkan: tanpa TP soal dibuat dari CP, tanpa keduanya dari topik atau mapel. Pemeriksa kualitas TP memberi saran tanpa memblokir.
 4. **Pengaturan lanjutan** tertutup secara bawaan: komposisi mudah/sedang/sulit (bawaan 30/50/20, saling terkunci pada 100%), bentuk soal, cara menjawab benar-salah (centang kotak atau lingkari B/S), bahasa, gaya, soal bergambar, teks materi tempel, dan judul paket.
-5. **Bilah bawah:** "Simpan pengaturan ini" (dengan nama), tombol Batal (merah), dan tombol utama "Buat n soal". Pembuatan dimulai langsung dan mengarah ke layar Periksa.
+5. **Bilah bawah:** ringkasan kelas dan mapel, tombol Batal (merah), dan tombol utama "Buat n soal". "Simpan pengaturan ini" (dengan nama) ada di akhir Pengaturan lanjutan. Pembuatan dimulai langsung dan mengarah ke layar Periksa.
 
 Mapel diketik guru; rumpun mapel (penentu pemeriksa jawaban) ditebak dari namanya. Mapel yang belum punya pemeriksa otomatis menghasilkan soal bertanda "Mohon cek dulu".
 
@@ -146,7 +146,7 @@ Pembuatan soal berjalan dari peramban butir demi butir, dan setiap butir yang lo
 ### Aturan layar Periksa
 
 - Satu penanda per soal: **Jawaban sudah dicek** (status mutu terverifikasi), **Mohon cek dulu** (perlu telaah), atau **Disetujui** (sudah disetujui guru). Status mutu (diatur sistem) dan status telaah (diatur guru) tetap dua data terpisah.
-- Satu tombol **Setujui** per soal. Soal "Mohon cek dulu" tidak dapat diunduh sebelum disetujui; "Setujui semua yang sudah dicek" tersedia di status paket.
+- Satu tombol **Setujui** per soal, di samping Sunting; aksi lain (ganti, buat ulang, hapus) di menu Lainnya. Soal "Mohon cek dulu" tidak dapat diunduh sebelum disetujui; "Setujui semua yang sudah dicek" tersedia di status paket. Di ponsel, ringkasan dan "Lanjut ke Unduh" ada di bilah bawah tetap.
 - Setiap soal uraian membawa tanda jenis jawaban (penjelasan atau hitungan). AI mengisinya saat membuat soal, dan guru dapat mengubahnya di sini.
 
 ### Istilah di layar
@@ -167,7 +167,7 @@ Pembuatan soal berjalan dari peramban butir demi butir, dan setiap butir yang lo
 Terang dan ramah: latar abu kebiruan lembut, kartu putih, dan warna untuk tiap langkah. Gaya hitam-putih, orbit, garis tipis, dan label huruf besar berjarak lebar ditinggalkan.
 
 1. Menu atas di atas garis kuning, jelas berbeda dari area kerja.
-2. Setiap kelompok isian berada dalam satu kartu putih dengan pita berwarna di atasnya dan nomor kelompok berlatar kuning.
+2. Setiap kelompok isian berada dalam satu kartu putih dengan pita berwarna di atasnya. Nomor kelompok berlatar kuning tidak dipakai lagi (penyederhanaan 25 Oktober, `docs/PENYEDERHANAAN-UI.md`).
 3. Jarak antarkartu 24 px, jarak di dalam kartu 16 px.
 4. Satu tombol utama berwarna pekat per layar; tombol lain berupa garis tepi. Merah hanya untuk hapus dan batal.
 5. Teks minimal 16 px, judul halaman 30 sampai 36 px, font Nunito Sans.

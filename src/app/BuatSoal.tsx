@@ -13,7 +13,7 @@ import { nilaiTp } from '../kurikulum/pemeriksa-tp';
 import { paketUntuk, rumpunDariMapel } from '../paket';
 import { KepalaHalaman, PenunjukLangkah } from '../komponen/Kepala';
 import { usePesan } from '../komponen/Pesan';
-import { Kartu, Label, NomorBagian, Peringatan } from '../komponen/Status';
+import { Kartu, Label, Peringatan } from '../komponen/Status';
 import { Chip, Panah, Tombol } from '../komponen/Tombol';
 import { useJudulHalaman, useProfil, useRegistri } from './kait';
 import { batasEfektif, permintaanHariIni } from '../ai/laju';
@@ -113,18 +113,13 @@ function keParameter(f: Isian): ParameterPaket {
   };
 }
 
-function Bagian({ nomor, judul, keterangan, pita, children }: { nomor: string; judul: string; keterangan?: string; pita: 'utama' | 'kuning'; children: React.ReactNode }) {
-  return (
-    <Kartu pita={pita} className="grid gap-4 md:grid-cols-[220px_minmax(0,1fr)] md:gap-8">
-      <div>
-        <NomorBagian>{nomor}</NomorBagian>
-        <h2 className="mt-2 text-[22px] font-extrabold text-judul">{judul}</h2>
-        {keterangan ? <p className="mt-1 text-base leading-normal text-redup">{keterangan}</p> : null}
-      </div>
-      <div className="min-w-0">{children}</div>
-    </Kartu>
-  );
-}
+const KOMPOSISI: { nama: string; persen: [number, number, number] }[] = [
+  { nama: 'Bawaan', persen: [30, 50, 20] },
+  { nama: 'Lebih mudah', persen: [50, 40, 10] },
+  { nama: 'Lebih sulit', persen: [20, 50, 30] },
+];
+
+const samaPersen = (a: [number, number, number], b: [number, number, number]) => a.every((x, i) => x === b[i]);
 
 function Langkah({ label, onClick, disabled }: { label: string; onClick: () => void; disabled?: boolean }) {
   return (
@@ -151,6 +146,7 @@ export default function BuatSoal() {
   const [namaPreset, setNamaPreset] = useState('');
   const [judul, setJudul] = useState('');
   const [lanjutan, setLanjutan] = useState(false);
+  const [aturSendiri, setAturSendiri] = useState(false);
   const [mengirim, setMengirim] = useState(false);
   const [galat, setGalat] = useState<string[]>([]);
   const ubah = (u: Partial<Isian>) => setF((x) => ({ ...x, ...u }));
@@ -268,48 +264,56 @@ export default function BuatSoal() {
     pesan('Pengaturan disimpan.');
   }
 
+  const komposisiCepat = KOMPOSISI.find((k) => samaPersen(k.persen, f.persen));
+  const nTampil = nSah ? Number(teksN) : f.n;
+  const kuotaKurang = sisaHarian !== null && sisaHarian < f.n;
+
   return (
     <div>
       <PenunjukLangkah langkah={1} />
-      <div className="mx-auto max-w-[960px] px-4 pb-16 pt-8 sm:px-8 sm:pt-10">
-        <KepalaHalaman label="Soal baru" judul="Buat soal">
-          Cukup isi kelas, mapel, dan jumlah soal. Sisanya sudah terisi otomatis.
-        </KepalaHalaman>
+      <div className="mx-auto max-w-[880px] px-4 pb-16 pt-8 sm:px-8 sm:pt-10">
+        <KepalaHalaman judul="Buat soal">Cukup isi kelas, mapel, dan jumlah soal. Sisanya sudah terisi otomatis.</KepalaHalaman>
 
-        <div className="mt-8 space-y-6">
-          {preset && preset.length ? (
-            <Bagian nomor="00" judul="Pengaturan tersimpan" pita="utama" keterangan="Pilih untuk mengisi semua isian sekaligus.">
-              <div className="flex flex-wrap gap-3">
-                <Chip aktif={!presetId} onClick={() => muatPreset(null)}>
-                  Kosong
-                </Chip>
+        {preset && preset.length ? (
+          <div className="mt-6 flex flex-wrap items-end gap-3">
+            <div className="min-w-0 flex-1 sm:max-w-sm">
+              <Label htmlFor="preset">Pakai pengaturan tersimpan</Label>
+              <select
+                id="preset"
+                className="bidang mt-2"
+                value={presetId ?? ''}
+                onChange={(e) => muatPreset(preset.find((p) => p.id === e.target.value) ?? null)}
+              >
+                <option value="">Tidak (isian kosong)</option>
                 {preset.map((p) => (
-                  <Chip key={p.id} aktif={presetId === p.id} onClick={() => muatPreset(p)}>
+                  <option key={p.id} value={p.id}>
                     {p.nama}
-                  </Chip>
+                  </option>
                 ))}
-              </div>
-              {presetId ? (
-                <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <p className="text-base text-redup">Pengaturan dimuat. Ubah isian bila perlu, lalu tekan Buat soal.</p>
-                  <Tombol
-                    varian="bahaya"
-                    ukuran="kecil"
-                    onClick={async () => {
-                      if (!confirm('Hapus pengaturan tersimpan ini? Paket soal yang sudah dibuat tidak terpengaruh.')) return;
-                      await db.preset.delete(presetId);
-                      muatPreset(null);
-                    }}
-                  >
-                    Hapus
-                  </Tombol>
-                </div>
-              ) : null}
-            </Bagian>
-          ) : null}
+              </select>
+            </div>
+            {presetId ? (
+              <button
+                type="button"
+                className="min-h-12 px-2 text-base font-bold text-buruk hover:underline"
+                onClick={async () => {
+                  if (!confirm('Hapus pengaturan tersimpan ini? Paket soal yang sudah dibuat tidak terpengaruh.')) return;
+                  await db.preset.delete(presetId);
+                  muatPreset(null);
+                }}
+              >
+                Hapus pengaturan ini
+              </button>
+            ) : null}
+          </div>
+        ) : null}
 
-          <Bagian nomor="01" judul="Kelas dan mapel" pita="kuning">
-            <div className="grid gap-4 sm:grid-cols-[180px_minmax(0,1fr)]">
+        <div className="mt-6 space-y-6">
+          <Kartu aria-labelledby="judul-soal">
+            <h2 id="judul-soal" className="text-[20px] font-extrabold text-judul">
+              Soal yang dibuat
+            </h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-[160px_minmax(0,1fr)_128px]">
               <div>
                 <Label htmlFor="kelas">Kelas</Label>
                 <select id="kelas" className="bidang mt-2" value={f.kelas} onChange={(e) => ubah({ kelas: Number(e.target.value) })}>
@@ -332,33 +336,78 @@ export default function BuatSoal() {
                   ))}
                 </datalist>
               </div>
+              <div>
+                <Label htmlFor="jumlah">Jumlah soal</Label>
+                <input
+                  id="jumlah"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  value={teksN}
+                  aria-invalid={!nSah}
+                  aria-describedby="jumlah-ket"
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const s = e.target.value.replace(/\D/g, '').slice(0, 3);
+                    setTeksN(s);
+                    const n = Number(s);
+                    if (s && n >= MIN_SOAL && n <= MAKS_SOAL) ubah({ n });
+                  }}
+                  onBlur={() => {
+                    const n = Math.max(MIN_SOAL, Math.min(MAKS_SOAL, Number(teksN) || f.n));
+                    ubah({ n });
+                    setTeksN(String(n));
+                  }}
+                  className={`bidang mt-2 text-center !text-[20px] font-extrabold text-judul ${nSah ? '' : '!border-buruk'}`}
+                />
+              </div>
             </div>
-            {f.mapel.trim() ? (
-              <p className="mt-3 text-base text-redup">
-                {dicekOtomatis ? 'Kunci soal hitungan dicek otomatis.' : 'Kunci soal mapel ini belum dapat dicek otomatis. Setiap soal ditandai "Mohon cek dulu" dan perlu Anda setujui sebelum diunduh.'}
-              </p>
+            <p id="jumlah-ket" className={`mt-3 text-base ${nSah ? 'text-redup' : 'font-bold text-buruk'}`}>
+              {!nSah
+                ? `Jumlah soal: ketik angka ${MIN_SOAL} sampai ${MAKS_SOAL}.`
+                : [
+                    f.mapel.trim() ? (dicekOtomatis ? 'Kunci soal hitungan dicek otomatis.' : 'Mapel ini belum dapat dicek otomatis: setiap soal ditandai "Mohon cek dulu".') : `Jumlah ${MIN_SOAL} sampai ${MAKS_SOAL} soal.`,
+                    menitPerkiraan && f.n > (batasModel?.rpm ?? 0) ? `Perkiraan selesai sekitar ${menitPerkiraan} menit karena batas ${batasModel?.rpm} permintaan per menit.` : '',
+                    kuotaKurang && profil.model_cadangan ? `Sisa kuota hari ini ${sisaHarian} permintaan; sisanya dibuat dengan model cadangan.` : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+            </p>
+            {kuotaKurang && !profil.model_cadangan ? (
+              <Peringatan className="mt-3">
+                Sisa kuota AI hari ini {sisaHarian} dari {batasModel?.rpd} permintaan, sedangkan {f.n} soal perlu {f.n}–{perkiraanMaks} permintaan. Pembuatan akan dijeda di tengah. Kurangi jumlah soal atau pasang model cadangan di{' '}
+                <Link to="/pengaturan/ai" className="font-bold underline">
+                  Pengaturan AI
+                </Link>
+                .
+              </Peringatan>
             ) : null}
-          </Bagian>
+          </Kartu>
 
-          <Bagian nomor="02" judul="CP dan TP" pita="utama" keterangan="Boleh dikosongkan. Satu TP satu baris; jumlah soal dibagi ke tiap TP.">
-            <Label htmlFor="cp">Capaian pembelajaran (CP)</Label>
+          <Kartu aria-labelledby="judul-cp">
+            <h2 id="judul-cp" className="text-[20px] font-extrabold text-judul">
+              CP dan TP <span className="text-base font-semibold text-redup">(boleh kosong)</span>
+            </h2>
+            <Label htmlFor="cp" className="mt-4">
+              Capaian pembelajaran (CP)
+            </Label>
             <textarea id="cp" className="bidang mt-2" rows={2} value={f.cp} onChange={(e) => ubah({ cp: e.target.value })} />
             <Label htmlFor="tp" className="mt-5">
-              Tujuan pembelajaran (TP)
+              Tujuan pembelajaran (TP), satu TP satu baris
             </Label>
             <textarea
               id="tp"
               className="bidang mt-2"
-              rows={Math.min(10, Math.max(4, daftarTp.length + 1))}
+              rows={Math.min(10, Math.max(3, daftarTp.length + 1))}
               value={f.tpTeks}
               onChange={(e) => ubah({ tpTeks: e.target.value })}
               placeholder="Peserta didik dapat membandingkan dua pecahan berpenyebut berbeda dengan menyamakan penyebutnya."
             />
-            <p className="mt-2 text-base font-semibold text-utama">
-              {daftarTp.length ? `${daftarTp.length} TP · soal dibagi ke tiap TP` : f.cp.trim() ? 'Tanpa TP: soal dibuat dari CP' : 'Tanpa CP dan TP: soal dibuat dari topik atau mapel'}
+            <p className="mt-2 text-base text-redup">
+              {daftarTp.length ? `${daftarTp.length} TP · jumlah soal dibagi ke tiap TP.` : f.cp.trim() ? 'Tanpa TP: soal dibuat dari CP.' : 'Tanpa CP dan TP: soal dibuat dari topik atau mapel.'}
             </p>
             {saranTp.length ? (
-              <details className="mt-3 rounded-lg border border-garis bg-panel px-4 py-3">
+              <details className="mt-2">
                 <summary className="cursor-pointer text-base font-bold text-awas">Saran rumusan untuk {saranTp.length} TP (tidak wajib)</summary>
                 <ul className="mt-2 space-y-2 text-base leading-normal">
                   {saranTp.map(({ t, n }, i) => (
@@ -370,100 +419,65 @@ export default function BuatSoal() {
                 </ul>
               </details>
             ) : null}
-          </Bagian>
+          </Kartu>
 
-          <Bagian nomor="03" judul="Jumlah soal" pita="kuning">
-            <Label htmlFor="jumlah">Jumlah soal</Label>
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <input
-                id="jumlah"
-                type="text"
-                inputMode="numeric"
-                autoComplete="off"
-                value={teksN}
-                aria-invalid={!nSah}
-                aria-describedby="jumlah-ket"
-                onFocus={(e) => e.target.select()}
-                onChange={(e) => {
-                  const s = e.target.value.replace(/\D/g, '').slice(0, 3);
-                  setTeksN(s);
-                  const n = Number(s);
-                  if (s && n >= MIN_SOAL && n <= MAKS_SOAL) ubah({ n });
-                }}
-                onBlur={() => {
-                  const n = Math.max(MIN_SOAL, Math.min(MAKS_SOAL, Number(teksN) || f.n));
-                  ubah({ n });
-                  setTeksN(String(n));
-                }}
-                className={`bidang !w-28 text-center !text-[28px] font-extrabold text-judul ${nSah ? '' : '!border-buruk'}`}
-              />
-              <span id="jumlah-ket" className={`text-base ${nSah ? 'text-redup' : 'font-bold text-buruk'}`}>
-                {nSah ? 'soal (5 sampai 50)' : `Ketik angka ${MIN_SOAL} sampai ${MAKS_SOAL}`}
-              </span>
-            </div>
-            {batasModel && (batasModel.rpm || batasModel.rpd) ? (
-              <div className={`mt-4 rounded-lg border px-4 py-3 text-base leading-relaxed ${sisaHarian !== null && sisaHarian < f.n ? 'border-awas/40 bg-awas-latar text-awas' : 'border-garis bg-panel text-isi'}`}>
-                <div>
-                  Perkiraan {f.n}–{perkiraanMaks} permintaan ke AI
-                  {menitPerkiraan && f.n > (batasModel.rpm ?? 0) ? `, sekitar ${menitPerkiraan} menit karena batas ${batasModel.rpm} permintaan per menit` : ''}.
-                </div>
-                {sisaHarian !== null ? (
-                  <div className="mt-1">
-                    Sisa kuota hari ini: {sisaHarian} dari {batasModel.rpd} permintaan.
-                    {sisaHarian < f.n
-                      ? profil.model_cadangan
-                        ? ' Sisanya dibuat dengan model cadangan.'
-                        : ' Tidak cukup untuk satu paket; pembuatan akan dijeda di tengah. Kurangi jumlah soal atau pasang model cadangan di Pengaturan AI.'
-                      : ''}
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-          </Bagian>
-
-          <Kartu pita="utama" className="!p-0">
-            <button type="button" className="flex w-full items-center gap-4 p-4 text-left sm:p-6" aria-expanded={lanjutan} aria-controls="lanjutan" onClick={() => setLanjutan((b) => !b)}>
-              <NomorBagian>04</NomorBagian>
+          <Kartu pita="tanpa" className="!p-0">
+            <button type="button" className="flex w-full items-center gap-4 p-4 text-left sm:px-6" aria-expanded={lanjutan} aria-controls="lanjutan" onClick={() => setLanjutan((b) => !b)}>
               <span className="min-w-0 flex-1">
-                <span className="block text-[22px] font-extrabold text-judul">Pengaturan lanjutan</span>
+                <span className="block text-[20px] font-extrabold text-judul">Pengaturan lanjutan</span>
                 <span className="block text-base text-redup">
                   {kuota[0]} mudah · {kuota[1]} sedang · {kuota[2]} sulit · {f.bentuk.map((b) => BENTUK_LABEL[b].toLowerCase()).join(', ') || 'belum ada bentuk soal'}
                 </span>
               </span>
-              <span className="rounded-md bg-kuning-lembut px-3 py-1 text-base font-bold text-kuning-tua">{lanjutan ? 'Tutup' : 'Buka'}</span>
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" className={`shrink-0 text-utama transition-transform ${lanjutan ? 'rotate-180' : ''}`}>
+                <path d="M3 6.5l6 6 6-6" />
+              </svg>
             </button>
             {lanjutan ? (
               <div id="lanjutan" className="space-y-7 border-t border-garis p-4 sm:p-6">
                 <div>
-                  <div className="text-base font-bold">Komposisi mudah, sedang, sulit</div>
-                  <div className="mt-2 flex h-3 overflow-hidden rounded-full" aria-hidden="true">
-                    <div className="bg-utama-lembut" style={{ width: `${f.persen[0]}%` }} />
-                    <div className="bg-utama" style={{ width: `${f.persen[1]}%` }} />
-                    <div className="bg-judul" style={{ width: `${f.persen[2]}%` }} />
-                  </div>
-                  <div className="mt-2">
-                    {(['Mudah', 'Sedang', 'Sulit'] as const).map((nama, i) => (
-                      <div key={nama} className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 border-b border-garis py-3 last:border-b-0 sm:gap-5">
-                        <span className="text-[17px] font-bold">{nama}</span>
-                        <span className="flex items-center gap-2 sm:gap-3">
-                          <Langkah label={`Kurangi persen ${nama.toLowerCase()}`} onClick={() => ubah({ persen: geserPersen(f.persen, i as 0 | 1 | 2, f.persen[i] - 5) })} disabled={f.persen[i] <= 0} />
-                          <span className="min-w-14 text-center text-[22px] font-extrabold" aria-live="polite">
-                            {f.persen[i]}%
-                          </span>
-                          <Langkah label={`Tambah persen ${nama.toLowerCase()}`} onClick={() => ubah({ persen: geserPersen(f.persen, i as 0 | 1 | 2, f.persen[i] + 5) })} disabled={f.persen[i] >= 100} />
-                        </span>
-                        <span className="min-w-16 text-right text-base text-redup">
-                          <strong className="text-[20px] text-tinta">{kuota[i]}</strong> soal
-                        </span>
-                      </div>
+                  <div className="text-base font-bold">Tingkat kesukaran</div>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {KOMPOSISI.map((k) => (
+                      <Chip
+                        key={k.nama}
+                        aktif={!aturSendiri && komposisiCepat === k}
+                        onClick={() => {
+                          setAturSendiri(false);
+                          ubah({ persen: k.persen });
+                        }}
+                      >
+                        {k.nama}
+                      </Chip>
                     ))}
+                    <Chip aktif={aturSendiri || !komposisiCepat} onClick={() => setAturSendiri(true)}>
+                      Atur sendiri
+                    </Chip>
                   </div>
-                  <p className="mt-2 text-base text-redup">Bawaan 30% mudah, 50% sedang, 20% sulit. Jumlah persen selalu 100%.</p>
+                  <p className="mt-2 text-base text-redup">
+                    {kuota[0]} mudah ({f.persen[0]}%) · {kuota[1]} sedang ({f.persen[1]}%) · {kuota[2]} sulit ({f.persen[2]}%)
+                  </p>
+                  {aturSendiri || !komposisiCepat ? (
+                    <div className="mt-2">
+                      {(['Mudah', 'Sedang', 'Sulit'] as const).map((nama, i) => (
+                        <div key={nama} className="flex items-center justify-between gap-3 border-b border-garis py-2 last:border-b-0">
+                          <span className="text-base font-bold">{nama}</span>
+                          <span className="flex items-center gap-2 sm:gap-3">
+                            <Langkah label={`Kurangi persen ${nama.toLowerCase()}`} onClick={() => ubah({ persen: geserPersen(f.persen, i as 0 | 1 | 2, f.persen[i] - 5) })} disabled={f.persen[i] <= 0} />
+                            <span className="min-w-14 text-center text-[20px] font-extrabold" aria-live="polite">
+                              {f.persen[i]}%
+                            </span>
+                            <Langkah label={`Tambah persen ${nama.toLowerCase()}`} onClick={() => ubah({ persen: geserPersen(f.persen, i as 0 | 1 | 2, f.persen[i] + 5) })} disabled={f.persen[i] >= 100} />
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
 
                 <div>
                   <div className="text-base font-bold">Bentuk soal</div>
-                  <div className="mt-2 flex flex-wrap gap-3">
+                  <div className="mt-2 flex flex-wrap gap-2">
                     {URUTAN_BENTUK.map((b) => (
                       <Chip key={b} aktif={f.bentuk.includes(b)} onClick={() => ubah({ bentuk: f.bentuk.includes(b) ? f.bentuk.filter((x) => x !== b) : [...f.bentuk, b] })}>
                         {BENTUK_LABEL[b]}
@@ -471,21 +485,13 @@ export default function BuatSoal() {
                     ))}
                   </div>
                   {f.bentuk.includes('benar_salah') ? (
-                    <fieldset className="mt-4">
-                      <legend className="text-base font-bold">Cara menjawab benar-salah</legend>
-                      <div className="mt-2 flex flex-wrap gap-3">
-                        {(
-                          [
-                            ['centang', 'Centang kotak Benar / Salah'],
-                            ['lingkari', 'Lingkari B / S'],
-                          ] as [CaraBenarSalah, string][]
-                        ).map(([v, l]) => (
-                          <Chip key={v} aktif={f.cara_bs === v} onClick={() => ubah({ cara_bs: v })}>
-                            {l}
-                          </Chip>
-                        ))}
-                      </div>
-                    </fieldset>
+                    <div className="mt-4">
+                      <Label htmlFor="cara-bs">Cara menjawab benar-salah</Label>
+                      <select id="cara-bs" className="bidang mt-2 sm:max-w-sm" value={f.cara_bs} onChange={(e) => ubah({ cara_bs: e.target.value as CaraBenarSalah })}>
+                        <option value="centang">Centang kotak Benar / Salah</option>
+                        <option value="lingkari">Lingkari B / S</option>
+                      </select>
+                    </div>
                   ) : null}
                 </div>
 
@@ -521,13 +527,28 @@ export default function BuatSoal() {
                   <Label htmlFor="materi">
                     Teks materi (boleh kosong · {kataMateri}/{MAKS_KATA_MATERI} kata)
                   </Label>
-                  <textarea id="materi" className="bidang mt-2" rows={4} value={f.materi} onChange={(e) => ubah({ materi: e.target.value })} placeholder="Tempel bahan bacaan atau ringkasan materi bila soal harus berdasar teks tertentu." />
-                  <p className="mt-1 text-base text-redup">Jangan menempel data siswa. Teks ini dikirim ke penyedia AI pilihan Anda.</p>
+                  <textarea id="materi" className="bidang mt-2" rows={3} value={f.materi} onChange={(e) => ubah({ materi: e.target.value })} placeholder="Tempel bahan bacaan bila soal harus berdasar teks tertentu. Jangan menempel data siswa." />
                 </div>
 
                 <div>
-                  <Label htmlFor="judul">Judul paket (tidak ikut pengaturan tersimpan)</Label>
-                  <input id="judul" className="bidang mt-2" value={judul} onChange={(e) => setJudul(e.target.value)} placeholder="mis. Penilaian harian pecahan" />
+                  <Label htmlFor="judul">Judul paket</Label>
+                  <input id="judul" className="bidang mt-2" value={judul} onChange={(e) => setJudul(e.target.value)} placeholder={f.mapel ? `${f.mapel} kelas ${f.kelas || ''}`.trim() : 'mis. Penilaian harian pecahan'} />
+                </div>
+
+                <div className="border-t border-garis pt-5">
+                  <label className="flex items-center gap-3 text-base font-bold">
+                    <input type="checkbox" className="size-5" checked={simpanPreset} onChange={(e) => setSimpanPreset(e.target.checked)} />
+                    Simpan pengaturan ini
+                  </label>
+                  <p className="mt-1 pl-8 text-base text-redup">Lain kali cukup pilih namanya di atas formulir.</p>
+                  {simpanPreset ? (
+                    <div className="mt-3 flex flex-wrap gap-3 pl-8">
+                      <input className="bidang min-w-0 flex-1 sm:max-w-xs" aria-label="Nama pengaturan tersimpan" value={namaPreset} onChange={(e) => setNamaPreset(e.target.value)} placeholder={`${f.mapel || 'Mapel'} K${f.kelas || ''}`} />
+                      <Tombol varian="hantu" onClick={hanyaSimpanPreset}>
+                        Simpan tanpa membuat soal
+                      </Tombol>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             ) : null}
@@ -555,28 +576,17 @@ export default function BuatSoal() {
         </div>
       </div>
 
-      <div className="tanpa-cetak sticky bottom-0 z-10 border-t-[3px] border-kuning bg-kartu shadow-[0_-4px_16px_rgba(15,23,42,0.08)]">
-        <div className="mx-auto flex max-w-[960px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-8">
-          <div className="flex flex-wrap items-center gap-3 text-base">
-            <label className="flex items-center gap-2.5 font-semibold">
-              <input type="checkbox" className="size-5" checked={simpanPreset} onChange={(e) => setSimpanPreset(e.target.checked)} />
-              <span>Simpan pengaturan ini</span>
-            </label>
-            {simpanPreset ? (
-              <>
-                <input className="bidang !min-h-11 !w-[220px]" aria-label="Nama pengaturan tersimpan" value={namaPreset} onChange={(e) => setNamaPreset(e.target.value)} placeholder={`${f.mapel || 'Mapel'} K${f.kelas || ''}`} />
-                <Tombol varian="hantu" ukuran="kecil" onClick={hanyaSimpanPreset}>
-                  Simpan saja
-                </Tombol>
-              </>
-            ) : null}
-          </div>
+      <div className="tanpa-cetak sticky bottom-0 z-10 border-t border-garis bg-kartu shadow-[0_-4px_16px_rgba(15,23,42,0.08)]">
+        <div className="mx-auto flex max-w-[880px] items-center justify-between gap-3 px-4 py-3 sm:px-8">
+          <span className="hidden min-w-0 truncate text-base text-redup sm:block">
+            {[f.kelas ? `Kelas ${f.kelas}` : 'Kelas belum dipilih', f.mapel.trim() || 'mapel belum diisi'].join(' · ')}
+          </span>
           <div className="flex w-full gap-3 sm:w-auto">
             <Tombol varian="bahaya" onClick={() => navigasi('/')} className="flex-1 sm:flex-none">
               Batal
             </Tombol>
             <Tombol ukuran="besar" onClick={buat} disabled={mengirim} className="flex-[2] sm:flex-none">
-              {mengirim ? 'Menyiapkan…' : `Buat ${nSah ? Number(teksN) : f.n} soal`} <Panah />
+              {mengirim ? 'Menyiapkan…' : `Buat ${nTampil} soal`} <Panah />
             </Tombol>
           </div>
         </div>

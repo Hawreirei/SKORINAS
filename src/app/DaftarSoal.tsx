@@ -20,26 +20,29 @@ export default function DaftarSoal() {
   const soalSampah = useLiveQuery(() => db.soal.filter((s) => s.dihapus_pada != null).toArray(), []);
   const q = cari.trim().toLowerCase();
   const tersaring = (paket ?? []).filter((r) => !q || `${r.paket.judul} ${r.paket.parameter_json.mapel} kelas ${r.paket.parameter_json.kelas} ${r.paket.parameter_json.tp.map((t) => t.rumusan).join(' ')}`.toLowerCase().includes(q));
+  const cekDulu = (paket ?? []).reduce((a, r) => a + r.belumDitelaah, 0);
   const sisaHari = (t: number) => Math.max(0, Math.ceil((t + MASA_SAMPAH_MS - Date.now()) / 86400000));
 
   return (
     <div className="mx-auto max-w-[1100px] px-4 pb-20 pt-8 sm:px-8 sm:pt-10">
       <div className="flex flex-wrap items-end justify-between gap-6">
-        <KepalaHalaman label="Paket soal di perangkat ini" judul="Soal saya" />
+        <KepalaHalaman judul="Soal saya" />
         <TautanTombol to="/soal/baru" ukuran="besar">
           Buat soal <Panah />
         </TautanTombol>
       </div>
-      <div className="mt-10 flex flex-wrap items-center gap-3">
+      <div className="mt-8 flex flex-wrap items-center gap-3">
         <Chip aktif={tab === 'paket'} onClick={() => setTab('paket')}>
           Paket · {paket?.length ?? 0}
         </Chip>
         <Chip aktif={tab === 'sampah'} onClick={() => setTab('sampah')}>
           Tong sampah · {(paketSampah?.length ?? 0) + (soalSampah?.length ?? 0)}
         </Chip>
-        <Link to="/telaah" className="ml-2 font-bold text-utama hover:underline">
-          Semua soal "Mohon cek dulu"
-        </Link>
+        {cekDulu ? (
+          <Link to="/telaah" className="ml-1 font-bold text-awas hover:underline">
+            {cekDulu} soal mohon cek dulu
+          </Link>
+        ) : null}
         {tab === 'paket' ? <input className="bidang ml-auto !min-h-11 sm:!w-72" placeholder="Cari judul, mapel, TP" aria-label="Cari paket" value={cari} onChange={(e) => setCari(e.target.value)} /> : null}
       </div>
 
@@ -61,19 +64,20 @@ export default function DaftarSoal() {
                   <Titik isi={st.isi} />
                   {st.teks}
                 </span>
-                <span className="flex gap-2">
-                  <TautanTombol to={`/soal/${r.paket.id}/ekspor`} varian="hantu" ukuran="kecil">
+                <span className="flex gap-4 text-base font-bold">
+                  <Link to={`/soal/${r.paket.id}/ekspor`} className="inline-flex min-h-10 items-center text-utama hover:underline">
                     Unduh
-                  </TautanTombol>
-                  <Tombol
-                    varian="bahaya"
-                    ukuran="kecil"
+                  </Link>
+                  <button
+                    type="button"
+                    className="inline-flex min-h-10 items-center text-redup hover:text-buruk hover:underline"
+                    aria-label={`Hapus paket ${r.paket.judul}`}
                     onClick={() => {
                       if (confirm('Pindahkan paket ini ke tong sampah? Dapat dipulihkan selama 30 hari.')) void hapusPaket(r.paket.id);
                     }}
                   >
                     Hapus
-                  </Tombol>
+                  </button>
                 </span>
               </div>
             );

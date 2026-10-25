@@ -83,7 +83,3 @@ export function Kartu({ children, pita = 'utama', className = '', as: Tag = 'sec
   );
 }
 
-/** Nomor kelompok isian (00, 01, …) berlatar kuning. */
-export function NomorBagian({ children }: { children: ReactNode }) {
-  return <span className="inline-flex min-w-9 items-center justify-center rounded-md bg-kuning px-2 py-0.5 text-base font-extrabold text-[#422006]">{children}</span>;
-}

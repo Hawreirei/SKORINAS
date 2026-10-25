@@ -75,3 +75,20 @@ Bagian rancangan perubahan, pembaruan 24 Oktober, dan kanvas desain v0.4 tidak s
 | Jumlah soal | Diketik langsung (5–50), tanpa tombol tambah-kurang; angka di luar batas diberi pesan dan dirapikan saat kolom ditinggalkan | Permintaan pemilik (25 Oktober): tombol terlalu rumit |
 | Berkas terpisah | Lembar soal, kunci jawaban, dan kisi-kisi menjadi tiga berkas terpisah dengan akhiran nama `-Kunci-Jawaban` dan `-Kisi-kisi`; pembahasan ikut berkas kunci. Satu tombol mengunduh semua berkas terpilih berurutan, dan tiap berkas punya tombol "Unduh ini saja" bila peramban menolak unduhan beruntun | Permintaan pemilik (25 Oktober) |
 | Baris jejak berkas | Baris "GenSoal versi · versi soal · … · dibuat dengan bantuan AI · tanggal" dihapus dari Word, PDF, .tex, tampilan cetak, dan properti berkas | Permintaan pemilik (25 Oktober); mengubah butir "Transparansi" rancangan |
+
+## Penyederhanaan tampilan (25 Oktober 2026)
+
+Permintaan pemilik: beberapa tampilan terlalu repot. Rancangan lengkap, temuan, dan alasan per layar ada di `docs/PENYEDERHANAAN-UI.md`. Baris di bawah mengubah sebagian "Arah visual" dan "Aturan layar" rancangan v0.4.
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Nomor kelompok kuning | Tidak dipakai lagi (dahulu 00–04 di Buat dan Pengaturan AI). Pita warna kartu tetap; Pengaturan AI memakai "1. 2. 3." biasa | Hiasan tanpa fungsi navigasi; layar Buat kini hanya dua kartu |
+| Layar Buat | Kelas, mapel, dan jumlah soal satu kartu; CP dan TP satu kartu; Pengaturan tersimpan berupa satu pilihan di atas formulir; "Simpan pengaturan ini" pindah ke Pengaturan lanjutan; bilah bawah hanya ringkasan, Batal, dan Buat | Tiga isian wajib terlihat sebagai satu kesatuan; bilah bawah tidak lagi padat |
+| Komposisi kesukaran | Pilihan cepat Bawaan 30/50/20, Lebih mudah 50/40/10, Lebih sulit 20/50/30, dan "Atur sendiri" (tombol tambah-kurang lama) | Kebanyakan guru memakai bawaan; tetap dapat diatur per 5% |
+| Kartu soal di Periksa | Terlihat: Setujui, Sunting, dan menu Lainnya (Ganti soal, Buat ulang dengan catatan, Hapus soal). Pembahasan, rubrik, dan catatan pemeriksaan dilipat untuk soal yang sudah dicek, terbuka untuk "Mohon cek dulu". Lencana "Kunci: X" pilihan ganda diganti tanda "✓ Kunci" pada opsi | Enam tombol per soal membuat halaman 9.700 px di ponsel |
+| Saringan Periksa | "Semua" dan "Mohon cek dulu" (hanya bila ada), ditambah "Ditolak otomatis" bila ada. "Belum disetujui" dihapus | Soal yang sudah dicek boleh diunduh tanpa disetujui; saringan itu menyesatkan |
+| Periksa di ponsel | Kartu Status paket diganti bilah bawah tetap berisi ringkasan dan "Lanjut ke Unduh" | Langkah berikutnya tidak lagi di ujung halaman |
+| Layar Unduh | Format Word/PDF dua tombol bersebelahan; berkas tiga kotak centang; "Unduh ini saja" menjadi satu tombol di panel pratinjau untuk berkas yang sedang dipratinjau | Empat tombol unduh menjadi dua; cadangan unduhan satu berkas tetap ada |
+| Pengaturan AI | Bila kunci sudah berfungsi: kartu "Siap dipakai" dengan pilihan model dan tombol "Ganti penyedia atau kunci". Model cadangan dan batas RPM/RPD pindah ke Pengaturan lanjutan | Guru yang sudah siap tidak perlu melihat tiga langkah lagi |
+| Cadangan | Satu kartu: ringkasan data, "Unduh berkas .gensoal" (utama) dan "Pulihkan dari berkas". Daftar pengaturan tersimpan dan Hapus semua data dilipat | Aksi utama menonjol; aksi berbahaya tidak sejajar dengan aksi sehari-hari |
+| Kepala | "Tersimpan di perangkat ini" hanya di kaki halaman | Pengulangan |

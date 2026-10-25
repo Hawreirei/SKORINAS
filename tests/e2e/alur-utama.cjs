@@ -128,6 +128,13 @@ function butirPalsu(bentuk) {
   await foto('04-periksa');
   const urlPeriksa = page.url();
 
+  // Aksi jarang dipakai ada di menu Lainnya; Escape menutupnya.
+  await page.getByRole('button', { name: 'Lainnya' }).first().click();
+  await page.getByRole('menuitem', { name: 'Ganti soal' }).waitFor();
+  if (!(await page.getByRole('menuitem', { name: 'Hapus soal' }).isVisible())) galat.push('menu Lainnya tidak memuat Hapus soal');
+  await page.keyboard.press('Escape');
+  if (await page.getByRole('menuitem').count()) galat.push('menu Lainnya tidak tertutup dengan Escape');
+
   // Ubah tanda jenis jawaban satu soal uraian, lalu setujui soal "Mohon cek dulu"
   const jenis = page.getByRole('radio', { name: /Penjelasan \(garis tulis\)/ });
   if (await jenis.count()) await jenis.first().check();
