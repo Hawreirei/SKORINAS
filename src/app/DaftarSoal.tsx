@@ -5,7 +5,7 @@ import { db } from '../db/skema';
 import { MASA_SAMPAH_MS } from '../db/sampah';
 import { hapusPaket, pulihkanPaket, pulihkanSoal } from '../generasi/operasi';
 import { KepalaHalaman } from '../komponen/Kepala';
-import { Titik } from '../komponen/Status';
+import { Kartu, Titik } from '../komponen/Status';
 import { Chip, Panah, TautanTombol, Tombol } from '../komponen/Tombol';
 import { useJudulHalaman } from './kait';
 import { daftarRingkasan, formatTanggal, labelStatusPaket } from './ringkas';
@@ -31,17 +31,17 @@ export default function DaftarSoal() {
         </TautanTombol>
       </div>
       <div className="mt-8 flex flex-wrap items-center gap-3">
-        <Chip aktif={tab === 'paket'} onClick={() => setTab('paket')}>
+        <Chip aktif={tab === 'paket'} onClick={() => setTab('paket')} className="tabular-nums">
           Paket · {paket?.length ?? 0}
         </Chip>
-        <Chip aktif={tab === 'sampah'} onClick={() => setTab('sampah')}>
+        <Chip aktif={tab === 'sampah'} onClick={() => setTab('sampah')} className="tabular-nums">
           Tong sampah · {(paketSampah?.length ?? 0) + (soalSampah?.length ?? 0)}
         </Chip>
         {tab === 'paket' ? <input className="bidang ml-auto !min-h-11 sm:!w-72" placeholder="Cari judul, mapel, TP" aria-label="Cari paket" value={cari} onChange={(e) => setCari(e.target.value)} /> : null}
       </div>
 
       {tab === 'paket' ? (
-        <div className="mt-6 rounded-xl border border-garis border-t-4 border-t-utama bg-kartu p-4 sm:p-6 !py-1">
+        <Kartu as="div" className="mt-6 !py-1">
           {paket && !tersaring.length ? <p className="py-8 text-[17px] text-isi">{q ? 'Tidak ada paket yang cocok.' : 'Belum ada paket soal.'}</p> : null}
           {tersaring.map((r) => {
             const st = labelStatusPaket(r);
@@ -76,11 +76,11 @@ export default function DaftarSoal() {
               </div>
             );
           })}
-        </div>
+        </Kartu>
       ) : (
         <div className="mt-8">
           <p className="text-base text-isi">Isi tong sampah dikosongkan otomatis 30 hari setelah dihapus.</p>
-          <div className="mt-5 rounded-xl border border-garis border-t-4 border-t-utama bg-kartu p-4 sm:p-6 !py-1">
+          <Kartu as="div" className="mt-5 !py-1">
             {paketSampah?.map((r) => (
               <div key={r.paket.id} className="flex flex-wrap items-center justify-between gap-4 border-b border-garis px-2 py-4">
                 <span>
@@ -104,7 +104,7 @@ export default function DaftarSoal() {
               </div>
             ))}
             {!paketSampah?.length && !soalSampah?.length ? <p className="py-8 text-isi">Tong sampah kosong.</p> : null}
-          </div>
+          </Kartu>
         </div>
       )}
     </div>

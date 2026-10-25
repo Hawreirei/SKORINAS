@@ -289,7 +289,7 @@ export default function PengaturanAi() {
                     <input id="rpd" type="number" min={1} className="bidang mt-2" value={batas.rpd ?? ''} placeholder="tanpa batas" onChange={(e) => ubahBatas({ rpd: angkaAtauKosong(e.target.value) })} />
                   </div>
                 </div>
-                <p className="mt-2 text-base text-redup">
+                <p className="mt-2 text-base text-redup tabular-nums">
                   Terpakai hari ini: {terpakaiHariIni ?? 0}
                   {batas.rpd ? ` dari ${batas.rpd} permintaan` : ' permintaan'}.
                 </p>
@@ -307,7 +307,7 @@ export default function PengaturanAi() {
               </div>
             </div>
             <div>
-              <p className="text-base text-redup">
+              <p className="text-base text-redup tabular-nums">
                 Hari ini: {lolosHariIni} soal lolos · {(pemakaian ?? []).length} permintaan · {formatBiaya(biayaHariIni)}. Hanya soal yang lolos verifikasi yang mengurangi batas harian.
               </p>
               {lewatBatasBiaya ? <Peringatan className="mt-3">Perkiraan biaya hari ini melewati batas peringatan yang Anda atur.</Peringatan> : null}

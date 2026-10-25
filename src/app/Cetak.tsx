@@ -31,7 +31,7 @@ export default function Cetak() {
           Cetak atau simpan PDF
         </button>
       </div>
-      <div className="mx-auto max-w-[210mm] bg-white p-[20mm] text-[12pt] leading-[1.4] shadow-sm print:max-w-none print:p-0 print:shadow-none">
+      <div className="kertas mx-auto max-w-[210mm] p-[20mm] text-[12pt] leading-[1.4] shadow-sm print:max-w-none print:p-0 print:shadow-none">
         <LembarCetak d={dok} />
       </div>
     </div>

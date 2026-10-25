@@ -104,3 +104,13 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | Tabel istilah wajib | Diganti aturan singkat "Bahasa di layar": bahasa sehari-hari, tanpa kata teknis atau bahasa Inggris di label utama. `AGENTS.md` butir 8 disesuaikan | Keputusan pemilik |
 | Penunjuk "Langkah n dari 3" | Dihapus bersama warna per langkah. Halaman paket menaruh tombol Unduh di kepala; layar Unduh punya tautan kembali | Keputusan pemilik |
 | Data status | `status_mutu` dan `status_telaah` tetap disimpan; tidak ada versi Dexie baru | Cadangan lama tetap terbaca; status mutu masih dipakai untuk kalimat keterangan dan kisi-kisi |
+
+## UI-01 Fondasi tampilan (issue #2)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Utilitas bersama | `kartu`, `pita-*`, `tombol`, `tombol-utama/garis/hantu/bahaya`, `bidang`, dan `kertas` di `src/index.css` (`@utility`), memakai token v0.4. `Kartu` dan `kelasTombol` memakai utilitas ini | Satu sumber gaya; tahap berikutnya tidak menyalin kelas mentah |
+| Warna pita kartu | Diatur lewat variabel `--pita` (kelas `pita-utama`, `pita-kuning`, …), bukan `border-t-4 border-t-*` | Urutan kelas Tailwind tidak dapat menimpa tebal pita |
+| `bidang` sebagai utilitas | Dahulu CSS biasa di luar lapisan Tailwind, sehingga kelas tambahan seperti `font-extrabold text-judul` pada kotak jumlah soal tidak pernah berlaku. Kini berlaku: angka jumlah soal tampil tebal dan biru tua sesuai kelas yang sudah tertulis | Perilaku yang dimaksud kode; satu-satunya perubahan tampilan yang terlihat di tangkapan e2e |
+| Tema tanpa kedipan | `public/tema.js` dimuat tanpa `defer` di `<head>` lewat `%BASE_URL%tema.js`, membaca cermin `localStorage` `gensoal:tema`. Cermin ditulis `terapkanTema()` (dipanggil saat aplikasi dibuka, saat tema diubah, setelah pulihkan cadangan, dan setelah hapus semua data). Profil di IndexedDB tetap sumber utama; bila cermin kosong atau `localStorage` ditolak, perilaku lama berlaku | Skrip sebaris ditolak CSP `script-src 'self'`; berkas terpisah tidak memerlukan pelonggaran CSP |
+| Angka tabular | `tabular-nums` pada isian angka (lewat `bidang`), jumlah dan komposisi soal, biaya, kuota, hitungan tab, dan ringkasan cadangan | Angka tidak bergeser saat berubah |

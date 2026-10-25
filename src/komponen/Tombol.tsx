@@ -4,17 +4,13 @@ import { Link, type LinkProps } from 'react-router-dom';
 // Satu tombol utama berwarna pekat per layar; tombol lain berupa garis tepi. Merah hanya untuk hapus dan batal.
 type Varian = 'utama' | 'garis' | 'hantu' | 'bahaya';
 
-const KELAS: Record<Varian, string> = {
-  utama: 'bg-utama text-di-tinta border border-utama hover:bg-utama-tua hover:border-utama-tua',
-  garis: 'border border-utama text-utama bg-kartu hover:bg-utama-lembut',
-  hantu: 'border border-garis-kuat text-tinta bg-kartu hover:border-utama hover:text-utama',
-  bahaya: 'border border-buruk text-buruk bg-kartu hover:bg-buruk-latar',
-};
+// Nama kelas ditulis utuh agar Tailwind membuatnya (utilitas di src/index.css).
+const KELAS: Record<Varian, string> = { utama: 'tombol-utama', garis: 'tombol-garis', hantu: 'tombol-hantu', bahaya: 'tombol-bahaya' };
 
 const UKURAN = { besar: 'min-h-14 px-7 text-[17px]', sedang: 'min-h-12 px-5 text-base', kecil: 'min-h-10 px-3.5 text-base' };
 
 export function kelasTombol(varian: Varian = 'utama', ukuran: keyof typeof UKURAN = 'sedang') {
-  return `inline-flex items-center justify-center gap-3 rounded-lg font-bold ${UKURAN[ukuran]} ${KELAS[varian]} disabled:cursor-not-allowed disabled:opacity-40`;
+  return `tombol ${KELAS[varian]} ${UKURAN[ukuran]}`;
 }
 
 export function Panah() {

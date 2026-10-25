@@ -26,9 +26,9 @@ export function Peringatan({ children, className = '' }: { children: ReactNode; 
 
 /** Kartu putih dengan pita judul berwarna di atasnya (rancangan v0.4, aturan pengelompokan). */
 export function Kartu({ children, pita = 'utama', className = '', as: Tag = 'section', ...props }: { children: ReactNode; pita?: 'utama' | 'kuning' | 'baik' | 'awas' | 'tanpa'; className?: string; as?: 'section' | 'article' | 'div' | 'aside' } & React.HTMLAttributes<HTMLElement>) {
-  const warna = { utama: 'border-t-utama', kuning: 'border-t-kuning', baik: 'border-t-baik', awas: 'border-t-awas', tanpa: 'border-t-garis' }[pita];
+  const warna = { utama: 'pita-utama', kuning: 'pita-kuning', baik: 'pita-baik', awas: 'pita-awas', tanpa: 'pita-garis' }[pita];
   return (
-    <Tag className={`rounded-xl border border-garis border-t-4 ${warna} bg-kartu p-4 sm:p-6 ${className}`} {...props}>
+    <Tag className={`kartu ${warna} ${className}`} {...props}>
       {children}
     </Tag>
   );

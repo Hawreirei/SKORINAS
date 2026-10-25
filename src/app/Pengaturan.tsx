@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { simpanProfil } from '../db/profil';
 import { KepalaHalaman } from '../komponen/Kepala';
 import { usePesan } from '../komponen/Pesan';
-import { Label } from '../komponen/Status';
+import { Kartu, Label } from '../komponen/Status';
 import { Chip, Tombol } from '../komponen/Tombol';
 import { useJudulHalaman, useProfil } from './kait';
 import { terapkanTema } from './mulai';
@@ -58,7 +58,7 @@ export default function Pengaturan() {
       <KepalaHalaman label="Pengaturan" judul="Profil dan kop">
         Satu profil per perangkat, tanpa akun. Kop dan identitas siswa dipakai di berkas Word, PDF, dan LaTeX. <Link to="/pengaturan/ai" className="underline">Pengaturan AI</Link> ada di halaman terpisah.
       </KepalaHalaman>
-      <div className="mt-8 grid gap-5 rounded-xl border border-garis border-t-4 border-t-utama bg-kartu p-4 sm:p-6 sm:grid-cols-2">
+      <Kartu as="div" className="mt-8 grid gap-5 sm:grid-cols-2">
         <div>
           <Label htmlFor="nama">Nama guru</Label>
           <input id="nama" className="bidang mt-2" value={nama} onChange={(e) => setNama(e.target.value)} />
@@ -94,12 +94,12 @@ export default function Pengaturan() {
             ) : null}
           </div>
         </div>
-      </div>
+      </Kartu>
       <Tombol className="mt-8" onClick={simpan}>
         Simpan profil
       </Tombol>
 
-      <div className="mt-6 rounded-xl border border-garis border-t-4 border-t-kuning bg-kartu p-4 sm:p-6">
+      <Kartu pita="kuning" className="mt-6">
         <h2 className="text-[22px] font-extrabold text-judul">Tampilan</h2>
         <div className="mt-4 flex flex-wrap gap-3">
           {(
@@ -121,7 +121,7 @@ export default function Pengaturan() {
             </Chip>
           ))}
         </div>
-      </div>
+      </Kartu>
     </div>
   );
 }

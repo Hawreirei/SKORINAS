@@ -361,7 +361,7 @@ export default function BuatSoal() {
                 />
               </div>
             </div>
-            <p id="jumlah-ket" className={`mt-3 text-base ${nSah ? 'text-redup' : 'font-bold text-buruk'}`}>
+            <p id="jumlah-ket" className={`mt-3 text-base tabular-nums ${nSah ? 'text-redup' : 'font-bold text-buruk'}`}>
               {!nSah
                 ? `Jumlah soal: ketik angka ${MIN_SOAL} sampai ${MAKS_SOAL}.`
                 : [
@@ -453,7 +453,7 @@ export default function BuatSoal() {
                       Atur sendiri
                     </Chip>
                   </div>
-                  <p className="mt-2 text-base text-redup">
+                  <p className="mt-2 text-base text-redup tabular-nums">
                     {kuota[0]} mudah ({f.persen[0]}%) · {kuota[1]} sedang ({f.persen[1]}%) · {kuota[2]} sulit ({f.persen[2]}%)
                   </p>
                   {aturSendiri || !komposisiCepat ? (
@@ -463,7 +463,7 @@ export default function BuatSoal() {
                           <span className="text-base font-bold">{nama}</span>
                           <span className="flex items-center gap-2 sm:gap-3">
                             <Langkah label={`Kurangi persen ${nama.toLowerCase()}`} onClick={() => ubah({ persen: geserPersen(f.persen, i as 0 | 1 | 2, f.persen[i] - 5) })} disabled={f.persen[i] <= 0} />
-                            <span className="min-w-14 text-center text-[20px] font-extrabold" aria-live="polite">
+                            <span className="min-w-14 text-center text-[20px] font-extrabold tabular-nums" aria-live="polite">
                               {f.persen[i]}%
                             </span>
                             <Langkah label={`Tambah persen ${nama.toLowerCase()}`} onClick={() => ubah({ persen: geserPersen(f.persen, i as 0 | 1 | 2, f.persen[i] + 5) })} disabled={f.persen[i] >= 100} />

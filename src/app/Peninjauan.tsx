@@ -108,7 +108,7 @@ export default function Peninjauan() {
               </Tombol>
             </form>
           )}
-          <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-base text-redup">
+          <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-base text-redup tabular-nums">
             <span>{aktif.length} soal</span>
             <span>{komposisi}</span>
             <span>Dibuat dengan bantuan AI</span>
@@ -200,7 +200,7 @@ export default function Peninjauan() {
             <Link to={`/soal/baru?ulang=${id}`} className="mt-4 block text-base font-bold text-utama hover:underline">
               Buat paket serupa
             </Link>
-            <p className="mt-4 border-t border-garis pt-3 text-base text-redup">
+            <p className="mt-4 border-t border-garis pt-3 text-base text-redup tabular-nums">
               Biaya AI: {formatBiaya(totalBiaya)} · {totalToken.toLocaleString('id-ID')} token
             </p>
           </Kartu>
@@ -210,7 +210,7 @@ export default function Peninjauan() {
       {/* Ponsel dan tablet: ringkasan dan langkah berikutnya selalu terlihat di bawah. */}
       <div className="tanpa-cetak sticky bottom-0 z-10 border-t border-garis bg-kartu shadow-[0_-4px_16px_rgba(15,23,42,0.08)] lg:hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-8">
-          <span className="min-w-0 text-base font-bold text-isi">{aktif.length ? `${aktif.length} soal` : 'Belum ada soal'}</span>
+          <span className="min-w-0 text-base font-bold text-isi tabular-nums">{aktif.length ? `${aktif.length} soal` : 'Belum ada soal'}</span>
           <TautanTombol to={`/soal/${id}/ekspor`} className={`shrink-0 ${bisaUnduh ? '' : 'pointer-events-none opacity-40'}`} aria-disabled={!bisaUnduh}>
             Unduh <Panah />
           </TautanTombol>

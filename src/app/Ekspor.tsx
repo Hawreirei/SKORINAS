@@ -177,10 +177,10 @@ export default function Ekspor() {
               ) : (
                 <span className="text-base font-bold text-redup">Pratinjau · {JENIS_BERKAS_LABEL[pratinjau].toLowerCase()}</span>
               )}
-              <span className="text-base text-redup">±{halaman} halaman</span>
+              <span className="text-base text-redup tabular-nums">±{halaman} halaman</span>
             </div>
             <div className="mt-4 flex justify-center rounded-lg bg-lembut p-3 sm:p-6">
-              <div className="aspect-[210/297] w-full max-w-[440px] overflow-hidden border border-garis bg-white px-[8%] py-[8%] text-[8.5px] leading-[1.4] shadow-sm sm:text-[10px]">
+              <div className="aspect-[210/297] w-full max-w-[440px] overflow-hidden border border-garis kertas px-[8%] py-[8%] text-[8.5px] leading-[1.4] shadow-sm sm:text-[10px]">
                 <LembarCetak d={dok} hanyaHalamanPertama={pratinjau === 'soal'} />
               </div>
             </div>

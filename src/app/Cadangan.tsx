@@ -2,14 +2,14 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useState } from 'react';
 import { bacaCadangan, buatCadangan, hapusSemuaData, pulihkanCadangan, ringkasCadangan, type BerkasCadangan } from '../db/cadangan';
 import { db } from '../db/skema';
-import { simpanProfil } from '../db/profil';
+import { ambilProfil, simpanProfil } from '../db/profil';
 import { unduhBlob, VERSI_APLIKASI } from '../ekspor/peramban';
 import { KepalaHalaman } from '../komponen/Kepala';
 import { usePesan } from '../komponen/Pesan';
 import { Kartu, Label, Peringatan } from '../komponen/Status';
 import { kelasTombol, Tombol } from '../komponen/Tombol';
 import { useJudulHalaman, useProfil } from './kait';
-import { mintaPenyimpananPersisten } from './mulai';
+import { mintaPenyimpananPersisten, terapkanTema } from './mulai';
 import { formatTanggal } from './ringkas';
 
 const LABEL_TOKO: Record<string, string> = {
@@ -68,6 +68,7 @@ export default function Cadangan() {
     if (!impor) return;
     if (mode === 'ganti' && !confirm('Semua soal, pengaturan tersimpan, dan profil di perangkat ini akan diganti isi cadangan. Lanjutkan?')) return;
     await pulihkanCadangan(db, impor, mode);
+    terapkanTema((await ambilProfil()).tema);
     setImpor(null);
     pesan('Data dipulihkan dari cadangan.');
   }
@@ -79,7 +80,7 @@ export default function Cadangan() {
       <KepalaHalaman judul="Cadangan">Tanpa akun, berkas cadangan adalah satu-satunya cara memindah soal ke perangkat lain atau memulihkannya. Kunci API tidak ikut berkas cadangan.</KepalaHalaman>
 
       <Kartu className="mt-6">
-        <dl className="grid gap-4 sm:grid-cols-3">
+        <dl className="grid gap-4 tabular-nums sm:grid-cols-3">
           <div>
             <dt className="text-base text-redup">Data di perangkat ini</dt>
             <dd className="mt-1 text-[18px] font-bold">
@@ -168,6 +169,7 @@ export default function Cadangan() {
             disabled={konfirmasi !== 'HAPUS'}
             onClick={async () => {
               await hapusSemuaData(db);
+              terapkanTema('sistem');
               setKonfirmasi('');
               pesan('Semua data di perangkat ini dihapus.');
               void segarkan();

@@ -126,7 +126,7 @@ export function LembarCetak({ d, hanyaHalamanPertama = false }: { d: DokumenSoal
   const bagian = hanyaHalamanPertama ? d.bagian.slice(0, 2).map((b) => ({ ...b, butir: b.butir.slice(0, 4) })) : d.bagian;
   const mapelKelas = `${d.mapel} · ${L('Kelas', 'Grade')} ${d.kelas}`;
   return (
-    <div className="lembar bg-white text-black" style={{ fontFamily: "'Times New Roman', 'Liberation Serif', Tinos, serif" }}>
+    <div className="lembar kertas">
       {d.berkas === 'soal' ? (
         <>
       {d.kop ? (
