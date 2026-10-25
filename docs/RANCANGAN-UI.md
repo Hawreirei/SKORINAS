@@ -86,22 +86,22 @@ Kolom **Keputusan** berisi salah satu dari: *Ambil* (dipakai apa adanya), *Sesua
 
 ## Tahap kerja
 
-Setiap tahap menjadi satu issue di GitHub dan satu PR. Tahap fondasi (UI-01 sampai UI-05) tidak mengubah alur guru, hanya menyiapkan bahan bersama. Tahap layar (UI-06 sampai UI-11) boleh dikerjakan dalam urutan apa pun setelah fondasinya selesai. UI-12 terakhir.
+Setiap tahap menjadi satu issue di GitHub (sub-issue dari #1) dan satu PR. Tahap fondasi (UI-01 sampai UI-05) tidak mengubah alur guru, hanya menyiapkan bahan bersama. Tahap layar (UI-06 sampai UI-11) boleh dikerjakan dalam urutan apa pun setelah fondasinya selesai. UI-12 terakhir.
 
-| ID | Tahap | Bergantung pada | Fitur terkait |
-| --- | --- | --- | --- |
-| UI-01 | Fondasi tampilan: token, utilitas kartu/tombol/bidang/kertas, angka tabular, tema tanpa kedipan | — | F-01 |
-| UI-02 | Komponen formulir dan pemberitahuan: `Bidang`, `Pilihan`, `Sakelar`, `BagianLipat`, `Pemberitahuan` | UI-01 | F-03 |
-| UI-03 | Peta status pusat, lencana status paket, bilah kemajuan yang dapat dibaca pembaca layar | UI-01 | F-07, F-13 |
-| UI-04 | Kerangka halaman: kepala lengket di layar lebar, `KepalaHalaman` dengan aksi utama | UI-01 | — |
-| UI-05 | Dialog, menu Lainnya, dan dialog konfirmasi pengganti `window.confirm` | UI-01 | F-09, F-12 |
-| UI-06 | Layar Buat: inti, Pengaturan lanjutan, panel Rencana, draf otomatis, gerbang kunci AI | UI-02, UI-04 | F-03, F-04, F-14 |
-| UI-07 | Layar Periksa: aksi utama di kepala, banner Mohon cek dulu, navigasi nomor soal, saringan di URL, peringatan saat menutup tab | UI-03, UI-04, UI-05 | F-09, F-13 |
-| UI-08 | Layar Unduh: `Pilihan` format, `Sakelar` berkas, utilitas kertas, pilihan diingat | UI-02 | F-10, F-11 |
-| UI-09 | Soal saya: saringan status, menu ⋯ per baris, tab di URL | UI-03, UI-05 | F-12 |
-| UI-10 | Beranda: kartu Langkah awal | UI-03 | F-14 |
-| UI-11 | Pengaturan AI, Profil dan kop, Cadangan: kartu per bagian, Zona berbahaya, umpan balik inline | UI-02, UI-05 | F-01, F-12, F-14 |
-| UI-12 | Copy dan aksesibilitas: audit semua layar, mode gelap, uji e2e akhir | UI-01 sampai UI-11 | — |
+| ID | Issue | Tahap | Bergantung pada | Fitur terkait |
+| --- | --- | --- | --- | --- |
+| UI-01 | #2 | Fondasi tampilan: token, utilitas kartu/tombol/bidang/kertas, angka tabular, tema tanpa kedipan | — | F-01 |
+| UI-02 | #3 | Komponen formulir dan pemberitahuan: `Bidang`, `Pilihan`, `Sakelar`, `BagianLipat`, `Pemberitahuan` | UI-01 | F-03 |
+| UI-03 | #4 | Peta status pusat, lencana status paket, bilah kemajuan yang dapat dibaca pembaca layar | UI-01 | F-07, F-13 |
+| UI-04 | #5 | Kerangka halaman: kepala lengket di layar lebar, `KepalaHalaman` dengan aksi utama | UI-01 | — |
+| UI-05 | #6 | Dialog, menu Lainnya, dan dialog konfirmasi pengganti `window.confirm` | UI-01 | F-09, F-12 |
+| UI-06 | #7 | Layar Buat: inti, Pengaturan lanjutan, panel Rencana, draf otomatis, gerbang kunci AI | UI-02, UI-04 | F-03, F-04, F-14 |
+| UI-07 | #8 | Layar Periksa: aksi utama di kepala, banner Mohon cek dulu, navigasi nomor soal, saringan di URL, peringatan saat menutup tab | UI-03, UI-04, UI-05 | F-09, F-13 |
+| UI-08 | #9 | Layar Unduh: `Pilihan` format, `Sakelar` berkas, utilitas kertas, pilihan diingat | UI-02 | F-10, F-11 |
+| UI-09 | #10 | Soal saya: saringan status, menu ⋯ per baris, tab di URL | UI-03, UI-05 | F-12 |
+| UI-10 | #11 | Beranda: kartu Langkah awal | UI-03 | F-14 |
+| UI-11 | #12 | Pengaturan AI, Profil dan kop, Cadangan: kartu per bagian, Zona berbahaya, umpan balik inline | UI-02, UI-05 | F-01, F-12, F-14 |
+| UI-12 | #13 | Copy dan aksesibilitas: audit semua layar, mode gelap, uji e2e akhir | UI-01 sampai UI-11 | — |
 
 ## Kriteria selesai yang berlaku untuk setiap tahap
 
