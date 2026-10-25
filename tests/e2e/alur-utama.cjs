@@ -209,8 +209,7 @@ function butirPalsu(bentuk) {
   await foto('04c-konfirmasi-hapus', { fullPage: false });
   await dialogHapus.getByRole('button', { name: 'Hapus soal', exact: true }).click();
   await page.waitForFunction((n) => document.querySelectorAll('article[id^="soal-"]').length === n - 1, sebelumHapus);
-  await page.goto(DASAR + '/soal');
-  await page.getByRole('button', { name: /^Tong sampah ·/ }).click();
+  await page.goto(DASAR + '/soal?tab=sampah');
   await page.getByRole('button', { name: 'Pulihkan' }).first().click();
   // Tunggu pemulihan tersimpan sebelum pindah halaman.
   await page.getByText('Tong sampah kosong.').waitFor();
@@ -276,6 +275,35 @@ function butirPalsu(bentuk) {
   await page.goto(DASAR + '/soal');
   await page.waitForSelector('h1');
   await utamaTerlihat(page, 'Soal saya');
+  // Soal saya (UI-09): saringan status di URL, menu ⋯, ubah judul, hapus lalu pulihkan dari tong sampah.
+  await page.getByRole('radio', { name: /^Belum selesai/ }).click();
+  await page.waitForURL(/status=belum/);
+  await page.getByText('Semua paket sudah siap diunduh.').waitFor();
+  if (await page.getByRole('link', { name: 'Penjumlahan pecahan' }).count()) galat.push('saringan "Belum selesai" menampilkan paket yang siap');
+  await page.getByRole('radio', { name: /^Siap diunduh/ }).click();
+  await page.getByRole('link', { name: 'Penjumlahan pecahan' }).waitFor();
+  await foto('11-soal-saya');
+  const menuPaket = () => page.getByRole('button', { name: /^Aksi paket / }).first();
+  await menuPaket().click();
+  await page.getByRole('menuitem', { name: 'Ubah judul…' }).click();
+  await page.getByRole('textbox', { name: 'Judul paket' }).fill('Pecahan uji');
+  await page.getByRole('dialog', { name: 'Ubah judul paket' }).getByRole('button', { name: 'Simpan' }).click();
+  await page.getByRole('link', { name: 'Pecahan uji' }).waitFor();
+  await menuPaket().click();
+  await page.getByRole('menuitem', { name: 'Ubah judul…' }).click();
+  await page.getByRole('textbox', { name: 'Judul paket' }).fill('Penjumlahan pecahan');
+  await page.keyboard.press('Enter');
+  await page.getByRole('link', { name: 'Penjumlahan pecahan' }).waitFor();
+  await menuPaket().click();
+  await page.getByRole('menuitem', { name: 'Hapus…' }).click();
+  await page.getByRole('dialog', { name: /^Hapus paket "Penjumlahan pecahan"\?$/ }).getByRole('button', { name: 'Hapus paket' }).click();
+  await page.getByRole('link', { name: 'Penjumlahan pecahan' }).waitFor({ state: 'detached' });
+  await page.getByRole('button', { name: /^Tong sampah · 1$/ }).click();
+  await page.waitForURL(/tab=sampah/);
+  await page.getByRole('button', { name: 'Pulihkan' }).click();
+  await page.getByText('Tong sampah kosong.').waitFor();
+  await page.goto(DASAR + '/soal');
+  await page.getByRole('link', { name: 'Penjumlahan pecahan' }).waitFor();
   const hp = await ctx.newPage();
   await hp.setViewportSize({ width: 390, height: 844 });
   await hp.goto(DASAR + '/');

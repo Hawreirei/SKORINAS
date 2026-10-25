@@ -187,3 +187,13 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | Diingat | Format dan pilihan berkas di `localStorage` `gensoal:pilihan-unduh` | Unduhan berikutnya cukup satu ketukan |
 | Umpan balik | `Pemberitahuan` berhasil di bawah tombol: "3 berkas terunduh: …"; pesan melayang hanya menyebut jumlah. Kop tanpa nama sekolah: `Pemberitahuan` info dengan tautan ke profil | Nama berkas tetap terlihat setelah pesan melayang hilang |
 | Pratinjau | Tab berkas memakai `Pilihan`; lembar memakai utilitas `kertas` | Komponen bersama |
+
+## UI-09 Soal saya (issue #10)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Saringan | `Pilihan` Semua · Belum selesai · Siap diunduh dengan jumlah, tersimpan di URL (`?status=belum`, `?status=siap`). "Belum selesai" = semua status selain Siap diunduh (sedang dibuat, menunggu, dijeda, perlu perhatian) | Tautan dapat dibagikan dan bertahan setelah muat ulang |
+| Tong sampah | Tampilan tersendiri di `?tab=sampah` (judul "Tong sampah", tautan kembali), dibuka dari tautan "Tong sampah · n" di bawah daftar | Tab paket/tong sampah tidak lagi bersaing dengan saringan status |
+| Baris paket | Judul tebal (seluruh baris membuka paket), keterangan "Kelas · mapel · tanggal · jumlah", `LencanaStatus`, dan menu ⋯ (Buka, Unduh, Buat paket serupa, Ubah judul…, Hapus…) | Tautan Unduh dan Hapus per baris diganti satu menu |
+| Ubah judul | Dialog sempit dengan isian "Judul paket"; Enter atau Simpan menyimpan | Komponen UI-05 |
+| Empty state | "Belum ada paket soal. Buat paket pertama" (tautan), "Tidak ada paket yang cocok dengan pencarian" dengan "Hapus pencarian", dan pesan per saringan | Prinsip rekap: empty state menunjukkan aksi berikutnya |
