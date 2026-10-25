@@ -177,3 +177,13 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | Ubah judul | Dari menu Lainnya; formulir di bawah judul dengan Simpan dan Batal | Tautan "Ubah judul" di samping judul dihapus agar kepala halaman bersih |
 | Jeda | "Jeda dan simpan", berubah menjadi "Menjeda…" sampai pengatur berhenti | Menjelaskan bahwa soal yang sudah jadi tetap tersimpan |
 | Peringatan menutup tab | `beforeunload` hanya selama paket ini sedang dibuat di tab ini | Tab tertutup menjeda pembuatan; peringatan mencegah jeda tanpa sengaja |
+
+## UI-08 Layar Unduh (issue #9)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Format | `Pilihan` Word · Bisa disunting / PDF · Siap cetak. LaTeX dipilih dari Menu lanjutan ("Pilih format LaTeX (.tex)") lalu ikut tampil sebagai opsi ketiga | LaTeX jarang dipakai guru; tetap mudah dikembalikan ke Word/PDF |
+| Berkas | Baris ringkas: "Lembar soal (selalu)" dengan sakelar "dengan kop sekolah", "Kunci jawaban" dengan "dengan pembahasan" (petunjuk: menambah sekitar n halaman), dan "Kisi-kisi". Sub-pilihan di samping induknya pada layar lebar | Versi pertama dengan petunjuk di setiap sakelar mendorong tombol Unduh ke bawah layar laptop (tertangkap pemeriksaan e2e); hanya petunjuk yang menjelaskan akibat yang dipertahankan |
+| Diingat | Format dan pilihan berkas di `localStorage` `gensoal:pilihan-unduh` | Unduhan berikutnya cukup satu ketukan |
+| Umpan balik | `Pemberitahuan` berhasil di bawah tombol: "3 berkas terunduh: …"; pesan melayang hanya menyebut jumlah. Kop tanpa nama sekolah: `Pemberitahuan` info dengan tautan ke profil | Nama berkas tetap terlihat setelah pesan melayang hilang |
+| Pratinjau | Tab berkas memakai `Pilihan`; lembar memakai utilitas `kertas` | Komponen bersama |

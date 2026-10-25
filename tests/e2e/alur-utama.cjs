@@ -233,7 +233,11 @@ function butirPalsu(bentuk) {
   await utamaTerlihat(page, 'Unduh');
   const urlUnduh = page.url();
   for (const [fmt, label] of [['docx', 'Word'], ['pdf', 'PDF'], ['tex', 'LaTeX']]) {
-    if (fmt === 'tex') await page.click('text=Menu lanjutan');
+    if (fmt === 'tex') {
+      // LaTeX ada di Menu lanjutan (UI-08).
+      await page.getByRole('button', { name: /Menu lanjutan/ }).click();
+      await page.getByRole('button', { name: /Pilih format LaTeX/ }).click();
+    }
     await page.getByRole('radio', { name: new RegExp(label) }).click();
     // Lembar soal, kunci jawaban, dan kisi-kisi diunduh sebagai tiga berkas terpisah.
     const berkas = [];
@@ -244,6 +248,7 @@ function butirPalsu(bentuk) {
     while (berkas.length < 3 && Date.now() < batas) await page.waitForTimeout(200);
     page.off('download', dengar);
     if (berkas.length !== 3) galat.push(`${fmt}: ${berkas.length} berkas terunduh, seharusnya 3`);
+    await page.getByText(/^3 berkas terunduh: /).waitFor({ timeout: 10000 }).catch(() => galat.push(`${fmt}: tanpa pemberitahuan berhasil yang menyebut nama berkas`));
     for (const u of berkas) {
       const nama = u.suggestedFilename();
       const akhiran = /Kunci-Jawaban/.test(nama) ? '-kunci' : /Kisi-kisi/.test(nama) ? '-kisi' : '';
@@ -252,6 +257,12 @@ function butirPalsu(bentuk) {
       console.log(fmt, nama, fs.statSync(tujuan).size, 'bytes');
     }
   }
+
+  // Format terakhir diingat saat layar Unduh dibuka lagi.
+  await page.goto(urlPeriksa);
+  await page.goto(urlUnduh);
+  await page.waitForSelector('h1:has-text("Unduh")');
+  if ((await page.getByRole('radio', { name: /LaTeX/ }).getAttribute('aria-checked')) !== 'true') galat.push('layar Unduh tidak mengingat format terakhir');
 
   // Cetak, beranda, ponsel
   await page.goto(page.url().replace('/ekspor', '/cetak'));
