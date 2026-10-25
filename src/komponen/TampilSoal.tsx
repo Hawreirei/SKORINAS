@@ -85,7 +85,7 @@ export function TampilSoal({ isi, ringkas = false, besar = true, tanpaPembahasan
         <>
           {isi.bentuk === 'pilihan_ganda' && opsi.length ? null : (
             <div className="mt-5 flex flex-wrap items-start gap-3">
-              <span className="shrink-0 rounded-md bg-utama px-3 py-1.5 text-base font-bold text-di-tinta">{teksKunciLayar(isi)}</span>
+              <span className="shrink-0 rounded-md bg-utama-isi px-3 py-1.5 text-base font-bold text-di-tinta">{teksKunciLayar(isi)}</span>
               {isi.bentuk === 'isian_singkat' || isi.bentuk === 'uraian' ? <TeksSoal as="span" teks={isi.kunci} className="pt-1 text-base text-isi" /> : null}
             </div>
           )}

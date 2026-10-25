@@ -125,10 +125,10 @@ export function Pilihan<T extends string>({ label, opsi, nilai, ubah, labelTerse
               tabIndex={dipilih ? 0 : -1}
               onClick={() => ubah(o.nilai)}
               onKeyDown={(e) => tekan(e, i)}
-              className={`flex min-h-11 min-w-0 flex-col items-center justify-center rounded-md px-3 py-1.5 text-center text-base font-bold ${dipilih ? 'bg-utama text-di-tinta' : 'text-tinta hover:bg-lembut'}`}
+              className={`flex min-h-11 min-w-0 flex-col items-center justify-center rounded-md px-3 py-1.5 text-center text-base font-bold ${dipilih ? 'bg-utama-isi text-di-tinta' : 'text-tinta hover:bg-lembut'}`}
             >
               <span>{o.label}</span>
-              {o.keterangan ? <span className={`text-base font-semibold ${dipilih ? 'opacity-90' : 'text-redup'}`}>{o.keterangan}</span> : null}
+              {o.keterangan ? <span className={`text-base font-semibold ${dipilih ? '' : 'text-redup'}`}>{o.keterangan}</span> : null}
             </button>
           );
         })}

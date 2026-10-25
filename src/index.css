@@ -5,7 +5,10 @@
 /*
  * Palet rancangan v0.4: latar abu kebiruan, kartu putih, biru sebagai warna utama,
  * kuning sebagai ornamen, merah hanya untuk hapus dan batal. Pasangan teks dan latar
- * dipilih dengan kontras setidaknya 4,5 : 1.
+ * dipilih dengan kontras setidaknya 4,5 : 1 (diuji di tests/kontras.test.ts).
+ * --gs-main untuk teks, tautan, garis, dan fokus; --gs-main-fill untuk latar berisi teks putih
+ * (tombol utama, opsi terpilih). Di mode gelap keduanya berbeda: biru terang terbaca di kartu gelap,
+ * biru pekat terbaca dengan teks putih (UI-12).
  */
 :root {
   --gs-bg: #f5f7fa;
@@ -20,6 +23,8 @@
   --gs-panel: #f8fafd;
   --gs-main: #2563eb;
   --gs-main-dark: #1d4ed8;
+  --gs-main-fill: #2563eb;
+  --gs-main-fill-hover: #1d4ed8;
   --gs-main-soft: #dbeafe;
   --gs-head: #1e3a5f;
   --gs-yellow: #facc15;
@@ -45,8 +50,10 @@
   --gs-line-strong: #43536f;
   --gs-soft: #1c2a42;
   --gs-panel: #131c2e;
-  --gs-main: #3b82f6;
+  --gs-main: #6aa8fb;
   --gs-main-dark: #2563eb;
+  --gs-main-fill: #2563eb;
+  --gs-main-fill-hover: #1d4ed8;
   --gs-main-soft: #1e3a6b;
   --gs-head: #c7d7f2;
   --gs-yellow: #facc15;
@@ -75,6 +82,7 @@
   --color-utama: var(--gs-main);
   --color-utama-tua: var(--gs-main-dark);
   --color-utama-lembut: var(--gs-main-soft);
+  --color-utama-isi: var(--gs-main-fill);
   --color-judul: var(--gs-head);
   --color-kuning: var(--gs-yellow);
   --color-kuning-lembut: var(--gs-yellow-soft);
@@ -169,13 +177,13 @@ body {
   }
 }
 @utility tombol-utama {
-  border-color: var(--gs-main);
-  background-color: var(--gs-main);
+  border-color: var(--gs-main-fill);
+  background-color: var(--gs-main-fill);
   color: var(--gs-on-ink);
   @media (hover: hover) {
     &:hover {
-      border-color: var(--gs-main-dark);
-      background-color: var(--gs-main-dark);
+      border-color: var(--gs-main-fill-hover);
+      background-color: var(--gs-main-fill-hover);
     }
   }
 }
@@ -185,7 +193,7 @@ body {
   color: var(--gs-main);
   @media (hover: hover) {
     &:hover {
-      background-color: var(--gs-main-soft);
+      background-color: var(--gs-soft);
     }
   }
 }
@@ -227,7 +235,7 @@ body {
   &:focus {
     outline: none;
     border-color: var(--gs-main);
-    box-shadow: 0 0 0 3px var(--gs-main-soft);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--gs-main) 35%, transparent);
   }
   /* Angka sejajar lebar agar tidak bergeser saat diketik. */
   &:is([type='number'], [inputmode='numeric']) {

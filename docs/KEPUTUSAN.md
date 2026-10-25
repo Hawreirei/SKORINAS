@@ -12,7 +12,7 @@ Catatan ini melengkapi `docs/RANCANGAN.md` v0.4. Bagian "Keputusan saat membangu
 ## Perlu diverifikasi sebelum rilis
 
 - [ ] **Lisensi font PDF.** PDF menanam Liberation Serif 2.1.5 (SIL OFL 1.1, metrik sama dengan Times New Roman; lisensi di `public/fonts/OFL-LiberationSerif.txt`), bukan Times New Roman yang berlisensi Monotype. Cek ulang sebelum rilis bahwa pengganti ini dapat diterima; Word tetap memakai nama font Times New Roman dari komputer guru.
-- [ ] **Uji dengan 3 orang awam** (saran 8): catat titik berhenti mereka, lalu koreksi urutan dan istilah.
+- [ ] **Uji dengan 3 orang awam** (saran 8): catat titik berhenti mereka, lalu koreksi urutan dan istilah. Siap dijalankan: tahap UI-00 sampai UI-12 rancangan UI v0.5 selesai.
 - [ ] **Registri model** (`public/models/registri.json`): nama model mengikuti rancangan; ID tepat, harga, dan batas gratis harus diverifikasi. Semua harga masih `null` (biaya tampil "belum diketahui"). Belum ada model berlencana direkomendasikan karena golden set per model belum dijalankan: `GEMINI_API_KEY=… npm run uji-model -- --penyedia gemini --tulis`.
 - [ ] **Akses peramban (CORS)** tiap penyedia diuji dengan kunci asli. Adaptor memanggil langsung dari peramban; penyedia yang menolak hanya dapat didukung lewat proxy V1 (F-27).
 - [ ] **Video bantuan** belum direkam; `src/bantuan/daftar.ts` berisi `youtube_id: null` dan langkah teks tampil sebagai pengganti di halaman Bantuan.
@@ -125,7 +125,7 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | `Peringatan` | Menjadi pembungkus `Pemberitahuan nada="awas"` (mendapat ikon segitiga) | Layar lama tetap jalan tanpa diubah |
 | Status `BagianLipat` | Disimpan di `localStorage` `gensoal:lipat:<kunci>` bila prop `ingat` diisi | Kenyamanan per perangkat; tidak mengubah skema Dexie |
 | Uji komponen | `tests/*.test.tsx` dengan lingkungan jsdom per berkas, `react-dom/client` dan `act` dari React 19, tanpa pustaka tambahan | Pola Vitest diperluas ke `.tsx` di `vite.config.ts` |
-| Temuan untuk UI-12 | Teks putih di atas biru utama mode gelap (#3b82f6) berkontras 3,68 : 1, di bawah 4,5. Berlaku untuk semua tombol utama dan chip aktif di mode gelap, sudah ada sebelum UI-02 | Diselesaikan di UI-12 (#13) bersama audit kontras mode gelap |
+| Temuan untuk UI-12 | Teks putih di atas biru utama mode gelap (#3b82f6) berkontras 3,68 : 1, di bawah 4,5. Berlaku untuk semua tombol utama dan chip aktif di mode gelap, sudah ada sebelum UI-02 | Selesai di UI-12: token `--gs-main-fill` (#2563eb, 5,17 : 1) untuk latar berisi teks putih |
 
 ## UI-03 Peta status paket (issue #4)
 
@@ -216,3 +216,16 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | Profil dan kop | Kartu Guru dan sekolah, Kop lembar soal (dengan pratinjau `kertas` yang memakai komponen kop yang sama dengan pratinjau Unduh, `KopLembar`), tombol Simpan profil dengan `Pemberitahuan` berhasil "Profil tersimpan." di sampingnya, dan kartu Tampilan dengan `Pilihan` Ikuti sistem · Terang · Gelap | Umpan balik di tempat; pesan hilang lagi saat isian diubah sehingga tidak menyesatkan. Galat logo tampil di bawah isiannya, bukan pesan melayang |
 | Pengaturan AI | "Siap dipakai", "Kunci berfungsi · n model tersedia", galat uji kunci, dan "Belum siap" memakai `Pemberitahuan`. Pengaturan lanjutan memakai `BagianLipat` (status buka diingat). Isian angka tersimpan langsung selama sah; teks tetap milik isian sehingga dapat dikosongkan lalu diketik ulang, dengan petunjuk akibat (mis. "Pembuatan dijeda setelah sebanyak ini soal lolos dalam sehari") | Sebelumnya mengosongkan batas harian langsung menjadi 1 |
 | Cadangan | Kartu Data di perangkat ini (ringkasan, unduh, pulihkan), kartu Pengaturan tersimpan dengan tombol Hapus… per baris (konfirmasi), lalu Zona berbahaya | Pengaturan tersimpan kini dapat dihapus tanpa membuka layar Buat |
+
+## UI-12 Copy dan aksesibilitas (issue #13)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Biru di mode gelap | Token dipisah: `--gs-main` untuk teks, tautan, garis, dan fokus (gelap #6aa8fb, 6,68 : 1 di kartu), `--gs-main-fill` untuk latar berisi teks putih (#2563eb di kedua mode, 5,17 : 1; disorot #1d4ed8). Kelas Tailwind `bg-utama-isi` | Audit menemukan #3b82f6 tidak hanya gagal dengan teks putih (3,68) tetapi juga sebagai teks tautan di kartu gelap (4,43) |
+| Temuan kontras lain | Tombol garis disorot: latar `--gs-soft`, bukan biru lembut (4,24 di mode terang). Langkah aktif di Langkah awal: latar `bg-lembut`. Pesan melayang: teks warna latar di atas `--gs-head` (sebelumnya putih di biru muda pada mode gelap). Keterangan opsi terpilih `Pilihan` dan penyedia terpilih: tanpa `opacity-90` (ditemukan axe) | Semua pasangan teks dan latar minimal 4,5 : 1 |
+| Uji kontras | `tests/kontras.test.ts`: delapan token teks di empat permukaan dan pasangan khusus (tombol utama, disorot, pesan melayang, galat), mode terang dan gelap, dihitung dari `src/index.css`. Penghitung bersama di `tests/bantu-kontras.ts` | Perubahan token berikutnya langsung tertangkap |
+| axe-core | `axe-core` sebagai devDependency; `npm run e2e` menjalankan aturan WCAG 2.2 A/AA di delapan layar (Beranda, Buat, paket, Unduh, Soal saya, Pengaturan AI, Profil, Cadangan), mode terang dan gelap. Disuntikkan lewat `page.evaluate`, sehingga CSP `script-src 'self'` tidak perlu dilonggarkan | Hasil akhir: 0 pelanggaran di 16 pemeriksaan |
+| Papan ketik | E2E menelusuri Buat, paket, dan Unduh hanya dengan Tab: setiap elemen yang difokus harus memperlihatkan garis atau bayangan fokus, tombol utama harus tercapai, lalu Enter membuka Unduh dan mengunduh berkas. Butir menu Lainnya kini bergaris fokus di sisi dalam (sebelumnya hanya latar yang nyaris tak terlihat). Fokus isian: bayangan biru 35% menggantikan biru lembut yang tak terlihat di mode gelap | Kriteria "seluruh alur bisa diselesaikan dengan papan ketik" |
+| Teks kecil | Pratinjau kop di Profil kini 16 px. Pengecualian yang disengaja: miniatur halaman A4 di pratinjau Unduh (8,5–10 px) karena berupa gambar halaman; tampilan cetak ukuran penuh tersedia di Menu lanjutan | Teks layar minimal 16 px |
+| Copy | Tidak ditemukan lagi Setujui, Disetujui, Mohon cek dulu, "Langkah n dari 3", atau kata generate/preset/ekspor di label. RPM dan RPD hanya di Pengaturan lanjutan dengan petunjuk akibat. Label proses: "Menyiapkan…", "Menjeda…", "Membuat berkas…", "Menguji…" | Aturan "Bahasa di layar" |
+| Mode gelap di e2e | Tangkapan `14-buat-gelap`, `14-paket-gelap`, `14-unduh-gelap` lewat `emulateMedia({ colorScheme: 'dark' })` dengan tema Ikuti sistem | Mode gelap diperiksa setiap kali e2e dijalankan |

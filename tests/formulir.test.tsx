@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
-import { readFileSync } from 'node:fs';
 import { act, useState } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { kontras, MODE, tokenMode } from './bantu-kontras';
 import { BagianLipat, IsianTeks, Pemberitahuan, Pilihan, Sakelar, WARNA_NADA, type NadaPemberitahuan } from '../src/komponen/Formulir';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -134,26 +134,10 @@ describe('Pemberitahuan', () => {
     expect(wadah.querySelector('[data-nada="berhasil"]')!.getAttribute('role')).toBe('status');
   });
 
-  // Kontras dihitung dari token asli di src/index.css untuk mode terang (:root) dan gelap (.dark).
-  const css = readFileSync('src/index.css', 'utf8');
-  const blok = (pemilih: string) => {
-    const m = css.match(new RegExp(`^${pemilih.replace('.', '\\.')} \\{([^}]*)\\}`, 'm'))!;
-    return Object.fromEntries([...m[1].matchAll(/(--gs-[\w-]+):\s*(#[0-9a-f]{6})/gi)].map((x) => [x[1], x[2]]));
-  };
-  const luminans = (hex: string) => {
-    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  };
-  const kontras = (a: string, b: string) => {
-    const [t, g] = [luminans(a), luminans(b)].sort((x, y) => y - x);
-    return (t + 0.05) / (g + 0.05);
-  };
-  for (const [tema, pemilih] of [
-    ['terang', ':root'],
-    ['gelap', '.dark'],
-  ] as const) {
+  // Kontras dihitung dari token asli di src/index.css untuk mode terang dan gelap.
+  for (const [tema, pemilih] of MODE) {
     it(`setiap nada berkontras minimal 4,5 : 1 di mode ${tema}`, () => {
-      const token = blok(pemilih);
+      const token = tokenMode(pemilih);
       for (const nada of Object.keys(WARNA_NADA) as NadaPemberitahuan[]) {
         const { teks, latar } = WARNA_NADA[nada];
         expect(token[teks], `${teks} di ${pemilih}`).toBeDefined();

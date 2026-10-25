@@ -54,7 +54,7 @@ function LangkahAwal({ langkah, sembunyikan }: { langkah: Langkah[]; sembunyikan
         {langkah.map((l, i) => {
           const kini = i === berikut;
           return (
-            <li key={l.judul} aria-current={kini ? 'step' : undefined} className={`flex items-start gap-3 rounded-lg border px-3 py-3 sm:px-4 ${kini ? 'border-utama bg-utama-lembut/40' : 'border-garis'}`}>
+            <li key={l.judul} aria-current={kini ? 'step' : undefined} className={`flex items-start gap-3 rounded-lg border px-3 py-3 sm:px-4 ${kini ? 'border-utama bg-lembut' : 'border-garis'}`}>
               {l.selesai ? (
                 <span aria-hidden="true" className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-baik-latar text-baik">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -62,7 +62,7 @@ function LangkahAwal({ langkah, sembunyikan }: { langkah: Langkah[]; sembunyikan
                   </svg>
                 </span>
               ) : (
-                <span aria-hidden="true" className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full text-base font-extrabold ${kini ? 'bg-utama text-di-tinta' : 'bg-lembut text-redup'}`}>
+                <span aria-hidden="true" className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full text-base font-extrabold ${kini ? 'bg-utama-isi text-di-tinta' : 'bg-lembut text-redup'}`}>
                   {i + 1}
                 </span>
               )}

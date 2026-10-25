@@ -1,5 +1,7 @@
 # Rancangan UI/UX GenSoal v0.5
 
+> **Status: selesai (25 Oktober 2026).** Tahap UI-00 sampai UI-12 sudah dikerjakan di cabang `claude/intelligent-volta-mmshjn`; keputusan per tahap tercatat di `docs/KEPUTUSAN.md`. Keadaan akhir layar dirangkum di `docs/RANCANGAN.md` (Rancangan Layar dan Arah visual).
+
 Oct 25, 2026 · disusun dari rekap desain *A-Level Set Builder* (`docs/referensi/rekap-desain-a-level-set-builder.md`) atas permintaan pemilik.
 
 Rekap itu berasal dari aplikasi lain: berbahasa Inggris, untuk pengguna yang terbiasa dengan alat kerja, dan memakai indigo, font sistem, serta teks 14 px. GenSoal dipakai guru kelas 1–12 yang belum tentu terbiasa dengan aplikasi. Karena itu **polanya diambil, gayanya tidak**. Setiap pola diperiksa terhadap patokan di bawah sebelum diambil.

@@ -169,10 +169,10 @@ export default function PengaturanAi() {
                       type="button"
                       onClick={() => setPilih(x.id)}
                       aria-pressed={dipilih}
-                      className={`flex min-h-[64px] flex-col items-start justify-center gap-0.5 rounded-lg border px-4 py-2 text-left transition-colors ${dipilih ? 'border-utama bg-utama text-di-tinta' : 'border-garis-kuat bg-kartu hover:border-utama'}`}
+                      className={`flex min-h-[64px] flex-col items-start justify-center gap-0.5 rounded-lg border px-4 py-2 text-left transition-colors ${dipilih ? 'border-utama-isi bg-utama-isi text-di-tinta' : 'border-garis-kuat bg-kartu hover:border-utama'}`}
                     >
                       <span className="text-[17px] font-bold">{x.nama}</span>
-                      <span className={`text-base ${dipilih ? 'opacity-90' : 'text-redup'}`}>
+                      <span className={`text-base ${dipilih ? '' : 'text-redup'}`}>
                         {x.tingkat_gratis ? 'Gratis' : 'Berbayar'}
                         {k?.status === 'berfungsi' ? ' · kunci ✓' : ''}
                       </span>

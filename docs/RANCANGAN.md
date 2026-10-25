@@ -122,14 +122,14 @@ Pekerjaan guru berjalan dari layar Buat ke halaman paket soal, lalu ke Unduh. Se
 
 | Layar | Rute | Elemen utama | Aksi |
 | --- | --- | --- | --- |
-| Beranda | / | Satu tombol besar "Buat soal" dan daftar soal terakhir; pengingat memasang kunci bila belum ada | Mulai buat soal, buka soal |
-| Buat soal | /soal/baru | Pengaturan tersimpan (satu pilihan); Kelas, mapel, dan jumlah soal; CP dan TP; Pengaturan lanjutan (tertutup) | Buat soal, simpan pengaturan, Batal |
-| Paket soal | /soal/\[id\] | Daftar soal dengan gambar, kunci, pembahasan; keterangan "Kunci tidak dicek otomatis" bila perlu; tanda jenis jawaban uraian; kemajuan pembuatan | Unduh, sunting, ganti soal, buat ulang, hapus |
+| Beranda | / | Satu tombol besar "Buat soal"; kartu Langkah awal (pasang kunci AI, buat soal pertama, unduh) yang hilang setelah selesai atau disembunyikan; lima paket terakhir dengan lencana status | Mulai buat soal, buka soal |
+| Buat soal | /soal/baru | Pengaturan tersimpan (satu pilihan); Kelas, mapel, dan jumlah soal; CP dan TP; Pengaturan lanjutan (tertutup); panel Rencana (permintaan AI, waktu, kuota, biaya); draf otomatis | Buat soal (atau "Pasang kunci AI dulu"), simpan pengaturan, Batal |
+| Paket soal | /soal/\[id\] | Kepala dengan tombol Unduh dan menu Lainnya; kemajuan pembuatan dengan lencana status dan bilah; daftar soal dengan gambar, kunci, pembahasan; keterangan "Kunci tidak dicek otomatis" bila perlu; tanda jenis jawaban uraian; navigasi nomor soal | Unduh, sunting, ganti soal, buat ulang, hapus (konfirmasi, dapat dipulihkan) |
 | Unduh | /soal/\[id\]/ekspor | Pilih Word atau PDF; berkas yang diunduh (lembar soal dengan atau tanpa kop, kunci jawaban dengan atau tanpa pembahasan, kisi-kisi), masing-masing berkas terpisah; pratinjau tiap berkas; menu lanjutan berisi .tex dan tampilan cetak | Unduh semua berkas terpilih, atau satu berkas saja |
-| Soal saya | /soal | Paket soal dan tong sampah | Buka, unduh, hapus, pulihkan |
-| Pengaturan AI | /pengaturan/ai | Tiga langkah: pilih penyedia, tempel kunci, pilih model; batas pemakaian; biaya dan privasi | Simpan dan uji kunci, pilih model utama dan cadangan |
-| Cadangan | /cadangan | Ukuran data, cadangan terakhir, penyimpanan persisten, pengaturan tersimpan | Unduh dan impor .gensoal, hapus semua data |
-| Profil dan kop | /pengaturan | Nama sekolah, kop, logo, identitas siswa, mode gelap | Simpan |
+| Soal saya | /soal | Saringan Semua · Belum selesai · Siap diunduh (di URL), pencarian, menu ⋯ per paket; tong sampah di `?tab=sampah` | Buka, unduh, buat paket serupa, ubah judul, hapus, pulihkan |
+| Pengaturan AI | /pengaturan/ai | "Siap dipakai" bila kunci berfungsi, atau tiga langkah: pilih penyedia, tempel kunci, pilih model; Pengaturan lanjutan (model cadangan, batas pemakaian, batas harian); Zona berbahaya | Simpan dan uji kunci, pilih model utama dan cadangan, hapus kunci |
+| Cadangan | /cadangan | Data di perangkat ini (ukuran, cadangan terakhir, penyimpanan persisten); pengaturan tersimpan; Zona berbahaya | Unduh dan impor .gensoal, hapus pengaturan tersimpan, hapus semua data (konfirmasi) |
+| Profil dan kop | /pengaturan | Guru dan sekolah; kop lembar soal dengan pratinjau; logo; identitas siswa; tema (Ikuti sistem · Terang · Gelap) | Simpan profil |
 
 Menu atas berisi Beranda, Buat soal, Soal saya, Pengaturan AI, dan Cadangan. Profil dan kop serta Bantuan ada di kaki halaman dan menu ponsel. Ringkasan, cadangan, dan daftar sekaligus tidak lagi tampil di beranda.
 
@@ -139,7 +139,7 @@ Menu atas berisi Beranda, Buat soal, Soal saya, Pengaturan AI, dan Cadangan. Pro
 2. **Pengaturan tersimpan** (dahulu preset) dipilih di bagian atas dan mengisi semua isian sekaligus; hanya tampil bila sudah ada.
 3. **CP dan TP** berupa dua kolom teks; satu TP satu baris; jumlah soal dibagi ke tiap TP. Boleh dikosongkan: tanpa TP soal dibuat dari CP, tanpa keduanya dari topik atau mapel. Pemeriksa kualitas TP memberi saran tanpa memblokir.
 4. **Pengaturan lanjutan** tertutup secara bawaan: komposisi mudah/sedang/sulit (bawaan 30/50/20, saling terkunci pada 100%), bentuk soal, cara menjawab benar-salah (centang kotak atau lingkari B/S), bahasa, gaya, soal bergambar, teks materi tempel, dan judul paket.
-5. **Bilah bawah:** ringkasan kelas dan mapel, tombol Batal (merah), dan tombol utama "Buat n soal". "Simpan pengaturan ini" (dengan nama) ada di akhir Pengaturan lanjutan. Pembuatan dimulai langsung dan mengarah ke layar Periksa.
+5. **Panel Rencana** (samping kanan di laptop, bilah bawah dengan "Rincian" di ponsel): ringkasan isian, perkiraan permintaan AI, waktu, sisa kuota, dan biaya, isian yang masih kurang, tombol Batal (merah), dan tombol utama "Buat n soal" (atau "Pasang kunci AI dulu" bila belum ada kunci). "Simpan pengaturan ini" (dengan nama) ada di akhir Pengaturan lanjutan. Isian tersimpan otomatis sebagai draf. Pembuatan dimulai langsung dan mengarah ke halaman paket soal.
 
 Mapel diketik guru; rumpun mapel (penentu pemeriksa jawaban) ditebak dari namanya. Mapel yang belum punya pemeriksa otomatis menghasilkan soal berketerangan "Kunci tidak dicek otomatis".
 
@@ -162,14 +162,16 @@ Terang dan ramah: latar abu kebiruan lembut, kartu putih, dan sedikit warna yang
 1. Menu atas di atas garis kuning, jelas berbeda dari area kerja.
 2. Setiap kelompok isian berada dalam satu kartu putih dengan pita berwarna di atasnya. Nomor kelompok berlatar kuning tidak dipakai lagi (penyederhanaan 25 Oktober, `docs/PENYEDERHANAAN-UI.md`).
 3. Jarak antarkartu 24 px, jarak di dalam kartu 16 px.
-4. Satu tombol utama berwarna pekat per layar; tombol lain berupa garis tepi. Merah hanya untuk hapus dan batal.
-5. Teks minimal 16 px, judul halaman 30 sampai 36 px, font Nunito Sans.
+4. Satu tombol utama berwarna pekat per layar; tombol lain berupa garis tepi. Merah hanya untuk hapus dan batal; aksi yang menghapus data ada di kartu Zona berbahaya paling bawah dan selalu meminta konfirmasi.
+5. Teks minimal 16 px, judul halaman 30 sampai 36 px, font Nunito Sans. Angka memakai lebar sejajar (tabular).
+6. Status paket memakai satu peta: biru sedang dibuat, kuning-oranye menunggu atau dijeda, merah perlu perhatian, hijau siap diunduh.
+7. Mode gelap tersedia (Profil dan kop → Tampilan) dan mengikuti sistem secara bawaan, tanpa kedipan saat dibuka.
 
 | Peran | Warna | Kode |
 | --- | --- | --- |
 | Latar halaman | Abu kebiruan lembut | #F5F7FA |
 | Kartu | Putih, garis tepi abu | #FFFFFF, #D7DEE8 |
-| Warna utama: tombol, tautan, sedang dibuat | Biru | #2563EB |
+| Warna utama: tombol, tautan, sedang dibuat | Biru | #2563EB (mode gelap: teks dan tautan #6AA8FB, tombol berisi #2563EB) |
 | Ornamen | Kuning | #FACC15 |
 | Peringatan: kuota hampir habis, dijeda, kunci tidak dicek otomatis | Kuning-oranye | #B45309 pada #FEF3C7 |
 | Berhasil: siap diunduh, tersimpan | Hijau | #15803D pada #DCFCE7 |
@@ -178,7 +180,7 @@ Terang dan ramah: latar abu kebiruan lembut, kartu putih, dan sedikit warna yang
 | Teks pendukung | Abu sedang | #4B5563 |
 | Hapus, batal, galat | Merah | #B91C1C |
 
-Semua pasangan teks dan latar berkontras setidaknya 4,5 banding 1. Warna tidak berdiri sendiri: setiap status juga memakai kata dan ikon.
+Semua pasangan teks dan latar berkontras setidaknya 4,5 banding 1 di mode terang dan gelap; diuji otomatis dari token (`tests/kontras.test.ts`) dan dengan axe-core di delapan layar (`npm run e2e`). Warna tidak berdiri sendiri: setiap status juga memakai kata dan ikon. Semua elemen dapat dicapai dengan papan ketik dan memperlihatkan cincin fokus.
 
 ### Bantuan
 

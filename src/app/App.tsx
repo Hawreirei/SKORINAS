@@ -20,7 +20,7 @@ const TidakDitemukan = lazy(() => import('./TidakDitemukan'));
 function Tata() {
   return (
     <div className="flex min-h-screen flex-col">
-      <a href="#isi" className="sr-only z-50 rounded-lg bg-utama px-4 py-3 font-bold text-di-tinta focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
+      <a href="#isi" className="sr-only z-50 rounded-lg bg-utama-isi px-4 py-3 font-bold text-di-tinta focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
         Lompat ke isi
       </a>
       <Kepala />

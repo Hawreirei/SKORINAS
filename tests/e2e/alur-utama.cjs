@@ -3,6 +3,7 @@
 const { chromium } = require('playwright');
 const fs = require('node:fs');
 const path = require('node:path');
+const AXE = fs.readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
 
 const DASAR = process.env.DASAR ?? 'http://localhost:4173';
 const KELUAR = process.argv[2] ?? 'e2e-hasil';
@@ -343,6 +344,94 @@ function butirPalsu(bentuk) {
     lebar = Math.max(lebar, await hp.evaluate(() => document.documentElement.scrollWidth));
   }
   console.log('lebar halaman ponsel', lebar);
+
+  // Audit aksesibilitas (UI-12): axe-core (WCAG 2.2 A/AA) di delapan layar, mode terang dan gelap.
+  const periksaAxe = async (pg, layar) => {
+    await pg.evaluate(AXE);
+    const hasil = await pg.evaluate(() => window.axe.run(document, { runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'], resultTypes: ['violations'] }));
+    for (const v of hasil.violations) galat.push(`axe ${layar}: ${v.id} (${v.nodes.length}) ${v.nodes[0].target.join(' ')}`);
+    return hasil.violations.length;
+  };
+  const LAYAR = [
+    ['beranda', DASAR + '/'],
+    ['buat', DASAR + '/soal/baru'],
+    ['paket', urlPeriksa],
+    ['unduh', urlUnduh],
+    ['soal-saya', DASAR + '/soal'],
+    ['pengaturan-ai', DASAR + '/pengaturan/ai'],
+    ['profil', DASAR + '/pengaturan'],
+    ['cadangan', DASAR + '/cadangan'],
+  ];
+  const gelap = await ctx.newPage();
+  await gelap.emulateMedia({ colorScheme: 'dark' });
+  gelap.on('pageerror', (e) => galat.push(e.message));
+  let pelanggaran = 0;
+  for (const [nama, u] of LAYAR) {
+    for (const [pg, tema] of [[page, 'terang'], [gelap, 'gelap']]) {
+      await pg.goto(u);
+      await pg.waitForSelector('h1');
+      await pg.waitForLoadState('networkidle');
+      if (tema === 'gelap' && !(await pg.evaluate(() => document.documentElement.classList.contains('dark')))) galat.push(`${nama}: mode gelap tidak aktif`);
+      pelanggaran += await periksaAxe(pg, `${nama} ${tema}`);
+      if (tema === 'gelap' && ['buat', 'paket', 'unduh'].includes(nama)) await pg.screenshot({ path: path.join(KELUAR, `14-${nama}-gelap.png`), fullPage: true });
+    }
+  }
+  console.log('axe: layar diperiksa', LAYAR.length * 2, '· pelanggaran', pelanggaran);
+
+  // Papan ketik (UI-12): setiap elemen yang difokus dengan Tab memperlihatkan cincin fokus,
+  // tombol utama dapat dicapai, dan Unduh berjalan hanya dengan Enter.
+  const fokusKini = (pg) =>
+    pg.evaluate(() => {
+      const el = document.activeElement;
+      if (!el || el === document.body) return null;
+      const cs = getComputedStyle(el);
+      const garis = cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0;
+      const bayang = cs.boxShadow !== 'none';
+      const nama = (el.getAttribute('aria-label') || el.labels?.[0]?.textContent || el.textContent || el.id || el.tagName).replace(/\s+/g, ' ').trim().slice(0, 50);
+      // Penanda unik per elemen agar putaran Tab kembali ke awal dapat dikenali.
+      el.dataset.ujiFokus ??= String(Math.random());
+      return { nama, terlihat: garis || bayang, utama: el.classList.contains('tombol-utama'), kunci: el.dataset.ujiFokus };
+    });
+  const telusuriTab = async (pg, layar, cariUtama) => {
+    await pg.evaluate(() => {
+      window.scrollTo(0, 0);
+      document.activeElement?.blur();
+    });
+    const dilihat = new Set();
+    let ketemu = null;
+    for (let i = 0; i < 150; i++) {
+      await pg.keyboard.press('Tab');
+      const f = await fokusKini(pg);
+      if (!f) continue;
+      if (dilihat.has(f.kunci)) break;
+      dilihat.add(f.kunci);
+      if (!f.terlihat) galat.push(`${layar}: fokus tidak terlihat pada "${f.nama}"`);
+      if (f.utama && cariUtama.test(f.nama)) {
+        ketemu = f;
+        break;
+      }
+    }
+    if (!ketemu) galat.push(`${layar}: tombol utama ${cariUtama} tidak tercapai dengan Tab`);
+    return dilihat.size;
+  };
+  await page.goto(DASAR + '/soal/baru');
+  await page.waitForSelector('h1');
+  const nBuat = await telusuriTab(page, 'buat (papan ketik)', /^Buat \d+ soal/);
+  await page.goto(urlPeriksa);
+  await page.waitForSelector('h1');
+  const nPaket = await telusuriTab(page, 'paket (papan ketik)', /^Unduh/);
+  await page.keyboard.press('Enter');
+  await page.waitForURL(/\/ekspor$/);
+  await page.waitForSelector('h1');
+  const nUnduh = await telusuriTab(page, 'unduh (papan ketik)', /^Unduh/);
+  const unduhan = [];
+  const catat = (d) => unduhan.push(d.suggestedFilename());
+  page.on('download', catat);
+  await page.keyboard.press('Enter');
+  await page.getByText(/terunduh/i).first().waitFor();
+  page.off('download', catat);
+  if (!unduhan.length) galat.push('unduh dengan Enter tidak menghasilkan berkas');
+  console.log('papan ketik: elemen difokus', { buat: nBuat, paket: nPaket, unduh: nUnduh }, '· berkas lewat Enter', unduhan.length);
 
   // Halaman "Mohon cek dulu" dihapus; tautan lama diarahkan ke Soal saya.
   await page.goto(DASAR + '/telaah');

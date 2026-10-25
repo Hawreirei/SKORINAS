@@ -42,7 +42,7 @@ export function Chip({ aktif, children, className = '', ...props }: ButtonHTMLAt
     <button
       type="button"
       aria-pressed={aktif}
-      className={`min-h-11 rounded-lg border px-4 text-base font-semibold transition-colors ${aktif ? 'border-utama bg-utama text-di-tinta' : 'border-garis-kuat bg-kartu text-tinta hover:border-utama hover:text-utama'} ${className}`}
+      className={`min-h-11 rounded-lg border px-4 text-base font-semibold transition-colors ${aktif ? 'border-utama-isi bg-utama-isi text-di-tinta' : 'border-garis-kuat bg-kartu text-tinta hover:border-utama hover:text-utama'} ${className}`}
       {...props}
     >
       {children}

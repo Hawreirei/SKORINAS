@@ -99,7 +99,7 @@ export function MenuLainnya({ butir, label = 'Lainnya', ikon = false, arah = 'at
                 tutup(true);
                 b.onClick();
               }}
-              className={`block min-h-11 w-full px-4 text-left text-base font-semibold hover:bg-lembut focus:bg-lembut focus:outline-none disabled:opacity-40 ${b.bahaya ? 'text-buruk' : 'text-tinta'}`}
+              className={`block min-h-11 w-full px-4 text-left text-base font-semibold hover:bg-lembut focus:bg-lembut focus-visible:-outline-offset-3 disabled:opacity-40 ${b.bahaya ? 'text-buruk' : 'text-tinta'}`}
             >
               {b.label}
             </button>

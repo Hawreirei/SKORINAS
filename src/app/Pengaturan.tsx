@@ -113,7 +113,7 @@ export default function Pengaturan() {
 
           <figure className="mt-6">
             <figcaption className="text-base font-bold text-tinta">Pratinjau kop</figcaption>
-            <div className="kertas mt-2 overflow-hidden rounded-lg border border-garis px-4 py-4 text-[15px] leading-snug sm:px-6 sm:text-[16px]">
+            <div className="kertas mt-2 overflow-hidden rounded-lg border border-garis px-4 py-4 text-base leading-snug sm:px-6">
               <KopLembar kop={kop} identitas={pisahKoma(identitas)} mapelKelas="Mapel · Kelas" />
             </div>
           </figure>
