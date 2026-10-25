@@ -11,7 +11,7 @@ import { URUTAN_BENTUK } from '../generasi/rencana';
 import { faseDariKelas } from '../kurikulum/fase';
 import { nilaiTp } from '../kurikulum/pemeriksa-tp';
 import { paketUntuk, rumpunDariMapel } from '../paket';
-import { KepalaHalaman, PenunjukLangkah } from '../komponen/Kepala';
+import { KepalaHalaman } from '../komponen/Kepala';
 import { usePesan } from '../komponen/Pesan';
 import { Kartu, Label, Peringatan } from '../komponen/Status';
 import { Chip, Panah, Tombol } from '../komponen/Tombol';
@@ -270,7 +270,6 @@ export default function BuatSoal() {
 
   return (
     <div>
-      <PenunjukLangkah langkah={1} />
       <div className="mx-auto max-w-[880px] px-4 pb-16 pt-8 sm:px-8 sm:pt-10">
         <KepalaHalaman judul="Buat soal">Cukup isi kelas, mapel, dan jumlah soal. Sisanya sudah terisi otomatis.</KepalaHalaman>
 
@@ -366,7 +365,7 @@ export default function BuatSoal() {
               {!nSah
                 ? `Jumlah soal: ketik angka ${MIN_SOAL} sampai ${MAKS_SOAL}.`
                 : [
-                    f.mapel.trim() ? (dicekOtomatis ? 'Kunci soal hitungan dicek otomatis.' : 'Mapel ini belum dapat dicek otomatis: setiap soal ditandai "Mohon cek dulu".') : `Jumlah ${MIN_SOAL} sampai ${MAKS_SOAL} soal.`,
+                    f.mapel.trim() ? (dicekOtomatis ? 'Kunci soal hitungan dicek otomatis.' : 'Kunci soal mapel ini tidak dicek otomatis.') : `Jumlah ${MIN_SOAL} sampai ${MAKS_SOAL} soal.`,
                     menitPerkiraan && f.n > (batasModel?.rpm ?? 0) ? `Perkiraan selesai sekitar ${menitPerkiraan} menit karena batas ${batasModel?.rpm} permintaan per menit.` : '',
                     kuotaKurang && profil.model_cadangan ? `Sisa kuota hari ini ${sisaHarian} permintaan; sisanya dibuat dengan model cadangan.` : '',
                   ]

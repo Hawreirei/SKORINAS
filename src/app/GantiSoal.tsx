@@ -58,7 +58,7 @@ export function GantiSoal({ soal, mode, selesai }: { soal: Soal; mode: 'ganti' |
               <TampilSoal isi={soal.isi_json} besar={false} />
             </div>
             <div className="border-t border-garis pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-              <div className="font-semibold">Versi baru · {kandidat.hasil.periksa?.status_mutu === 'perlu_telaah' ? 'mohon cek dulu' : 'jawaban sudah dicek'}</div>
+              <div className="font-semibold">Versi baru · {kandidat.hasil.periksa?.status_mutu === 'perlu_telaah' ? 'kunci tidak dicek otomatis' : 'kunci sudah dihitung ulang'}</div>
               <TampilSoal isi={kandidat.hasil.isi} besar={false} />
               <p className="font-semibold mt-4 text-redup">
                 {kandidat.model.model} · {formatBiaya(kandidat.biaya)}

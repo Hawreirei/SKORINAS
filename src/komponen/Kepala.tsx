@@ -13,7 +13,7 @@ const NAV = [
 ];
 
 function aktif(path: string, ke: string, akhir: boolean) {
-  if (ke === '/soal') return path === '/soal' || (path.startsWith('/soal/') && !path.startsWith('/soal/baru')) || path === '/telaah';
+  if (ke === '/soal') return path === '/soal' || (path.startsWith('/soal/') && !path.startsWith('/soal/baru'));
   return akhir ? path === ke : path.startsWith(ke);
 }
 
@@ -99,51 +99,5 @@ export function KepalaHalaman({ label, judul, children }: { label?: string; judu
       <h1 className="judul-besar mt-1 text-[30px] sm:text-[36px]">{judul}</h1>
       {children ? <div className="mt-2 max-w-[640px] text-[17px] leading-relaxed text-redup">{children}</div> : null}
     </div>
-  );
-}
-
-const LANGKAH = [
-  { nama: 'Buat', warna: 'bg-utama text-di-tinta', lembut: 'bg-utama-lembut text-utama-tua dark:text-di-tinta' },
-  { nama: 'Periksa', warna: 'bg-awas text-di-tinta', lembut: 'bg-awas-latar text-awas' },
-  { nama: 'Unduh', warna: 'bg-baik text-di-tinta', lembut: 'bg-baik-latar text-baik' },
-] as const;
-
-/** Penunjuk "Langkah n dari 3" yang selalu terlihat di layar Buat, Periksa, dan Unduh. */
-export function PenunjukLangkah({ langkah, paketId }: { langkah: 1 | 2 | 3; paketId?: string }) {
-  const tujuan = [null, paketId ? `/soal/${paketId}` : null, paketId ? `/soal/${paketId}/ekspor` : null];
-  return (
-    <nav aria-label="Langkah" className="tanpa-cetak border-b border-garis bg-kartu">
-      <div className="mx-auto flex max-w-[1312px] flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 sm:px-8">
-        <span className="text-base font-extrabold text-judul">
-          Langkah {langkah} dari 3
-        </span>
-        <ol className="flex items-center gap-1.5 sm:gap-2">
-          {LANGKAH.map((l, i) => {
-            const nomor = i + 1;
-            const kini = nomor === langkah;
-            const isi = (
-              <>
-                <span className={`inline-flex size-6 items-center justify-center rounded-full text-[14px] font-extrabold ${kini ? 'bg-kartu text-tinta' : l.warna}`}>{nomor}</span>
-                {l.nama}
-              </>
-            );
-            const kelas = `inline-flex min-h-9 items-center gap-1.5 rounded-full px-2.5 text-base font-bold sm:gap-2 sm:px-3 ${kini ? l.warna : nomor < langkah ? l.lembut : 'bg-panel text-redup'}`;
-            const ke = tujuan[i];
-            return (
-              <li key={l.nama} className="flex items-center gap-1.5 sm:gap-2" aria-current={kini ? 'step' : undefined}>
-                {i ? <span aria-hidden="true" className="hidden h-px w-4 bg-garis-kuat sm:block" /> : null}
-                {ke && !kini ? (
-                  <Link to={ke} className={`${kelas} hover:underline`}>
-                    {isi}
-                  </Link>
-                ) : (
-                  <span className={kelas}>{isi}</span>
-                )}
-              </li>
-            );
-          })}
-        </ol>
-      </div>
-    </nav>
   );
 }

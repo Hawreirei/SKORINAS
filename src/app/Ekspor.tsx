@@ -2,9 +2,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { db } from '../db/skema';
-import { bangunDokumen, berkasDipilih, JENIS_BERKAS_LABEL, penghalangEkspor, soalUntukEkspor, type JenisBerkas, type OpsiEkspor } from '../ekspor/model';
+import { bangunDokumen, berkasDipilih, JENIS_BERKAS_LABEL, soalUntukEkspor, type JenisBerkas, type OpsiEkspor } from '../ekspor/model';
 import { ekspor, type FormatEkspor } from '../ekspor/peramban';
-import { PenunjukLangkah } from '../komponen/Kepala';
 import { LembarCetak } from '../komponen/LembarCetak';
 import { usePesan } from '../komponen/Pesan';
 import { Kartu, Peringatan } from '../komponen/Status';
@@ -51,11 +50,10 @@ export default function Ekspor() {
   if (!paket || !dok) return <div className="px-4 py-20 sm:px-8">Paket tidak ditemukan.</div>;
 
   const aktif = soalUntukEkspor(soal);
-  const penghalang = penghalangEkspor(paket, aktif);
   const halaman = { soal: 1 + Math.floor(aktif.length / 6), kunci: 1 + (opsi.pembahasan ? 1 + Math.floor(aktif.length / 10) : 0), kisi: 1 + Math.floor(aktif.length / 8) }[pratinjau];
   const pilihan = FORMAT.find((f) => f.id === format)!;
   const daftar = berkasDipilih(opsi);
-  const terhalang = sibuk || penghalang.length > 0 || !aktif.length;
+  const terhalang = sibuk || !aktif.length;
 
   /** Lembar soal, kunci jawaban, dan kisi-kisi diunduh sebagai berkas terpisah, berurutan. */
   async function unduh(berkas: JenisBerkas[]) {
@@ -78,22 +76,15 @@ export default function Ekspor() {
 
   return (
     <div>
-      <PenunjukLangkah langkah={3} paketId={id} />
       <div className="mx-auto flex max-w-[1240px] flex-wrap gap-x-10 px-4 sm:px-8">
         <div className="min-w-0 flex-[1_1_440px] pb-10 pt-8 sm:pt-10 lg:pb-16">
-          <div className="text-base font-bold text-utama">
-            <Link to={`/soal/${id}`} className="hover:underline">
-              {paket.judul}
-            </Link>{' '}
-            · {aktif.length} soal
-          </div>
+          <Link to={`/soal/${id}`} className="inline-flex min-h-10 items-center gap-2 text-base font-bold text-utama hover:underline">
+            <span aria-hidden="true">←</span> Kembali ke soal
+          </Link>
           <h1 className="judul-besar mt-1 text-[30px] sm:text-[36px]">Unduh</h1>
-
-          {penghalang.length ? (
-            <Peringatan className="mt-6">
-              {penghalang.length} soal masih "Mohon cek dulu". <Link to={`/soal/${id}`} className="font-bold underline">Setujui dulu di layar Periksa</Link>.
-            </Peringatan>
-          ) : null}
+          <p className="mt-1 text-base text-redup">
+            {paket.judul} · {aktif.length} soal
+          </p>
 
           <Kartu className="mt-6">
             <h2 className="text-[20px] font-extrabold text-judul">Format</h2>

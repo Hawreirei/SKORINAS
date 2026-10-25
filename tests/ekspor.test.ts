@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import JSZip from 'jszip';
 import { describe, expect, it } from 'vitest';
 import { buatDocx } from '../src/ekspor/docx';
-import { bangunDokumen, berkasDipilih, jawabanAngka, jumlahGaris, namaBerkas, penghalangEkspor, type JenisBerkas } from '../src/ekspor/model';
+import { bangunDokumen, berkasDipilih, jawabanAngka, jumlahGaris, namaBerkas, type JenisBerkas } from '../src/ekspor/model';
 import { buatTex } from '../src/ekspor/tex';
 import { keLatex } from '../src/matematika/latex';
 import { paketUji, profilUji, soalUji } from './bantu-soal';
@@ -74,10 +74,12 @@ describe('model dokumen', () => {
     expect(dd.bagian[0].butir.map((b) => b.tempat.jenis)).toEqual(['garis', 'hitungan']);
     expect(dd.bagian[0].petunjuk).toMatch(/penjelasan dijawab pada garis/);
   });
-  it('menghalangi ekspor soal perlu telaah yang belum ditelaah', () => {
-    const soal = soalUji().map((s) => ({ ...s, status_telaah: 'draf' as const }));
-    expect(penghalangEkspor(paketUji(), soal).length).toBe(soal.filter((s) => s.status_mutu === 'perlu_telaah').length);
-    expect(penghalangEkspor(paketUji(), soalUji())).toEqual([]);
+  it('soal yang kuncinya tidak dicek otomatis ikut diunduh tanpa persetujuan (v0.5)', () => {
+    const asal = soalUji();
+    const soal = asal.map((s, i) => ({ ...s, status_mutu: i === 0 ? ('perlu_telaah' as const) : s.status_mutu, status_telaah: i === 1 ? ('ditelaah_guru' as const) : ('draf' as const) }));
+    const kisi = bangunDokumen(paketUji(), soal, profilUji(), OPSI, 'kisi').kisi;
+    expect(kisi.length).toBe(asal.length);
+    expect(kisi.some((k) => /ditelaah guru/.test(k.status))).toBe(false);
   });
 });
 

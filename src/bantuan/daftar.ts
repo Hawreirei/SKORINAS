@@ -33,8 +33,8 @@ export const BANTUAN: Record<string, VideoBantuan> = {
       'Bila perlu, tulis CP dan TP (satu TP satu baris); jumlah soal dibagi ke tiap TP.',
       'Buka Pengaturan lanjutan untuk mengubah komposisi mudah, sedang, sulit, bentuk soal, bahasa, gaya, dan gambar.',
       'Centang Simpan pengaturan ini bila ingin memakai isian yang sama lain kali, lalu tekan Buat soal.',
-      'Di layar Periksa, baca soal bertanda "Mohon cek dulu" lalu tekan Setujui.',
-      'Di layar Unduh, pilih Word atau PDF lalu tekan Unduh.',
+      'Soal muncul satu per satu. Baca sekali soal yang bertanda "Kunci tidak dicek otomatis", lalu tekan Unduh.',
+      'Pilih Word atau PDF, lalu tekan tombol unduh.',
     ],
   },
   cadangan: {

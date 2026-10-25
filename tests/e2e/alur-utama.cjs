@@ -103,7 +103,7 @@ function butirPalsu(bentuk) {
 
   // Buat soal: tiga isian wajib, sisanya di Pengaturan lanjutan
   await page.goto(DASAR + '/soal/baru');
-  await page.waitForSelector('text=Langkah 1 dari 3');
+  await page.waitForSelector('h1:has-text("Buat soal")');
   await foto('03a-buat-soal-kosong');
   await page.selectOption('#kelas', '4');
   await page.fill('#mapel', 'Matematika');
@@ -117,8 +117,7 @@ function butirPalsu(bentuk) {
   await foto('03-buat-soal');
   await page.getByRole('button', { name: /Buat 12 soal/ }).click();
   await page.waitForURL(/\/soal\/[0-9a-f-]+$/);
-  await page.waitForSelector('text=Lanjut ke Unduh');
-  await page.waitForSelector('text=Langkah 2 dari 3');
+  await page.locator('aside').getByRole('link', { name: /Unduh/ }).waitFor();
   await page.waitForSelector('text=Melanjutkan otomatis dalam', { timeout: 30000 });
   await foto('04a-menunggu-batas');
   await page.waitForSelector('text=Menjaga batas per menit', { timeout: 120000 });
@@ -135,19 +134,18 @@ function butirPalsu(bentuk) {
   await page.keyboard.press('Escape');
   if (await page.getByRole('menuitem').count()) galat.push('menu Lainnya tidak tertutup dengan Escape');
 
-  // Ubah tanda jenis jawaban satu soal uraian, lalu setujui soal "Mohon cek dulu"
+  // Ubah tanda jenis jawaban satu soal uraian. Tanpa persetujuan (v0.5): soal uraian hanya diberi
+  // keterangan, tidak ada tombol Setujui atau penunjuk langkah, dan Unduh langsung aktif.
   const jenis = page.getByRole('radio', { name: /Penjelasan \(garis tulis\)/ });
   if (await jenis.count()) await jenis.first().check();
-  await page.getByRole('button', { name: /^Mohon cek dulu ·/ }).click();
-  const setujui = page.getByRole('button', { name: 'Setujui', exact: true });
-  for (let n = await setujui.count(); n > 0; n = await setujui.count()) {
-    await setujui.first().click();
-    await page.waitForFunction((sisa) => [...document.querySelectorAll('button')].filter((b) => b.textContent === 'Setujui').length < sisa, n);
-  }
-  await page.getByRole('button', { name: /^Semua ·/ }).click();
-  await page.click('text=Lanjut ke Unduh');
+  if (!(await page.getByText('Kunci tidak dicek otomatis').count())) galat.push('soal uraian tanpa keterangan "Kunci tidak dicek otomatis"');
+  if (await page.getByRole('button', { name: /Setujui/ }).count()) galat.push('tombol Setujui masih ada');
+  if (/Mohon cek dulu|Disetujui|Langkah \d dari 3/.test(await page.locator('body').innerText())) galat.push('penanda status atau penunjuk langkah masih tampil');
+  const tautanUnduh = page.locator('aside').getByRole('link', { name: /Unduh/ });
+  if ((await tautanUnduh.getAttribute('aria-disabled')) === 'true') galat.push('Unduh tidak aktif padahal paket sudah selesai');
+  await tautanUnduh.click();
   await page.waitForSelector('text=Unduh 3 berkas Word');
-  await page.waitForSelector('text=Langkah 3 dari 3');
+  await page.getByRole('link', { name: /Kembali ke soal/ }).waitFor();
   await foto('05-unduh');
   const urlUnduh = page.url();
   for (const [fmt, label] of [['docx', 'Word'], ['pdf', 'PDF'], ['tex', 'LaTeX']]) {
@@ -194,6 +192,10 @@ function butirPalsu(bentuk) {
     lebar = Math.max(lebar, await hp.evaluate(() => document.documentElement.scrollWidth));
   }
   console.log('lebar halaman ponsel', lebar);
+
+  // Halaman "Mohon cek dulu" dihapus; tautan lama diarahkan ke Soal saya.
+  await page.goto(DASAR + '/telaah');
+  await page.waitForURL(/\/soal$/);
 
   // Cadangan: unduh .gensoal
   await page.goto(DASAR + '/cadangan');

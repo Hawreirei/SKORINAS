@@ -20,7 +20,6 @@ export default function DaftarSoal() {
   const soalSampah = useLiveQuery(() => db.soal.filter((s) => s.dihapus_pada != null).toArray(), []);
   const q = cari.trim().toLowerCase();
   const tersaring = (paket ?? []).filter((r) => !q || `${r.paket.judul} ${r.paket.parameter_json.mapel} kelas ${r.paket.parameter_json.kelas} ${r.paket.parameter_json.tp.map((t) => t.rumusan).join(' ')}`.toLowerCase().includes(q));
-  const cekDulu = (paket ?? []).reduce((a, r) => a + r.belumDitelaah, 0);
   const sisaHari = (t: number) => Math.max(0, Math.ceil((t + MASA_SAMPAH_MS - Date.now()) / 86400000));
 
   return (
@@ -38,11 +37,6 @@ export default function DaftarSoal() {
         <Chip aktif={tab === 'sampah'} onClick={() => setTab('sampah')}>
           Tong sampah · {(paketSampah?.length ?? 0) + (soalSampah?.length ?? 0)}
         </Chip>
-        {cekDulu ? (
-          <Link to="/telaah" className="ml-1 font-bold text-awas hover:underline">
-            {cekDulu} soal mohon cek dulu
-          </Link>
-        ) : null}
         {tab === 'paket' ? <input className="bidang ml-auto !min-h-11 sm:!w-72" placeholder="Cari judul, mapel, TP" aria-label="Cari paket" value={cari} onChange={(e) => setCari(e.target.value)} /> : null}
       </div>
 

@@ -4,7 +4,6 @@ import { bangkitkanGambar } from '../gambar';
 import type { Gambar } from '../gambar/primitif';
 import { keSvg } from '../gambar/svg';
 import { teksPolos } from '../matematika/teks';
-import { paketUntuk } from '../paket';
 import { URUTAN_BENTUK } from '../generasi/rencana';
 
 export interface OpsiEkspor {
@@ -187,12 +186,6 @@ export function teksKunci(s: Soal, inggris: boolean): string {
   }
 }
 
-/** Soal yang menghalangi unduhan: "Mohon cek dulu" yang belum disetujui guru, atau rumpun risiko tinggi tanpa centang sumber. */
-export function penghalangEkspor(paket: PaketSoal, soal: Soal[]): Soal[] {
-  const risiko = paketUntuk(paket.parameter_json.rumpun)?.risikoTinggi ?? false;
-  return soal.filter((s) => s.status_mutu === 'perlu_telaah' && (s.status_telaah !== 'ditelaah_guru' || (risiko && !s.sumber_dicek)));
-}
-
 export function soalUntukEkspor(soal: Soal[]): Soal[] {
   return soal.filter((s) => s.dihapus_pada == null && s.status_mutu !== 'ditolak').sort((a, b) => a.urutan - b.urutan);
 }
@@ -263,7 +256,7 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
       level: b.soal.level_kognitif,
       kesukaran: KESUKARAN_LABEL[b.soal.kesukaran_rancangan],
       bentuk: BENTUK_LABEL[b.soal.bentuk],
-      status: STATUS_MUTU_LABEL[b.soal.status_mutu] + (b.soal.status_telaah === 'ditelaah_guru' ? ' · ditelaah guru' : ''),
+      status: STATUS_MUTU_LABEL[b.soal.status_mutu],
     })),
     kurikulumLabel,
     opsi,

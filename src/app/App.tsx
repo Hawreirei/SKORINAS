@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { Kaki, Kepala } from '../komponen/Kepala';
 import { PenyediaPesan } from '../komponen/Pesan';
 import { PembaruanAplikasi } from './PembaruanAplikasi';
@@ -10,7 +10,6 @@ const DaftarSoal = lazy(() => import('./DaftarSoal'));
 const Peninjauan = lazy(() => import('./Peninjauan'));
 const Ekspor = lazy(() => import('./Ekspor'));
 const Cetak = lazy(() => import('./Cetak'));
-const Telaah = lazy(() => import('./Telaah'));
 const Pengaturan = lazy(() => import('./Pengaturan'));
 const PengaturanAi = lazy(() => import('./PengaturanAi'));
 const Cadangan = lazy(() => import('./Cadangan'));
@@ -47,7 +46,8 @@ export function App() {
             <Route path="soal" element={<DaftarSoal />} />
             <Route path="soal/:id" element={<Peninjauan />} />
             <Route path="soal/:id/ekspor" element={<Ekspor />} />
-            <Route path="telaah" element={<Telaah />} />
+            {/* Halaman telaah dihapus pada v0.5; tautan lama diarahkan ke Soal saya. */}
+            <Route path="telaah" element={<Navigate to="/soal" replace />} />
             <Route path="pengaturan" element={<Pengaturan />} />
             <Route path="pengaturan/ai" element={<PengaturanAi />} />
             <Route path="cadangan" element={<Cadangan />} />

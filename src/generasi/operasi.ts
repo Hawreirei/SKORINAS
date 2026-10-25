@@ -125,18 +125,6 @@ export async function simpanSuntingan(soalId: string, isi: IsiSoal): Promise<Has
   return h;
 }
 
-export async function setujui(soalId: string, sumberDicek = false): Promise<void> {
-  const s = await ambilSoal(soalId);
-  await db.soal.update(soalId, { status_telaah: 'ditelaah_guru', sumber_dicek: sumberDicek || s.sumber_dicek, diubah_pada: sekarang() });
-  await log(soalId, s.status_mutu === 'perlu_telaah' ? 'telaah' : 'setujui', s.status_telaah, 'ditelaah_guru');
-}
-
-export async function batalSetujui(soalId: string): Promise<void> {
-  const s = await ambilSoal(soalId);
-  await db.soal.update(soalId, { status_telaah: 'draf', diubah_pada: sekarang() });
-  await log(soalId, 'setujui', s.status_telaah, 'draf');
-}
-
 /** Guru mengubah tanda jenis jawaban uraian. Hanya tata letak tempat jawaban yang berubah, jadi status tidak diulang. */
 export async function aturJenisUraian(soalId: string, jenis: JenisUraian): Promise<void> {
   const s = await ambilSoal(soalId);

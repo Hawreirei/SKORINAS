@@ -38,7 +38,7 @@ Kebijakan keamanan konten juga disisipkan sebagai `<meta>` saat build, karena Gi
 | F-10 | Kisi-kisi, kunci, pembahasan otomatis | Selesai |
 | F-11 | Unduh Word dan PDF (Times New Roman 12, pakem penulisan soal); LaTeX di menu lanjutan | Selesai (v0.4); tampilan cetak sebagai cadangan |
 | F-12 | Cadangan .gensoal, pengingat, penyimpanan persisten | Selesai |
-| F-13 | Periksa: satu penanda per soal, Setujui, gerbang unduh | Dihapus pada v0.5; dikerjakan di UI-00 (#14) |
+| F-13 | Periksa: satu penanda per soal, Setujui, gerbang unduh | Dihapus (v0.5, UI-00) |
 | F-14 | Kunci API milik guru, uji kunci, peringatan biaya dan privasi | Selesai |
 | F-15 | CP dan TP ditulis di layar Buat | Selesai (v0.4) |
 | F-16 | Registri model berlencana + daftar langsung penyedia | Selesai; golden set per model belum dijalankan dengan kunci asli |

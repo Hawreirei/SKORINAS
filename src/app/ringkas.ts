@@ -4,11 +4,7 @@ import type { PaketSoal, Soal } from '../db/tipe';
 export interface RingkasanPaket {
   paket: PaketSoal;
   jumlah: number;
-  terverifikasi: number;
-  perluTelaah: number;
-  belumDitelaah: number;
   ditolak: number;
-  disetujui: number;
 }
 
 export function ringkasPaket(paket: PaketSoal, soal: Soal[]): RingkasanPaket {
@@ -16,11 +12,7 @@ export function ringkasPaket(paket: PaketSoal, soal: Soal[]): RingkasanPaket {
   return {
     paket,
     jumlah: aktif.length,
-    terverifikasi: aktif.filter((s) => s.status_mutu === 'terverifikasi_hitung' || s.status_mutu === 'terverifikasi_aturan').length,
-    perluTelaah: aktif.filter((s) => s.status_mutu === 'perlu_telaah').length,
-    belumDitelaah: aktif.filter((s) => s.status_mutu === 'perlu_telaah' && s.status_telaah !== 'ditelaah_guru').length,
     ditolak: soal.filter((s) => s.status_mutu === 'ditolak').length,
-    disetujui: aktif.filter((s) => s.status_telaah === 'ditelaah_guru').length,
   };
 }
 
@@ -35,7 +27,6 @@ export async function daftarRingkasan(batas?: number, terhapus = false): Promise
 export function labelStatusPaket(r: RingkasanPaket): { teks: string; isi: boolean; nada: 'proses' | 'awas' | 'baik' } {
   if (r.paket.status === 'membuat') return { teks: `${r.jumlah}/${r.paket.parameter_json.n} soal · Sedang dibuat`, isi: false, nada: 'proses' };
   if (r.paket.status === 'dijeda') return { teks: `${r.jumlah}/${r.paket.parameter_json.n} soal · Dijeda`, isi: false, nada: 'awas' };
-  if (r.belumDitelaah) return { teks: `${r.jumlah} soal · ${r.belumDitelaah} mohon cek dulu`, isi: false, nada: 'awas' };
   return { teks: `${r.jumlah} soal · Siap diunduh`, isi: true, nada: 'baik' };
 }
 

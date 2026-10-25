@@ -1,42 +1,45 @@
 import type { JenisUraian, Soal } from '../db/tipe';
-import { BENTUK_LABEL, KESUKARAN_LABEL, jenisUraian, penandaSoal } from '../db/tipe';
-import { aturJenisUraian, aturKunci, batalSetujui, hapusSoal, setujui } from '../generasi/operasi';
-import { Kartu, LencanaPenanda } from '../komponen/Status';
+import { BENTUK_LABEL, KESUKARAN_LABEL, jenisUraian } from '../db/tipe';
+import { aturJenisUraian, aturKunci, hapusSoal } from '../generasi/operasi';
+import { Kartu } from '../komponen/Status';
 import { MenuLainnya } from '../komponen/MenuLainnya';
 import { PembahasanSoal, TampilSoal } from '../komponen/TampilSoal';
 import { Tombol } from '../komponen/Tombol';
 
 export type AksiKartu = 'sunting' | 'ganti' | 'buat_ulang';
 
-const PITA = { dicek: 'utama', cek_dulu: 'awas', disetujui: 'baik', ditolak: 'tanpa' } as const;
-
-/** Satu soal di layar Periksa: satu penanda, Setujui dan Sunting terlihat, aksi lain di menu Lainnya. */
+/**
+ * Satu soal di halaman paket. Tanpa penanda status dan tanpa langkah persetujuan (rancangan v0.5);
+ * soal yang kuncinya tidak dapat dicek otomatis hanya diberi satu kalimat keterangan.
+ */
 export function KartuSoal({ soal, nomor, risikoTinggi, aksi }: { soal: Soal; nomor: number; risikoTinggi: boolean; aksi: (a: AksiKartu) => void }) {
-  const penanda = penandaSoal(soal);
   const terkunci = soal.terkunci;
   const jenis = soal.bentuk === 'uraian' ? jenisUraian(soal.isi_json) : null;
-  const perluDicek = penanda === 'cek_dulu';
+  const tanpaCek = soal.status_mutu === 'perlu_telaah';
   return (
-    <Kartu as="article" pita={PITA[penanda]} id={`soal-${soal.id}`} aria-labelledby={`nomor-${soal.id}`}>
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-        <div className="flex min-w-0 items-baseline gap-3">
-          <span id={`nomor-${soal.id}`} className="text-[22px] font-extrabold text-judul">
-            {nomor}.
-          </span>
-          <span className="text-base font-semibold text-redup">
-            {BENTUK_LABEL[soal.bentuk]} · {KESUKARAN_LABEL[soal.kesukaran_rancangan]}
-          </span>
-        </div>
-        <LencanaPenanda penanda={penanda} />
+    <Kartu as="article" pita={tanpaCek ? 'awas' : 'utama'} id={`soal-${soal.id}`} aria-labelledby={`nomor-${soal.id}`}>
+      <div className="flex min-w-0 items-baseline gap-3">
+        <span id={`nomor-${soal.id}`} className="text-[22px] font-extrabold text-judul">
+          {nomor}.
+        </span>
+        <span className="text-base font-semibold text-redup">
+          {BENTUK_LABEL[soal.bentuk]} · {KESUKARAN_LABEL[soal.kesukaran_rancangan]}
+        </span>
       </div>
       <TampilSoal isi={soal.isi_json} tanpaPembahasan />
-      {perluDicek ? (
-        <div className="mt-5 rounded-lg border border-awas/30 bg-awas-latar px-4 py-3 text-base leading-normal text-awas">
-          {soal.bentuk === 'uraian' ? 'Jawaban soal uraian tidak dapat dicek otomatis.' : 'Kunci soal ini tidak dapat dicek otomatis.'} Baca kunci{soal.bentuk === 'uraian' ? ' dan rubrik' : ''}, lalu tekan Setujui.
-          {risikoTinggi ? ' Periksa juga kutipan sumber di pembahasan.' : ''}
-        </div>
+      {tanpaCek ? (
+        <p className="mt-4 flex items-start gap-2 text-base leading-normal text-awas">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-1 shrink-0">
+            <path d="M8 1.5l6.5 12h-13z" />
+            <path d="M8 6.5v3M8 11.6v.2" />
+          </svg>
+          <span>
+            Kunci tidak dicek otomatis. Baca sekali sebelum dipakai.
+            {risikoTinggi ? ' Periksa juga kutipan sumber di pembahasan.' : ''}
+          </span>
+        </p>
       ) : null}
-      <details className="group mt-4" open={perluDicek}>
+      <details className="group mt-4" open={tanpaCek}>
         <summary className="cursor-pointer text-base font-bold text-utama">
           {soal.isi_json.rubrik?.length ? 'Rubrik dan pembahasan' : 'Pembahasan'}
           {soal.catatan_mutu.length ? ' · catatan pemeriksaan' : ''}
@@ -71,24 +74,7 @@ export function KartuSoal({ soal, nomor, risikoTinggi, aksi }: { soal: Soal; nom
           </div>
         </fieldset>
       ) : null}
-      <div className="mt-5 grid grid-cols-3 gap-2 border-t border-garis pt-4 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
-        {penanda === 'disetujui' ? (
-          <Tombol varian="hantu" className="!px-3 sm:!px-5" onClick={() => batalSetujui(soal.id)} aria-label="Batalkan persetujuan">
-            <span className="sm:hidden">Batalkan</span>
-            <span className="hidden sm:inline">Batalkan persetujuan</span>
-          </Tombol>
-        ) : (
-          <Tombol
-            varian="garis"
-            className="!px-3 sm:!px-5"
-            onClick={() => {
-              if (perluDicek && risikoTinggi && !confirm('Anda sudah memeriksa kunci dan kutipan sumber di pembahasan?')) return;
-              void setujui(soal.id, risikoTinggi);
-            }}
-          >
-            Setujui
-          </Tombol>
-        )}
+      <div className="mt-5 grid grid-cols-2 gap-2 border-t border-garis pt-4 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
         <Tombol varian="hantu" className="!px-3 sm:!px-5" onClick={() => aksi('sunting')} disabled={terkunci}>
           Sunting
         </Tombol>
