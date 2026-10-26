@@ -169,7 +169,11 @@ function butirPalsu(bentuk) {
   await page.waitForSelector('h1:has-text("Buat soal")');
   const draf = await page.evaluate(() => ['#kelas', '#mapel', '#jumlah'].map((q) => document.querySelector(q).value));
   if (draf.join('|') !== '4|Matematika|12') galat.push(`draf layar Buat tidak pulih setelah muat ulang: ${draf.join('|')}`);
-  await page.getByRole('button', { name: /Pengaturan lanjutan/ }).click();
+  // Opsi lanjutan: satu tombol lebar lalu kartu lipat per kelompok, semuanya tertutup di awal.
+  await page.getByRole('button', { name: 'Tampilkan opsi lanjutan' }).click();
+  const kartu = (judul) => page.getByRole('button', { name: new RegExp(`^${judul}`) });
+  if ((await page.locator('section[aria-label="Opsi lanjutan"] h3 button[aria-expanded="false"]').count()) !== 6) galat.push('opsi lanjutan tidak berisi enam kartu tertutup');
+  await kartu('Bentuk soal').click();
   for (const b of ['Pilihan ganda kompleks', 'Benar-salah', 'Menjodohkan', 'Isian singkat', 'Uraian']) await page.getByRole('button', { name: b, exact: true }).click();
   // Pengaturan lanjutan rinci: jumlah per bentuk, banyak opsi, dan skor.
   await page.getByLabel('Atur jumlah per bentuk soal').check();
@@ -181,6 +185,7 @@ function butirPalsu(bentuk) {
   await page.getByLabel('Cantumkan skor per soal').check();
   // 3 PG × 1 + 2 PG kompleks × 2 + 2 B-S × 1 + 2 menjodohkan × 3 + 2 isian × 2 + 1 uraian × 5 = 24.
   await page.locator('aside[aria-label="Rencana"]').getByText('Skor maksimal 24').waitFor();
+  await kartu('Judul dan simpan').click();
   await page.getByLabel('Simpan pengaturan ini').check();
   await page.fill('#nama-preset', 'Matematika K4 · Pecahan');
   await page.fill('#judul', 'Penjumlahan pecahan');

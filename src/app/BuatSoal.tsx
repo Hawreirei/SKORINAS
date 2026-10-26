@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { db } from '../db/skema';
 import type { Bentuk, BahasaSoal, CaraBenarSalah, GayaSoal, Level, ModeGambar, ParameterPaket, Preset, TpDipakai } from '../db/tipe';
@@ -14,7 +14,7 @@ import { paketUntuk, rumpunDariMapel } from '../paket';
 import { KepalaHalaman } from '../komponen/Kepala';
 import { useKonfirmasi } from '../komponen/Konfirmasi';
 import { usePesan } from '../komponen/Pesan';
-import { BagianLipat, IsianAngka, IsianPanjang, IsianTeks, Pemberitahuan, Pilihan, PilihanBanyak, PilihanDaftar, Sakelar } from '../komponen/Formulir';
+import { IsianAngka, IsianPanjang, IsianTeks, KartuLipat, OpsiLanjutan, Pemberitahuan, Pilihan, PilihanBanyak, PilihanDaftar, Sakelar } from '../komponen/Formulir';
 import { Kartu } from '../komponen/Status';
 import { Panah, Tombol } from '../komponen/Tombol';
 import { useJudulHalaman, useProfil, useRegistri } from './kait';
@@ -205,18 +205,9 @@ function TotalJumlah({ total, n, bagi, labelBagi, samakan }: { total: number; n:
   );
 }
 
-/** Kelompok isian di dalam Pengaturan lanjutan: judul kecil, satu kalimat penjelas, lalu isinya. */
-function SubBagian({ judul, ket, children }: { judul: string; ket?: string; children: ReactNode }) {
-  const id = useId();
-  return (
-    <section aria-labelledby={id} className="border-t border-garis pt-6 first:border-t-0 first:pt-0">
-      <h3 id={id} className="text-[18px] font-extrabold text-judul">
-        {judul}
-      </h3>
-      {ket ? <p className="mt-0.5 text-base text-redup">{ket}</p> : null}
-      <div className="mt-4 space-y-6">{children}</div>
-    </section>
-  );
+/** Penanda di kepala kartu opsi lanjutan bila ada isian yang perlu diperbaiki. */
+function TandaPerbaiki() {
+  return <span className="inline-flex min-h-7 items-center rounded-full bg-buruk-latar px-2.5 text-base font-bold text-buruk">Perlu diperbaiki</span>;
 }
 
 function Langkah({ label, onClick, disabled }: { label: string; onClick: () => void; disabled?: boolean }) {
@@ -345,6 +336,8 @@ export default function BuatSoal() {
   const aturTp = daftarTp.length > 1;
   const paramSusunan = { n: f.n, persen: f.persen, bentuk: bentukTerpilih, tp: tpUntuk(f).map((rumusan) => ({ id: '', rumusan })), jumlah_bentuk: jumlahBentukDipakai(f), sebaran_level: f.sebaranLevel, jumlah_tp: aturTp ? f.jumlahTp : null };
   const galatSusunan = galatKomposisi(paramSusunan).filter((g) => !g.startsWith('Pilih minimal'));
+  const galatBentuk = !f.bentuk.length || (!!f.jumlahBentuk && bentukTerpilih.reduce((n, b) => n + (f.jumlahBentuk![b] ?? 0), 0) !== f.n);
+  const galatKesukaran = (!!f.sebaranLevel && LEVEL.reduce((n, l) => n + (f.sebaranLevel![l] ?? 0), 0) !== f.n) || (aturTp && !!f.jumlahTp && f.jumlahTp.reduce((n, x) => n + x, 0) !== f.n);
   // Banyak soal per bentuk menurut rencana, untuk skor maksimal. Kosong bila susunan belum sah.
   const perBentuk = useMemo(() => {
     try {
@@ -365,6 +358,7 @@ export default function BuatSoal() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [daftarTp.length]);
   const kataMateri = f.materi.trim() ? f.materi.trim().split(/\s+/).length : 0;
+  const galatMateri = kataMateri > MAKS_KATA_MATERI;
   const siapAi = kunci !== undefined && (kunci ?? []).some((k) => k.kunci && k.penyedia === profil.penyedia_utama) && !!profil.model_utama;
   const belumSiapAi = kunci !== undefined && !siapAi;
   const rumpun = rumpunDariMapel(f.mapel);
@@ -391,6 +385,8 @@ export default function BuatSoal() {
     'nama-preset': simpanPreset && !namaPreset.trim() ? 'Beri nama pengaturan tersimpan.' : null,
   };
   const tampilGalat = (b: BidangWajib) => ((tersentuh[b] || dicoba) && galatBidang[b]) || undefined;
+  // Opsi lanjutan dibuka sendiri bila tombol Buat ditekan saat ada isian di dalamnya yang perlu diperbaiki.
+  const bukaKarenaGalat = (dicoba && (galatBentuk || galatKesukaran || galatMateri)) || !!tampilGalat('nama-preset');
   const galatLain = [
     daftarTp.length > MAKS_TP ? `Maksimal ${MAKS_TP} TP.` : null,
     !f.bentuk.length ? 'Pilih minimal satu bentuk soal di Pengaturan lanjutan.' : null,
@@ -411,7 +407,8 @@ export default function BuatSoal() {
   /** Arahkan fokus ke isian wajib pertama yang belum sah. */
   function fokusGalatPertama() {
     const pertama = (['kelas', 'mapel', 'jumlah', 'nama-preset'] as const).find((b) => galatBidang[b]);
-    if (pertama) document.getElementById(pertama)?.focus();
+    // Nama pengaturan tersimpan bisa berada di kartu yang baru dibuka, jadi fokus menunggu kartu tampil.
+    if (pertama) setTimeout(() => document.getElementById(pertama)?.focus(), 50);
   }
 
   async function buat() {
@@ -688,255 +685,242 @@ export default function BuatSoal() {
               ) : null}
             </Kartu>
 
-            <BagianLipat
-              judul="Pengaturan lanjutan"
-              ingat="buat-lanjutan"
-              ringkasan={[
-                f.sebaranLevel ? LEVEL.filter((l) => (f.sebaranLevel![l] ?? 0) > 0).map((l) => `${f.sebaranLevel![l]} ${l}`).join(' · ') : `${kuota[0]} mudah · ${kuota[1]} sedang · ${kuota[2]} sulit`,
-                teksBentuk,
-                f.opsiPg && adaPg ? `${f.opsiPg} opsi` : null,
-                f.skorBentuk ? 'dengan skor' : null,
-              ]
-                .filter(Boolean)
-                .join(' · ')}
-            >
-              <div className="space-y-8">
-                <SubBagian judul="Susunan soal" ket="Bentuk, jumlah, dan tingkat kesukaran soal dalam paket.">
-                  <div>
-                    <PilihanBanyak label="Bentuk soal" nilai={f.bentuk} ubah={(bentuk) => ubah({ bentuk })} opsi={URUTAN_BENTUK.map((b) => ({ nilai: b, label: BENTUK_LABEL[b] }))} />
-                    {!f.bentuk.length ? <p className="mt-2 text-base font-bold text-buruk">Pilih minimal satu bentuk soal.</p> : null}
-                    {f.bentuk.includes('pilihan_ganda_kompleks') || f.bentuk.includes('menjodohkan') ? (
-                      <p className="mt-2 text-base text-redup">
-                        {[f.bentuk.includes('pilihan_ganda_kompleks') ? 'Pilihan ganda kompleks: jawaban benar lebih dari satu.' : null, f.bentuk.includes('menjodohkan') ? 'Menjodohkan: siswa menarik garis dari kolom kiri ke kolom kanan.' : null].filter(Boolean).join(' ')}
-                      </p>
-                    ) : null}
-                    {f.bentuk.length ? (
-                      <Sakelar
-                        className="mt-3"
-                        label="Atur jumlah per bentuk soal"
-                        petunjuk={f.jumlahBentuk ? undefined : 'Bila mati, soal dibagi rata ke bentuk yang dipilih.'}
-                        checked={!!f.jumlahBentuk}
-                        ubah={(nyala) => ubah({ jumlahBentuk: nyala ? Object.fromEntries(bentukTerpilih.map((b, i) => [b, bagiRata(f.n, bentukTerpilih.length)[i]])) : null })}
-                      />
-                    ) : null}
-                    {f.jumlahBentuk && f.bentuk.length ? (
-                      <div className="mt-2 pl-8">
-                        {bentukTerpilih.map((b) => (
-                          <BarisJumlah key={b} id={`jumlah-${b}`} label={BENTUK_LABEL[b]} nilai={f.jumlahBentuk![b] ?? 0} ubah={(n) => ubah({ jumlahBentuk: { ...f.jumlahBentuk, [b]: n } })} />
-                        ))}
-                        <TotalJumlah
-                          total={bentukTerpilih.reduce((a, b) => a + (f.jumlahBentuk![b] ?? 0), 0)}
-                          n={f.n}
-                          samakan={(n) => ubah({ n })}
-                          labelBagi="Bagi rata"
-                          bagi={() => ubah({ jumlahBentuk: Object.fromEntries(bentukTerpilih.map((b, i) => [b, bagiRata(f.n, bentukTerpilih.length)[i]])) })}
-                        />
-                      </div>
-                    ) : null}
-                    {f.bentuk.includes('benar_salah') ? (
-                      <Pilihan
-                        className="mt-4 sm:max-w-lg"
-                        label="Cara menjawab benar-salah"
-                        nilai={f.cara_bs}
-                        ubah={(cara_bs) => ubah({ cara_bs })}
-                        opsi={[
-                          { nilai: 'centang', label: 'Centang kotak', keterangan: 'Benar / Salah' },
-                          { nilai: 'lingkari', label: 'Lingkari', keterangan: 'B / S' },
-                        ]}
-                      />
-                    ) : null}
-                  </div>
-
-                  <div>
-                    {f.sebaranLevel ? null : (
-                      <>
-                        <Pilihan
-                          label="Tingkat kesukaran"
-                          nilai={nilaiKomposisi}
-                          ubah={(v) => {
-                            if (v === 'sendiri') return setAturSendiri(true);
-                            setAturSendiri(false);
-                            ubah({ persen: [...KOMPOSISI.find((k) => k.nilai === v)!.persen] });
-                          }}
-                          opsi={[...KOMPOSISI.map((k) => ({ nilai: k.nilai, label: k.label })), { nilai: 'sendiri' as const, label: 'Atur sendiri' }]}
-                        />
-                        <p className="mt-2 text-base text-redup tabular-nums">
-                          {kuota[0]} mudah ({f.persen[0]}%) · {kuota[1]} sedang ({f.persen[1]}%) · {kuota[2]} sulit ({f.persen[2]}%).{' '}
-                          {nilaiKomposisi === 'sendiri' ? 'Jumlah persen selalu 100%.' : KOMPOSISI.find((k) => k.nilai === nilaiKomposisi)?.akibat}
-                        </p>
-                        {nilaiKomposisi === 'sendiri' ? (
-                          <div className="mt-2">
-                            {(['Mudah', 'Sedang', 'Sulit'] as const).map((nama, i) => (
-                              <div key={nama} className="flex items-center justify-between gap-3 border-b border-garis py-2 last:border-b-0">
-                                <span className="text-base font-bold">{nama}</span>
-                                <span className="flex items-center gap-2 sm:gap-3">
-                                  <Langkah label={`Kurangi persen ${nama.toLowerCase()}`} onClick={() => ubah({ persen: geserPersen(f.persen, i as 0 | 1 | 2, f.persen[i] - 5) })} disabled={f.persen[i] <= 0} />
-                                  <span className="min-w-14 text-center text-[20px] font-extrabold tabular-nums" aria-live="polite">
-                                    {f.persen[i]}%
-                                  </span>
-                                  <Langkah label={`Tambah persen ${nama.toLowerCase()}`} onClick={() => ubah({ persen: geserPersen(f.persen, i as 0 | 1 | 2, f.persen[i] + 5) })} disabled={f.persen[i] >= 100} />
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : null}
-                      </>
-                    )}
+            <OpsiLanjutan ingat="buat-lanjutan" paksaBuka={bukaKarenaGalat} ringkasan="bentuk soal, kesukaran, gambar, gaya, materi, simpan">
+              <KartuLipat judul="Bentuk soal" ket="Jenis soal, jumlah per bentuk, banyak opsi, dan skor" ingat="buat-kartu-bentuk" paksaBuka={dicoba && galatBentuk} tanda={galatBentuk ? <TandaPerbaiki /> : null}>
+                <div>
+                  <PilihanBanyak label="Bentuk soal" nilai={f.bentuk} ubah={(bentuk) => ubah({ bentuk })} opsi={URUTAN_BENTUK.map((b) => ({ nilai: b, label: BENTUK_LABEL[b] }))} />
+                  {!f.bentuk.length ? <p className="mt-2 text-base font-bold text-buruk">Pilih minimal satu bentuk soal.</p> : null}
+                  {f.bentuk.includes('pilihan_ganda_kompleks') || f.bentuk.includes('menjodohkan') ? (
+                    <p className="mt-2 text-base text-redup">
+                      {[f.bentuk.includes('pilihan_ganda_kompleks') ? 'Pilihan ganda kompleks: jawaban benar lebih dari satu.' : null, f.bentuk.includes('menjodohkan') ? 'Menjodohkan: siswa menarik garis dari kolom kiri ke kolom kanan.' : null].filter(Boolean).join(' ')}
+                    </p>
+                  ) : null}
+                  {f.bentuk.length ? (
                     <Sakelar
-                      className={f.sebaranLevel ? '' : 'mt-3'}
-                      label="Atur per level kognitif (C1–C6)"
-                      petunjuk={f.sebaranLevel ? 'C1–C2 dihitung mudah, C3–C4 sedang, C5–C6 sulit.' : 'Tentukan sendiri jumlah soal tiap level, menggantikan tingkat kesukaran di atas.'}
-                      checked={!!f.sebaranLevel}
-                      ubah={(nyala) => ubah({ sebaranLevel: nyala ? levelDariPersen(f.n, f.persen) : null })}
+                      className="mt-3"
+                      label="Atur jumlah per bentuk soal"
+                      petunjuk={f.jumlahBentuk ? undefined : 'Bila mati, soal dibagi rata ke bentuk yang dipilih.'}
+                      checked={!!f.jumlahBentuk}
+                      ubah={(nyala) => ubah({ jumlahBentuk: nyala ? Object.fromEntries(bentukTerpilih.map((b, i) => [b, bagiRata(f.n, bentukTerpilih.length)[i]])) : null })}
                     />
-                    {f.sebaranLevel ? (
-                      <div className="mt-2 pl-8">
-                        {LEVEL.map((l) => (
-                          <BarisJumlah key={l} id={`level-${l}`} label={l} ket={NAMA_LEVEL[l]} nilai={f.sebaranLevel![l] ?? 0} ubah={(n) => ubah({ sebaranLevel: { ...f.sebaranLevel, [l]: n } })} />
-                        ))}
-                        <TotalJumlah
-                          total={LEVEL.reduce((a, l) => a + (f.sebaranLevel![l] ?? 0), 0)}
-                          n={f.n}
-                          samakan={(n) => ubah({ n })}
-                          labelBagi="Ambil dari tingkat kesukaran"
-                          bagi={() => ubah({ sebaranLevel: levelDariPersen(f.n, f.persen) })}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-
-                  {aturTp ? (
-                    <div>
-                      <Sakelar
-                        label="Atur jumlah soal per TP"
-                        petunjuk={f.jumlahTp ? undefined : `Bila mati, ${f.n} soal dibagi rata ke ${daftarTp.length} TP.`}
-                        checked={!!f.jumlahTp}
-                        ubah={(nyala) => ubah({ jumlahTp: nyala ? bagiRata(f.n, daftarTp.length) : null })}
+                  ) : null}
+                  {f.jumlahBentuk && f.bentuk.length ? (
+                    <div className="mt-2 pl-8">
+                      {bentukTerpilih.map((b) => (
+                        <BarisJumlah key={b} id={`jumlah-${b}`} label={BENTUK_LABEL[b]} nilai={f.jumlahBentuk![b] ?? 0} ubah={(n) => ubah({ jumlahBentuk: { ...f.jumlahBentuk, [b]: n } })} />
+                      ))}
+                      <TotalJumlah
+                        total={bentukTerpilih.reduce((a, b) => a + (f.jumlahBentuk![b] ?? 0), 0)}
+                        n={f.n}
+                        samakan={(n) => ubah({ n })}
+                        labelBagi="Bagi rata"
+                        bagi={() => ubah({ jumlahBentuk: Object.fromEntries(bentukTerpilih.map((b, i) => [b, bagiRata(f.n, bentukTerpilih.length)[i]])) })}
                       />
-                      {f.jumlahTp && f.jumlahTp.length === daftarTp.length ? (
-                        <div className="mt-2 pl-8">
-                          {daftarTp.map((t, i) => (
-                            <BarisJumlah
-                              key={i}
-                              id={`jumlah-tp-${i}`}
-                              label={`TP ${i + 1}`}
-                              ket={<span className="line-clamp-2">{t}</span>}
-                              nilai={f.jumlahTp![i] ?? 0}
-                              ubah={(n) => ubah({ jumlahTp: f.jumlahTp!.map((x, j) => (j === i ? n : x)) })}
-                            />
-                          ))}
-                          <TotalJumlah total={f.jumlahTp.reduce((a, b) => a + b, 0)} n={f.n} samakan={(n) => ubah({ n })} labelBagi="Bagi rata" bagi={() => ubah({ jumlahTp: bagiRata(f.n, daftarTp.length) })} />
-                        </div>
-                      ) : null}
                     </div>
                   ) : null}
-                </SubBagian>
-
-                <SubBagian judul="Isi soal" ket="Bahasa, gaya, gambar, opsi jawaban, dan skor.">
-                  {adaPg ? (
+                  {f.bentuk.includes('benar_salah') ? (
                     <Pilihan
-                      className="sm:max-w-xl"
-                      label="Banyak opsi pilihan ganda"
-                      nilai={f.opsiPg ? String(f.opsiPg) : 'otomatis'}
-                      ubah={(v) => ubah({ opsiPg: v === 'otomatis' ? null : (Number(v) as 4 | 5) })}
+                      className="mt-4 sm:max-w-lg"
+                      label="Cara menjawab benar-salah"
+                      nilai={f.cara_bs}
+                      ubah={(cara_bs) => ubah({ cara_bs })}
                       opsi={[
-                        { nilai: 'otomatis', label: 'Otomatis', keterangan: f.kelas ? `${f.kelas >= 10 ? 5 : 4} opsi` : 'Sesuai kelas' },
-                        { nilai: '4', label: '4 opsi', keterangan: 'A–D' },
-                        { nilai: '5', label: '5 opsi', keterangan: 'A–E' },
+                        { nilai: 'centang', label: 'Centang kotak', keterangan: 'Benar / Salah' },
+                        { nilai: 'lingkari', label: 'Lingkari', keterangan: 'B / S' },
                       ]}
                     />
                   ) : null}
-
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <PilihanDaftar id="bahasa" label="Bahasa soal" value={f.bahasa} onChange={(e) => ubah({ bahasa: e.target.value as BahasaSoal })} petunjuk={f.bahasa === 'dwibahasa' ? 'Setiap soal ditulis dalam dua bahasa.' : undefined}>
-                      <option value="id">Indonesia</option>
-                      <option value="en">Inggris</option>
-                      <option value="dwibahasa">Dwibahasa</option>
-                    </PilihanDaftar>
+                </div>
+                {adaPg ? (
+                  <Pilihan
+                    className="sm:max-w-xl"
+                    label="Banyak opsi pilihan ganda"
+                    nilai={f.opsiPg ? String(f.opsiPg) : 'otomatis'}
+                    ubah={(v) => ubah({ opsiPg: v === 'otomatis' ? null : (Number(v) as 4 | 5) })}
+                    opsi={[
+                      { nilai: 'otomatis', label: 'Otomatis', keterangan: f.kelas ? `${f.kelas >= 10 ? 5 : 4} opsi` : 'Sesuai kelas' },
+                      { nilai: '4', label: '4 opsi', keterangan: 'A–D' },
+                      { nilai: '5', label: '5 opsi', keterangan: 'A–E' },
+                    ]}
+                  />
+                ) : null}
+                <div>
+                  <Sakelar
+                    label="Cantumkan skor per soal"
+                    petunjuk={f.skorBentuk ? 'Skor tercetak di petunjuk tiap bagian, dan pedoman penskoran ikut berkas kunci jawaban.' : 'Skor tercetak di lembar soal dan pedoman penskoran di kunci jawaban.'}
+                    checked={!!f.skorBentuk}
+                    ubah={(nyala) => ubah({ skorBentuk: nyala ? Object.fromEntries(URUTAN_BENTUK.map((b) => [b, SKOR_BAWAAN[b]])) : null })}
+                  />
+                  {f.skorBentuk && f.bentuk.length ? (
+                    <div className="mt-2 pl-8">
+                      {bentukTerpilih.map((b) => (
+                        <BarisJumlah
+                          key={b}
+                          id={`skor-${b}`}
+                          label={BENTUK_LABEL[b]}
+                          ket={perBentuk?.[b] ? `${perBentuk[b]} soal × ${f.skorBentuk![b] ?? SKOR_BAWAAN[b]} = ${(perBentuk[b] ?? 0) * (f.skorBentuk![b] ?? SKOR_BAWAAN[b])}` : undefined}
+                          nilai={f.skorBentuk![b] ?? SKOR_BAWAAN[b]}
+                          min={1}
+                          maks={100}
+                          ubah={(n) => ubah({ skorBentuk: { ...f.skorBentuk, [b]: n } })}
+                        />
+                      ))}
+                      {skorMaks !== null ? <p className="mt-2 text-base font-bold text-tinta tabular-nums">Skor maksimal {skorMaks}{f.bentuk.includes('uraian') ? '. Rubrik uraian disusun sesuai skornya.' : '.'}</p> : null}
+                    </div>
+                  ) : null}
+                </div>
+              </KartuLipat>
+              <KartuLipat judul="Kesukaran dan TP" ket="Tingkat kesukaran, level kognitif C1–C6, dan jumlah soal per TP" ingat="buat-kartu-kesukaran" paksaBuka={dicoba && galatKesukaran} tanda={galatKesukaran ? <TandaPerbaiki /> : null}>
+                <div>
+                  {f.sebaranLevel ? null : (
+                    <>
+                      <Pilihan
+                        label="Tingkat kesukaran"
+                        nilai={nilaiKomposisi}
+                        ubah={(v) => {
+                          if (v === 'sendiri') return setAturSendiri(true);
+                          setAturSendiri(false);
+                          ubah({ persen: [...KOMPOSISI.find((k) => k.nilai === v)!.persen] });
+                        }}
+                        opsi={[...KOMPOSISI.map((k) => ({ nilai: k.nilai, label: k.label })), { nilai: 'sendiri' as const, label: 'Atur sendiri' }]}
+                      />
+                      <p className="mt-2 text-base text-redup tabular-nums">
+                        {kuota[0]} mudah ({f.persen[0]}%) · {kuota[1]} sedang ({f.persen[1]}%) · {kuota[2]} sulit ({f.persen[2]}%).{' '}
+                        {nilaiKomposisi === 'sendiri' ? 'Jumlah persen selalu 100%.' : KOMPOSISI.find((k) => k.nilai === nilaiKomposisi)?.akibat}
+                      </p>
+                      {nilaiKomposisi === 'sendiri' ? (
+                        <div className="mt-2">
+                          {(['Mudah', 'Sedang', 'Sulit'] as const).map((nama, i) => (
+                            <div key={nama} className="flex items-center justify-between gap-3 border-b border-garis py-2 last:border-b-0">
+                              <span className="text-base font-bold">{nama}</span>
+                              <span className="flex items-center gap-2 sm:gap-3">
+                                <Langkah label={`Kurangi persen ${nama.toLowerCase()}`} onClick={() => ubah({ persen: geserPersen(f.persen, i as 0 | 1 | 2, f.persen[i] - 5) })} disabled={f.persen[i] <= 0} />
+                                <span className="min-w-14 text-center text-[20px] font-extrabold tabular-nums" aria-live="polite">
+                                  {f.persen[i]}%
+                                </span>
+                                <Langkah label={`Tambah persen ${nama.toLowerCase()}`} onClick={() => ubah({ persen: geserPersen(f.persen, i as 0 | 1 | 2, f.persen[i] + 5) })} disabled={f.persen[i] >= 100} />
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+                    </>
+                  )}
+                  <Sakelar
+                    className={f.sebaranLevel ? '' : 'mt-3'}
+                    label="Atur per level kognitif (C1–C6)"
+                    petunjuk={f.sebaranLevel ? 'C1–C2 dihitung mudah, C3–C4 sedang, C5–C6 sulit.' : 'Tentukan sendiri jumlah soal tiap level, menggantikan tingkat kesukaran di atas.'}
+                    checked={!!f.sebaranLevel}
+                    ubah={(nyala) => ubah({ sebaranLevel: nyala ? levelDariPersen(f.n, f.persen) : null })}
+                  />
+                  {f.sebaranLevel ? (
+                    <div className="mt-2 pl-8">
+                      {LEVEL.map((l) => (
+                        <BarisJumlah key={l} id={`level-${l}`} label={l} ket={NAMA_LEVEL[l]} nilai={f.sebaranLevel![l] ?? 0} ubah={(n) => ubah({ sebaranLevel: { ...f.sebaranLevel, [l]: n } })} />
+                      ))}
+                      <TotalJumlah
+                        total={LEVEL.reduce((a, l) => a + (f.sebaranLevel![l] ?? 0), 0)}
+                        n={f.n}
+                        samakan={(n) => ubah({ n })}
+                        labelBagi="Ambil dari tingkat kesukaran"
+                        bagi={() => ubah({ sebaranLevel: levelDariPersen(f.n, f.persen) })}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+                {aturTp ? (
+                  <div>
+                    <Sakelar
+                      label="Atur jumlah soal per TP"
+                      petunjuk={f.jumlahTp ? undefined : `Bila mati, ${f.n} soal dibagi rata ke ${daftarTp.length} TP.`}
+                      checked={!!f.jumlahTp}
+                      ubah={(nyala) => ubah({ jumlahTp: nyala ? bagiRata(f.n, daftarTp.length) : null })}
+                    />
+                    {f.jumlahTp && f.jumlahTp.length === daftarTp.length ? (
+                      <div className="mt-2 pl-8">
+                        {daftarTp.map((t, i) => (
+                          <BarisJumlah
+                            key={i}
+                            id={`jumlah-tp-${i}`}
+                            label={`TP ${i + 1}`}
+                            ket={<span className="line-clamp-2">{t}</span>}
+                            nilai={f.jumlahTp![i] ?? 0}
+                            ubah={(n) => ubah({ jumlahTp: f.jumlahTp!.map((x, j) => (j === i ? n : x)) })}
+                          />
+                        ))}
+                        <TotalJumlah total={f.jumlahTp.reduce((a, b) => a + b, 0)} n={f.n} samakan={(n) => ubah({ n })} labelBagi="Bagi rata" bagi={() => ubah({ jumlahTp: bagiRata(f.n, daftarTp.length) })} />
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+              </KartuLipat>
+              <KartuLipat judul="Gambar" ket="Digambar aplikasi dari isi soal, bukan ditebak AI" ingat="buat-kartu-gambar">
+                <div className="sm:max-w-sm">
+                  <PilihanDaftar id="gambar" label="Soal bergambar" value={f.gambar} onChange={(e) => ubah({ gambar: e.target.value as ModeGambar })} petunjuk={f.gambar === 'mati' ? undefined : 'Gambar dihitung dari isi soal, bukan ditebak AI.'}>
+                    <option value="terprogram">Pakai gambar bila membantu</option>
+                    <option value="campuran">Sesekali saja</option>
+                    <option value="mati">Tanpa gambar</option>
+                  </PilihanDaftar>
+                </div>
+              </KartuLipat>
+              <KartuLipat judul="Gaya dan bahasa" ket="Gaya soal (biasa, numerasi, literasi, HOTS) dan bahasa soal" ingat="buat-kartu-gaya">
+                <div className="grid gap-4 sm:grid-cols-2">
                     <PilihanDaftar id="gaya" label="Gaya soal" value={f.gaya} onChange={(e) => ubah({ gaya: e.target.value as GayaSoal })}>
                       <option value="biasa">Biasa</option>
                       <option value="numerasi">Numerasi</option>
                       <option value="literasi">Literasi</option>
                       <option value="hots">HOTS</option>
                     </PilihanDaftar>
-                    <PilihanDaftar id="gambar" label="Soal bergambar" value={f.gambar} onChange={(e) => ubah({ gambar: e.target.value as ModeGambar })} petunjuk={f.gambar === 'mati' ? undefined : 'Gambar dihitung dari isi soal, bukan ditebak AI.'}>
-                      <option value="terprogram">Pakai gambar bila membantu</option>
-                      <option value="campuran">Sesekali saja</option>
-                      <option value="mati">Tanpa gambar</option>
+                    <PilihanDaftar id="bahasa" label="Bahasa soal" value={f.bahasa} onChange={(e) => ubah({ bahasa: e.target.value as BahasaSoal })} petunjuk={f.bahasa === 'dwibahasa' ? 'Setiap soal ditulis dalam dua bahasa.' : undefined}>
+                      <option value="id">Indonesia</option>
+                      <option value="en">Inggris</option>
+                      <option value="dwibahasa">Dwibahasa</option>
                     </PilihanDaftar>
-                  </div>
-
-                  <div>
-                    <Sakelar
-                      label="Cantumkan skor per soal"
-                      petunjuk={f.skorBentuk ? 'Skor tercetak di petunjuk tiap bagian, dan pedoman penskoran ikut berkas kunci jawaban.' : 'Skor tercetak di lembar soal dan pedoman penskoran di kunci jawaban.'}
-                      checked={!!f.skorBentuk}
-                      ubah={(nyala) => ubah({ skorBentuk: nyala ? Object.fromEntries(URUTAN_BENTUK.map((b) => [b, SKOR_BAWAAN[b]])) : null })}
-                    />
-                    {f.skorBentuk && f.bentuk.length ? (
-                      <div className="mt-2 pl-8">
-                        {bentukTerpilih.map((b) => (
-                          <BarisJumlah
-                            key={b}
-                            id={`skor-${b}`}
-                            label={BENTUK_LABEL[b]}
-                            ket={perBentuk?.[b] ? `${perBentuk[b]} soal × ${f.skorBentuk![b] ?? SKOR_BAWAAN[b]} = ${(perBentuk[b] ?? 0) * (f.skorBentuk![b] ?? SKOR_BAWAAN[b])}` : undefined}
-                            nilai={f.skorBentuk![b] ?? SKOR_BAWAAN[b]}
-                            min={1}
-                            maks={100}
-                            ubah={(n) => ubah({ skorBentuk: { ...f.skorBentuk, [b]: n } })}
-                          />
-                        ))}
-                        {skorMaks !== null ? <p className="mt-2 text-base font-bold text-tinta tabular-nums">Skor maksimal {skorMaks}{f.bentuk.includes('uraian') ? '. Rubrik uraian disusun sesuai skornya.' : '.'}</p> : null}
-                      </div>
-                    ) : null}
-                  </div>
-                </SubBagian>
-
-                <SubBagian judul="Materi dan judul">
-                  <IsianPanjang
-                    id="materi"
-                    label={`Teks materi (boleh kosong · ${kataMateri}/${MAKS_KATA_MATERI} kata)`}
-                    rows={3}
-                    value={f.materi}
-                    onChange={(e) => ubah({ materi: e.target.value })}
-                    placeholder="Tempel bahan bacaan bila soal harus berdasar teks tertentu."
-                    petunjuk="Teks ini dikirim ke penyedia AI pilihan Anda. Jangan menempel data siswa."
-                    galat={kataMateri > MAKS_KATA_MATERI ? `Teks materi maksimal ${MAKS_KATA_MATERI} kata.` : undefined}
-                  />
-
-                  <IsianTeks
-                    id="judul"
-                    label="Judul paket"
-                    value={judul}
-                    onChange={(e) => setJudul(e.target.value)}
-                    placeholder="mis. Penilaian harian pecahan"
-                    petunjuk={`Bila kosong: ${f.mapel.trim() ? `${f.mapel.trim()} kelas ${f.kelas || '…'}` : 'mapel dan kelas'}.`}
-                  />
-                </SubBagian>
-
-                <div className="border-t border-garis pt-5">
-                  <Sakelar label="Simpan pengaturan ini" petunjuk="Lain kali cukup pilih namanya di atas formulir." checked={simpanPreset} ubah={setSimpanPreset} />
-                  {simpanPreset ? (
-                    <div className="mt-3 flex flex-wrap items-start gap-3 pl-8">
-                      <IsianTeks
-                        id="nama-preset"
-                        label="Nama pengaturan tersimpan"
-                        className="min-w-0 flex-1 sm:max-w-xs"
-                        value={namaPreset}
-                        galat={tampilGalat('nama-preset')}
-                        onBlur={() => sentuh('nama-preset')}
-                        onChange={(e) => setNamaPreset(e.target.value)}
-                        placeholder={`${f.mapel || 'Mapel'} K${f.kelas || ''}`}
-                      />
-                      <Tombol varian="hantu" className="sm:mt-9" onClick={hanyaSimpanPreset}>
-                        Simpan tanpa membuat soal
-                      </Tombol>
-                    </div>
-                  ) : null}
                 </div>
-              </div>
-            </BagianLipat>
+              </KartuLipat>
+              <KartuLipat judul="Teks materi" ket="Bahan bacaan sebagai dasar soal, boleh kosong" ingat="buat-kartu-materi" paksaBuka={dicoba && galatMateri} tanda={galatMateri ? <TandaPerbaiki /> : null}>
+                <IsianPanjang
+                  id="materi"
+                  label={`Teks materi (boleh kosong · ${kataMateri}/${MAKS_KATA_MATERI} kata)`}
+                  rows={3}
+                  value={f.materi}
+                  onChange={(e) => ubah({ materi: e.target.value })}
+                  placeholder="Tempel bahan bacaan bila soal harus berdasar teks tertentu."
+                  petunjuk="Teks ini dikirim ke penyedia AI pilihan Anda. Jangan menempel data siswa."
+                  galat={kataMateri > MAKS_KATA_MATERI ? `Teks materi maksimal ${MAKS_KATA_MATERI} kata.` : undefined}
+                />
+              </KartuLipat>
+              <KartuLipat judul="Judul dan simpan" ket="Judul paket dan pengaturan tersimpan untuk dipakai lagi" ingat="buat-kartu-simpan" paksaBuka={!!tampilGalat('nama-preset')}>
+                <IsianTeks
+                  id="judul"
+                  label="Judul paket"
+                  value={judul}
+                  onChange={(e) => setJudul(e.target.value)}
+                  placeholder="mis. Penilaian harian pecahan"
+                  petunjuk={`Bila kosong: ${f.mapel.trim() ? `${f.mapel.trim()} kelas ${f.kelas || '…'}` : 'mapel dan kelas'}.`}
+                />
+                <div>
+                <Sakelar label="Simpan pengaturan ini" petunjuk="Lain kali cukup pilih namanya di atas formulir." checked={simpanPreset} ubah={setSimpanPreset} />
+                {simpanPreset ? (
+                  <div className="mt-3 flex flex-wrap items-start gap-3 pl-8">
+                    <IsianTeks
+                      id="nama-preset"
+                      label="Nama pengaturan tersimpan"
+                      className="min-w-0 flex-1 sm:max-w-xs"
+                      value={namaPreset}
+                      galat={tampilGalat('nama-preset')}
+                      onBlur={() => sentuh('nama-preset')}
+                      onChange={(e) => setNamaPreset(e.target.value)}
+                      placeholder={`${f.mapel || 'Mapel'} K${f.kelas || ''}`}
+                    />
+                    <Tombol varian="hantu" className="sm:mt-9" onClick={hanyaSimpanPreset}>
+                      Simpan tanpa membuat soal
+                    </Tombol>
+                  </div>
+                ) : null}
+                </div>
+              </KartuLipat>
+            </OpsiLanjutan>
           </div>
         </div>
 

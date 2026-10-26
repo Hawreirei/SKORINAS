@@ -9,7 +9,7 @@
  * - `BagianLipat`: judul dan ringkasan sebagai tombol lipat; `ingat` menyimpan status buka per perangkat.
  * - `Pemberitahuan`: pesan dengan nada info, awas, galat, berhasil. Warna dari token; nada galat memakai `role="alert"`.
  */
-import { useEffect, useId, useRef, useState, type InputHTMLAttributes, type KeyboardEvent, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { useEffect, useId, useRef, useState, type Dispatch, type InputHTMLAttributes, type KeyboardEvent, type ReactNode, type SelectHTMLAttributes, type SetStateAction, type TextareaHTMLAttributes } from 'react';
 import { Chip } from './Tombol';
 
 /** Atribut yang menghubungkan isian dengan label, petunjuk, dan galatnya. */
@@ -188,10 +188,9 @@ function bacaIngat(kunci: string | undefined, bawaan: boolean): boolean {
   }
 }
 
-/** Bagian yang dapat dilipat. Bila `ingat` diisi, status buka/tutup disimpan per perangkat. */
-export function BagianLipat({ judul, ringkasan, ingat, bawaanTerbuka = false, className = '', children }: { judul: ReactNode; ringkasan?: ReactNode; ingat?: string; bawaanTerbuka?: boolean; className?: string; children: ReactNode }) {
-  const [buka, setBuka] = useState(() => bacaIngat(ingat, bawaanTerbuka));
-  const idIsi = useId();
+/** Status buka/tutup; bila `ingat` diisi, disimpan per perangkat. */
+export function useIngatBuka(ingat: string | undefined, bawaan = false): [boolean, Dispatch<SetStateAction<boolean>>] {
+  const [buka, setBuka] = useState(() => bacaIngat(ingat, bawaan));
   useEffect(() => {
     if (!ingat) return;
     try {
@@ -200,6 +199,13 @@ export function BagianLipat({ judul, ringkasan, ingat, bawaanTerbuka = false, cl
       // localStorage dapat ditolak (mode privat); bagian tetap dapat dibuka, hanya tidak diingat.
     }
   }, [ingat, buka]);
+  return [buka, setBuka];
+}
+
+/** Bagian yang dapat dilipat. Bila `ingat` diisi, status buka/tutup disimpan per perangkat. */
+export function BagianLipat({ judul, ringkasan, ingat, bawaanTerbuka = false, className = '', children }: { judul: ReactNode; ringkasan?: ReactNode; ingat?: string; bawaanTerbuka?: boolean; className?: string; children: ReactNode }) {
+  const [buka, setBuka] = useIngatBuka(ingat, bawaanTerbuka);
+  const idIsi = useId();
   return (
     <section className={`kartu pita-garis !p-0 ${className}`}>
       <button type="button" className="flex w-full items-center gap-4 p-4 text-left sm:px-6" aria-expanded={buka} aria-controls={idIsi} onClick={() => setBuka((b) => !b)}>
@@ -213,6 +219,69 @@ export function BagianLipat({ judul, ringkasan, ingat, bawaanTerbuka = false, cl
       </button>
       {buka ? (
         <div id={idIsi} className="border-t border-garis p-4 sm:p-6">
+          {children}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+/**
+ * Opsi lanjutan: satu tombol lebar "Tampilkan/Sembunyikan opsi lanjutan" dengan daftar isinya di kanan,
+ * lalu kartu-kartu `KartuLipat` di bawahnya.
+ */
+export function OpsiLanjutan({ ringkasan, ingat, paksaBuka = false, className = '', children }: { ringkasan?: ReactNode; ingat?: string; paksaBuka?: boolean; className?: string; children: ReactNode }) {
+  const [buka, setBuka] = useIngatBuka(ingat);
+  const idIsi = useId();
+  useEffect(() => {
+    if (paksaBuka) setBuka(true);
+  }, [paksaBuka, setBuka]);
+  return (
+    <section aria-label="Opsi lanjutan" className={className}>
+      <button
+        type="button"
+        className="flex min-h-12 w-full items-center justify-between gap-4 rounded-xl border border-garis-kuat bg-kartu px-4 py-3 text-left hover:border-utama sm:px-5"
+        aria-expanded={buka}
+        aria-controls={idIsi}
+        onClick={() => setBuka((b) => !b)}
+      >
+        <span className="shrink-0 text-base font-bold text-tinta">{buka ? 'Sembunyikan opsi lanjutan' : 'Tampilkan opsi lanjutan'}</span>
+        {ringkasan ? <span className="hidden min-w-0 truncate text-base text-redup sm:block">{ringkasan}</span> : null}
+      </button>
+      {buka ? (
+        <div id={idIsi} className="mt-4 space-y-4">
+          {children}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+/** Kartu lipat di dalam opsi lanjutan: judul, satu baris keterangan, dan tanda + / −. `paksaBuka` membukanya (mis. ada isian salah). */
+export function KartuLipat({ judul, ket, ingat, paksaBuka = false, tanda, children }: { judul: string; ket?: ReactNode; ingat?: string; paksaBuka?: boolean; tanda?: ReactNode; children: ReactNode }) {
+  const [buka, setBuka] = useIngatBuka(ingat);
+  const idIsi = useId();
+  useEffect(() => {
+    if (paksaBuka) setBuka(true);
+  }, [paksaBuka, setBuka]);
+  return (
+    <section className="rounded-xl border border-garis bg-kartu shadow-[0_1px_3px_rgba(15,23,42,0.06)]">
+      <h3>
+        <button type="button" className="flex w-full items-center gap-4 rounded-xl px-4 py-4 text-left sm:px-6 sm:py-5" aria-expanded={buka} aria-controls={idIsi} onClick={() => setBuka((b) => !b)}>
+          <span className="min-w-0 flex-1">
+            <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="text-[18px] font-extrabold text-judul">{judul}</span>
+              {tanda}
+            </span>
+            {ket ? <span className="mt-0.5 block text-base font-normal text-redup">{ket}</span> : null}
+          </span>
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="shrink-0 text-redup">
+            {buka ? <path d="M2.5 8h11" /> : <path d="M2.5 8h11M8 2.5v11" />}
+          </svg>
+        </button>
+      </h3>
+      {buka ? (
+        <div id={idIsi} className="space-y-6 border-t border-garis px-4 py-5 sm:px-6">
           {children}
         </div>
       ) : null}
