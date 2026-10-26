@@ -14,7 +14,7 @@
 | Folder | Isi |
 | --- | --- |
 | `src/app/` | Layar dan rute |
-| `src/db/` | Skema Dexie (versi 2), profil, cadangan .gensoal, tong sampah |
+| `src/db/` | Skema Dexie (versi 3), profil, cadangan .gensoal, tong sampah |
 | `src/kurikulum/` | Pemetaan kelas ke fase, pemeriksa kualitas TP |
 | `src/ai/` | Adaptor per penyedia, registri model, biaya |
 | `src/generasi/` | Komposisi, rencana butir, prompt, pengatur generasi, operasi per butir |

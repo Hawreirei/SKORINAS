@@ -5,6 +5,7 @@ import { modelDari, muatRegistri } from '../ai/registri';
 import { db } from '../db/skema';
 import { ambilProfil } from '../db/profil';
 import type { HurufOpsi, PaketSoal, ParameterPaket, PekerjaanGenerasi, PenyediaId, Slot, Soal } from '../db/tipe';
+import { teksPembanding } from '../db/tipe';
 import { sekarang, tanggalLokal, uuid } from '../db/util';
 import { teksPolos } from '../matematika/teks';
 import { buatButir, type HasilButir, type Pengirim, type Percobaan } from './butir';
@@ -76,7 +77,7 @@ export async function konteksPaket(paketId: string, kecuali?: string): Promise<{
   const daftar = (await soalAktif(paketId)).filter((s) => s.id !== kecuali);
   const kunciTerpakai: Partial<Record<HurufOpsi, number>> = {};
   for (const s of daftar) if (s.bentuk === 'pilihan_ganda') kunciTerpakai[s.isi_json.kunci as HurufOpsi] = (kunciTerpakai[s.isi_json.kunci as HurufOpsi] ?? 0) + 1;
-  return { pokokLain: daftar.map((s) => teksPolos(s.isi_json.pokok)), kunciTerpakai };
+  return { pokokLain: daftar.map((s) => teksPolos(teksPembanding(s.isi_json))), kunciTerpakai };
 }
 
 function pencatat(m: ModelAktif, paketId: string, biaya: { total: number | null }) {

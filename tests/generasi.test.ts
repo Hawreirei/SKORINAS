@@ -24,6 +24,11 @@ function param(n: number, bentuk: ParameterPaket['bentuk'] = ['pilihan_ganda']):
     gambar: 'mati',
     materi: '',
     cara_bs: 'centang',
+    jumlah_bentuk: null,
+    sebaran_level: null,
+    jumlah_tp: null,
+    opsi_pg: null,
+    skor_bentuk: null,
   };
 }
 

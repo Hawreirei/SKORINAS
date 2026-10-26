@@ -1,4 +1,5 @@
-import type { Bentuk, GambarSoal, HurufOpsi, IsiSoal, JenisUraian, Kesukaran, Level, Verifikasi } from '../db/tipe';
+import type { Bentuk, GambarSoal, HurufOpsi, IsiSoal, JenisUraian, Kesukaran, Level, Pernyataan, Verifikasi } from '../db/tipe';
+import { HURUF_KANAN, hurufKunci, petaJodoh, teksJodoh } from '../db/tipe';
 
 export class GalatSkema extends Error {
   constructor(public readonly daftar: string[]) {
@@ -65,10 +66,31 @@ function bacaVerifikasi(v: unknown, galat: string[]): Verifikasi {
       const arah = o.arah === 'turun' ? 'turun' : 'naik';
       return { tipe: 'urutan', nilai, arah };
     }
+    case 'per_opsi': {
+      const opsi: Partial<Record<HurufOpsi, Pernyataan>> = {};
+      const mentah = o.opsi && typeof o.opsi === 'object' ? (o.opsi as Record<string, unknown>) : {};
+      for (const [k, x] of Object.entries(mentah)) {
+        const h = normalisasiHuruf(k) as HurufOpsi;
+        const p = (x ?? {}) as Record<string, unknown>;
+        if (!HURUF.includes(h) || !s(p.kiri) || !s(p.kanan)) {
+          galat.push(`verifikasi per_opsi untuk ${k} memerlukan kiri, relasi, dan kanan.`);
+          continue;
+        }
+        opsi[h] = { kiri: s(p.kiri), relasi: s(p.relasi) || '=', kanan: s(p.kanan) };
+      }
+      if (!Object.keys(opsi).length) galat.push('verifikasi per_opsi memerlukan pernyataan untuk setiap opsi.');
+      return { tipe: 'per_opsi', opsi };
+    }
+    case 'pasangan': {
+      const kiri = Array.isArray(o.kiri) ? o.kiri.map(s) : [];
+      const kanan = Array.isArray(o.kanan) ? o.kanan.map(s) : [];
+      if (!kiri.length || !kanan.length || [...kiri, ...kanan].some((x) => !x)) galat.push('verifikasi pasangan memerlukan nilai untuk setiap butir kolom kiri dan kanan.');
+      return { tipe: 'pasangan', kiri, kanan };
+    }
     case 'tidak_ada':
       return { tipe: 'tidak_ada', alasan: s(o.alasan) };
     default:
-      galat.push('verifikasi.tipe harus ekspresi, perbandingan, urutan, atau tidak_ada.');
+      galat.push('verifikasi.tipe harus ekspresi, perbandingan, urutan, per_opsi, pasangan, atau tidak_ada.');
       return { tipe: 'tidak_ada' };
   }
 }
@@ -98,6 +120,34 @@ function bacaOpsi(v: unknown, galat: string[], nama = 'opsi'): Partial<Record<Hu
   return hasil;
 }
 
+/** Kunci pilihan ganda kompleks dari "A, C", ["A","C"], atau {"A":true,...}; dikembalikan sebagai "A,C". */
+function kunciKompleks(v: unknown): string {
+  if (Array.isArray(v)) return hurufKunci(v.map((x) => normalisasiHuruf(x)).join(',')).join(',');
+  if (v && typeof v === 'object')
+    return hurufKunci(
+      Object.entries(v as Record<string, unknown>)
+        .filter(([, x]) => x === true)
+        .map(([k]) => k)
+        .join(','),
+    ).join(',');
+  return hurufKunci(String(v ?? '').replace(/\b(dan|and)\b/gi, ',')).join(',');
+}
+
+function daftarTeks(v: unknown, nama: string, galat: string[]): string[] {
+  if (!Array.isArray(v)) {
+    galat.push(`${nama} wajib berupa daftar.`);
+    return [];
+  }
+  return v.map((x, i) => teksWajib(x, `${nama} ${i + 1}`, galat, 300));
+}
+
+/** Kunci menjodohkan dari "1-B, 2-A", ["B","A"], atau {"1":"B","2":"A"}; dikembalikan sebagai "1-B, 2-A". */
+function kunciJodoh(v: unknown, jumlahKiri: number): number[] {
+  if (Array.isArray(v)) return Array.from({ length: jumlahKiri }, (_, i) => HURUF_KANAN.indexOf(normalisasiHuruf(v[i])));
+  if (v && typeof v === 'object') return petaJodoh(Object.entries(v as Record<string, unknown>).map(([k, x]) => `${k}-${normalisasiHuruf(x)}`).join(', '), jumlahKiri);
+  return petaJodoh(String(v ?? ''), jumlahKiri);
+}
+
 function bacaGambar(v: unknown, galat: string[]): GambarSoal | null {
   if (v === null || v === undefined || v === false) return null;
   const o = v as Record<string, unknown>;
@@ -123,6 +173,7 @@ export function bacaIsiSoal(mentah: unknown, harapan: HarapanSkema): IsiSoal {
   if (o.bentuk !== harapan.bentuk) galat.push(`bentuk harus "${harapan.bentuk}".`);
   const pokok = teksWajib(o.pokok, 'pokok', galat);
   let opsi: IsiSoal['opsi'];
+  let pasangan: IsiSoal['pasangan'];
   let kunci = '';
   let rubrik: string[] | undefined;
   let jenis_uraian: JenisUraian | undefined;
@@ -131,6 +182,28 @@ export function bacaIsiSoal(mentah: unknown, harapan: HarapanSkema): IsiSoal {
       opsi = bacaOpsi(o.opsi, galat);
       kunci = normalisasiHuruf(o.kunci);
       if (!opsi[kunci as HurufOpsi]) galat.push('kunci harus salah satu huruf opsi.');
+      break;
+    }
+    case 'pilihan_ganda_kompleks': {
+      opsi = bacaOpsi(o.opsi, galat);
+      kunci = kunciKompleks(o.kunci);
+      const huruf = kunci ? kunci.split(',') : [];
+      if (huruf.some((h) => !opsi![h as HurufOpsi])) galat.push('kunci harus huruf-huruf opsi yang ada.');
+      if (huruf.length < 2) galat.push('Pilihan ganda kompleks memerlukan sedikitnya dua jawaban benar.');
+      else if (huruf.length >= Object.keys(opsi).length) galat.push('Pilihan ganda kompleks harus memiliki sedikitnya satu opsi yang salah.');
+      break;
+    }
+    case 'menjodohkan': {
+      const p = (o.pasangan ?? {}) as Record<string, unknown>;
+      const kiri = daftarTeks(p.kiri, 'pasangan.kiri', galat);
+      const kanan = daftarTeks(p.kanan, 'pasangan.kanan', galat);
+      pasangan = { kiri, kanan };
+      if (kiri.length < 3 || kiri.length > 6) galat.push(`Kolom kiri harus berisi 3 sampai 6 butir, bukan ${kiri.length}.`);
+      if (kanan.length < kiri.length || kanan.length > Math.min(kiri.length + 2, HURUF_KANAN.length)) galat.push('Kolom kanan harus sama banyak dengan kolom kiri atau lebih satu sampai dua butir pengecoh.');
+      const peta = kunciJodoh(o.kunci, kiri.length);
+      if (peta.some((j) => j < 0 || j >= kanan.length)) galat.push('kunci harus memasangkan setiap butir kolom kiri dengan satu huruf kolom kanan, mis. "1-B, 2-A".');
+      else if (new Set(peta).size !== peta.length) galat.push('Setiap butir kolom kanan hanya boleh dipasangkan sekali.');
+      kunci = teksJodoh(peta);
       break;
     }
     case 'benar_salah': {
@@ -174,6 +247,7 @@ export function bacaIsiSoal(mentah: unknown, harapan: HarapanSkema): IsiSoal {
     bentuk: harapan.bentuk,
     pokok,
     ...(opsi ? { opsi } : {}),
+    ...(pasangan ? { pasangan } : {}),
     kunci,
     ...(rubrik ? { rubrik } : {}),
     ...(jenis_uraian ? { jenis_uraian } : {}),

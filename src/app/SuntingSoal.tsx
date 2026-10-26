@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { HurufOpsi, IsiSoal, Soal, Verifikasi } from '../db/tipe';
+import { HURUF_KANAN, hurufKunci, petaJodoh, teksJodoh } from '../db/tipe';
 import { periksaSuntingan, simpanSuntingan } from '../generasi/operasi';
 import { Label, Peringatan } from '../komponen/Status';
 import { TampilSoal } from '../komponen/TampilSoal';
@@ -20,6 +21,11 @@ export function SuntingSoal({ soal, selesai }: { soal: Soal; selesai: () => void
   const awal = soal.isi_json;
   const [pokok, setPokok] = useState(awal.pokok);
   const [opsi, setOpsi] = useState<Partial<Record<HurufOpsi, string>>>(awal.opsi ?? {});
+  const [kiri, setKiri] = useState((awal.pasangan?.kiri ?? []).join('\n'));
+  const [kanan, setKanan] = useState((awal.pasangan?.kanan ?? []).join('\n'));
+  // Verifikasi per_opsi dan pasangan disunting sebagai JSON.
+  const [verifikasiJson, setVerifikasiJson] = useState(awal.verifikasi.tipe === 'per_opsi' || awal.verifikasi.tipe === 'pasangan' ? JSON.stringify(awal.verifikasi, null, 1) : '');
+  const berOpsi = awal.bentuk === 'pilihan_ganda' || awal.bentuk === 'pilihan_ganda_kompleks';
   const [kunci, setKunci] = useState(awal.kunci);
   const [rubrik, setRubrik] = useState((awal.rubrik ?? []).join('\n'));
   const [pembahasan, setPembahasan] = useState(awal.pembahasan.join('\n'));
@@ -39,16 +45,26 @@ export function SuntingSoal({ soal, selesai }: { soal: Soal; selesai: () => void
         return null;
       }
     }
+    let v = verifikasi;
+    if (verifikasi.tipe === 'per_opsi' || verifikasi.tipe === 'pasangan') {
+      try {
+        v = JSON.parse(verifikasiJson || '{}');
+      } catch {
+        setGalat('Verifikasi bukan JSON yang sah.');
+        return null;
+      }
+    }
     setGalat(null);
     const huruf = HURUF.filter((h) => (opsi[h] ?? '').trim());
     return {
       ...awal,
       pokok: pokok.trim(),
-      opsi: awal.bentuk === 'pilihan_ganda' ? Object.fromEntries(huruf.map((h) => [h, opsi[h]!.trim()])) : undefined,
-      kunci: kunci.trim(),
+      opsi: berOpsi ? Object.fromEntries(huruf.map((h) => [h, opsi[h]!.trim()])) : undefined,
+      pasangan: awal.bentuk === 'menjodohkan' ? { kiri: baris(kiri), kanan: baris(kanan) } : undefined,
+      kunci: awal.bentuk === 'menjodohkan' ? teksJodoh(petaJodoh(kunci, baris(kiri).length)) : awal.bentuk === 'pilihan_ganda_kompleks' ? hurufKunci(kunci).join(',') : kunci.trim(),
       rubrik: awal.bentuk === 'uraian' ? baris(rubrik) : undefined,
       pembahasan: baris(pembahasan),
-      verifikasi,
+      verifikasi: v,
       gambar: awal.gambar && parameter ? { ...awal.gambar, parameter } : null,
     };
   }
@@ -91,7 +107,19 @@ export function SuntingSoal({ soal, selesai }: { soal: Soal; selesai: () => void
           <Label htmlFor="s-pokok">Pokok soal · rumus di antara $…$</Label>
           <textarea id="s-pokok" className="bidang mt-2" rows={4} value={pokok} onChange={(e) => setPokok(e.target.value)} />
         </div>
-        {awal.bentuk === 'pilihan_ganda' ? (
+        {awal.bentuk === 'menjodohkan' ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="s-kiri">Kolom kiri · satu butir per baris (1, 2, …)</Label>
+              <textarea id="s-kiri" className="bidang mt-2" rows={5} value={kiri} onChange={(e) => setKiri(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="s-kanan">Kolom kanan · satu butir per baris (A, B, …)</Label>
+              <textarea id="s-kanan" className="bidang mt-2" rows={5} value={kanan} onChange={(e) => setKanan(e.target.value)} />
+            </div>
+          </div>
+        ) : null}
+        {berOpsi ? (
           <div className="space-y-2">
             <Label>Opsi</Label>
             {HURUF.slice(0, Math.max(4, Object.keys(opsi).length)).map((h) => (
@@ -104,7 +132,21 @@ export function SuntingSoal({ soal, selesai }: { soal: Soal; selesai: () => void
         ) : null}
         <div>
           <Label htmlFor="s-kunci">Kunci</Label>
-          {awal.bentuk === 'pilihan_ganda' ? (
+          {awal.bentuk === 'pilihan_ganda_kompleks' ? (
+            <div id="s-kunci" role="group" aria-label="Kunci" className="mt-2 flex flex-wrap gap-4">
+              {HURUF.filter((h) => (opsi[h] ?? '').trim()).map((h) => {
+                const dipilih = hurufKunci(kunci);
+                return (
+                  <label key={h} className="inline-flex min-h-11 items-center gap-2 text-base font-semibold">
+                    <input type="checkbox" className="size-5 accent-[var(--gs-main-fill)]" checked={dipilih.includes(h)} onChange={(e) => setKunci((e.target.checked ? [...dipilih, h] : dipilih.filter((x) => x !== h)).sort().join(','))} />
+                    {h}
+                  </label>
+                );
+              })}
+            </div>
+          ) : awal.bentuk === 'menjodohkan' ? (
+            <input id="s-kunci" className="bidang mt-2" value={kunci} onChange={(e) => setKunci(e.target.value)} placeholder={`1-${HURUF_KANAN[1]}, 2-${HURUF_KANAN[0]}, …`} />
+          ) : awal.bentuk === 'pilihan_ganda' ? (
             <select id="s-kunci" className="bidang mt-2" value={kunci} onChange={(e) => setKunci(e.target.value)}>
               {HURUF.filter((h) => (opsi[h] ?? '').trim()).map((h) => (
                 <option key={h}>{h}</option>
@@ -132,10 +174,28 @@ export function SuntingSoal({ soal, selesai }: { soal: Soal; selesai: () => void
         <details className="border border-garis p-4">
           <summary className="font-semibold cursor-pointer text-redup">Verifikasi hitung{awal.gambar ? ' dan parameter gambar' : ''}</summary>
           <div className="mt-4 space-y-3">
-            <select className="bidang" aria-label="Tipe verifikasi" value={verifikasi.tipe} onChange={(e) => setVerifikasi(e.target.value === 'ekspresi' ? { tipe: 'ekspresi', ekspresi: '', nilai: '' } : e.target.value === 'perbandingan' ? { tipe: 'perbandingan', kiri: '', relasi: '<', kanan: '' } : e.target.value === 'urutan' ? { tipe: 'urutan', nilai: [], arah: 'naik' } : { tipe: 'tidak_ada', alasan: 'Ditelaah guru.' })}>
-              <option value="ekspresi">Ekspresi = nilai</option>
-              <option value="perbandingan">Perbandingan</option>
-              <option value="urutan">Urutan</option>
+            <select
+              className="bidang"
+              aria-label="Tipe verifikasi"
+              value={verifikasi.tipe}
+              onChange={(e) => {
+                const t = e.target.value;
+                if (t === 'per_opsi' || t === 'pasangan') {
+                  const v: Verifikasi = t === 'per_opsi' ? { tipe: 'per_opsi', opsi: Object.fromEntries(HURUF.filter((h) => (opsi[h] ?? '').trim()).map((h) => [h, { kiri: '', relasi: '=', kanan: '' }])) } : { tipe: 'pasangan', kiri: baris(kiri).map(() => ''), kanan: baris(kanan).map(() => '') };
+                  setVerifikasi(v);
+                  setVerifikasiJson(JSON.stringify(v, null, 1));
+                } else setVerifikasi(t === 'ekspresi' ? { tipe: 'ekspresi', ekspresi: '', nilai: '' } : t === 'perbandingan' ? { tipe: 'perbandingan', kiri: '', relasi: '<', kanan: '' } : t === 'urutan' ? { tipe: 'urutan', nilai: [], arah: 'naik' } : { tipe: 'tidak_ada', alasan: 'Ditelaah guru.' });
+              }}
+            >
+              {awal.bentuk === 'menjodohkan' ? null : <option value="ekspresi">Ekspresi = nilai</option>}
+              {awal.bentuk === 'pilihan_ganda_kompleks' || awal.bentuk === 'menjodohkan' ? null : (
+                <>
+                  <option value="perbandingan">Perbandingan</option>
+                  <option value="urutan">Urutan</option>
+                </>
+              )}
+              {awal.bentuk === 'pilihan_ganda_kompleks' ? <option value="per_opsi">Pernyataan per opsi</option> : null}
+              {awal.bentuk === 'menjodohkan' ? <option value="pasangan">Nilai tiap pasangan</option> : null}
               <option value="tidak_ada">Tidak dapat dihitung (kunci tidak dicek otomatis)</option>
             </select>
             {verifikasi.tipe === 'ekspresi' ? (
@@ -161,6 +221,8 @@ export function SuntingSoal({ soal, selesai }: { soal: Soal; selesai: () => void
                   <option value="turun">turun</option>
                 </select>
               </div>
+            ) : verifikasi.tipe === 'per_opsi' || verifikasi.tipe === 'pasangan' ? (
+              <textarea className="bidang font-semibold text-base" aria-label="Verifikasi (JSON)" rows={6} value={verifikasiJson} onChange={(e) => setVerifikasiJson(e.target.value)} />
             ) : null}
             <p className="text-base text-redup">Sintaks mathjs: titik desimal, pecahan a/b. Bila soal memakai gambar, ekspresi boleh memakai variabel gambar.</p>
             {awal.gambar ? (

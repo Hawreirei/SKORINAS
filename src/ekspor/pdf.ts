@@ -1,7 +1,8 @@
 import { jsPDF } from 'jspdf';
 import type { HurufOpsi } from '../db/tipe';
+import { HURUF_KANAN } from '../db/tipe';
 import { FONT_PDF, gambarParagraf, lebarTeks, tataParagraf, tinggiParagraf, type Baris, type GayaTeks } from './pdf-tata';
-import { UKURAN_DOKUMEN, kolomOpsi, type BagianDok, type ButirDok, type DokumenSoal } from './model';
+import { UKURAN_DOKUMEN, kolomOpsi, teksPenskoran, type BagianDok, type ButirDok, type DokumenSoal } from './model';
 
 /** Gambar SVG vektor ke PDF. Di peramban memakai svg2pdf.js; disuntikkan agar dapat diuji. */
 export type GambarSvg = (doc: jsPDF, svg: string, x: number, y: number, w: number, h: number) => Promise<void>;
@@ -117,7 +118,7 @@ async function butir(p: Penulis, b: ButirDok, d: DokumenSoal, x: number, y: numb
     if (gambar) await p.aset.gambarSvg(doc, b.svg, xi, cy, u.w, u.h);
     cy += u.h + 6;
   }
-  if (isi.bentuk === 'pilihan_ganda' && isi.opsi) {
+  if (isi.opsi) {
     const huruf = Object.keys(isi.opsi).sort() as HurufOpsi[];
     const kolom = kolomOpsi(b);
     const lebarSel = lebarIsi / kolom;
@@ -135,6 +136,35 @@ async function butir(p: Penulis, b: ButirDok, d: DokumenSoal, x: number, y: numb
         tinggi = Math.max(tinggi, tinggiParagraf(t, gaya));
       });
       cy += tinggi + 1;
+    }
+  }
+  if (isi.pasangan) {
+    // Menjodohkan: kolom kiri bernomor dan kolom kanan berhuruf dengan titik; ruang tengah untuk menarik garis.
+    const { kiri, kanan } = isi.pasangan;
+    const tengah = 70;
+    const lebarKolom = (lebarIsi - tengah) / 2;
+    const lebarLabel = 20;
+    cy += 4;
+    for (let i = 0; i < Math.max(kiri.length, kanan.length); i++) {
+      const tk = kiri[i] !== undefined ? tataParagraf(doc, kiri[i], lebarKolom - lebarLabel - 12, gaya) : null;
+      const tn = kanan[i] !== undefined ? tataParagraf(doc, kanan[i], lebarKolom - lebarLabel - 12, gaya) : null;
+      const tinggi = Math.max(tk ? tinggiParagraf(tk, gaya) : 0, tn ? tinggiParagraf(tn, gaya) : 0);
+      const yTitik = cy + Math.min(tinggi, UKURAN * 1.35) / 2;
+      if (gambar) {
+        doc.setFillColor(0, 0, 0);
+        if (tk) {
+          labelSejajar(doc, `${i + 1}.`, xi, cy, lebarLabel, gaya, tk);
+          gambarParagraf(doc, tk, xi + lebarLabel, cy, gaya);
+          doc.circle(xi + lebarKolom - 3, yTitik, 2, 'F');
+        }
+        if (tn) {
+          const xk = xi + lebarKolom + tengah;
+          doc.circle(xk + 3, yTitik, 2, 'F');
+          labelSejajar(doc, `${HURUF_KANAN[i]}.`, xk + 12, cy, lebarLabel, gaya, tn);
+          gambarParagraf(doc, tn, xk + 12 + lebarLabel, cy, gaya);
+        }
+      }
+      cy += tinggi + 8;
     }
   }
   const t = b.tempat;
@@ -283,6 +313,40 @@ function tabelKisi(p: Penulis, d: DokumenSoal) {
   }
 }
 
+/** Pedoman penskoran: Bentuk soal | Jumlah soal | Skor per soal | Skor maksimal, baris jumlah, lalu rumus nilai. */
+function tabelPenskoran(p: Penulis, d: DokumenSoal) {
+  const doc = p.doc;
+  const t = teksPenskoran(d.inggris);
+  const lebar = [0.4, 0.2, 0.2, 0.2].map((w) => w * LEBAR);
+  const pad = 4;
+  const baris = [...d.penskoran!.baris.map((b) => [b.bentuk, String(b.jumlah), String(b.skor), String(b.maks)]), [t.total, '', '', String(d.penskoran!.total)]];
+  const tinggiBaris = UKURAN * 1.35 + pad * 2;
+  p.y += 16;
+  p.ruang(tinggiBaris * (baris.length + 1) + 40);
+  p.paragraf(t.judul, g({ tebal: true }), { jarak: 4 });
+  [t.kepala, ...baris].forEach((r, ri) => {
+    const tebal = ri === 0 || ri === baris.length;
+    const gy = g({ tebal });
+    let x = TEPI.kiri;
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+    r.forEach((teks, i) => {
+      if (ri === 0) {
+        doc.setFillColor(242, 242, 242);
+        doc.rect(x, p.y, lebar[i], tinggiBaris, 'FD');
+      } else doc.rect(x, p.y, lebar[i], tinggiBaris);
+      if (teks) {
+        const tt = tataParagraf(doc, teks, lebar[i] - pad * 2, gy);
+        gambarParagraf(doc, tt, x + pad, p.y + (tinggiBaris - tinggiParagraf(tt, gy)) / 2, gy, i ? 'tengah' : 'kiri', lebar[i] - pad * 2);
+      }
+      x += lebar[i];
+    });
+    p.y += tinggiBaris;
+  });
+  p.y += 6;
+  p.paragraf(t.rumus, g());
+}
+
 function kepalaDokumen(p: Penulis, d: DokumenSoal) {
   const doc = p.doc;
   const L = (id: string, en: string) => (d.inggris ? en : id);
@@ -374,6 +438,7 @@ export async function buatPdf(d: DokumenSoal, aset: AsetPdf): Promise<Blob> {
       p.paragraf(L('Rubrik:', 'Rubric:'), g({ tebal: true }));
       for (const r of k.rubrik!) p.paragraf(`–  ${r}`, gk, { x: TEPI.kiri + INDEN, lebar: LEBAR - INDEN });
     }
+    if (d.penskoran) tabelPenskoran(p, d);
     // Pembahasan ikut berkas kunci jawaban, mulai di halaman baru.
     if (d.opsi.pembahasan) {
       p.halamanBaru();

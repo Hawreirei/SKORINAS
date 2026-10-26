@@ -1,7 +1,8 @@
 import type { HurufOpsi } from '../db/tipe';
+import { HURUF_KANAN } from '../db/tipe';
 import { keTikz } from '../gambar/tikz';
 import { escLatex, keLatex } from '../matematika/latex';
-import { opsiPerBaris, type ButirDok, type DokumenSoal } from './model';
+import { opsiPerBaris, teksPenskoran, type ButirDok, type DokumenSoal } from './model';
 
 function lebarGambarCm(b: ButirDok): number {
   if (!b.gambar) return 0;
@@ -17,7 +18,7 @@ function butirKeTex(b: ButirDok, d: DokumenSoal): string {
   if (isi.bentuk === 'benar_salah') baris[0] += ` \\hfill ${d.inggris ? 'T\\quad F' : 'B\\quad S'}`;
   if (isi.terjemahan?.pokok) baris.push(`\\\\{\\itshape ${keLatex(isi.terjemahan.pokok)}}`);
   if (b.gambar) baris.push(`\\par\\smallskip\\begin{center}\n${keTikz(b.gambar, lebarGambarCm(b))}\n\\end{center}`);
-  if (isi.bentuk === 'pilihan_ganda' && isi.opsi) {
+  if (isi.opsi) {
     const huruf = Object.keys(isi.opsi).sort() as HurufOpsi[];
     const perBaris = opsiPerBaris(b, huruf.length);
     if (perBaris > 1) {
@@ -28,6 +29,16 @@ function butirKeTex(b: ButirDok, d: DokumenSoal): string {
       const opsi = huruf.map((h) => `\\item ${keLatex(isi.opsi![h] ?? '')}`);
       baris.push(`\\begin{enumerate}[itemsep=0pt,label=\\Alph*.,leftmargin=*]\n${opsi.join('\n')}\n\\end{enumerate}`);
     }
+  }
+  if (isi.pasangan) {
+    // Menjodohkan: kiri bernomor dan kanan berhuruf dengan titik; kolom tengah kosong untuk menarik garis.
+    const { kiri, kanan } = isi.pasangan;
+    const sel = Array.from({ length: Math.max(kiri.length, kanan.length) }, (_, i) => {
+      const k = kiri[i] !== undefined ? `${i + 1}.~${keLatex(kiri[i])} & $\\bullet$` : ' & ';
+      const n = kanan[i] !== undefined ? `$\\bullet$ & ${HURUF_KANAN[i]}.~${keLatex(kanan[i])}` : ' & ';
+      return `${k} & & ${n} \\\\[0.6em]`;
+    });
+    baris.push(`\\par\\smallskip\\noindent\\begin{tabular}{@{}p{0.36\\linewidth}@{\\hspace{4pt}}c@{}p{0.16\\linewidth}@{}c@{\\hspace{4pt}}p{0.36\\linewidth}@{}}\n${sel.join('\n')}\n\\end{tabular}`);
   }
   if (b.kotakJawaban) baris.push(`\\kotakjawaban[${isi.bentuk === 'uraian' ? '5cm' : '2.5cm'}]`);
   if (b.sederhana) {
@@ -113,6 +124,18 @@ ${pendek.length ? `\\begin{multicols}{2}\n\\begin{itemize}[leftmargin=*,itemsep=
 ${panjang
   .map((k) => `\\paragraph{${k.nomor}.} ${keLatex(k.teks)}\\par\n${L('Rubrik', 'Rubric')}:\n\\begin{itemize}[itemsep=0pt]\n${k.rubrik!.map((r) => `\\item ${keLatex(r)}`).join('\n')}\n\\end{itemize}`)
   .join('\n')}`);
+    if (d.penskoran) {
+      const t = teksPenskoran(en);
+      const baris = d.penskoran.baris.map((b) => `${escLatex(b.bentuk)} & ${b.jumlah} & ${b.skor} & ${b.maks} \\\\ \\hline`);
+      bagian.push(`\\subsection*{${escLatex(t.judul)}}
+\\begin{tabular}{|p{6cm}|c|c|c|}
+\\hline
+${t.kepala.map((k) => `\\textbf{${escLatex(k)}}`).join(' & ')} \\\\ \\hline
+${baris.join('\n')}
+\\multicolumn{3}{|l|}{\\textbf{${escLatex(t.total)}}} & \\textbf{${d.penskoran.total}} \\\\ \\hline
+\\end{tabular}\\par\\smallskip
+${escLatex(t.rumus)}`);
+    }
     // Pembahasan ikut berkas kunci jawaban, mulai di halaman baru.
     if (d.opsi.pembahasan) {
       bagian.push(`\\newpage

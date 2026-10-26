@@ -40,6 +40,30 @@ function butirPalsu(bentuk) {
       meta,
     };
   }
+  if (bentuk === 'pilihan_ganda_kompleks') {
+    return {
+      bentuk,
+      pokok: `Pilihlah semua bentuk yang senilai dengan hasil $\\frac{${a}}{${d}} + \\frac{${b}}{${d}}$ (soal ${i} tentang ${benda} ${nama}).`,
+      opsi: { A: `$\\frac{${a + b}}{${d}}$`, B: `$\\frac{${2 * (a + b)}}{${2 * d}}$`, C: `$\\frac{${a + b}}{${2 * d}}$`, D: `$\\frac{${a + b + 1}}{${d}}$` },
+      kunci: 'A,B',
+      pembahasan: [`Hasilnya $\\frac{${a + b}}{${d}}$, dan $\\frac{${2 * (a + b)}}{${2 * d}}$ senilai dengannya.`],
+      verifikasi: { tipe: 'ekspresi', ekspresi: `${a}/${d} + ${b}/${d}`, nilai: sum },
+      gambar: null,
+      meta,
+    };
+  }
+  if (bentuk === 'menjodohkan') {
+    return {
+      bentuk,
+      pokok: `Pasangkan setiap penjumlahan milik ${nama} (kumpulan ${i}) dengan hasilnya.`,
+      pasangan: { kiri: [`$${i} + 1$`, `$${i} + 2$`, `$${i} + 3$`], kanan: [String(i + 3), String(i + 1), String(i + 10), String(i + 2)] },
+      kunci: '1-B, 2-D, 3-A',
+      pembahasan: ['Hitung setiap penjumlahan.'],
+      verifikasi: { tipe: 'pasangan', kiri: [`${i}+1`, `${i}+2`, `${i}+3`], kanan: [String(i + 3), String(i + 1), String(i + 10), String(i + 2)] },
+      gambar: null,
+      meta,
+    };
+  }
   if (bentuk === 'benar_salah') {
     return { bentuk, pokok: `$\\frac{${a}}{${d}} + \\frac{${b}}{${d}} = \\frac{${a + b}}{${2 * d}}$ (soal ${i}).`, kunci: 'S', pembahasan: [`Hasil yang benar $\\frac{${a + b}}{${d}}$.`], verifikasi: { tipe: 'ekspresi', ekspresi: `${a}/${d} + ${b}/${d}`, nilai: `${a + b}/${2 * d}` }, gambar: null, meta };
   }
@@ -93,7 +117,7 @@ function butirPalsu(bentuk) {
       });
     const body = JSON.parse(route.request().postData() ?? '{}');
     const teks = body.contents[0].parts[0].text;
-    const bentuk = teks.match(/\("(pilihan_ganda|benar_salah|isian_singkat|uraian)"\)/)[1];
+    const bentuk = teks.match(/\("(pilihan_ganda_kompleks|pilihan_ganda|benar_salah|menjodohkan|isian_singkat|uraian)"\)/)[1];
     await new Promise((r) => setTimeout(r, 60));
     return route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify(butirPalsu(bentuk)) }] } }], usageMetadata: { promptTokenCount: 1800, candidatesTokenCount: 400 } } });
   });
@@ -146,7 +170,17 @@ function butirPalsu(bentuk) {
   const draf = await page.evaluate(() => ['#kelas', '#mapel', '#jumlah'].map((q) => document.querySelector(q).value));
   if (draf.join('|') !== '4|Matematika|12') galat.push(`draf layar Buat tidak pulih setelah muat ulang: ${draf.join('|')}`);
   await page.getByRole('button', { name: /Pengaturan lanjutan/ }).click();
-  for (const b of ['Isian singkat', 'Benar-salah', 'Uraian']) await page.getByRole('button', { name: b, exact: true }).click();
+  for (const b of ['Pilihan ganda kompleks', 'Benar-salah', 'Menjodohkan', 'Isian singkat', 'Uraian']) await page.getByRole('button', { name: b, exact: true }).click();
+  // Pengaturan lanjutan rinci: jumlah per bentuk, banyak opsi, dan skor.
+  await page.getByLabel('Atur jumlah per bentuk soal').check();
+  await page.fill('#jumlah-pilihan_ganda', '3');
+  await page.getByText('Total 13 dari 12 soal, lebih 1.').waitFor();
+  await page.fill('#jumlah-uraian', '1');
+  await page.getByText('Total 12 soal, sudah pas.').first().waitFor();
+  await page.getByRole('radio', { name: /^4 opsi/ }).click();
+  await page.getByLabel('Cantumkan skor per soal').check();
+  // 3 PG × 1 + 2 PG kompleks × 2 + 2 B-S × 1 + 2 menjodohkan × 3 + 2 isian × 2 + 1 uraian × 5 = 24.
+  await page.locator('aside[aria-label="Rencana"]').getByText('Skor maksimal 24').waitFor();
   await page.getByLabel('Simpan pengaturan ini').check();
   await page.fill('#nama-preset', 'Matematika K4 · Pecahan');
   await page.fill('#judul', 'Penjumlahan pecahan');
@@ -232,7 +266,11 @@ function butirPalsu(bentuk) {
   // Ubah tanda jenis jawaban satu soal uraian. Tanpa persetujuan (v0.5): soal uraian hanya diberi
   // keterangan, tidak ada tombol Setujui atau penunjuk langkah, dan Unduh langsung aktif.
   const jenis = page.getByRole('radio', { name: /Penjelasan \(garis tulis\)/ });
-  if (await jenis.count()) await jenis.first().check();
+  if (await jenis.count()) {
+    // Tanda tersimpan dulu di IndexedDB lalu tampil lagi, jadi tunggu radionya terpilih.
+    await jenis.first().click();
+    await page.locator('label:has-text("Penjelasan (garis tulis)") input:checked').first().waitFor({ timeout: 5000 });
+  }
   if (!(await page.getByText('Kunci tidak dicek otomatis').count())) galat.push('soal uraian tanpa keterangan "Kunci tidak dicek otomatis"');
   if (await page.getByRole('button', { name: /Setujui/ }).count()) galat.push('tombol Setujui masih ada');
   if (/Mohon cek dulu|Disetujui|Langkah \d dari 3/.test(await page.locator('body').innerText())) galat.push('penanda status atau penunjuk langkah masih tampil');
@@ -267,6 +305,11 @@ function butirPalsu(bentuk) {
       const tujuan = path.join(KELUAR, `soal${akhiran}.${fmt}`);
       await u.saveAs(tujuan);
       console.log(fmt, nama, fs.statSync(tujuan).size, 'bytes');
+      if (fmt === 'docx') {
+        const xml = await (await require('jszip').loadAsync(fs.readFileSync(tujuan))).file('word/document.xml').async('string');
+        if (akhiran === '-kunci' && !xml.includes('PEDOMAN PENSKORAN')) galat.push('kunci jawaban Word tanpa pedoman penskoran');
+        if (!akhiran && !(xml.includes('Menjodohkan') && xml.includes('Pilihan Ganda Kompleks'))) galat.push('lembar soal Word tanpa bagian Menjodohkan atau Pilihan Ganda Kompleks');
+      }
     }
   }
 

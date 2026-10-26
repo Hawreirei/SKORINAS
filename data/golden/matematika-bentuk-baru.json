@@ -1,0 +1,814 @@
+{
+ "keterangan": "Golden set pilihan ganda kompleks (K) dan menjodohkan (J): butir benar harus lolos hitung ulang, butir salah (S) harus ditolak.",
+ "benar": [
+  {
+   "id": "K-01",
+   "kelas": 5,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua pecahan yang senilai dengan $\\frac{3}{4}$.",
+    "opsi": {
+     "A": "$\\frac{6}{8}$",
+     "B": "$\\frac{9}{16}$",
+     "C": "$\\frac{12}{16}$",
+     "D": "$\\frac{4}{5}$"
+    },
+    "kunci": "A,C",
+    "pembahasan": [
+     "Hitung setiap opsi."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "3/4",
+     "nilai": "3/4"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "K-02",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua bilangan yang hasilnya sama dengan $6 \\times 4$.",
+    "opsi": {
+     "A": "24",
+     "B": "$3 \\times 8$",
+     "C": "20",
+     "D": "$12 \\times 2$"
+    },
+    "kunci": "A,B,D",
+    "pembahasan": [
+     "Hitung setiap opsi."
+    ],
+    "verifikasi": {
+     "tipe": "per_opsi",
+     "opsi": {
+      "A": {
+       "kiri": "24",
+       "relasi": "=",
+       "kanan": "6*4"
+      },
+      "B": {
+       "kiri": "3*8",
+       "relasi": "=",
+       "kanan": "6*4"
+      },
+      "C": {
+       "kiri": "20",
+       "relasi": "=",
+       "kanan": "6*4"
+      },
+      "D": {
+       "kiri": "12*2",
+       "relasi": "=",
+       "kanan": "6*4"
+      }
+     }
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "K-03",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua pernyataan yang benar.",
+    "opsi": {
+     "A": "$\\frac{2}{3}$ lebih besar daripada $\\frac{1}{2}$",
+     "B": "$0,25 = 25\\%$",
+     "C": "$\\frac{3}{5}$ lebih kecil daripada $\\frac{1}{2}$",
+     "D": "$1,5 > 1,49$"
+    },
+    "kunci": "A,B,D",
+    "pembahasan": [
+     "Hitung setiap opsi."
+    ],
+    "verifikasi": {
+     "tipe": "per_opsi",
+     "opsi": {
+      "A": {
+       "kiri": "2/3",
+       "relasi": ">",
+       "kanan": "1/2"
+      },
+      "B": {
+       "kiri": "0.25",
+       "relasi": "=",
+       "kanan": "25%"
+      },
+      "C": {
+       "kiri": "3/5",
+       "relasi": "<",
+       "kanan": "1/2"
+      },
+      "D": {
+       "kiri": "1.5",
+       "relasi": ">",
+       "kanan": "1.49"
+      }
+     }
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "K-04",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua bentuk yang bernilai sama dengan hasil $18 : 3$.",
+    "opsi": {
+     "A": "6",
+     "B": "9",
+     "C": "$\\frac{12}{2}$",
+     "D": "3"
+    },
+    "kunci": "A,C",
+    "pembahasan": [
+     "Hitung setiap opsi."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "18 / 3",
+     "nilai": "6"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "K-05",
+   "kelas": 10,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua nilai $x$ yang memenuhi $x^2 = 16$.",
+    "opsi": {
+     "A": "4",
+     "B": "8",
+     "C": "$-4$",
+     "D": "2",
+     "E": "16"
+    },
+    "kunci": "A,C",
+    "pembahasan": [
+     "Hitung setiap opsi."
+    ],
+    "verifikasi": {
+     "tipe": "per_opsi",
+     "opsi": {
+      "A": {
+       "kiri": "4^2",
+       "relasi": "=",
+       "kanan": "16"
+      },
+      "B": {
+       "kiri": "8^2",
+       "relasi": "=",
+       "kanan": "16"
+      },
+      "C": {
+       "kiri": "(-4)^2",
+       "relasi": "=",
+       "kanan": "16"
+      },
+      "D": {
+       "kiri": "2^2",
+       "relasi": "=",
+       "kanan": "16"
+      },
+      "E": {
+       "kiri": "16^2",
+       "relasi": "=",
+       "kanan": "16"
+      }
+     }
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "K-06",
+   "kelas": 5,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua bilangan desimal yang senilai dengan $\\frac{1}{4}$.",
+    "opsi": {
+     "A": "0,25",
+     "B": "0,4",
+     "C": "0,250",
+     "D": "2,5"
+    },
+    "kunci": "A,C",
+    "pembahasan": [
+     "Hitung setiap opsi."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "1/4",
+     "nilai": "0.25"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "J-01",
+   "kelas": 3,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "menjodohkan",
+    "pokok": "Pasangkan setiap operasi hitung di kolom kiri dengan hasilnya di kolom kanan.",
+    "pasangan": {
+     "kiri": [
+      "$12 \\times 4$",
+      "$72 : 8$",
+      "$35 + 18$"
+     ],
+     "kanan": [
+      "9",
+      "53",
+      "48",
+      "63"
+     ]
+    },
+    "kunci": "1-C, 2-A, 3-B",
+    "pembahasan": [
+     "Hitung setiap butir."
+    ],
+    "verifikasi": {
+     "tipe": "pasangan",
+     "kiri": [
+      "12*4",
+      "72/8",
+      "35+18"
+     ],
+     "kanan": [
+      "9",
+      "53",
+      "48",
+      "63"
+     ]
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "J-02",
+   "kelas": 5,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "menjodohkan",
+    "pokok": "Jodohkan setiap pecahan dengan bentuk desimalnya.",
+    "pasangan": {
+     "kiri": [
+      "$\\frac{1}{2}$",
+      "$\\frac{3}{4}$",
+      "$\\frac{1}{5}$",
+      "$\\frac{2}{5}$"
+     ],
+     "kanan": [
+      "0,75",
+      "0,4",
+      "0,5",
+      "0,2",
+      "0,25"
+     ]
+    },
+    "kunci": "1-C, 2-A, 3-D, 4-B",
+    "pembahasan": [
+     "Hitung setiap butir."
+    ],
+    "verifikasi": {
+     "tipe": "pasangan",
+     "kiri": [
+      "1/2",
+      "3/4",
+      "1/5",
+      "2/5"
+     ],
+     "kanan": [
+      "0.75",
+      "0.4",
+      "0.5",
+      "0.2",
+      "0.25"
+     ]
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "J-03",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "menjodohkan",
+    "pokok": "Pasangkan setiap satuan panjang di kolom kiri dengan nilai yang sama di kolom kanan.",
+    "pasangan": {
+     "kiri": [
+      "2 m",
+      "3 km",
+      "50 dm"
+     ],
+     "kanan": [
+      "500 cm",
+      "3.000 m",
+      "200 cm",
+      "30 m"
+     ]
+    },
+    "kunci": "1-C, 2-B, 3-A",
+    "pembahasan": [
+     "Hitung setiap butir."
+    ],
+    "verifikasi": {
+     "tipe": "pasangan",
+     "kiri": [
+      "200",
+      "300000",
+      "500"
+     ],
+     "kanan": [
+      "500",
+      "300000",
+      "200",
+      "3000"
+     ]
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "J-04",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "menjodohkan",
+    "pokok": "Pasangkan setiap bilangan kuadrat dengan hasilnya.",
+    "pasangan": {
+     "kiri": [
+      "$7^2$",
+      "$9^2$",
+      "$11^2$"
+     ],
+     "kanan": [
+      "121",
+      "81",
+      "49",
+      "64"
+     ]
+    },
+    "kunci": "1-C, 2-B, 3-A",
+    "pembahasan": [
+     "Hitung setiap butir."
+    ],
+    "verifikasi": {
+     "tipe": "pasangan",
+     "kiri": [
+      "7^2",
+      "9^2",
+      "11^2"
+     ],
+     "kanan": [
+      "121",
+      "81",
+      "49",
+      "64"
+     ]
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "J-05",
+   "kelas": 2,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "menjodohkan",
+    "pokok": "Tarik garis dari setiap soal ke jawabannya.",
+    "pasangan": {
+     "kiri": [
+      "$8 + 5$",
+      "$15 - 7$",
+      "$6 + 6$"
+     ],
+     "kanan": [
+      "12",
+      "8",
+      "13"
+     ]
+    },
+    "kunci": "1-C, 2-B, 3-A",
+    "pembahasan": [
+     "Hitung setiap butir."
+    ],
+    "verifikasi": {
+     "tipe": "pasangan",
+     "kiri": [
+      "8+5",
+      "15-7",
+      "6+6"
+     ],
+     "kanan": [
+      "12",
+      "8",
+      "13"
+     ]
+    },
+    "gambar": null
+   }
+  }
+ ],
+ "salah": [
+  {
+   "id": "SK-01",
+   "kelas": 5,
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua pecahan yang senilai dengan $\\frac{3}{4}$.",
+    "opsi": {
+     "A": "$\\frac{6}{8}$",
+     "B": "$\\frac{9}{16}$",
+     "C": "$\\frac{12}{16}$",
+     "D": "$\\frac{4}{5}$"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "Hitung setiap opsi."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "3/4",
+     "nilai": "3/4"
+    },
+    "gambar": null
+   },
+   "catatan": "kunci melewatkan satu opsi benar"
+  },
+  {
+   "id": "SK-02",
+   "kelas": 4,
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua bilangan yang hasilnya sama dengan $6 \\times 4$.",
+    "opsi": {
+     "A": "24",
+     "B": "$3 \\times 8$",
+     "C": "20",
+     "D": "$12 \\times 2$"
+    },
+    "kunci": "A,B,C,D",
+    "pembahasan": [
+     "Hitung setiap opsi."
+    ],
+    "verifikasi": {
+     "tipe": "per_opsi",
+     "opsi": {
+      "A": {
+       "kiri": "24",
+       "relasi": "=",
+       "kanan": "6*4"
+      },
+      "B": {
+       "kiri": "3*8",
+       "relasi": "=",
+       "kanan": "6*4"
+      },
+      "C": {
+       "kiri": "20",
+       "relasi": "=",
+       "kanan": "6*4"
+      },
+      "D": {
+       "kiri": "12*2",
+       "relasi": "=",
+       "kanan": "6*4"
+      }
+     }
+    },
+    "gambar": null
+   },
+   "catatan": "kunci memasukkan opsi salah"
+  },
+  {
+   "id": "SK-03",
+   "kelas": 6,
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua pernyataan yang benar.",
+    "opsi": {
+     "A": "$\\frac{2}{3}$ lebih besar daripada $\\frac{1}{2}$",
+     "B": "$0,25 = 25\\%$",
+     "C": "$\\frac{3}{5}$ lebih kecil daripada $\\frac{1}{2}$",
+     "D": "$1,5 > 1,49$"
+    },
+    "kunci": "A,B,C,D",
+    "pembahasan": [
+     "Hitung setiap opsi."
+    ],
+    "verifikasi": {
+     "tipe": "per_opsi",
+     "opsi": {
+      "A": {
+       "kiri": "2/3",
+       "relasi": ">",
+       "kanan": "1/2"
+      },
+      "B": {
+       "kiri": "0.25",
+       "relasi": "=",
+       "kanan": "25%"
+      },
+      "C": {
+       "kiri": "3/5",
+       "relasi": "<",
+       "kanan": "1/2"
+      },
+      "D": {
+       "kiri": "1.5",
+       "relasi": ">",
+       "kanan": "1.49"
+      }
+     }
+    },
+    "gambar": null
+   },
+   "catatan": "pernyataan opsi C dinilai benar padahal salah"
+  },
+  {
+   "id": "SK-04",
+   "kelas": 5,
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua pecahan yang senilai dengan $\\frac{3}{4}$.",
+    "opsi": {
+     "A": "$\\frac{6}{8}$",
+     "B": "tiga perempat",
+     "C": "$\\frac{12}{16}$",
+     "D": "$\\frac{4}{5}$"
+    },
+    "kunci": "A,C",
+    "pembahasan": [
+     "Hitung setiap opsi."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "3/4",
+     "nilai": "3/4"
+    },
+    "gambar": null
+   },
+   "catatan": "opsi bukan bilangan dengan verifikasi ekspresi"
+  },
+  {
+   "id": "SK-05",
+   "kelas": 10,
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua nilai $x$ yang memenuhi $x^2 = 16$.",
+    "opsi": {
+     "A": "4",
+     "B": "8",
+     "C": "$-4$",
+     "D": "2",
+     "E": "16"
+    },
+    "kunci": "A,C",
+    "pembahasan": [
+     "Hitung setiap opsi."
+    ],
+    "verifikasi": {
+     "tipe": "per_opsi",
+     "opsi": {
+      "A": {
+       "kiri": "4^2",
+       "relasi": "=",
+       "kanan": "16"
+      },
+      "B": {
+       "kiri": "8^2",
+       "relasi": "=",
+       "kanan": "16"
+      },
+      "C": {
+       "kiri": "(-4)^2",
+       "relasi": "=",
+       "kanan": "16"
+      },
+      "D": {
+       "kiri": "2^2",
+       "relasi": "=",
+       "kanan": "16"
+      }
+     }
+    },
+    "gambar": null
+   },
+   "catatan": "pernyataan untuk opsi E tidak ada"
+  },
+  {
+   "id": "SJ-01",
+   "kelas": 3,
+   "isi": {
+    "bentuk": "menjodohkan",
+    "pokok": "Pasangkan setiap operasi hitung di kolom kiri dengan hasilnya di kolom kanan.",
+    "pasangan": {
+     "kiri": [
+      "$12 \\times 4$",
+      "$72 : 8$",
+      "$35 + 18$"
+     ],
+     "kanan": [
+      "9",
+      "53",
+      "48",
+      "63"
+     ]
+    },
+    "kunci": "1-A, 2-C, 3-B",
+    "pembahasan": [
+     "Hitung setiap butir."
+    ],
+    "verifikasi": {
+     "tipe": "pasangan",
+     "kiri": [
+      "12*4",
+      "72/8",
+      "35+18"
+     ],
+     "kanan": [
+      "9",
+      "53",
+      "48",
+      "63"
+     ]
+    },
+    "gambar": null
+   },
+   "catatan": "pasangan 1 dan 2 tertukar"
+  },
+  {
+   "id": "SJ-02",
+   "kelas": 5,
+   "isi": {
+    "bentuk": "menjodohkan",
+    "pokok": "Jodohkan setiap pecahan dengan bentuk desimalnya.",
+    "pasangan": {
+     "kiri": [
+      "$\\frac{1}{2}$",
+      "$\\frac{3}{4}$",
+      "$\\frac{1}{5}$",
+      "$\\frac{2}{5}$"
+     ],
+     "kanan": [
+      "0,75",
+      "0,4",
+      "0,5",
+      "0,2",
+      "0,25"
+     ]
+    },
+    "kunci": "1-C, 2-A, 3-D, 4-E",
+    "pembahasan": [
+     "Hitung setiap butir."
+    ],
+    "verifikasi": {
+     "tipe": "pasangan",
+     "kiri": [
+      "1/2",
+      "3/4",
+      "1/5",
+      "2/5"
+     ],
+     "kanan": [
+      "0.75",
+      "0.4",
+      "0.5",
+      "0.2",
+      "0.25"
+     ]
+    },
+    "gambar": null
+   },
+   "catatan": "pasangan 4 salah"
+  },
+  {
+   "id": "SJ-03",
+   "kelas": 4,
+   "isi": {
+    "bentuk": "menjodohkan",
+    "pokok": "Pasangkan setiap satuan panjang di kolom kiri dengan nilai yang sama di kolom kanan.",
+    "pasangan": {
+     "kiri": [
+      "2 m",
+      "3 km",
+      "50 dm"
+     ],
+     "kanan": [
+      "500 cm",
+      "3.000 m",
+      "200 cm",
+      "20 dm"
+     ]
+    },
+    "kunci": "1-C, 2-B, 3-A",
+    "pembahasan": [
+     "Hitung setiap butir."
+    ],
+    "verifikasi": {
+     "tipe": "pasangan",
+     "kiri": [
+      "200",
+      "300000",
+      "500"
+     ],
+     "kanan": [
+      "500",
+      "300000",
+      "200",
+      "200"
+     ]
+    },
+    "gambar": null
+   },
+   "catatan": "butir kanan pengecoh bernilai sama dengan butir kiri"
+  },
+  {
+   "id": "SJ-04",
+   "kelas": 6,
+   "isi": {
+    "bentuk": "menjodohkan",
+    "pokok": "Pasangkan setiap bilangan kuadrat dengan hasilnya.",
+    "pasangan": {
+     "kiri": [
+      "$7^2$",
+      "$9^2$",
+      "$11^2$"
+     ],
+     "kanan": [
+      "121",
+      "81",
+      "49",
+      "64"
+     ]
+    },
+    "kunci": "1-C, 2-B, 3-A",
+    "pembahasan": [
+     "Hitung setiap butir."
+    ],
+    "verifikasi": {
+     "tipe": "pasangan",
+     "kiri": [
+      "7^2",
+      "9^2",
+      "11^2"
+     ],
+     "kanan": [
+      "121",
+      "81",
+      "49"
+     ]
+    },
+    "gambar": null
+   },
+   "catatan": "verifikasi kekurangan nilai kolom kanan"
+  },
+  {
+   "id": "SJ-05",
+   "kelas": 2,
+   "isi": {
+    "bentuk": "menjodohkan",
+    "pokok": "Tarik garis dari setiap soal ke jawabannya.",
+    "pasangan": {
+     "kiri": [
+      "$8 + 5$",
+      "$15 - 7$",
+      "$6 + 6$"
+     ],
+     "kanan": [
+      "12",
+      "8",
+      "13"
+     ]
+    },
+    "kunci": "1-C, 2-B, 3-A",
+    "pembahasan": [
+     "Hitung setiap butir."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "8+5",
+     "nilai": "13"
+    },
+    "gambar": null
+   },
+   "catatan": "verifikasi bertipe ekspresi untuk menjodohkan"
+  }
+ ]
+}

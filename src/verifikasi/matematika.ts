@@ -1,4 +1,5 @@
-import type { HurufOpsi, IsiSoal } from '../db/tipe';
+import type { HurufOpsi, IsiSoal, Pernyataan } from '../db/tipe';
+import { HURUF_KANAN, hurufKunci, petaJodoh } from '../db/tipe';
 import { angkaDariTeks, daftarAngkaDariTeks, evaluasi, normalisasiRelasi, samaNilai, ujiRelasi, type Lingkup, type Lokal } from './angka';
 
 export type HasilHitung = { hasil: 'lolos' | 'gagal' | 'tidak_dapat'; alasan: string };
@@ -26,6 +27,63 @@ function samaDaftar(a: number[], b: number[]): boolean {
   return a.length === b.length && a.every((x, i) => samaNilai(x, b[i]));
 }
 
+function benarPernyataan(p: Pernyataan, lingkup: Lingkup): boolean {
+  const relasi = normalisasiRelasi(p.relasi);
+  if (!relasi) throw new Error(`Relasi "${p.relasi}" tidak dikenal.`);
+  return ujiRelasi(hitung(p.kiri, lingkup), relasi, hitung(p.kanan, lingkup));
+}
+
+const daftarHuruf = (h: HurufOpsi[]) => h.join(', ') || 'tidak ada';
+
+/**
+ * Pilihan ganda kompleks: opsi benar menurut hitungan harus tepat sama dengan huruf kunci.
+ * "ekspresi": opsi berupa bilangan; opsi benar adalah yang bernilai sama dengan hasil.
+ * "per_opsi": setiap opsi punya satu pernyataan; opsi benar adalah yang pernyataannya benar.
+ */
+function periksaKompleks(isi: IsiSoal, lokal: Lokal, lingkup: Lingkup): HasilHitung {
+  const v = isi.verifikasi;
+  const huruf = (Object.keys(isi.opsi ?? {}) as HurufOpsi[]).sort();
+  let benar: HurufOpsi[];
+  let dasar: string;
+  if (v.tipe === 'ekspresi') {
+    const h = hitung(v.ekspresi, lingkup);
+    if (!samaNilai(h, hitung(v.nilai, lingkup))) return gagal(`Hitung ulang ${v.ekspresi} = ${fmt(h)}, bukan ${v.nilai}.`);
+    benar = [];
+    for (const x of huruf) {
+      const n = angkaDariTeks(isi.opsi![x] ?? '', lokal);
+      if (n === null) return gagal(`Opsi ${x} ("${isi.opsi![x]}") bukan bilangan, tidak dapat dibandingkan.`);
+      if (samaNilai(n, h)) benar.push(x);
+    }
+    dasar = `opsi bernilai ${fmt(h)}`;
+  } else if (v.tipe === 'per_opsi') {
+    const kurang = huruf.filter((x) => !v.opsi[x]);
+    if (kurang.length) return gagal(`Pernyataan verifikasi untuk opsi ${kurang.join(', ')} belum ada.`);
+    benar = huruf.filter((x) => benarPernyataan(v.opsi[x]!, lingkup));
+    dasar = 'pernyataan tiap opsi';
+  } else return gagal('Pilihan ganda kompleks memerlukan verifikasi ekspresi atau per_opsi.');
+  const kunci = hurufKunci(isi.kunci);
+  if (benar.join() !== kunci.join()) return gagal(`Menurut hitungan opsi yang benar ${daftarHuruf(benar)}, tetapi kunci ${daftarHuruf(kunci)}.`);
+  return lolos(`Dihitung dari ${dasar}: opsi benar ${daftarHuruf(benar)}.`);
+}
+
+/** Menjodohkan: setiap pasangan pada kunci bernilai sama, dan tidak ada butir kolom kanan lain yang juga cocok. */
+function periksaJodoh(isi: IsiSoal, lingkup: Lingkup): HasilHitung {
+  const v = isi.verifikasi;
+  if (v.tipe !== 'pasangan') return gagal('Menjodohkan memerlukan verifikasi pasangan.');
+  const p = isi.pasangan ?? { kiri: [], kanan: [] };
+  if (v.kiri.length !== p.kiri.length || v.kanan.length !== p.kanan.length) return gagal('Banyak nilai verifikasi tidak sama dengan banyak butir kolom kiri dan kanan.');
+  const kiri = v.kiri.map((e) => hitung(e, lingkup));
+  const kanan = v.kanan.map((e) => hitung(e, lingkup));
+  const peta = petaJodoh(isi.kunci, p.kiri.length);
+  for (let i = 0; i < kiri.length; i++) {
+    const j = peta[i];
+    if (j < 0 || !samaNilai(kiri[i], kanan[j])) return gagal(`Butir ${i + 1} bernilai ${fmt(kiri[i])}, tetapi dipasangkan dengan ${HURUF_KANAN[j] ?? '?'} yang bernilai ${j < 0 ? '?' : fmt(kanan[j])}.`);
+    const lain = kanan.findIndex((x, k) => k !== j && samaNilai(x, kiri[i]));
+    if (lain >= 0) return gagal(`Butir ${i + 1} juga cocok dengan ${HURUF_KANAN[lain]}; pasangan tidak tunggal.`);
+  }
+  return lolos(`Setiap pasangan bernilai sama (${kiri.map(fmt).join(', ')}).`);
+}
+
 /**
  * Pemeriksa rumpun Matematika: hitung ulang dengan mathjs lalu bandingkan dengan kunci.
  * Model hanya menulis instruksi pemeriksaan; hasilnya ditentukan kode ini.
@@ -33,9 +91,13 @@ function samaDaftar(a: number[], b: number[]): boolean {
 export function periksaHitung(isi: IsiSoal, lokal: Lokal, lingkup: Lingkup = {}): HasilHitung {
   const v = isi.verifikasi;
   try {
+    if (v.tipe === 'tidak_ada') return { hasil: 'tidak_dapat', alasan: v.alasan || 'Soal tidak dapat dihitung ulang otomatis.' };
+    if (isi.bentuk === 'pilihan_ganda_kompleks') return periksaKompleks(isi, lokal, lingkup);
+    if (isi.bentuk === 'menjodohkan') return periksaJodoh(isi, lingkup);
     switch (v.tipe) {
-      case 'tidak_ada':
-        return { hasil: 'tidak_dapat', alasan: v.alasan || 'Soal tidak dapat dihitung ulang otomatis.' };
+      case 'per_opsi':
+      case 'pasangan':
+        return gagal(`Verifikasi ${v.tipe} hanya untuk ${v.tipe === 'per_opsi' ? 'pilihan ganda kompleks' : 'menjodohkan'}.`);
 
       case 'ekspresi': {
         const h = hitung(v.ekspresi, lingkup);

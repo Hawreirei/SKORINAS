@@ -3,7 +3,15 @@ import type { KunciApi, LogSoal, PaketSoal, ParameterPaket, PekerjaanGenerasi, P
 
 /** Lengkapi parameter paket dari versi lama dengan nilai bawaan isian baru. */
 export function lengkapiParameter(p: ParameterPaket): ParameterPaket {
-  return { ...p, cara_bs: p.cara_bs ?? 'centang' };
+  return {
+    ...p,
+    cara_bs: p.cara_bs ?? 'centang',
+    jumlah_bentuk: p.jumlah_bentuk ?? null,
+    sebaran_level: p.sebaran_level ?? null,
+    jumlah_tp: p.jumlah_tp ?? null,
+    opsi_pg: p.opsi_pg ?? null,
+    skor_bentuk: p.skor_bentuk ?? null,
+  };
 }
 
 export class GenSoalDb extends Dexie {
@@ -45,6 +53,16 @@ export class GenSoalDb extends Dexie {
           p.parameter_json = lengkapiParameter(p.parameter_json);
         });
       });
+    // Versi 3: Pengaturan lanjutan yang lebih rinci. Parameter paket dan preset mendapat isian jumlah_bentuk,
+    // sebaran_level, jumlah_tp, opsi_pg, dan skor_bentuk (null = perilaku lama). Indeks tidak berubah.
+    this.version(3).upgrade(async (tx) => {
+      await tx.table('preset').toCollection().modify((p: Preset) => {
+        p.parameter_json = lengkapiParameter(p.parameter_json);
+      });
+      await tx.table('paket_soal').toCollection().modify((p: PaketSoal) => {
+        p.parameter_json = lengkapiParameter(p.parameter_json);
+      });
+    });
   }
 }
 

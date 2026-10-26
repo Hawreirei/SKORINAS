@@ -1,5 +1,5 @@
 import type { Bentuk, CaraBenarSalah, PaketSoal, Profil, Soal } from '../db/tipe';
-import { BENTUK_LABEL, KESUKARAN_LABEL, STATUS_MUTU_LABEL, jenisUraian } from '../db/tipe';
+import { BENTUK_LABEL, KESUKARAN_LABEL, STATUS_MUTU_LABEL, hurufKunci, jenisUraian } from '../db/tipe';
 import { bangkitkanGambar } from '../gambar';
 import type { Gambar } from '../gambar/primitif';
 import { keSvg } from '../gambar/svg';
@@ -70,6 +70,14 @@ export interface BagianDok {
   judul: string;
   petunjuk: string;
   butir: ButirDok[];
+  /** Skor setiap soal di bagian ini, bila guru mengaturnya. */
+  skor: number | null;
+}
+
+/** Pedoman penskoran di berkas kunci jawaban: satu baris per bentuk soal yang diberi skor. */
+export interface Penskoran {
+  baris: { bentuk: string; jumlah: number; skor: number; maks: number }[];
+  total: number;
 }
 
 const ANGKA = /^[\d\s.,:/+\-−%°]+$/;
@@ -118,6 +126,7 @@ export interface DokumenSoal {
   identitas: string[];
   bagian: BagianDok[];
   kunci: { nomor: number; teks: string; rubrik?: string[] }[];
+  penskoran: Penskoran | null;
   pembahasan: { nomor: number; langkah: string[] }[];
   kisi: BarisKisi[];
   /** Kelas, mapel, dan sumber TP yang dipakai; dicatat di kisi-kisi. */
@@ -128,19 +137,30 @@ export interface DokumenSoal {
 
 const JUDUL_BAGIAN: Record<Bentuk, [string, string]> = {
   pilihan_ganda: ['Pilihan Ganda', 'Multiple Choice'],
+  pilihan_ganda_kompleks: ['Pilihan Ganda Kompleks', 'Multiple Response'],
   benar_salah: ['Benar atau Salah', 'True or False'],
+  menjodohkan: ['Menjodohkan', 'Matching'],
   isian_singkat: ['Isian Singkat', 'Short Answer'],
   uraian: ['Uraian', 'Essay'],
 };
 
 /** Satu kalimat petunjuk cara menjawab untuk tiap bagian. */
 function petunjukBagian(bentuk: Bentuk, butir: ButirDok[], cara: CaraBenarSalah, en: boolean): string {
+  const daftarHuruf = (sambung: string) => {
+    const huruf = [...new Set(butir.flatMap((b) => Object.keys(b.soal.isi_json.opsi ?? {})))].sort();
+    return huruf.length > 1 ? `${huruf.slice(0, -1).join(', ')}, ${sambung} ${huruf.at(-1)}` : huruf.join('');
+  };
   switch (bentuk) {
     case 'pilihan_ganda': {
-      const huruf = [...new Set(butir.flatMap((b) => Object.keys(b.soal.isi_json.opsi ?? {})))].sort();
-      const daftar = huruf.length > 1 ? `${huruf.slice(0, -1).join(', ')}, ${en ? 'or' : 'atau'} ${huruf.at(-1)}` : huruf.join('');
+      const daftar = daftarHuruf(en ? 'or' : 'atau');
       return en ? `Choose the one best answer by putting a cross (X) on the letter ${daftar}.` : `Pilihlah satu jawaban yang paling tepat dengan memberi tanda silang (X) pada huruf ${daftar}.`;
     }
+    case 'pilihan_ganda_kompleks':
+      return en
+        ? 'Choose all the correct answers (there is more than one) by putting a cross (X) on each correct letter.'
+        : 'Pilihlah semua jawaban yang benar (lebih dari satu) dengan memberi tanda silang (X) pada setiap huruf jawaban yang benar.';
+    case 'menjodohkan':
+      return en ? 'Match each item in the left column with the correct answer in the right column by drawing a line.' : 'Pasangkan setiap butir di kolom kiri dengan jawaban yang tepat di kolom kanan dengan menarik garis.';
     case 'benar_salah':
       return cara === 'lingkari'
         ? en
@@ -168,7 +188,7 @@ function petunjukBagian(bentuk: Bentuk, butir: ButirDok[], cara: CaraBenarSalah,
   }
 }
 
-const ROMAWI = ['A', 'B', 'C', 'D'];
+const ROMAWI = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 function jumlahKata(teks: string): number {
   return teksPolos(teks).split(/\s+/).filter(Boolean).length;
@@ -179,6 +199,10 @@ export function teksKunci(s: Soal, inggris: boolean): string {
   switch (isi.bentuk) {
     case 'pilihan_ganda':
       return `${isi.kunci}. ${isi.opsi?.[isi.kunci as 'A'] ?? ''}`;
+    case 'pilihan_ganda_kompleks':
+      return hurufKunci(isi.kunci).join(', ');
+    case 'menjodohkan':
+      return isi.kunci.replace(/-/g, '–');
     case 'benar_salah':
       return isi.kunci === 'B' ? (inggris ? 'True' : 'Benar') : inggris ? 'False' : 'Salah';
     default:
@@ -221,15 +245,24 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
         soal: s,
         gambar,
         svg,
-        sederhana: bentuk !== 'uraian' && !gambar && kata <= 25 && opsiPendek && !s.isi_json.terjemahan,
+        sederhana: bentuk !== 'uraian' && bentuk !== 'menjodohkan' && !gambar && kata <= 25 && opsiPendek && !s.isi_json.terjemahan,
         kotakJawaban: bentuk === 'uraian' || (bentuk === 'isian_singkat' && kata > 25),
         opsiPendek,
         panjangOpsi,
         tempat: tempatJawab(s, kata),
       };
     });
-    bagian.push({ bentuk, judul: `${ROMAWI[bagian.length]}. ${JUDUL_BAGIAN[bentuk][inggris ? 1 : 0]}`, petunjuk: petunjukBagian(bentuk, butir, cara, inggris), butir });
+    const skor = p.skor_bentuk?.[bentuk] ?? null;
+    const teksSkor = skor ? (inggris ? ` Each question is worth ${skor} ${skor === 1 ? 'point' : 'points'}.` : ` Skor setiap soal ${skor}.`) : '';
+    bagian.push({ bentuk, judul: `${ROMAWI[bagian.length]}. ${JUDUL_BAGIAN[bentuk][inggris ? 1 : 0]}`, petunjuk: petunjukBagian(bentuk, butir, cara, inggris) + teksSkor, butir, skor });
   }
+  const berskor = bagian.filter((b) => b.skor);
+  const penskoran: Penskoran | null = berskor.length
+    ? {
+        baris: berskor.map((b) => ({ bentuk: JUDUL_BAGIAN[b.bentuk][inggris ? 1 : 0], jumlah: b.butir.length, skor: b.skor!, maks: b.butir.length * b.skor! })),
+        total: berskor.reduce((a, b) => a + b.butir.length * b.skor!, 0),
+      }
+    : null;
   const semua = bagian.flatMap((b) => b.butir);
   // Paket dari versi 0.3 masih mencatat kurikulum resminya; paket baru memakai CP dan TP yang ditulis guru.
   const kurikulumLabel = p.kurikulum_nama && p.tp.some((t) => t.sumber === 'resmi') ? `${p.kurikulum_nama} ${p.kurikulum_versi ?? ''}`.trim() : inggris ? "Teacher's learning objectives" : 'CP dan TP dari guru';
@@ -247,6 +280,7 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
     identitas: opsi.kop ? profil.identitas_siswa.filter(Boolean) : [],
     bagian,
     kunci: semua.map((b) => ({ nomor: b.nomor, teks: teksKunci(b.soal, inggris), rubrik: b.soal.isi_json.rubrik })),
+    penskoran,
     pembahasan: semua.map((b) => ({ nomor: b.nomor, langkah: b.soal.isi_json.pembahasan })),
     kisi: semua.map((b) => ({
       nomor: b.nomor,
@@ -262,6 +296,13 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
     opsi,
     berkas,
   };
+}
+
+/** Judul dan kalimat rumus nilai untuk pedoman penskoran. */
+export function teksPenskoran(inggris: boolean) {
+  return inggris
+    ? { judul: 'SCORING GUIDE', kepala: ['Question type', 'Questions', 'Score each', 'Maximum'], total: 'Total', rumus: 'Grade = (score obtained ÷ maximum score) × 100' }
+    : { judul: 'PEDOMAN PENSKORAN', kepala: ['Bentuk soal', 'Jumlah soal', 'Skor per soal', 'Skor maksimal'], total: 'Jumlah', rumus: 'Nilai = (skor perolehan : skor maksimal) × 100' };
 }
 
 const AKHIRAN_BERKAS: Record<JenisBerkas, string> = { soal: '', kunci: '-Kunci-Jawaban', kisi: '-Kisi-kisi' };

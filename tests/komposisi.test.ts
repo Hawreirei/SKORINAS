@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { bagiKomposisi, geserPersen } from '../src/generasi/komposisi';
-import { rencanakanSlot } from '../src/generasi/rencana';
+import { galatKomposisi, rencanakanSlot, sebarKuota } from '../src/generasi/rencana';
 
 describe('bagiKomposisi', () => {
   it('contoh rancangan: 25 soal 30:50:20 menjadi 8, 12, 5', () => {
@@ -60,5 +60,51 @@ describe('rencanakanSlot', () => {
     const slot = rencanakanSlot({ n: 12, persen: [40, 40, 20], bentuk: ['uraian', 'pilihan_ganda'], tp });
     const iUraian = slot.findIndex((s) => s.bentuk === 'uraian');
     expect(slot.slice(iUraian).every((s) => s.bentuk === 'uraian')).toBe(true);
+  });
+});
+
+describe('rencanakanSlot dengan komposisi yang diatur guru', () => {
+  const tp = ['TP satu', 'TP dua', 'TP tiga'].map((rumusan, i) => ({ id: String(i), rumusan, sumber: 'guru' as const, versi: 1 }));
+  const dasar = { n: 30, persen: [30, 50, 20] as [number, number, number], bentuk: ['pilihan_ganda' as const], tp };
+  const hitung = <T,>(xs: T[]) => xs.reduce<Map<T, number>>((m, x) => m.set(x, (m.get(x) ?? 0) + 1), new Map());
+
+  it('memakai jumlah per bentuk persis dan mengurutkan bentuk baru di tempatnya', () => {
+    const slot = rencanakanSlot({ ...dasar, jumlah_bentuk: { pilihan_ganda: 15, pilihan_ganda_kompleks: 5, menjodohkan: 2, isian_singkat: 3, uraian: 5 } });
+    const n = hitung(slot.map((s) => s.bentuk));
+    expect(Object.fromEntries(n)).toEqual({ pilihan_ganda: 15, pilihan_ganda_kompleks: 5, menjodohkan: 2, isian_singkat: 3, uraian: 5 });
+    expect([...new Set(slot.map((s) => s.bentuk))]).toEqual(['pilihan_ganda', 'pilihan_ganda_kompleks', 'menjodohkan', 'isian_singkat', 'uraian']);
+    // Uraian tidak hanya mendapat soal mudah: kuota disebar selang-seling di sepanjang deret kesukaran.
+    expect(new Set(slot.filter((s) => s.bentuk === 'uraian').map((s) => s.kesukaran)).size).toBeGreaterThan(1);
+  });
+
+  it('memakai sebaran level C1–C6 persis dengan kesukaran yang sesuai', () => {
+    const slot = rencanakanSlot({ ...dasar, sebaran_level: { C1: 3, C2: 5, C3: 8, C4: 8, C5: 4, C6: 2 } });
+    expect(Object.fromEntries(hitung(slot.map((s) => s.level)))).toEqual({ C1: 3, C2: 5, C3: 8, C4: 8, C5: 4, C6: 2 });
+    for (const s of slot) expect(s.kesukaran).toBe(s.level <= 'C2' ? 'mudah' : s.level <= 'C4' ? 'sedang' : 'sulit');
+  });
+
+  it('memakai jumlah per TP persis dan setiap bentuk mendapat lebih dari satu TP', () => {
+    const slot = rencanakanSlot({ ...dasar, jumlah_bentuk: { pilihan_ganda: 20, uraian: 10 }, jumlah_tp: [10, 15, 5] });
+    expect(Object.fromEntries(hitung(slot.map((s) => s.tp_index)))).toEqual({ 0: 10, 1: 15, 2: 5 });
+    expect(new Set(slot.filter((s) => s.bentuk === 'uraian').map((s) => s.tp_index)).size).toBeGreaterThan(1);
+  });
+
+  it('tanpa pengaturan, rencana sama dengan cara lama', () => {
+    const lama = rencanakanSlot({ ...dasar, bentuk: ['pilihan_ganda', 'uraian'] });
+    const baru = rencanakanSlot({ ...dasar, bentuk: ['pilihan_ganda', 'uraian'], jumlah_bentuk: null, sebaran_level: null, jumlah_tp: null });
+    const ringkas = (xs: typeof lama) => xs.map((s) => [s.bentuk, s.kesukaran, s.level, s.tp_index]);
+    expect(ringkas(baru)).toEqual(ringkas(lama));
+  });
+
+  it('menolak jumlah yang tidak sama dengan n', () => {
+    expect(galatKomposisi({ ...dasar, jumlah_bentuk: { pilihan_ganda: 10 } })).toHaveLength(1);
+    expect(galatKomposisi({ ...dasar, sebaran_level: { C3: 29 } })).toHaveLength(1);
+    expect(galatKomposisi({ ...dasar, jumlah_tp: [10, 10] })[0]).toMatch(/daftar TP/);
+    expect(() => rencanakanSlot({ ...dasar, jumlah_tp: [10, 10, 11] })).toThrow(/31/);
+  });
+
+  it('sebarKuota selang-seling dan jumlahnya tepat', () => {
+    expect(sebarKuota([2, 1])).toEqual([0, 1, 0]);
+    expect(hitung(sebarKuota([4, 0, 3])).get(1)).toBeUndefined();
   });
 });

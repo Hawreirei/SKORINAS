@@ -100,6 +100,7 @@ export async function periksaSuntingan(soalId: string, isi: IsiSoal): Promise<Ha
     literasi: p.gaya === 'literasi',
     pokokLain: lain,
     gambarDiizinkan: true,
+    opsiPg: p.opsi_pg ? { jumlah: p.opsi_pg, wajib: false } : null,
   });
 }
 
