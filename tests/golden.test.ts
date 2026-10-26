@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import acuan from '../data/golden/matematika-acuan.json';
 import aritmetika from '../data/golden/matematika-aritmetika.json';
+import bentukBaru from '../data/golden/matematika-bentuk-baru.json';
 import type { HurufOpsi, IsiSoal } from '../src/db/tipe';
 import { faseDariKelas } from '../src/kurikulum/fase';
 import { periksaSoal } from '../src/verifikasi';
@@ -20,8 +21,8 @@ function periksa(b: Butir, isi = lengkap(b)) {
   return periksaSoal(isi, { rumpun: 'matematika', kelas: b.kelas, fase: faseDariKelas(b.kelas), lokal: 'id', literasi: false, pokokLain: [], gambarDiizinkan: true });
 }
 
-const benar = [...(acuan.benar as Butir[]), ...(aritmetika.benar as Butir[])];
-const salah = acuan.salah as Butir[];
+const benar = [...(acuan.benar as Butir[]), ...(aritmetika.benar as Butir[]), ...(bentukBaru.benar as unknown as Butir[])];
+const salah = [...(acuan.salah as Butir[]), ...(bentukBaru.salah as unknown as Butir[])];
 
 /** Varian salah-kunci yang sengaja dibuat dari tiap butir benar yang dapat dihitung. */
 function mutasi(b: Butir): { id: string; isi: IsiSoal }[] {
@@ -30,6 +31,25 @@ function mutasi(b: Butir): { id: string; isi: IsiSoal }[] {
   switch (isi.bentuk) {
     case 'pilihan_ganda':
       return (Object.keys(isi.opsi ?? {}) as HurufOpsi[]).filter((h) => h !== isi.kunci).map((h) => ({ id: `${b.id}~${h}`, isi: { ...isi, kunci: h } }));
+    case 'pilihan_ganda_kompleks': {
+      // Setiap kunci yang berbeda satu huruf dari kunci benar.
+      const kunci = new Set(isi.kunci.split(','));
+      return (Object.keys(isi.opsi ?? {}) as HurufOpsi[]).map((h) => {
+        const k = new Set(kunci);
+        if (k.has(h)) k.delete(h);
+        else k.add(h);
+        return { id: `${b.id}~${h}`, isi: { ...isi, kunci: [...k].sort().join(',') } };
+      });
+    }
+    case 'menjodohkan': {
+      // Tukar pasangan butir pertama dengan setiap butir lain.
+      const huruf = isi.kunci.split(', ').map((x) => x.split('-')[1]);
+      return huruf.slice(1).map((_, i) => {
+        const h = [...huruf];
+        [h[0], h[i + 1]] = [h[i + 1], h[0]];
+        return { id: `${b.id}~${i + 1}`, isi: { ...isi, kunci: h.map((x, j) => `${j + 1}-${x}`).join(', ') } };
+      });
+    }
     case 'benar_salah':
       return [{ id: `${b.id}~bs`, isi: { ...isi, kunci: isi.kunci === 'B' ? 'S' : 'B' } }];
     case 'isian_singkat': {

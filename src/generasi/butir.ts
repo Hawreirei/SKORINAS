@@ -83,6 +83,7 @@ export async function buatButir(kirim: Pengirim, m: MasukanButir, catat?: Pencat
       literasi: m.param.gaya === 'literasi',
       pokokLain: m.pokokLain,
       gambarDiizinkan: m.param.gambar !== 'mati',
+      opsiPg: m.param.opsi_pg ? { jumlah: m.param.opsi_pg, wajib: true } : null,
     });
     const p: Percobaan = { jawaban, alasan: periksa.alasan, isi };
     percobaan.push(p);

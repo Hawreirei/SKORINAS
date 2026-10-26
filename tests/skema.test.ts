@@ -46,6 +46,38 @@ describe('migrasi skema versi 2 (rancangan v0.4)', () => {
   });
 });
 
+describe('migrasi skema versi 3 (Pengaturan lanjutan rinci)', () => {
+  it('melengkapi isian baru dengan null pada preset dan paket versi 2', async () => {
+    const nama = `uji-migrasi-3-${Math.random()}`;
+    const lama = new Dexie(nama);
+    lama.version(2).stores({
+      profil: 'id',
+      kunci_api: 'penyedia',
+      preset: 'id, nama, terakhir_dipakai',
+      paket_soal: 'id, status, dibuat_pada, dihapus_pada',
+      soal: 'id, paket_id, status_mutu, status_telaah, dihapus_pada, [paket_id+urutan]',
+      soal_gambar: 'id, soal_id',
+      pekerjaan_generasi: 'id, paket_id, status',
+      pemakaian_ai: 'id, tanggal, model, paket_id',
+      log_soal: 'id, soal_id, dibuat_pada',
+    });
+    await lama.open();
+    const param = { kelas: 4, mapel: 'Matematika', tp: [{ id: 't', rumusan: 'x' }], cara_bs: 'lingkari', bentuk: ['pilihan_ganda'] };
+    await lama.table('preset').add({ id: 'p1', nama: 'Lama', parameter_json: param, terakhir_dipakai: 0 });
+    await lama.table('paket_soal').add({ id: 'k1', judul: 'Lama', parameter_json: param, status: 'siap', dibuat_pada: 0, dihapus_pada: null });
+    lama.close();
+
+    const baru = new GenSoalDb(nama);
+    await baru.open();
+    for (const p of [(await baru.preset.get('p1'))!.parameter_json, (await baru.paket_soal.get('k1'))!.parameter_json]) {
+      expect(p).toMatchObject({ jumlah_bentuk: null, sebaran_level: null, jumlah_tp: null, opsi_pg: null, skor_bentuk: null, cara_bs: 'lingkari' });
+      expect(p.bentuk).toEqual(['pilihan_ganda']);
+    }
+    baru.close();
+    await Dexie.delete(nama);
+  });
+});
+
 describe('data persetujuan lama (sebelum v0.5)', () => {
   it('cadangan berisi soal yang pernah disetujui tetap dapat dibaca', () => {
     const soal = { id: 's1', paket_id: 'k1', status_mutu: 'perlu_telaah', status_telaah: 'ditelaah_guru', sumber_dicek: true };

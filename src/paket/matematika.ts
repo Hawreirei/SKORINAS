@@ -43,5 +43,23 @@ export const paketMatematika: PaketMapel = {
       verifikasi: { tipe: 'perbandingan', kiri: '5/8', relasi: '>', kanan: '3/4' },
       gambar: null,
     },
+    {
+      bentuk: 'pilihan_ganda_kompleks',
+      pokok: 'Pilihlah semua pecahan yang senilai dengan $\\frac{3}{4}$.',
+      opsi: { A: '$\\frac{6}{8}$', B: '$\\frac{9}{16}$', C: '$\\frac{12}{16}$', D: '$\\frac{4}{5}$' },
+      kunci: 'A,C',
+      pembahasan: ['Kalikan pembilang dan penyebut dengan bilangan yang sama: $\\frac{3 \\times 2}{4 \\times 2} = \\frac{6}{8}$ dan $\\frac{3 \\times 4}{4 \\times 4} = \\frac{12}{16}$.', '$\\frac{9}{16}$ dan $\\frac{4}{5}$ tidak senilai dengan $\\frac{3}{4}$.'],
+      verifikasi: { tipe: 'ekspresi', ekspresi: '3/4', nilai: '3/4' },
+      gambar: null,
+    },
+    {
+      bentuk: 'menjodohkan',
+      pokok: 'Pasangkan setiap operasi hitung di kolom kiri dengan hasilnya di kolom kanan.',
+      pasangan: { kiri: ['$12 \\times 4$', '$72 : 8$', '$35 + 18$'], kanan: ['$9$', '$53$', '$48$', '$63$'] },
+      kunci: '1-C, 2-A, 3-B',
+      pembahasan: ['$12 \\times 4 = 48$.', '$72 : 8 = 9$.', '$35 + 18 = 53$.'],
+      verifikasi: { tipe: 'pasangan', kiri: ['12 * 4', '72 / 8', '35 + 18'], kanan: ['9', '53', '48', '63'] },
+      gambar: null,
+    },
   ],
 };

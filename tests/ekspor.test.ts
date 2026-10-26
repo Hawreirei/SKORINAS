@@ -8,6 +8,8 @@ import { buatDocx } from '../src/ekspor/docx';
 import { bangunDokumen, berkasDipilih, jawabanAngka, jumlahGaris, namaBerkas, type JenisBerkas } from '../src/ekspor/model';
 import { buatTex } from '../src/ekspor/tex';
 import { keLatex } from '../src/matematika/latex';
+import bentukBaru from '../data/golden/matematika-bentuk-baru.json';
+import type { IsiSoal } from '../src/db/tipe';
 import { paketUji, profilUji, soalUji } from './bantu-soal';
 
 const OPSI = { kop: true, kunci: true, kisi: true, pembahasan: true };
@@ -195,6 +197,66 @@ describe('PDF', () => {
       expect(buf.subarray(0, 5).toString()).toBe('%PDF-');
       expect(gambar).toBe(0);
       if (process.env.PDF_KELUAR) writeFileSync(process.env.PDF_KELUAR.replace(/\.pdf$/, `-${b}.pdf`), buf);
+    }
+  }, 60000);
+});
+
+describe('bentuk baru dan skor per bentuk', () => {
+  // Dua butir golden pilihan ganda kompleks dan menjodohkan ditambahkan ke soal uji.
+  const baru = (bentukBaru.benar as { id: string; isi: Omit<IsiSoal, 'meta'> }[]).filter((b) => b.id === 'K-01' || b.id === 'J-02');
+  const contoh = soalUji()[0];
+  const soal = [
+    ...soalUji(),
+    ...baru.map((b, i) => ({ ...contoh, id: b.id, slot_id: b.id, urutan: 100 + i, bentuk: b.isi.bentuk, isi_json: { ...(b.isi as IsiSoal), meta: contoh.isi_json.meta } })),
+  ];
+  const paket = { ...paketUji(), parameter_json: { ...paketUji().parameter_json, skor_bentuk: { pilihan_ganda: 1, pilihan_ganda_kompleks: 2, menjodohkan: 4, uraian: 5 } } };
+  const dok = (b: JenisBerkas = 'soal') => bangunDokumen(paket, soal, profilUji(), OPSI, b);
+
+  it('menempatkan bagian baru di urutan pakem dengan petunjuk dan kunci yang sesuai', () => {
+    const d = dok();
+    expect(d.bagian.map((b) => b.judul)).toEqual(['A. Pilihan Ganda', 'B. Pilihan Ganda Kompleks', 'C. Benar atau Salah', 'D. Menjodohkan', 'E. Isian Singkat', 'F. Uraian']);
+    expect(d.bagian[1].petunjuk).toMatch(/semua jawaban yang benar/);
+    expect(d.bagian[3].petunjuk).toMatch(/menarik garis/);
+    expect(d.bagian[3].butir[0].sederhana).toBe(false);
+    const kunci = Object.fromEntries(d.bagian.flatMap((b) => b.butir).map((b) => [b.soal.id, d.kunci.find((k) => k.nomor === b.nomor)!.teks]));
+    expect(kunci['K-01']).toBe('A, C');
+    expect(kunci['J-02']).toBe('1–C, 2–A, 3–D, 4–B');
+  });
+
+  it('mencetak skor di petunjuk bagian dan menyusun pedoman penskoran', () => {
+    const d = dok();
+    expect(d.bagian[0].petunjuk).toMatch(/Skor setiap soal 1\.$/);
+    expect(d.bagian[2].petunjuk).not.toMatch(/Skor/);
+    const pg = d.bagian[0].butir.length;
+    const uraian = d.bagian[5].butir.length;
+    expect(d.penskoran!.baris.map((b) => b.bentuk)).toEqual(['Pilihan Ganda', 'Pilihan Ganda Kompleks', 'Menjodohkan', 'Uraian']);
+    expect(d.penskoran!.total).toBe(pg * 1 + 2 + 4 + uraian * 5);
+    expect(bangunDokumen(paketUji(), soal, profilUji(), OPSI).penskoran).toBeNull();
+  });
+
+  it('Word, LaTeX, dan PDF memuat kolom menjodohkan dan pedoman penskoran', async () => {
+    const unzip = async (b: JenisBerkas) => {
+      const zip = await JSZip.loadAsync(await (await buatDocx(dok(b), async () => PNG_KOSONG)).arrayBuffer());
+      return zip.file('word/document.xml')!.async('string');
+    };
+    const [wSoal, wKunci] = await Promise.all([unzip('soal'), unzip('kunci')]);
+    expect(wSoal).toContain('Menjodohkan');
+    expect(wSoal).toContain('●');
+    expect(wKunci).toContain('PEDOMAN PENSKORAN');
+    expect(wKunci).toContain('Nilai = (skor perolehan : skor maksimal) × 100');
+    expect(buatTex(dok('soal'))).toContain('$\\bullet$ & D.~0,2');
+    expect(buatTex(dok('kunci'))).toContain('PEDOMAN PENSKORAN');
+    const { buatPdf } = await import('../src/ekspor/pdf');
+    const aset = {
+      fontBiasa: readFileSync('public/fonts/LiberationSerif-Regular.ttf').toString('base64'),
+      fontTebal: readFileSync('public/fonts/LiberationSerif-Bold.ttf').toString('base64'),
+      fontMiring: readFileSync('public/fonts/LiberationSerif-Italic.ttf').toString('base64'),
+      gambarSvg: async () => {},
+    };
+    for (const b of ['soal', 'kunci'] as JenisBerkas[]) {
+      const buf = Buffer.from(await (await buatPdf(dok(b), aset)).arrayBuffer());
+      expect(buf.subarray(0, 5).toString()).toBe('%PDF-');
+      if (process.env.PDF_KELUAR) writeFileSync(process.env.PDF_KELUAR.replace(/\.pdf$/, `-baru-${b}.pdf`), buf);
     }
   }, 60000);
 });

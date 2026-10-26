@@ -13,6 +13,8 @@ export interface KonteksPeriksa {
   literasi: boolean;
   pokokLain: string[];
   gambarDiizinkan: boolean;
+  /** Banyak opsi pilihan ganda yang diatur guru (lihat KonteksKaidah). */
+  opsiPg?: { jumlah: 4 | 5; wajib: boolean } | null;
 }
 
 export interface HasilPeriksa {
@@ -53,7 +55,7 @@ export function periksaSoal(isi: IsiSoal, k: KonteksPeriksa): HasilPeriksa {
   else hitung = paket.pemeriksa(isi, k.lokal, lingkup);
   if (hitung.hasil === 'gagal') alasan.push(hitung.alasan);
 
-  const kaidah = periksaKaidah(isi, { kelas: k.kelas, fase: k.fase, lokal: k.lokal, literasi: k.literasi, pokokLain: k.pokokLain });
+  const kaidah = periksaKaidah(isi, { kelas: k.kelas, fase: k.fase, lokal: k.lokal, literasi: k.literasi, pokokLain: k.pokokLain, opsiPg: k.opsiPg });
   alasan.push(...kaidah.keras);
   catatan.push(...kaidah.lunak);
 

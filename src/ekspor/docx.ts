@@ -22,8 +22,9 @@ import {
   type ParagraphChild,
 } from 'docx';
 import type { HurufOpsi } from '../db/tipe';
+import { HURUF_KANAN } from '../db/tipe';
 import { uraiTeks, type Simpul } from '../matematika/teks';
-import { FONT_DOKUMEN, UKURAN_DOKUMEN, kolomOpsi, type BagianDok, type ButirDok, type DokumenSoal } from './model';
+import { FONT_DOKUMEN, UKURAN_DOKUMEN, kolomOpsi, teksPenskoran, type BagianDok, type ButirDok, type DokumenSoal } from './model';
 
 /** Ubah SVG ke PNG (Word memerlukan gambar raster). Disuntikkan agar modul ini dapat diuji tanpa kanvas. */
 export type UbahPng = (svg: string, lebarPx: number, tinggiPx: number) => Promise<Uint8Array>;
@@ -136,12 +137,12 @@ async function butirKeParagraf(b: ButirDok, d: DokumenSoal, ubahPng: UbahPng): P
   const isi = b.soal.isi_json;
   const hasil: (Paragraph | Table)[] = [];
   const t = b.tempat;
-  const adaSesudah = isi.bentuk === 'pilihan_ganda' || t.jenis !== 'tidak_ada' || !!b.gambar;
+  const adaSesudah = !!isi.opsi || !!isi.pasangan || t.jenis !== 'tidak_ada' || !!b.gambar;
   hasil.push(p([tr(`${b.nomor}.\t`), ...teksKeRun(isi.pokok)], { indent: { left: INDEN, hanging: INDEN }, tabStops: [{ type: TabStopType.LEFT, position: INDEN }], spacing: { before: 160, after: 60 }, keepNext: true, keepLines: true }));
   if (isi.terjemahan?.pokok) hasil.push(p(teksKeRun(isi.terjemahan.pokok, { miring: true }), { indent: { left: INDEN }, keepNext: adaSesudah }));
   const g = await gambarButir(b, ubahPng);
   if (g) hasil.push(g);
-  if (isi.bentuk === 'pilihan_ganda' && isi.opsi) {
+  if (isi.opsi) {
     const huruf = Object.keys(isi.opsi).sort() as HurufOpsi[];
     const kolom = kolomOpsi(b);
     const langkah = Math.floor((LEBAR_ISI - INDEN) / 2);
@@ -155,6 +156,7 @@ async function butirKeParagraf(b: ButirDok, d: DokumenSoal, ubahPng: UbahPng): P
       hasil.push(p(anak, { indent: { left: INDEN }, keepNext: !terakhir, keepLines: true, spacing: { after: 40 }, tabStops: kolom > 1 ? [{ type: TabStopType.LEFT, position: INDEN + langkah }] : [] }));
     }
   }
+  if (isi.pasangan) hasil.push(tabelJodoh(isi.pasangan));
   if (t.jenis === 'titik') hasil.push(p([tr(d.inggris ? 'Answer : ' : 'Jawaban : '), tr('.'.repeat(60))], { indent: { left: INDEN }, spacing: { before: 80, after: 60 } }));
   if (t.jenis === 'kotak') hasil.push(labelDanKotak(d.inggris ? 'Answer :' : 'Jawaban :', 3400, false));
   if (t.jenis === 'garis') {
@@ -167,6 +169,64 @@ async function butirKeParagraf(b: ButirDok, d: DokumenSoal, ubahPng: UbahPng): P
     hasil.push(labelDanKotak(d.inggris ? 'Final answer :' : 'Jawaban akhir :', 3400, false));
   }
   return hasil;
+}
+
+/** Menjodohkan: tabel tanpa garis, kolom kiri bernomor dengan titik di ujung kanan, kolom tengah kosong untuk menarik garis, kolom kanan berhuruf. */
+function tabelJodoh(pasangan: { kiri: string[]; kanan: string[] }): Table {
+  const tengah = 1400;
+  const kolom = Math.floor((LEBAR_ISI - INDEN - tengah) / 2);
+  const titik = '●';
+  const baris = Math.max(pasangan.kiri.length, pasangan.kanan.length);
+  const selIsi = (anak: ParagraphChild[], lebar: number, rataKanan = false, terakhir = false) =>
+    new TableCell({
+      width: { size: lebar, type: WidthType.DXA },
+      verticalAlign: VerticalAlign.CENTER,
+      margins: { top: 60, bottom: 60, left: 60, right: 60 },
+      children: [p(anak, { spacing: { after: 0 }, keepNext: !terakhir, tabStops: rataKanan ? [{ type: TabStopType.RIGHT, position: lebar - 140 }] : [] })],
+    });
+  return new Table({
+    width: { size: LEBAR_ISI - INDEN, type: WidthType.DXA },
+    columnWidths: [kolom, tengah, kolom],
+    indent: { size: INDEN, type: WidthType.DXA },
+    borders: { top: TANPA, bottom: TANPA, left: TANPA, right: TANPA, insideHorizontal: TANPA, insideVertical: TANPA },
+    rows: Array.from({ length: baris }, (_, i) => {
+      const terakhir = i === baris - 1;
+      const kiri = pasangan.kiri[i];
+      const kanan = pasangan.kanan[i];
+      return new TableRow({
+        cantSplit: true,
+        children: [
+          selIsi(kiri !== undefined ? [tr(`${i + 1}.  `), ...teksKeRun(kiri), tr(`\t${titik}`)] : [], kolom, true, terakhir),
+          selIsi([], tengah, false, terakhir),
+          selIsi(kanan !== undefined ? [tr(`${titik}   ${HURUF_KANAN[i]}.  `), ...teksKeRun(kanan)] : [], kolom, false, terakhir),
+        ],
+      });
+    }),
+  });
+}
+
+/** Pedoman penskoran di berkas kunci jawaban. */
+function tabelPenskoran(d: DokumenSoal): (Paragraph | Table)[] {
+  const t = teksPenskoran(d.inggris);
+  const lebar = [40, 20, 20, 20];
+  const selTeks = (teks: string, i: number, tebal = false) =>
+    new TableCell({
+      width: { size: lebar[i], type: WidthType.PERCENTAGE },
+      margins: { top: 60, bottom: 60, left: 80, right: 80 },
+      children: [p([tr(teks, { tebal })], { alignment: i ? AlignmentType.CENTER : AlignmentType.LEFT, spacing: { after: 0 } })],
+    });
+  return [
+    p([tr(t.judul, { tebal: true })], { spacing: { before: 320, after: 80 }, keepNext: true }),
+    new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      rows: [
+        new TableRow({ tableHeader: true, cantSplit: true, children: t.kepala.map((k, i) => selTeks(k, i, true)) }),
+        ...d.penskoran!.baris.map((b) => new TableRow({ cantSplit: true, children: [b.bentuk, String(b.jumlah), String(b.skor), String(b.maks)].map((x, i) => selTeks(x, i)) })),
+        new TableRow({ cantSplit: true, children: [t.total, '', '', String(d.penskoran!.total)].map((x, i) => selTeks(x, i, true)) }),
+      ],
+    }),
+    p([tr(t.rumus)], { spacing: { before: 120 } }),
+  ];
 }
 
 function selTabel(anak: ParagraphChild[], lebar: number, o: { tengah?: boolean; tebal?: boolean; abu?: boolean; keepNext?: boolean } = {}): TableCell {
@@ -293,6 +353,7 @@ export async function buatDocx(d: DokumenSoal, ubahPng: UbahPng): Promise<Blob> 
       isi.push(p([tr(`${k.nomor}.\t`), ...teksKeRun(k.teks)], { indent: { left: INDEN, hanging: INDEN }, tabStops: [{ type: TabStopType.LEFT, position: INDEN }], spacing: { after: 40 }, keepNext: !!k.rubrik?.length }));
       if (k.rubrik?.length) k.rubrik.forEach((r, i) => isi.push(p([tr('– '), ...teksKeRun(r)], { indent: { left: INDEN * 2 }, spacing: { after: 20 }, keepNext: i < k.rubrik!.length - 1 })));
     }
+    if (d.penskoran) isi.push(...tabelPenskoran(d));
     // Pembahasan ikut berkas kunci jawaban, mulai di halaman baru.
     if (d.opsi.pembahasan) {
       isi.push(p([tr(L('PEMBAHASAN', 'WORKED SOLUTIONS'), { tebal: true })], { pageBreakBefore: true, alignment: AlignmentType.CENTER, spacing: { after: 200 } }));

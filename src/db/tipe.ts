@@ -1,7 +1,7 @@
 // Bentuk data milik guru (IndexedDB). Aplikasi tidak membawa data kurikulum:
 // kelas, mapel, CP, dan TP diisi guru (docs/RANCANGAN.md v0.4, bagian Model Data).
 
-export type Bentuk = 'pilihan_ganda' | 'isian_singkat' | 'benar_salah' | 'uraian';
+export type Bentuk = 'pilihan_ganda' | 'pilihan_ganda_kompleks' | 'isian_singkat' | 'benar_salah' | 'menjodohkan' | 'uraian';
 export type Kesukaran = 'mudah' | 'sedang' | 'sulit';
 export type Level = 'C1' | 'C2' | 'C3' | 'C4' | 'C5' | 'C6';
 export type StatusMutu = 'terverifikasi_hitung' | 'terverifikasi_aturan' | 'perlu_telaah' | 'ditolak';
@@ -16,10 +16,19 @@ export type PenyediaId = 'gemini' | 'openrouter' | 'groq' | 'mistral' | 'openai'
 
 export const BENTUK_LABEL: Record<Bentuk, string> = {
   pilihan_ganda: 'Pilihan ganda',
+  pilihan_ganda_kompleks: 'Pilihan ganda kompleks',
   isian_singkat: 'Isian singkat',
   benar_salah: 'Benar-salah',
+  menjodohkan: 'Menjodohkan',
   uraian: 'Uraian',
 };
+
+/** Level kognitif menurut kategori kesukaran rancangan: C1–C2 mudah, C3–C4 sedang, C5–C6 sulit. */
+export const LEVEL: Level[] = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6'];
+
+export function kesukaranDariLevel(l: Level): Kesukaran {
+  return l === 'C1' || l === 'C2' ? 'mudah' : l === 'C3' || l === 'C4' ? 'sedang' : 'sulit';
+}
 
 export const KESUKARAN_LABEL: Record<Kesukaran, string> = { mudah: 'Mudah', sedang: 'Sedang', sulit: 'Sulit' };
 
@@ -69,6 +78,16 @@ export interface ParameterPaket {
   materi: string;
   /** Cara siswa menjawab benar-salah di berkas: centang kotak Benar/Salah atau lingkari B/S. */
   cara_bs: CaraBenarSalah;
+  /** Jumlah soal per bentuk (berjumlah n). null: bentuk terpilih dibagi bergiliran. */
+  jumlah_bentuk: Partial<Record<Bentuk, number>> | null;
+  /** Jumlah soal per level kognitif C1–C6 (berjumlah n); menggantikan `persen`. null: dari persen kesukaran. */
+  sebaran_level: Partial<Record<Level, number>> | null;
+  /** Jumlah soal per TP, sejajar urutan `tp` (berjumlah n). null: TP dibagi rata bergiliran. */
+  jumlah_tp: number[] | null;
+  /** Banyak opsi pilihan ganda (biasa dan kompleks). null: 5 untuk kelas 10–12, 4 untuk lainnya. */
+  opsi_pg: 4 | 5 | null;
+  /** Skor setiap soal per bentuk, dicetak di lembar soal dan pedoman penskoran. null: tanpa skor. */
+  skor_bentuk: Partial<Record<Bentuk, number>> | null;
   /** Data dari versi 0.3 (sebelum aplikasi berhenti membawa data kurikulum). Tidak diisi lagi. */
   kurikulum_id?: string;
   kurikulum_nama?: string;
@@ -76,10 +95,21 @@ export interface ParameterPaket {
   kurikulum_dasar?: string;
 }
 
+/** Satu pernyataan yang dihitung ulang: kiri relasi kanan, mis. 3/4 > 2/3. */
+export interface Pernyataan {
+  kiri: string;
+  relasi: string;
+  kanan: string;
+}
+
 export type Verifikasi =
   | { tipe: 'ekspresi'; ekspresi: string; nilai: string }
   | { tipe: 'perbandingan'; kiri: string; relasi: string; kanan: string }
   | { tipe: 'urutan'; nilai: string[]; arah: 'naik' | 'turun' }
+  /** Pilihan ganda kompleks: satu pernyataan per opsi; opsi benar tepat yang pernyataannya benar. */
+  | { tipe: 'per_opsi'; opsi: Partial<Record<HurufOpsi, Pernyataan>> }
+  /** Menjodohkan: nilai tiap butir kolom kiri dan kanan; pasangan benar bernilai sama. */
+  | { tipe: 'pasangan'; kiri: string[]; kanan: string[] }
   | { tipe: 'tidak_ada'; alasan?: string };
 
 export interface GambarSoal {
@@ -95,6 +125,12 @@ export interface IsiSoal {
   bentuk: Bentuk;
   pokok: string;
   opsi?: Partial<Record<HurufOpsi, string>>;
+  /** Hanya menjodohkan: kolom kiri bernomor 1, 2, …; kolom kanan berhuruf A, B, … (boleh lebih banyak sebagai pengecoh). */
+  pasangan?: { kiri: string[]; kanan: string[] };
+  /**
+   * Pilihan ganda: satu huruf. Pilihan ganda kompleks: huruf dipisah koma ("A,C").
+   * Benar-salah: "B" atau "S". Menjodohkan: "1-B, 2-A, 3-C". Isian dan uraian: jawaban.
+   */
   kunci: string;
   rubrik?: string[];
   /** Hanya uraian: penjelasan dijawab pada garis, hitungan pada kotak cara pengerjaan dan jawaban akhir. */
@@ -104,6 +140,33 @@ export interface IsiSoal {
   gambar: GambarSoal | null;
   terjemahan?: { pokok: string; opsi?: Partial<Record<HurufOpsi, string>> } | null;
   meta: { tp: string; indikator: string; level: Level; kesukaran: Kesukaran };
+}
+
+/** Teks pembanding kemiripan antarsoal: pokok, ditambah kolom kiri untuk menjodohkan karena pokoknya sering sama. */
+export function teksPembanding(isi: Pick<IsiSoal, 'pokok' | 'pasangan'>): string {
+  return isi.pasangan ? `${isi.pokok} ${isi.pasangan.kiri.join(' ')}` : isi.pokok;
+}
+
+/** Huruf kunci pilihan ganda kompleks, terurut. */
+export function hurufKunci(kunci: string): HurufOpsi[] {
+  return [...new Set(kunci.toUpperCase().match(/[A-E]/g) ?? [])].sort() as HurufOpsi[];
+}
+
+/** Huruf kolom kanan menjodohkan. */
+export const HURUF_KANAN = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+
+/** Kunci menjodohkan sebagai indeks kolom kanan untuk tiap butir kolom kiri; -1 bila tidak terbaca. */
+export function petaJodoh(kunci: string, jumlahKiri: number): number[] {
+  const peta = Array.from({ length: jumlahKiri }, () => -1);
+  for (const m of kunci.toUpperCase().matchAll(/(\d+)\s*[-–:=>→]+\s*([A-H])/g)) {
+    const i = Number(m[1]) - 1;
+    if (i >= 0 && i < jumlahKiri) peta[i] = HURUF_KANAN.indexOf(m[2]);
+  }
+  return peta;
+}
+
+export function teksJodoh(peta: number[]): string {
+  return peta.map((j, i) => `${i + 1}-${HURUF_KANAN[j] ?? '?'}`).join(', ');
 }
 
 /** Jenis jawaban uraian; soal lama tanpa penanda ditebak dari verifikasinya. */

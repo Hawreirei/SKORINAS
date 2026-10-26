@@ -1,5 +1,6 @@
 import type { HurufOpsi } from '../db/tipe';
-import { kolomOpsi, type BagianDok, type ButirDok, type DokumenSoal } from '../ekspor/model';
+import { HURUF_KANAN } from '../db/tipe';
+import { kolomOpsi, teksPenskoran, type BagianDok, type ButirDok, type DokumenSoal } from '../ekspor/model';
 import { GambarSvg, TeksSoal } from './TeksSoal';
 
 function TempatJawab({ b, d }: { b: ButirDok; d: DokumenSoal }) {
@@ -34,6 +35,42 @@ function TempatJawab({ b, d }: { b: ButirDok; d: DokumenSoal }) {
   return null;
 }
 
+/** Menjodohkan: kolom kiri bernomor dan kolom kanan berhuruf dengan titik, ruang tengah untuk menarik garis. */
+function KolomJodoh({ b }: { b: ButirDok }) {
+  const p = b.soal.isi_json.pasangan;
+  if (!p) return null;
+  const titik = <span className="inline-block size-[0.4em] shrink-0 rounded-full bg-black" />;
+  return (
+    <div className="mt-[0.3em] grid grid-cols-[minmax(0,1fr)_5em_minmax(0,1fr)] gap-y-[0.5em]">
+      {Array.from({ length: Math.max(p.kiri.length, p.kanan.length) }, (_, i) => (
+        <div key={i} className="contents">
+          <div className="flex items-center justify-between gap-[0.5em]">
+            {p.kiri[i] !== undefined ? (
+              <>
+                <span>
+                  {i + 1}. <TeksSoal teks={p.kiri[i]} />
+                </span>
+                {titik}
+              </>
+            ) : null}
+          </div>
+          <div />
+          <div className="flex items-center gap-[0.5em]">
+            {p.kanan[i] !== undefined ? (
+              <>
+                {titik}
+                <span>
+                  {HURUF_KANAN[i]}. <TeksSoal teks={p.kanan[i]} />
+                </span>
+              </>
+            ) : null}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Butir({ b, d }: { b: ButirDok; d: DokumenSoal }) {
   const isi = b.soal.isi_json;
   const huruf = Object.keys(isi.opsi ?? {}).sort() as HurufOpsi[];
@@ -55,6 +92,7 @@ function Butir({ b, d }: { b: ButirDok; d: DokumenSoal }) {
               ))}
             </div>
           ) : null}
+          <KolomJodoh b={b} />
           <TempatJawab b={b} d={d} />
         </div>
       </div>
@@ -105,6 +143,45 @@ function TabelBenarSalah({ bg, d }: { bg: BagianDok; d: DokumenSoal }) {
         ))}
       </tbody>
     </table>
+  );
+}
+
+/** Pedoman penskoran di berkas kunci jawaban: skor per bentuk soal, skor maksimal, dan rumus nilai. */
+function TabelPenskoran({ d }: { d: DokumenSoal }) {
+  const t = teksPenskoran(d.inggris);
+  const sel = 'border border-black p-[0.3em]';
+  return (
+    <div className="mt-[1.2em] break-inside-avoid">
+      <div className="font-bold">{t.judul}</div>
+      <table className="mt-[0.3em] w-full border-collapse">
+        <thead>
+          <tr className="bg-[#f2f2f2]">
+            {t.kepala.map((k, i) => (
+              <th key={k} className={`${sel} ${i ? 'text-center' : 'text-left'} font-bold`}>
+                {k}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {d.penskoran!.baris.map((b) => (
+            <tr key={b.bentuk}>
+              <td className={sel}>{b.bentuk}</td>
+              <td className={`${sel} text-center`}>{b.jumlah}</td>
+              <td className={`${sel} text-center`}>{b.skor}</td>
+              <td className={`${sel} text-center`}>{b.maks}</td>
+            </tr>
+          ))}
+          <tr className="font-bold">
+            <td className={sel} colSpan={3}>
+              {t.total}
+            </td>
+            <td className={`${sel} text-center`}>{d.penskoran!.total}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div className="mt-[0.3em]">{t.rumus}</div>
+    </div>
   );
 }
 
@@ -192,6 +269,7 @@ export function LembarCetak({ d, hanyaHalamanPertama = false }: { d: DokumenSoal
                   </div>
                 ))}
               </div>
+              {d.penskoran ? <TabelPenskoran d={d} /> : null}
             </section>
           ) : null}
           {d.berkas === 'kunci' && d.opsi.pembahasan ? (

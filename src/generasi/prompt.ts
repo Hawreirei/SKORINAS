@@ -17,8 +17,9 @@ Kontrak keluaran:
 const SKEMA = `{
   "bentuk": "<bentuk>",
   "pokok": "teks soal; rumus sebaris di antara $...$",
-  "opsi": {"A": "...", "B": "...", "C": "...", "D": "..."},   // hanya pilihan_ganda
-  "kunci": "...",            // pilihan_ganda: huruf; benar_salah: "B" atau "S"; isian_singkat: jawaban singkat; uraian: jawaban model lengkap
+  "opsi": {"A": "...", "B": "...", "C": "...", "D": "..."},   // hanya pilihan_ganda dan pilihan_ganda_kompleks
+  "pasangan": {"kiri": ["...", "..."], "kanan": ["...", "..."]},   // hanya menjodohkan: kolom kiri bernomor 1, 2, ...; kolom kanan berhuruf A, B, ...
+  "kunci": "...",            // pilihan_ganda: huruf; pilihan_ganda_kompleks: semua huruf benar dipisah koma, mis. "A,C"; benar_salah: "B" atau "S"; menjodohkan: "1-B, 2-A, 3-C"; isian_singkat: jawaban singkat; uraian: jawaban model lengkap
   "rubrik": ["kriteria (skor)", "..."],   // hanya uraian
   "jenis_uraian": "penjelasan" atau "hitungan",   // hanya uraian: penjelasan bila meminta alasan atau pernyataan, hitungan bila meminta perhitungan
   "pembahasan": ["langkah 1", "langkah 2"],
@@ -36,11 +37,16 @@ const ATURAN_VERIFIKASI = `Aturan verifikasi (pilih satu tipe). Ekspresi memakai
 - {"tipe":"perbandingan","kiri":"5/8","relasi":"<","kanan":"3/4"}  relasi salah satu dari = < > <= >= !=
   pilihan_ganda: opsi berupa tanda perbandingan; benar_salah: pokok menyatakan kiri relasi kanan.
 - {"tipe":"urutan","nilai":["2/3","3/4","5/6"],"arah":"naik"}  untuk soal mengurutkan; kunci memuat daftar yang sama, dipisah koma atau titik koma.
+- {"tipe":"per_opsi","opsi":{"A":{"kiri":"3/4","relasi":">","kanan":"2/3"},"B":{"kiri":"0.5 + 0.25","relasi":"=","kanan":"0.7"}, ...}}  khusus pilihan_ganda_kompleks: satu pernyataan per opsi (semua opsi); opsi benar tepat yang pernyataannya benar.
+  pilihan_ganda_kompleks juga boleh memakai tipe "ekspresi" bila setiap opsi berupa bilangan: opsi benar tepat yang bernilai sama dengan hasil.
+- {"tipe":"pasangan","kiri":["3 * 4","20 - 5","6 + 7"],"kanan":["13","12","15","14"]}  khusus menjodohkan: nilai tiap butir kolom kiri dan kanan berurutan; pasangan benar bernilai sama dan tunggal.
 - {"tipe":"tidak_ada","alasan":"..."} bila jawaban tidak dapat dihitung (konsep, sifat, penalaran). Soal ini akan ditelaah guru.
 Bila memakai gambar, ekspresi boleh memakai variabel gambar (lihat daftar templat), mis. "pecahan" atau "nilai[2] - nilai[1]" (indeks mulai 1).`;
 
 const PETUNJUK_BENTUK: Record<Bentuk, string> = {
   pilihan_ganda: 'Pilihan ganda dengan tepat satu jawaban benar.',
+  pilihan_ganda_kompleks: 'Pilihan ganda kompleks: sedikitnya dua opsi benar dan sedikitnya satu opsi salah. Pokok meminta siswa memilih semua jawaban yang benar (mis. "Pilihlah semua pernyataan yang benar."). Kunci berisi semua huruf benar.',
+  menjodohkan: 'Menjodohkan (tarik garis): pokok berupa perintah singkat; "pasangan.kiri" berisi 3 sampai 5 pernyataan atau soal pendek, "pasangan.kanan" berisi jawabannya ditambah 1 pengecoh, diacak (urutan kanan tidak sejajar dengan kiri). Setiap butir kiri tepat satu pasangan.',
   isian_singkat: 'Isian singkat: jawaban satu bilangan, kata, atau tanda. Pokok diakhiri titik-titik "....".',
   benar_salah: 'Benar-salah: pokok berupa satu pernyataan (bukan pertanyaan). Kunci "B" atau "S".',
   uraian: 'Uraian: soal cerita atau penalaran dengan jawaban model lengkap dan rubrik penskoran. Isi "jenis_uraian": "penjelasan" bila siswa diminta memberi alasan atau pernyataan (dijawab pada garis), "hitungan" bila siswa diminta menghitung (dijawab pada kotak cara pengerjaan dan jawaban akhir).',
@@ -58,6 +64,11 @@ const BAHASA: Record<ParameterPaket['bahasa'], string> = {
   en: 'Write the item in English suitable for the grade level. Use a decimal point and comma thousands separators in the item text.',
   dwibahasa: 'Tulis soal dalam bahasa Indonesia, lalu isi "terjemahan" dengan versi bahasa Inggris dari pokok dan opsi.',
 };
+
+/** Banyak opsi pilihan ganda: diatur guru, atau 5 untuk kelas 10–12 dan 4 untuk lainnya. */
+export function jumlahOpsiPg(p: Pick<ParameterPaket, 'kelas' | 'opsi_pg'>): 4 | 5 {
+  return p.opsi_pg ?? (p.kelas >= 10 ? 5 : 4);
+}
 
 export interface KonteksPrompt {
   param: ParameterPaket;
@@ -82,7 +93,7 @@ ${p.cp.trim() ? `- Capaian pembelajaran: ${p.cp.trim()}` : ''}
 - Tujuan pembelajaran: ${tp.rumusan}`);
 
   bagian.push(`## Butir yang diminta
-- Bentuk: ${BENTUK_LABEL[slot.bentuk]} ("${slot.bentuk}"). ${PETUNJUK_BENTUK[slot.bentuk]}${slot.bentuk === 'pilihan_ganda' ? ` Gunakan ${p.kelas >= 10 ? '5 opsi (A–E)' : '4 opsi (A–D)'}.` : ''}
+- Bentuk: ${BENTUK_LABEL[slot.bentuk]} ("${slot.bentuk}"). ${PETUNJUK_BENTUK[slot.bentuk]}${slot.bentuk === 'pilihan_ganda' || slot.bentuk === 'pilihan_ganda_kompleks' ? ` Gunakan ${jumlahOpsiPg(p) === 5 ? '5 opsi (A–E)' : '4 opsi (A–D)'}.` : ''}${slot.bentuk === 'uraian' && p.skor_bentuk?.uraian ? ` Skor soal ini ${p.skor_bentuk.uraian}: jumlah skor dalam kurung pada rubrik harus ${p.skor_bentuk.uraian}.` : ''}
 - Kesukaran rancangan: ${slot.kesukaran}; level kognitif ${slot.level}.
 - Gaya: ${GAYA[p.gaya]}
 - Bahasa: ${BAHASA[p.bahasa]}`);

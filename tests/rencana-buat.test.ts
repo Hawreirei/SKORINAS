@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { ModelRegistri } from '../src/ai/tipe';
-import { bacaDraf, hapusDraf, hitungRencana, KUNCI_DRAF, simpanDraf, type MasukanRencana } from '../src/app/rencana-buat';
+import { bacaDraf, bagiRata, hapusDraf, hitungRencana, KUNCI_DRAF, levelDariPersen, simpanDraf, type MasukanRencana } from '../src/app/rencana-buat';
+import { rencanakanSlot } from '../src/generasi/rencana';
 
 const model = (harga: ModelRegistri['harga'], tingkat: ModelRegistri['tingkat'] = 'murah'): ModelRegistri => ({ id: 'm', label: 'M', status: 'stabil', tingkat, harga, golden: { status: 'belum', tanggal: null }, catatan: '' });
 const dasar: MasukanRencana = { n: 12, rpm: null, rpd: null, terpakaiHariIni: 0, adaCadangan: false, tokenRata: null, biayaHariIni: 0, batasBiayaUsd: 1 };
@@ -49,5 +50,20 @@ describe('draf layar Buat', () => {
   it('draf rusak dianggap tidak ada', () => {
     localStorage.setItem(KUNCI_DRAF, '{rusak');
     expect(bacaDraf()).toBeNull();
+  });
+});
+
+describe('nilai awal Pengaturan lanjutan', () => {
+  it('bagiRata memberi sisa ke kelompok awal dan jumlahnya tepat', () => {
+    expect(bagiRata(10, 3)).toEqual([4, 3, 3]);
+    expect(bagiRata(5, 0)).toEqual([]);
+  });
+
+  it('levelDariPersen sama dengan sebaran level rencana bawaan', () => {
+    for (const [n, persen] of [[20, [30, 50, 20]], [7, [50, 40, 10]], [45, [20, 50, 30]]] as [number, [number, number, number]][]) {
+      const slot = rencanakanSlot({ n, persen, bentuk: ['pilihan_ganda'], tp: [{ id: 't', rumusan: 'TP', sumber: 'guru', versi: 1 }] });
+      const hitung = Object.fromEntries(['C1', 'C2', 'C3', 'C4', 'C5', 'C6'].map((l) => [l, slot.filter((s) => s.level === l).length]));
+      expect(levelDariPersen(n, persen)).toEqual(hitung);
+    }
   });
 });

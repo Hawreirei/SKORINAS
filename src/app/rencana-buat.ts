@@ -1,5 +1,7 @@
 import { hitungBiaya } from '../ai';
 import type { ModelRegistri } from '../ai/tipe';
+import type { Bentuk, Level } from '../db/tipe';
+import { bagiKomposisi } from '../generasi/komposisi';
 
 /**
  * Perkiraan di panel Rencana layar Buat (rancangan UI v0.5, UI-06): permintaan AI, waktu, kuota, dan biaya
@@ -115,3 +117,19 @@ export function hapusDraf(): void {
     // Abaikan; draf lama akan tertimpa isian berikutnya.
   }
 }
+
+/** Bagi n soal rata ke beberapa kelompok; sisa diberikan ke kelompok paling awal. */
+export function bagiRata(n: number, banyak: number): number[] {
+  if (banyak <= 0) return [];
+  return Array.from({ length: banyak }, (_, i) => Math.floor(n / banyak) + (i < n % banyak ? 1 : 0));
+}
+
+/** Jumlah per level C1–C6 dari persen kesukaran, sama seperti rencana bawaan (level bergantian dalam kategorinya). */
+export function levelDariPersen(n: number, persen: [number, number, number]): Record<Level, number> {
+  const kuota = bagiKomposisi(n, persen);
+  const [m, s, h] = kuota.map((k) => [Math.ceil(k / 2), Math.floor(k / 2)]);
+  return { C1: m[0], C2: m[1], C3: s[0], C4: s[1], C5: h[0], C6: h[1] };
+}
+
+/** Skor bawaan per soal saat guru menyalakan "Cantumkan skor". */
+export const SKOR_BAWAAN: Record<Bentuk, number> = { pilihan_ganda: 1, pilihan_ganda_kompleks: 2, benar_salah: 1, menjodohkan: 3, isian_singkat: 2, uraian: 5 };

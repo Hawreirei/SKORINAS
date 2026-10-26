@@ -72,8 +72,8 @@ MVP dibatasi pada satu jalur lengkap: dari isian kelas, mapel, CP, dan TP sampai
 | F-01 | Profil lokal guru dan kop sekolah dasar (tanpa login) | MVP |
 | F-02 | ~~Katalog kurikulum resmi~~ dihapus pada v0.4: guru mengisi kelas, mapel, CP, dan TP sendiri | Dihapus |
 | F-03 | Layar Buat: 3 isian wajib (kelas, topik atau mapel, jumlah soal), Pengaturan lanjutan tertutup, Pengaturan tersimpan (preset), tombol Buat soal | MVP |
-| F-04 | Pengaturan komposisi kesukaran (tiga penggeser, sisa terbesar) | MVP |
-| F-05 | Bentuk soal: pilihan ganda, isian singkat, benar-salah, uraian | MVP |
+| F-04 | Pengaturan komposisi kesukaran (tiga penggeser, sisa terbesar); di Pengaturan lanjutan guru juga dapat mengatur jumlah per bentuk soal, jumlah per level kognitif C1–C6, jumlah soal per TP, banyak opsi pilihan ganda (4 atau 5), dan skor per bentuk dengan pedoman penskoran | MVP |
+| F-05 | Bentuk soal: pilihan ganda, pilihan ganda kompleks, benar-salah, menjodohkan (tarik garis), isian singkat, uraian | MVP |
 | F-06 | Pembuatan soal oleh AI dengan keluaran JSON terstruktur lewat adaptor penyedia | MVP |
 | F-07 | Verifikasi otomatis (hitung ulang, kaidah butir, duplikasi) dan status mutu | MVP |
 | F-08 | Gambar terprogram untuk Matematika SD (garis bilangan, pecahan, bangun datar, diagram batang, jam) | MVP |
@@ -90,7 +90,7 @@ MVP dibatasi pada satu jalur lengkap: dari isian kelas, mapel, CP, dan TP sampai
 | F-19 | Lisensi sekali bayar: kode lisensi, validasi, batas perangkat, kirim ulang kode | V1 |
 | F-20 | Bank soal: simpan, cari, pakai ulang | V1 |
 | F-21 | Paket A/B/C dengan pengacakan soal dan opsi | V1 |
-| F-22 | Bentuk soal tambahan: pilihan ganda kompleks, menjodohkan, soal bertumpu stimulus | V1 |
+| F-22 | Bentuk soal tambahan: soal bertumpu stimulus (pilihan ganda kompleks dan menjodohkan sudah masuk F-05) | V1 |
 | F-23 | Ilustrasi AI dan unggah gambar | V1 |
 | F-24 | Verifikasi SymPy lewat Pyodide dan paket mapel IPA | V1 |
 | F-25 | Berbagi bank soal lewat berkas .gensoal; bank bersama per sekolah menunggu server | V1 |
@@ -232,7 +232,7 @@ Semua data milik guru (pengaturan tersimpan, paket, soal, profil) disimpan di In
 - Soal uraian menyimpan `jenis_uraian` (penjelasan atau hitungan) di isi\_json.
 - Tanpa Row Level Security: seluruh data tinggal di perangkat. Konsekuensinya, kehilangan data peramban berarti kehilangan soal, sehingga cadangan .gensoal dan permintaan penyimpanan persisten (navigator.storage.persist) menjadi bagian MVP.
 - Hapus bersifat lunak (dihapus\_pada) untuk soal dan paket, dengan tong sampah yang dikosongkan setelah 30 hari.
-- Setiap perubahan skema IndexedDB lewat nomor versi Dexie baru dengan fungsi migrasi. Pengaturan tersimpan (toko preset): id, nama, parameter\_json, terakhir\_dipakai. Versi 2 skema menghapus toko tp\_kustom.
+- Setiap perubahan skema IndexedDB lewat nomor versi Dexie baru dengan fungsi migrasi. Pengaturan tersimpan (toko preset): id, nama, parameter\_json, terakhir\_dipakai. Versi 2 skema menghapus toko tp\_kustom. Versi 3 menambah isian parameter jumlah\_bentuk, sebaran\_level, jumlah\_tp, opsi\_pg, dan skor\_bentuk (null berarti perilaku bawaan).
 
 ## Mesin AI dan Verifikasi
 
