@@ -229,3 +229,10 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | Teks kecil | Pratinjau kop di Profil kini 16 px. Pengecualian yang disengaja: miniatur halaman A4 di pratinjau Unduh (8,5–10 px) karena berupa gambar halaman; tampilan cetak ukuran penuh tersedia di Menu lanjutan | Teks layar minimal 16 px |
 | Copy | Tidak ditemukan lagi Setujui, Disetujui, Mohon cek dulu, "Langkah n dari 3", atau kata generate/preset/ekspor di label. RPM dan RPD hanya di Pengaturan lanjutan dengan petunjuk akibat. Label proses: "Menyiapkan…", "Menjeda…", "Membuat berkas…", "Menguji…" | Aturan "Bahasa di layar" |
 | Mode gelap di e2e | Tangkapan `14-buat-gelap`, `14-paket-gelap`, `14-unduh-gelap` lewat `emulateMedia({ colorScheme: 'dark' })` dengan tema Ikuti sistem | Mode gelap diperiksa setiap kali e2e dijalankan |
+
+## Pembaruan aplikasi (PWA)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Cara versi baru sampai ke guru | `registerType: 'autoUpdate'` (sebelumnya `'prompt'`): service worker baru langsung aktif dan halaman dimuat ulang sekali saat aplikasi dibuka. Banner "Versi baru GenSoal tersedia · Muat ulang" dihapus; banner "siap dipakai tanpa internet" tetap | Setelah rancangan UI v0.5 tayang, pemilik masih melihat tampilan lama. Uji simulasi: dengan `'prompt'`, tampilan lama bertahan berapa kali pun halaman dimuat ulang sampai banner ditekan atau semua tab ditutup; dengan `'autoUpdate'`, versi baru tampil pada kunjungan pertama. Peramban yang masih memegang versi `'prompt'` lama beralih pada muat ulang kedua |
+| Risiko muat ulang | Pemeriksaan versi hanya terjadi saat aplikasi dibuka, jadi muat ulang otomatis terjadi beberapa detik setelah dibuka, bukan di tengah pembuatan soal. Bila tetap terjadi, pekerjaan dilanjutkan dari butir terakhir yang tersimpan (`pulihkanPekerjaanTertinggal`) dan draf layar Buat tersimpan | Tidak ada isian guru yang hilang |

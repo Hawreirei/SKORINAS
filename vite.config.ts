@@ -40,7 +40,9 @@ export default defineConfig({
     tailwindcss(),
     metaCsp(),
     VitePWA({
-      registerType: 'prompt',
+      // Versi baru langsung dipasang saat aplikasi dibuka (service worker baru melewati masa tunggu lalu halaman
+      // dimuat ulang sekali). Dengan 'prompt', guru terus melihat versi lama sampai menekan "Muat ulang".
+      registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'fonts/*.ttf'],
       manifest: {
         name: 'GenSoal',
