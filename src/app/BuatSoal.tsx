@@ -20,12 +20,10 @@ import { Panah, Tombol } from '../komponen/Tombol';
 import { useJudulHalaman, useProfil, useRegistri } from './kait';
 import { batasEfektif, permintaanHariIni } from '../ai/laju';
 import { modelDari } from '../ai/registri';
-import { bacaDraf, hapusDraf, hitungRencana, simpanDraf } from './rencana-buat';
+import { bacaDraf, hapusDraf, hitungRencana, MAKS_SOAL, MIN_SOAL, simpanDraf } from './rencana-buat';
 import { formatBiaya } from './ringkas';
 
 const MAKS_TP = 500;
-const MIN_SOAL = 5;
-const MAKS_SOAL = 50;
 const MAKS_KATA_MATERI = 3000;
 
 interface Isian {

@@ -103,10 +103,10 @@ function butirPalsu(bentuk) {
   await page.goto(DASAR + '/');
   await page.waitForSelector('h1');
   await foto('01-beranda-kosong');
-  // Langkah awal (UI-10): tiga langkah, langkah pertama aktif.
-  const langkahAwal = page.getByRole('region', { name: 'Langkah awal' });
-  if (!(await langkahAwal.count())) galat.push('beranda kosong tanpa kartu "Langkah awal"');
-  else if (!/Pasang kunci AI/.test((await langkahAwal.locator('[aria-current="step"]').textContent()) ?? '')) galat.push('langkah aktif pertama bukan "Pasang kunci AI"');
+  // Beranda: kartu Mulai cepat, tiga langkah, dan Soal terakhir yang masih kosong.
+  if (!(await page.getByRole('form', { name: 'Mulai cepat' }).count())) galat.push('beranda tanpa kartu "Mulai cepat"');
+  if (!(await page.getByRole('region', { name: 'Tiga langkah, soal siap dipakai' }).count())) galat.push('beranda tanpa "Tiga langkah"');
+  if (!(await page.getByText('Belum ada soal.').count())) galat.push('beranda kosong tanpa ajakan membuat paket pertama');
 
   // Tanpa kunci AI: layar Buat tetap dapat diisi, tombol utama mengarah ke Pengaturan AI (UI-06).
   await page.goto(DASAR + '/soal/baru');
@@ -121,20 +121,24 @@ function butirPalsu(bentuk) {
   await page.click('text=Pengaturan lanjutan');
   await page.selectOption('#model-cadangan', { index: 2 });
   await foto('02-pengaturan-ai');
-  await page.goto(DASAR + '/');
-  await langkahAwal.getByText('Selesai').first().waitFor();
-  if (!/Buat soal pertama/.test((await langkahAwal.locator('[aria-current="step"]').textContent()) ?? '')) galat.push('setelah kunci terpasang, langkah aktif bukan "Buat soal pertama"');
-  await foto('01b-beranda-langkah', { fullPage: false });
-
   // Buat soal: tiga isian wajib, sisanya di Pengaturan lanjutan
   await page.goto(DASAR + '/soal/baru');
   await page.waitForSelector('h1:has-text("Buat soal")');
   await foto('03a-buat-soal-kosong');
   await utamaTerlihat(page, 'Buat soal');
-  await page.selectOption('#kelas', '4');
-  await page.fill('#mapel', 'Matematika');
+  // Mulai cepat di beranda mengisi tiga isian wajib layar Buat.
+  await page.goto(DASAR + '/');
+  const cepat = page.getByRole('form', { name: 'Mulai cepat' });
+  await cepat.getByLabel('Kelas').selectOption('4');
+  await cepat.getByLabel('Mata pelajaran').fill('Matematika');
+  await cepat.getByLabel('Jumlah soal').fill('12');
+  await foto('01b-beranda-mulai-cepat', { fullPage: false });
+  await cepat.getByRole('button', { name: /Lanjut isi CP dan TP/ }).click();
+  await page.waitForURL(/\/soal\/baru$/);
+  await page.waitForSelector('h1:has-text("Buat soal")');
+  const isiCepat = await page.evaluate(() => ['#kelas', '#mapel', '#jumlah'].map((q) => document.querySelector(q).value));
+  if (isiCepat.join('|') !== '4|Matematika|12') galat.push(`Mulai cepat tidak mengisi layar Buat: ${isiCepat.join('|')}`);
   await page.fill('#tp', 'Peserta didik dapat menjumlahkan dua pecahan berpenyebut sama.\nPeserta didik dapat membandingkan dua pecahan berpenyebut berbeda dengan menyamakan penyebutnya.');
-  await page.fill('#jumlah', '12');
   // Panel Rencana menghitung permintaan sebelum tombol ditekan; isian tersimpan sebagai draf.
   await page.locator('aside[aria-label="Rencana"]').getByText('12–16').waitFor();
   await page.reload();
@@ -280,7 +284,7 @@ function butirPalsu(bentuk) {
   await page.waitForSelector('text=Penjumlahan pecahan');
   if (!(await page.getByText('Siap diunduh').count())) galat.push('beranda tanpa lencana "Siap diunduh"');
   await foto('07-beranda');
-  if (await page.getByRole('region', { name: 'Langkah awal' }).count()) galat.push('kartu "Langkah awal" masih tampil setelah ketiga langkah selesai');
+  if (await page.getByRole('region', { name: /^Penjumlahan pecahan$/ }).count()) galat.push('kartu "Belum selesai" tampil padahal paket sudah siap');
   await utamaTerlihat(page, 'Beranda');
   await page.goto(DASAR + '/soal');
   await page.waitForSelector('h1');
@@ -475,7 +479,7 @@ function butirPalsu(bentuk) {
   await dlgHapus.getByRole('button', { name: 'Hapus semua data' }).click();
   await page.getByText('0 paket · 0 soal').waitFor();
   await page.goto(DASAR + '/');
-  await page.getByRole('region', { name: 'Langkah awal' }).waitFor();
+  await page.getByText('Belum ada soal.').waitFor();
 
   const padat = Math.max(...waktuKirim.map((t) => waktuKirim.filter((u) => u >= t && u < t + 60000).length));
   console.log('permintaan terbanyak dalam 60 detik:', padat, '(batas 5)');

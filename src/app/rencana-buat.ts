@@ -82,6 +82,32 @@ export function simpanDraf(isi: unknown): void {
   }
 }
 
+/** Batas jumlah soal per paket, dipakai layar Buat dan Mulai cepat di beranda. */
+export const MIN_SOAL = 5;
+export const MAKS_SOAL = 50;
+
+/** Isian Mulai cepat di beranda; ditimpakan ke draf layar Buat agar isian lain di draf tetap ada. */
+export interface IsianCepat {
+  kelas: number;
+  mapel: string;
+  n: number;
+}
+
+export function bacaIsianCepat(): Partial<IsianCepat> {
+  const f = bacaDraf<{ f?: Partial<IsianCepat> }>()?.f;
+  return { kelas: f?.kelas || undefined, mapel: f?.mapel || undefined, n: f?.n || undefined };
+}
+
+/** Hanya nilai yang terisi dan sah yang ditimpakan; layar Buat memeriksa sisanya. */
+export function simpanIsianCepat(isi: IsianCepat): void {
+  const d = bacaDraf<{ f?: Record<string, unknown> }>() ?? {};
+  const f: Record<string, unknown> = { ...d.f };
+  if (isi.kelas >= 1 && isi.kelas <= 12) f.kelas = isi.kelas;
+  if (isi.mapel.trim()) f.mapel = isi.mapel.trim();
+  if (Number.isInteger(isi.n) && isi.n >= MIN_SOAL && isi.n <= MAKS_SOAL) f.n = isi.n;
+  simpanDraf({ ...d, f });
+}
+
 export function hapusDraf(): void {
   try {
     localStorage.removeItem(KUNCI_DRAF);
