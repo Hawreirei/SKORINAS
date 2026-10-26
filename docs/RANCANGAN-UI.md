@@ -83,7 +83,7 @@ Kolom **Keputusan** berisi salah satu dari: *Ambil* (dipakai apa adanya), *Sesua
 | Gate: tanpa kunci API, dialihkan ke pengaturan | Galat baru muncul setelah menekan Buat soal | **Sesuaikan:** tidak dialihkan paksa; pemberitahuan dan tombol "Pasang kunci AI dulu" | UI-06 |
 | Halaman detail: satu aksi utama tetap terlihat, sisanya di menu More; banner "N item perlu dicek" | Aksi utama di kartu samping dan bilah bawah | **Sesuaikan:** tombol **Unduh** di kepala halaman paket, menu Lainnya. Banner "perlu dicek" **tidak diambil** (tidak ada persetujuan) | UI-07 |
 | Peringatan `beforeunload` saat proses berjalan | Belum | **Ambil** | UI-07 |
-| Dashboard: tiga kartu statistik, daftar terbaru, kartu "How it works" | Tombol besar Buat soal, kartu pengingat kunci, daftar soal terakhir | **Sesuaikan:** kartu statistik **tidak diambil**; yang diambil kartu **Langkah awal** (Pasang kunci AI, Buat soal, Unduh) yang hilang setelah selesai | UI-10 |
+| Dashboard: tiga kartu statistik, daftar terbaru, kartu "How it works" | Tombol besar Buat soal, kartu pengingat kunci, daftar soal terakhir | **Sesuaikan:** kartu statistik **tidak diambil**. Sejak 26 Oktober beranda mengikuti tata letak dari guru: Mulai cepat, tiga langkah, soal terakhir, Belum selesai, Pintasan (kartu Langkah awal dihapus; lihat `docs/KEPUTUSAN.md`) | UI-10 |
 | Daftar: pencarian, filter segmented, menu ⋯ per baris | Pencarian, tab Paket/Tong sampah, tautan Unduh dan Hapus | **Ambil:** saringan Semua · Belum selesai · Siap diunduh; menu ⋯ per baris | UI-09 |
 | Settings per kartu dengan **Danger zone** di bawah | Belum seragam | **Ambil** untuk Pengaturan AI, Profil dan kop, Cadangan | UI-11 |
 | Tampilan `.paper` selalu hitam di atas putih | Pratinjau Unduh dan tampilan cetak sudah putih | **Ambil** sebagai utilitas `kertas` | UI-01, UI-08 |
@@ -136,7 +136,7 @@ Mengikuti `AGENTS.md` butir 5, ditambah syarat berikut.
 
 - Warna indigo, font sistem, dan teks 14 px atau 12 px. Bertentangan dengan Arah visual.
 - Tombol tema di kepala halaman. Menambah elemen di kepala untuk pengaturan yang jarang diubah.
-- Kartu statistik di beranda. Beranda tetap berisi satu tombol besar dan daftar soal terakhir.
+- Kartu statistik di beranda. Beranda berisi ajakan Buat soal, Mulai cepat, daftar soal terakhir, dan pintasan, tanpa angka ringkasan.
 - Banner "N item perlu dicek" dan perbaikan massal. Tidak ada langkah persetujuan lagi.
 - Pengalihan paksa ke Pengaturan AI. Guru awam bisa bingung kenapa layar berpindah sendiri; pemberitahuan dan tombol yang jelas lebih ramah, dan isian tidak hilang.
 - Ikon berupa karakter teks. Ikon SVG yang sudah ada lebih jelas.

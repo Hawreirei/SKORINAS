@@ -122,7 +122,7 @@ Pekerjaan guru berjalan dari layar Buat ke halaman paket soal, lalu ke Unduh. Se
 
 | Layar | Rute | Elemen utama | Aksi |
 | --- | --- | --- | --- |
-| Beranda | / | Satu tombol besar "Buat soal"; kartu Langkah awal (pasang kunci AI, buat soal pertama, unduh) yang hilang setelah selesai atau disembunyikan; lima paket terakhir dengan lencana status | Mulai buat soal, buka soal |
+| Beranda | / | Ajakan "Buat soal" dan "Buka soal saya"; kartu Mulai cepat (kelas, mapel, jumlah soal) yang mengisi layar Buat; tiga langkah Buat · Periksa · Unduh; lima paket terakhir dengan lencana status dan satu aksi (Unduh atau Lanjutkan); kartu Belum selesai untuk paket terbaru yang belum siap; Pintasan (kunci API, cadangan, semua soal) | Mulai buat soal, lanjutkan paket, unduh, buka soal |
 | Buat soal | /soal/baru | Pengaturan tersimpan (satu pilihan); Kelas, mapel, dan jumlah soal; CP dan TP; Pengaturan lanjutan (tertutup); panel Rencana (permintaan AI, waktu, kuota, biaya); draf otomatis | Buat soal (atau "Pasang kunci AI dulu"), simpan pengaturan, Batal |
 | Paket soal | /soal/\[id\] | Kepala dengan tombol Unduh dan menu Lainnya; kemajuan pembuatan dengan lencana status dan bilah; daftar soal dengan gambar, kunci, pembahasan; keterangan "Kunci tidak dicek otomatis" bila perlu; tanda jenis jawaban uraian; navigasi nomor soal | Unduh, sunting, ganti soal, buat ulang, hapus (konfirmasi, dapat dipulihkan) |
 | Unduh | /soal/\[id\]/ekspor | Pilih Word atau PDF; berkas yang diunduh (lembar soal dengan atau tanpa kop, kunci jawaban dengan atau tanpa pembahasan, kisi-kisi), masing-masing berkas terpisah; pratinjau tiap berkas; menu lanjutan berisi .tex dan tampilan cetak | Unduh semua berkas terpilih, atau satu berkas saja |

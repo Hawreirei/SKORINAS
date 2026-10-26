@@ -115,7 +115,6 @@ export function KepalaHalaman({
   judul,
   subjudul,
   aksi,
-  besar = false,
   children,
 }: {
   kembali?: { ke: string; label: string };
@@ -123,8 +122,6 @@ export function KepalaHalaman({
   judul: ReactNode;
   subjudul?: ReactNode;
   aksi?: ReactNode;
-  /** Judul lebih besar, hanya untuk beranda. */
-  besar?: boolean;
   children?: ReactNode;
 }) {
   return (
@@ -136,7 +133,7 @@ export function KepalaHalaman({
           </Link>
         ) : null}
         {label ? <div className="text-base font-bold text-utama">{label}</div> : null}
-        <h1 className={`judul-besar mt-1 ${besar ? 'text-[34px] sm:text-[44px]' : 'text-[30px] sm:text-[36px]'}`}>{judul}</h1>
+        <h1 className="judul-besar mt-1 text-[30px] sm:text-[36px]">{judul}</h1>
         {subjudul ? <div className="mt-2 max-w-[640px] text-[17px] leading-relaxed text-redup">{subjudul}</div> : null}
         {children}
       </div>

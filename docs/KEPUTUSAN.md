@@ -207,6 +207,18 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | Menghilang | Kartu tidak tampil setelah ketiga langkah selesai atau setelah "Sembunyikan" (`gensoal:langkah-awal-tersembunyi`) | Beranda guru lama tetap ringkas |
 | Soal terakhir | Tetap lima paket terbaru; empty state menautkan ke Buat soal | Tidak berubah |
 
+## Beranda baru (26 Oktober, tata letak dari guru)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Tata letak | Dua kolom di layar lebar: kiri label "Kelas 1–12 · tanpa akun", judul besar bergaris kuning, tombol Buat soal dan Buka soal saya, tiga butir centang; kanan kartu biru Mulai cepat. Di bawahnya Tiga langkah, lalu Soal terakhir di samping Belum selesai dan Pintasan. Satu kolom di ponsel | Mengikuti rancangan beranda yang diberikan guru (`Beranda.pdf`); permintaan terbaru mengalahkan UI-10 |
+| Mulai cepat | Kelas, mata pelajaran, dan jumlah soal ditimpakan ke draf layar Buat (`gensoal:draf-buat`), lalu "Lanjut isi CP dan TP" membuka `/soal/baru`. Hanya nilai yang terisi dan sah yang ditimpakan; isian lain di draf tetap | Tidak menambah parameter URL atau versi Dexie; layar Buat tetap memeriksa isian wajib |
+| Kartu Langkah awal | Dihapus beserta `src/app/langkah-awal.ts` dan tanda `gensoal:sudah-unduh`. Pengingat kunci tetap ada di layar Buat ("Pasang kunci AI dulu") dan di Pintasan | Tidak ada di rancangan baru. "Tiga langkah" hanya penjelasan statis, bukan penunjuk kemajuan "Langkah n dari 3" |
+| Baris Soal terakhir | Ikon berkas (biru bila siap, kuning bila belum), judul sebagai tautan ke paket, `LencanaStatus`, dan satu aksi: Unduh (garis) bila siap, Lanjutkan (berisi) bila belum | Seluruh baris tidak lagi satu tautan karena berisi tombol aksi |
+| Belum selesai | Paket terbaru yang belum siap (di luar tong sampah) dengan bilah kemajuan "n dari N soal sudah dibuat" dan tombol "Lanjutkan membuat" (atau "Lihat kemajuan" saat sedang dibuat). Tidak tampil bila semua paket siap | Guru langsung melanjutkan pekerjaan yang tertunda |
+| Tombol berisi | Beranda kini punya lebih dari satu tombol berisi (Buat soal, Lanjut isi CP dan TP, Lanjutkan, Lanjutkan membuat) | Mengikuti rancangan dari guru; pengecualian aturan "satu tombol utama per layar" khusus beranda |
+| `KepalaHalaman` | Prop `besar` dihapus; beranda memakai kepala sendiri | Hanya beranda yang memakainya |
+
 ## UI-11 Pengaturan AI, Profil dan kop, Cadangan (issue #12)
 
 | Topik | Keputusan | Alasan |

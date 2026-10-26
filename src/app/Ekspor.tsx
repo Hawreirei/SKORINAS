@@ -11,7 +11,6 @@ import { BagianLipat, Pemberitahuan, Pilihan, Sakelar } from '../komponen/Formul
 import { Kartu } from '../komponen/Status';
 import { kelasTombol, Tombol } from '../komponen/Tombol';
 import { useJudulHalaman, useProfil } from './kait';
-import { tandaiSudahUnduh } from './langkah-awal';
 
 const FORMAT: { id: FormatEkspor; nama: string; tombol: string; ket: string }[] = [
   { id: 'docx', nama: 'Word', tombol: 'Word', ket: 'Bisa disunting' },
@@ -81,7 +80,6 @@ export default function Ekspor() {
         nama.push((await ekspor(format, paket!, soal!, profil, opsi, b)).nama);
       }
       setTerunduh(nama);
-      tandaiSudahUnduh();
       pesan(nama.length > 1 ? `${nama.length} berkas terunduh.` : `${nama[0]} terunduh.`);
     } catch (e) {
       setGalat(`${(e as Error).message} Anda dapat memakai tampilan cetak peramban sebagai cadangan.`);
