@@ -1,3 +1,4 @@
+import { RANGKAIAN_ARAB, pisahArab } from '../ekspor/arab';
 import { HURUF_GANDA, OPERATOR_BESAR, SIMBOL, uraiTeks } from './teks';
 
 const KHUSUS: Record<string, string> = {
@@ -46,14 +47,24 @@ const KE_PERINTAH: Record<string, string> = (() => {
   return peta;
 })();
 
-/** Teks biasa ke LaTeX: karakter khusus di-escape, simbol matematika Unicode menjadi $\perintah$. */
+/** Teks biasa ke LaTeX: karakter khusus di-escape, simbol matematika Unicode menjadi $\perintah$, teks Arab menjadi \arab{...} (XeLaTeX, lihat tex.ts). */
 export function escLatex(s: string): string {
+  return pisahArab(s)
+    .map((b) => (b.arab ? `\\arab{${b.s}}` : escLatin(b.s)))
+    .join('');
+}
+
+function escLatin(s: string): string {
   return s.replace(/[\\{}$&#%_^~]|[^\x00-\xff]|[²³°×÷…“”½¼¾¹]/g, (c) => KHUSUS[c] ?? (KE_PERINTAH[c] ? `$${KE_PERINTAH[c]}$` : c));
 }
 
 /** Rumus ke LaTeX: simbol Unicode di dalam rumus diganti perintahnya; huruf lain dibungkus \text. */
 function rumusLatex(latex: string): string {
-  return latex.replace(/[^\x00-\x7f]/g, (c) => (c in KE_PERINTAH ? `${KE_PERINTAH[c]}${/[a-zA-Z]$/.test(KE_PERINTAH[c]) ? ' ' : ''}` : `\\text{${c}}`));
+  const arab: string[] = [];
+  return latex
+    .replace(RANGKAIAN_ARAB, (m) => `\u0000${arab.push(m) - 1}\u0000`)
+    .replace(/[^\x00-\x7f]/g, (c) => (c in KE_PERINTAH ? `${KE_PERINTAH[c]}${/[a-zA-Z]$/.test(KE_PERINTAH[c]) ? ' ' : ''}` : `\\text{${c}}`))
+    .replace(/\u0000(\d+)\u0000/g, (_, i: string) => `\\text{\\arab{${arab[Number(i)]}}}`);
 }
 
 /** Teks soal ke LaTeX: kalimat di-escape, rumus diteruskan (simbol Unicode diganti perintah), pecahan polos menjadi \frac. */

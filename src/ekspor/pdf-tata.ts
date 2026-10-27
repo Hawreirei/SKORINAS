@@ -1,5 +1,6 @@
 import type { jsPDF } from 'jspdf';
 import { uraiTeks, type Simpul } from '../matematika/teks';
+import { POLA_ARAB, dominanArab, sambungArab, urutanVisual } from './arab';
 
 // Penata huruf kecil untuk PDF: kata dan rumus (pecahan bertumpuk, pangkat, akar, matriks, operator besar) diukur,
 // dipatah per baris, lalu digambar dengan font yang ditanam.
@@ -9,12 +10,18 @@ export const FONT_PDF = 'LiberationSerif';
 // Simbol matematika yang tidak ada di Liberation Serif (∀, ⊆, ⇒, ℝ, ⌊ ⌋, …): potongan DejaVu Sans, public/fonts/GenSoalSimbol.ttf.
 export const FONT_SIMBOL = 'GenSoalSimbol';
 // Daftar ini dicetak oleh scripts/buat-font-simbol.py.
+// Huruf Arab: potongan Amiri (OFL), public/fonts/GenSoalArab.ttf, dibuat dengan scripts/buat-font-arab.py.
+export const FONT_ARAB = 'GenSoalArab';
+// Huruf Arab ditulis lebih besar agar harakat terbaca, setara 16 pt di samping huruf Latin 12 pt.
+export const SKALA_ARAB = 4 / 3;
 export const KARAKTER_SIMBOL = new Set('ℂℍℑℕℙℚℜℝℤℵ↗↘↦⇌⇐⇒∀∁∃∄∅∇∈∉∋∌∐∓∖∗∘∝∠∡∣∤∥∧∨∪∬∭∮∴∵∼∽≃≅≌≐≪≫≮≯≰≱⊂⊃⊄⊅⊆⊇⊈⊉⊊⊋⊕⊗⊤⊥⋂⋃⋄⋆⋍⋮⋯⋰⋱⌈⌉⌊⌋△◠☐✓⟨⟩⟵⟶⟹⟺');
 
 export interface Kotak {
   w: number;
   naik: number;
   turun: number;
+  /** Arah tulisan untuk penyusunan baris: kata Arab rtl, kata Latin, angka, dan rumus ltr, tanda baca netral. */
+  arah?: 'ltr' | 'rtl';
   gambar(doc: jsPDF, x: number, garisDasar: number): void;
 }
 
@@ -57,7 +64,96 @@ export function lebarTeks(doc: jsPDF, s: string, g: GayaTeks): number {
   }, 0);
 }
 
+type FontJsPdf = {
+  metadata: {
+    head: { unitsPerEm: number };
+    cmap: { unicode: { codeMap: Record<number, number> } };
+    hmtx: { widths: number[] };
+    glyf: { glyphFor(id: number): { xMin: number; xMax: number; yMin: number; yMax: number } | null };
+  };
+};
+type Glif = { w: number; xMin: number; xMax: number; yMin: number; yMax: number };
+const cacheGlif = new WeakMap<object, Map<string, Glif>>();
+
+/** Lebar dan batas tinta satu glif Arab dalam satuan font (dari font yang ditanam). */
+function glifArab(doc: jsPDF, c: string): Glif & { per: number } {
+  const font = (doc as unknown as { getFont(nama: string, gaya: string): FontJsPdf }).getFont(FONT_ARAB, 'normal');
+  const per = font.metadata.head.unitsPerEm;
+  let peta = cacheGlif.get(font);
+  if (!peta) cacheGlif.set(font, (peta = new Map()));
+  let glif = peta.get(c);
+  if (!glif) {
+    const id = font.metadata.cmap.unicode.codeMap[c.codePointAt(0)!] ?? 0;
+    const w = font.metadata.hmtx.widths[id] ?? font.metadata.hmtx.widths[font.metadata.hmtx.widths.length - 1] ?? 0;
+    const b = id ? font.metadata.glyf.glyphFor(id) : null;
+    glif = b ? { w, xMin: b.xMin, xMax: b.xMax, yMin: b.yMin, yMax: b.yMax } : { w, xMin: 0, xMax: w, yMin: 0, yMax: 0 };
+    peta.set(c, glif);
+  }
+  return { ...glif, per };
+}
+
+// Jarak harakat dari huruf, satuan font per 1000.
+const JARAK_HARAKAT = 60;
+// Teks sudah dalam urutan visual: pengatur arah jsPDF tidak boleh membaliknya lagi.
+const SUDAH_VISUAL = { isInputVisual: true, isOutputVisual: true } as const;
+
+/**
+ * Satu kata Arab: huruf disambung (bentuk sajian), gugus diurutkan dari kiri ke kanan, lalu harakat diletakkan
+ * di tengah atas atau bawah tinta hurufnya. Font Arab tidak memuat posisi harakat yang dapat dibaca jsPDF.
+ */
+function kotakArab(doc: jsPDF, s: string, g: GayaTeks): Kotak {
+  const ukuran = g.ukuran * SKALA_ARAB;
+  const gugus = urutanVisual(sambungArab(amankan(s)));
+  type Tempat = { c: string; dx: number; dy: number };
+  let naik = 0;
+  let turun = 0;
+  let x = 0;
+  const gambarGugus: { x: number; dasar: Tempat | null; tanda: Tempat[] }[] = [];
+  for (const gs of gugus) {
+    const dasar = gs.glif ? glifArab(doc, gs.glif) : null;
+    const per = dasar?.per ?? glifArab(doc, ' ').per;
+    const skala = ukuran / per;
+    const tengah = dasar ? (dasar.xMin + dasar.xMax) / 2 : 0;
+    let atas = dasar && dasar.yMax > dasar.yMin ? dasar.yMax : per * 0.5;
+    let bawah = dasar ? Math.min(0, dasar.yMin) : 0;
+    const tanda: Tempat[] = [];
+    for (const t of gs.tanda) {
+      const m = glifArab(doc, t);
+      const dx = tengah - (m.xMin + m.xMax) / 2;
+      let dy: number;
+      if (m.yMin >= 0) {
+        dy = atas + (JARAK_HARAKAT * per) / 1000 - m.yMin;
+        atas = m.yMax + dy;
+      } else {
+        dy = bawah - (JARAK_HARAKAT * per) / 1000 - m.yMax;
+        bawah = m.yMin + dy;
+      }
+      tanda.push({ c: t, dx: dx * skala, dy: dy * skala });
+    }
+    naik = Math.max(naik, atas * skala);
+    turun = Math.max(turun, -bawah * skala);
+    gambarGugus.push({ x, dasar: gs.glif ? { c: gs.glif, dx: 0, dy: 0 } : null, tanda });
+    x += dasar ? dasar.w * skala : 0;
+  }
+  return {
+    w: x,
+    naik: Math.max(naik, g.ukuran * 0.74),
+    turun: Math.max(turun, g.ukuran * 0.24),
+    arah: 'rtl',
+    gambar(d, x0, y) {
+      d.setFont(FONT_ARAB, 'normal');
+      d.setFontSize(ukuran);
+      d.setTextColor(...(g.warna ?? [0, 0, 0]));
+      for (const gg of gambarGugus) {
+        if (gg.dasar) d.text(gg.dasar.c, x0 + gg.x, y, SUDAH_VISUAL);
+        for (const t of gg.tanda) d.text(t.c, x0 + gg.x + t.dx, y - t.dy, SUDAH_VISUAL);
+      }
+    },
+  };
+}
+
 export function kotakTeks(doc: jsPDF, s: string, g: GayaTeks): Kotak {
+  if (POLA_ARAB.test(s)) return kotakArab(doc, s, g);
   const potongan = potongFont(s).map((p) => {
     aturFont(doc, g, p.simbol);
     return { ...p, w: doc.getTextWidth(p.s) };
@@ -418,21 +514,82 @@ export function kotakMath(doc: jsPDF, daftar: Simpul[], g: GayaTeks): Kotak {
 
 type Potongan = { jenis: 'kotak'; kotak: Kotak } | { jenis: 'spasi' } | { jenis: 'baris' };
 
-function potong(doc: jsPDF, teks: string, g: GayaTeks): Potongan[] {
+/** Potongan kata dan rumus, serta arah tiap paragraf logis (dipisah baris baru): rtl bila dominan Arab. */
+function potong(doc: jsPDF, teks: string, g: GayaTeks): { potongan: Potongan[]; arahBlok: ('ltr' | 'rtl')[] } {
   const hasil: Potongan[] = [];
+  const arahBlok: ('ltr' | 'rtl')[] = [];
+  let blok = '';
+  const tutupBlok = () => {
+    arahBlok.push(dominanArab(blok) ? 'rtl' : 'ltr');
+    blok = '';
+  };
   for (const seg of uraiTeks(teks)) {
     if (seg.jenis === 'mat') {
-      hasil.push({ jenis: 'kotak', kotak: kotakMath(doc, seg.simpul, g) });
+      hasil.push({ jenis: 'kotak', kotak: { ...kotakMath(doc, seg.simpul, g), arah: 'ltr' } });
       continue;
     }
     for (const bagian of seg.s.split(/(\n|[ \t]+)/)) {
       if (!bagian) continue;
-      if (bagian === '\n') hasil.push({ jenis: 'baris' });
-      else if (/^[ \t]+$/.test(bagian)) hasil.push({ jenis: 'spasi' });
-      else hasil.push({ jenis: 'kotak', kotak: kotakTeks(doc, bagian, g) });
+      if (bagian === '\n') {
+        hasil.push({ jenis: 'baris' });
+        tutupBlok();
+        continue;
+      }
+      blok += bagian;
+      if (/^[ \t]+$/.test(bagian)) hasil.push({ jenis: 'spasi' });
+      else {
+        const k = kotakTeks(doc, bagian, g);
+        hasil.push({ jenis: 'kotak', kotak: k.arah ? k : /[\p{L}\p{N}]/u.test(bagian) ? { ...k, arah: 'ltr' } : k });
+      }
     }
   }
-  return hasil;
+  tutupBlok();
+  return { potongan: hasil, arahBlok };
+}
+
+/**
+ * Susun ulang satu baris dari urutan logis ke urutan gambar (algoritma bidi sederhana): pada paragraf kiri-ke-kanan
+ * rangkaian kata Arab dibalik; pada paragraf kanan-ke-kiri seluruh baris dibalik kecuali rangkaian Latin, angka, dan rumus.
+ */
+function susunArah(b: Baris) {
+  if (b.arah === 'ltr' && !b.kotak.some(({ k }) => k.arah === 'rtl')) return;
+  type Token = { k: Kotak | null; w: number; arah?: 'ltr' | 'rtl' };
+  const token: Token[] = [];
+  b.kotak.forEach(({ x, k }, i) => {
+    const sebelum = b.kotak[i - 1];
+    const sela = sebelum ? x - (sebelum.x + sebelum.k.w) : 0;
+    if (sela > 0.01) token.push({ k: null, w: sela });
+    token.push({ k, w: k.w, arah: k.arah });
+  });
+  // Spasi dan tanda baca mengikuti arah tetangganya bila keduanya sama; selain itu arah paragraf.
+  const arah = token.map((t, i) => {
+    if (t.arah) return t.arah;
+    const kiri = token.slice(0, i).reverse().find((x) => x.arah)?.arah ?? b.arah;
+    const kanan = token.slice(i + 1).find((x) => x.arah)?.arah ?? b.arah;
+    return kiri === kanan ? kiri : b.arah;
+  });
+  const urut = token.map((t, i) => ({ t, a: arah[i] }));
+  const balikRangkaian = (daftar: typeof urut, a: 'ltr' | 'rtl') => {
+    const hasil: typeof urut = [];
+    for (let i = 0; i < daftar.length; ) {
+      if (daftar[i].a !== a) {
+        hasil.push(daftar[i++]);
+        continue;
+      }
+      let j = i;
+      while (j < daftar.length && daftar[j].a === a) j++;
+      hasil.push(...daftar.slice(i, j).reverse());
+      i = j;
+    }
+    return hasil;
+  };
+  const visual = b.arah === 'ltr' ? balikRangkaian(urut, 'rtl') : balikRangkaian([...urut].reverse(), 'ltr');
+  let x = 0;
+  b.kotak = [];
+  for (const { t } of visual) {
+    if (t.k) b.kotak.push({ x, k: t.k });
+    x += t.w;
+  }
 }
 
 export interface Baris {
@@ -440,24 +597,32 @@ export interface Baris {
   w: number;
   naik: number;
   turun: number;
+  /** Arah paragraf: baris kanan-ke-kiri rata kanan bila diminta rata kiri (rata awal). */
+  arah: 'ltr' | 'rtl';
+  /** Lebar tempat baris ditata. */
+  lebar: number;
 }
 
 /** Patah teks menjadi baris. Potongan tanpa spasi di antaranya (kata dan rumus) tidak dipisah. */
 export function tataParagraf(doc: jsPDF, teks: string, lebar: number, g: GayaTeks): Baris[] {
-  const potongan = potong(doc, teks, g);
+  const { potongan, arahBlok } = potong(doc, teks, g);
   const lebarSpasi = lebarTeks(doc, ' ', g);
   const baris: Baris[] = [];
-  let kini: Baris = { kotak: [], w: 0, naik: g.ukuran * 0.74, turun: g.ukuran * 0.24 };
+  let blok = 0;
+  const baru = (): Baris => ({ kotak: [], w: 0, naik: g.ukuran * 0.74, turun: g.ukuran * 0.24, arah: arahBlok[blok] ?? 'ltr', lebar });
+  let kini = baru();
   let adaSpasi = false;
   const tutup = () => {
+    susunArah(kini);
     baris.push(kini);
-    kini = { kotak: [], w: 0, naik: g.ukuran * 0.74, turun: g.ukuran * 0.24 };
+    kini = baru();
     adaSpasi = false;
   };
   let i = 0;
   while (i < potongan.length) {
     const p = potongan[i];
     if (p.jenis === 'baris') {
+      blok++;
       tutup();
       i++;
       continue;
@@ -470,7 +635,9 @@ export function tataParagraf(doc: jsPDF, teks: string, lebar: number, g: GayaTek
     const grup: Kotak[] = [];
     while (i < potongan.length && potongan[i].jenis === 'kotak') grup.push((potongan[i++] as { kotak: Kotak }).kotak);
     const wGrup = grup.reduce((a, k) => a + k.w, 0);
-    const sela = adaSpasi ? lebarSpasi : 0;
+    // Spasi di antara dua kata Arab mengikuti ukuran huruf Arab yang lebih besar.
+    const antarArab = grup[0].arah === 'rtl' && kini.kotak[kini.kotak.length - 1]?.k.arah === 'rtl';
+    const sela = adaSpasi ? lebarSpasi * (antarArab ? 1.6 : 1) : 0;
     if (kini.kotak.length && kini.w + sela + wGrup > lebar) tutup();
     let x = kini.w + (kini.kotak.length ? sela : 0);
     for (const k of grup) {
@@ -498,7 +665,8 @@ export function gambarParagraf(doc: jsPDF, baris: Baris[], x: number, y: number,
   let cy = y;
   for (const b of baris) {
     const dasar = cy + b.naik;
-    const geser = rata === 'tengah' ? (lebar - b.w) / 2 : rata === 'kanan' ? lebar - b.w : 0;
+    const ruang = lebar || b.lebar;
+    const geser = rata === 'tengah' ? (ruang - b.w) / 2 : rata === 'kanan' || b.arah === 'rtl' ? ruang - b.w : 0;
     for (const { x: kx, k } of b.kotak) k.gambar(doc, x + geser + kx, dasar);
     cy += tinggiBaris(b, g);
   }

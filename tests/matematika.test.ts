@@ -133,7 +133,7 @@ describe('korpus rumus SD-SMA', () => {
       .map((b) => `${keLatex(b)}\\par`)
       .join('\n');
     const dir = mkdtempSync(join(tmpdir(), 'gensoal-rumus-'));
-    const pembuka = readFileSync('src/ekspor/tex.ts', 'utf8').match(/\\\\usepackage\{amsmath,amssymb\}[\s\S]*?\\\\providecommand\{\\\\arc\}[^\n]*/)![0].replace(/\\\\/g, '\\');
+    const pembuka = readFileSync('src/ekspor/tex.ts', 'utf8').match(/\\\\usepackage\{amsmath,amssymb\}[\s\S]*?\\\\providecommand\{\\\\arc\}[^\n]*/)![0].replace(/\$\{[^}]*\}/g, '').replace(/\\\\/g, '\\');
     writeFileSync(join(dir, 'r.tex'), `\\documentclass{article}\n\\usepackage[utf8]{inputenc}\n\\usepackage[T1]{fontenc}\n\\usepackage{textcomp}\n${pembuka}\n\\begin{document}\n${isi}\n\\end{document}\n`);
     try {
       execFileSync('pdflatex', ['-interaction=nonstopmode', '-halt-on-error', 'r.tex'], { cwd: dir, stdio: 'pipe', timeout: 120000 });

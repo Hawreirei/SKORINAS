@@ -2,6 +2,7 @@ import type { HurufOpsi } from '../db/tipe';
 import { HURUF_KANAN } from '../db/tipe';
 import { keTikz } from '../gambar/tikz';
 import { escLatex, keLatex } from '../matematika/latex';
+import { POLA_ARAB } from './arab';
 import { opsiPerBaris, teksPenskoran, type ButirDok, type DokumenSoal } from './model';
 
 function lebarGambarCm(b: ButirDok): number {
@@ -73,13 +74,31 @@ export function buatTex(d: DokumenSoal): string {
   const en = d.inggris;
   const L = (id: string, inggris: string) => escLatex(en ? inggris : id);
   const bagian: string[] = [];
-  bagian.push(`% Kompilasi dengan pdflatex (Overleaf atau TeX lokal).
+  // pdflatex tidak dapat menulis huruf Arab; soal berhuruf Arab memakai XeLaTeX dengan polyglossia. FreeSerif dipilih karena
+  // harakat Amiri bergeser di XeTeX (diuji dengan Amiri 1.000 dan 1.003).
+  const arab = POLA_ARAB.test(JSON.stringify(d));
+  const pembuka = arab
+    ? `% Soal memuat huruf Arab: kompilasi dengan XeLaTeX (Overleaf: Menu > Compiler > XeLaTeX). Font FreeSerif tersedia di Overleaf dan TeX Live.
+\\documentclass[14pt,a4paper]{extarticle}
+\\usepackage{fontspec}`
+    : `% Kompilasi dengan pdflatex (Overleaf atau TeX lokal).
 \\documentclass[14pt,a4paper]{extarticle}
 \\usepackage[utf8]{inputenc}
 \\usepackage[T1]{fontenc}
 \\usepackage[${en ? 'english' : 'indonesian'}]{babel}
 \\usepackage{lmodern}
-\\usepackage{textcomp}
+\\usepackage{textcomp}`;
+  // polyglossia memuat bidi, yang harus dimuat sesudah paket lain.
+  const bahasaArab = arab
+    ? `\\usepackage{polyglossia}
+\\setdefaultlanguage{${en ? 'english' : 'bahasai'}}
+\\setotherlanguage{arabic}
+\\newfontfamily\\arabicfont[Script=Arabic,Scale=1.4]{FreeSerif}
+% Teks Arab dengan penyangga tinggi agar harakat tidak menimpa baris di atas atau di bawahnya.
+\\newcommand{\\arab}[1]{\\textarabic{\\rule[-0.6em]{0pt}{1.8em}#1}}
+`
+    : '';
+  bagian.push(`${pembuka}
 \\usepackage[a4paper,margin=2cm]{geometry}
 \\usepackage{amsmath,amssymb}
 \\usepackage{multicol}
@@ -89,7 +108,7 @@ export function buatTex(d: DokumenSoal): string {
 \\usetikzlibrary{arrows.meta}
 \\usepackage{needspace}
 \\usepackage{xcolor}
-% Perintah yang dikenali GenSoal tetapi tidak ada di LaTeX dasar.
+${bahasaArab}% Perintah yang dikenali GenSoal tetapi tidak ada di LaTeX dasar.
 \\providecommand{\\degree}{^{\\circ}}
 \\providecommand{\\bm}[1]{\\boldsymbol{#1}}
 \\providecommand{\\mathbbm}[1]{\\mathbb{#1}}

@@ -169,6 +169,7 @@ describe('PDF', () => {
       fontTebal: readFileSync('public/fonts/LiberationSerif-Bold.ttf').toString('base64'),
       fontMiring: readFileSync('public/fonts/LiberationSerif-Italic.ttf').toString('base64'),
       fontSimbol: readFileSync('public/fonts/GenSoalSimbol.ttf').toString('base64'),
+      fontArab: readFileSync('public/fonts/GenSoalArab.ttf').toString('base64'),
       gambarSvg: async (doc, _svg, x, y, w, h) => {
         gambar++;
         doc.rect(x, y, w, h);
@@ -191,6 +192,7 @@ describe('PDF', () => {
         fontTebal: readFileSync('public/fonts/LiberationSerif-Bold.ttf').toString('base64'),
         fontMiring: readFileSync('public/fonts/LiberationSerif-Italic.ttf').toString('base64'),
         fontSimbol: readFileSync('public/fonts/GenSoalSimbol.ttf').toString('base64'),
+        fontArab: readFileSync('public/fonts/GenSoalArab.ttf').toString('base64'),
         gambarSvg: async () => {
           gambar++;
         },
@@ -254,6 +256,7 @@ describe('bentuk baru dan skor per bentuk', () => {
       fontTebal: readFileSync('public/fonts/LiberationSerif-Bold.ttf').toString('base64'),
       fontMiring: readFileSync('public/fonts/LiberationSerif-Italic.ttf').toString('base64'),
       fontSimbol: readFileSync('public/fonts/GenSoalSimbol.ttf').toString('base64'),
+      fontArab: readFileSync('public/fonts/GenSoalArab.ttf').toString('base64'),
       gambarSvg: async () => {},
     };
     for (const b of ['soal', 'kunci'] as JenisBerkas[]) {

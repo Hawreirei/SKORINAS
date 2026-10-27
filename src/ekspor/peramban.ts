@@ -46,7 +46,7 @@ async function gambarSvgPdf(doc: jsPDF, svg: string, x: number, y: number, w: nu
   }
 }
 
-let fontCache: Promise<{ fontBiasa: string; fontTebal: string; fontMiring: string; fontSimbol: string }> | null = null;
+let fontCache: Promise<{ fontBiasa: string; fontTebal: string; fontMiring: string; fontSimbol: string; fontArab: string }> | null = null;
 
 async function keBase64(url: string): Promise<string> {
   const r = await fetch(url);
@@ -59,8 +59,8 @@ async function keBase64(url: string): Promise<string> {
 
 function muatFont() {
   const f = (nama: string) => keBase64(`${import.meta.env.BASE_URL}fonts/${nama}.ttf`);
-  fontCache ??= Promise.all([f('LiberationSerif-Regular'), f('LiberationSerif-Bold'), f('LiberationSerif-Italic'), f('GenSoalSimbol')])
-    .then(([fontBiasa, fontTebal, fontMiring, fontSimbol]) => ({ fontBiasa, fontTebal, fontMiring, fontSimbol }))
+  fontCache ??= Promise.all([f('LiberationSerif-Regular'), f('LiberationSerif-Bold'), f('LiberationSerif-Italic'), f('GenSoalSimbol'), f('GenSoalArab')])
+    .then(([fontBiasa, fontTebal, fontMiring, fontSimbol, fontArab]) => ({ fontBiasa, fontTebal, fontMiring, fontSimbol, fontArab }))
     .catch((e) => {
       fontCache = null;
       throw e;

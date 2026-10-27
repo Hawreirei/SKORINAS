@@ -26,6 +26,7 @@ import {
 import type { HurufOpsi } from '../db/tipe';
 import { HURUF_KANAN } from '../db/tipe';
 import { uraiTeks, type Simpul } from '../matematika/teks';
+import { dominanArab, pisahArab } from './arab';
 import { FONT_DOKUMEN, UKURAN_DOKUMEN, kolomOpsi, teksPenskoran, type BagianDok, type ButirDok, type DokumenSoal } from './model';
 
 /** Ubah SVG ke PNG (Word memerlukan gambar raster). Disuntikkan agar modul ini dapat diuji tanpa kanvas. */
@@ -33,6 +34,10 @@ export type UbahPng = (svg: string, lebarPx: number, tinggiPx: number) => Promis
 
 // Font dan ukuran diatur sekali pada gaya dokumen, bukan per paragraf, agar suntingan guru tetap konsisten.
 const UKURAN = UKURAN_DOKUMEN * 2; // setengah poin
+// Huruf Arab (ukuran aksara kompleks, w:szCs) 16 pt agar harakat terbaca; huruf Latin tetap 12 pt.
+const UKURAN_ARAB = 32;
+// Tanda kiri-ke-kanan di kedua sisi "3." dan "A." di paragraf kanan-ke-kiri, agar titik tetap di kanan angka atau huruf.
+const LRM = '\u200E';
 const LEBAR_ISI = 9638; // twip: A4 dengan tepi 2 cm
 const INDEN = 425; // nomor rata kiri, isi soal menggantung 0,75 cm
 const GARIS = { style: BorderStyle.SINGLE, size: 6, color: '000000' } as const;
@@ -151,7 +156,12 @@ export function teksKeRun(teks: string, gaya: { tebal?: boolean; miring?: boolea
   for (const g of uraiTeks(teks)) {
     if (g.jenis === 'teks') {
       g.s.split('\n').forEach((bagian, i) => {
-        hasil.push(new TextRun({ text: bagian, bold: gaya.tebal, italics: gaya.miring, break: i > 0 ? 1 : undefined }));
+        // Bagian Arab ditandai kanan-ke-kiri (w:rtl) agar Word memakai aturan dan ukuran aksara kompleks.
+        const potong = pisahArab(bagian);
+        (potong.length ? potong : [{ s: '', arab: false }]).forEach((pt, j) => {
+          const awal = j === 0 && i > 0 ? 1 : undefined;
+          hasil.push(new TextRun({ text: pt.s, bold: gaya.tebal, italics: gaya.miring, break: awal, ...(pt.arab ? { rightToLeft: true, language: { bidirectional: 'ar-SA' } } : {}) }));
+        });
       });
     } else hasil.push(new OMath({ children: simpulKeOmml(g.simpul) }));
   }
@@ -160,6 +170,37 @@ export function teksKeRun(teks: string, gaya: { tebal?: boolean; miring?: boolea
 
 function p(anak: ParagraphChild[], opsi: ConstructorParameters<typeof Paragraph>[0] & object = {}): Paragraph {
   return new Paragraph({ spacing: { after: 60 }, ...opsi, children: anak });
+}
+
+/** Paragraf kanan-ke-kiri (w:bidi) untuk teks yang dominan Arab: rata kanan, nomor dan indentasi di kanan. */
+function arah(teks: string): { bidirectional?: true } {
+  return dominanArab(teks) ? { bidirectional: true } : {};
+}
+
+/**
+ * Pokok soal: nomor, lalu teks. Baris yang arahnya berbeda dari baris sebelumnya (mis. ayat di soal berbahasa
+ * Indonesia) menjadi paragraf tersendiri agar ayat rata kanan.
+ */
+function paragrafPokok(nomor: number, pokok: string, keepNextAkhir: boolean): Paragraph[] {
+  const blok: { teks: string; rtl: boolean }[] = [];
+  for (const baris of pokok.split('\n')) {
+    const rtl = dominanArab(baris) || (!baris.trim() && !!blok.length && blok[blok.length - 1].rtl);
+    const akhir = blok[blok.length - 1];
+    if (akhir && akhir.rtl === rtl) akhir.teks += `\n${baris}`;
+    else blok.push({ teks: baris, rtl });
+  }
+  return blok.map((b, i) => {
+    const keepNext = i < blok.length - 1 || keepNextAkhir;
+    if (i === 0) {
+      const tab = [{ type: TabStopType.LEFT, position: INDEN }];
+      return b.rtl
+        ? p([tr(`${LRM}${nomor}.${LRM}\t`), ...teksKeRun(b.teks)], { bidirectional: true, indent: { start: INDEN, hanging: INDEN }, tabStops: tab, spacing: { before: 160, after: 60 }, keepNext, keepLines: true })
+        : p([tr(`${nomor}.\t`), ...teksKeRun(b.teks)], { indent: { left: INDEN, hanging: INDEN }, tabStops: tab, spacing: { before: 160, after: 60 }, keepNext, keepLines: true });
+    }
+    return b.rtl
+      ? p(teksKeRun(b.teks), { bidirectional: true, indent: { end: INDEN }, spacing: { after: 60 }, keepNext, keepLines: true })
+      : p(teksKeRun(b.teks), { indent: { left: INDEN }, spacing: { after: 60 }, keepNext, keepLines: true });
+  });
 }
 
 function tr(text: string, o: { tebal?: boolean; miring?: boolean; kecil?: boolean; warna?: string } = {}): TextRun {
@@ -228,7 +269,7 @@ async function butirKeParagraf(b: ButirDok, d: DokumenSoal, ubahPng: UbahPng): P
   const hasil: (Paragraph | Table)[] = [];
   const t = b.tempat;
   const adaSesudah = !!isi.opsi || !!isi.pasangan || t.jenis !== 'tidak_ada' || !!b.gambar;
-  hasil.push(p([tr(`${b.nomor}.\t`), ...teksKeRun(isi.pokok)], { indent: { left: INDEN, hanging: INDEN }, tabStops: [{ type: TabStopType.LEFT, position: INDEN }], spacing: { before: 160, after: 60 }, keepNext: true, keepLines: true }));
+  hasil.push(...paragrafPokok(b.nomor, isi.pokok, true));
   if (isi.terjemahan?.pokok) hasil.push(p(teksKeRun(isi.terjemahan.pokok, { miring: true }), { indent: { left: INDEN }, keepNext: adaSesudah }));
   const g = await gambarButir(b, ubahPng);
   if (g) hasil.push(g);
@@ -236,14 +277,17 @@ async function butirKeParagraf(b: ButirDok, d: DokumenSoal, ubahPng: UbahPng): P
     const huruf = Object.keys(isi.opsi).sort() as HurufOpsi[];
     const kolom = kolomOpsi(b);
     const langkah = Math.floor((LEBAR_ISI - INDEN) / 2);
+    // Opsi soal berbahasa Arab ditata dari kanan: A paling kanan.
+    const rtl = dominanArab(isi.pokok);
     for (let mulai = 0; mulai < huruf.length; mulai += kolom) {
       const anak: ParagraphChild[] = [];
       huruf.slice(mulai, mulai + kolom).forEach((h, i) => {
         if (i) anak.push(tr('\t'));
-        anak.push(tr(`${h}.  `), ...teksKeRun(isi.opsi![h] ?? ''));
+        anak.push(tr(rtl ? `${LRM}${h}.${LRM}  ` : `${h}.  `), ...teksKeRun(isi.opsi![h] ?? ''));
       });
       const terakhir = mulai + kolom >= huruf.length;
-      hasil.push(p(anak, { indent: { left: INDEN }, keepNext: !terakhir, keepLines: true, spacing: { after: 40 }, tabStops: kolom > 1 ? [{ type: TabStopType.LEFT, position: INDEN + langkah }] : [] }));
+      const tab = kolom > 1 ? [{ type: TabStopType.LEFT, position: INDEN + langkah }] : [];
+      hasil.push(p(anak, { ...(rtl ? { bidirectional: true, indent: { start: INDEN } } : { indent: { left: INDEN } }), keepNext: !terakhir, keepLines: true, spacing: { after: 40 }, tabStops: tab }));
     }
   }
   if (isi.pasangan) hasil.push(tabelJodoh(isi.pasangan));
@@ -319,13 +363,14 @@ function tabelPenskoran(d: DokumenSoal): (Paragraph | Table)[] {
   ];
 }
 
-function selTabel(anak: ParagraphChild[], lebar: number, o: { tengah?: boolean; tebal?: boolean; abu?: boolean; keepNext?: boolean } = {}): TableCell {
+function selTabel(anak: ParagraphChild[], lebar: number, o: { tengah?: boolean; tebal?: boolean; abu?: boolean; keepNext?: boolean; rtl?: boolean } = {}): TableCell {
   return new TableCell({
     width: { size: lebar, type: WidthType.DXA },
     verticalAlign: VerticalAlign.CENTER,
     margins: { top: 60, bottom: 60, left: 100, right: 100 },
     shading: o.abu ? { fill: 'F2F2F2' } : undefined,
-    children: [p(anak, { alignment: o.tengah ? AlignmentType.CENTER : AlignmentType.LEFT, spacing: { after: 0 }, keepNext: o.keepNext })],
+    // Paragraf kanan-ke-kiri tanpa perataan eksplisit: rata awal, yaitu kanan.
+    children: [p(anak, { ...(o.tengah ? { alignment: AlignmentType.CENTER } : o.rtl ? { bidirectional: true } : { alignment: AlignmentType.LEFT }), spacing: { after: 0 }, keepNext: o.keepNext })],
   });
 }
 
@@ -348,7 +393,7 @@ function tabelBenarSalah(bg: BagianDok, d: DokumenSoal): Table {
             cantSplit: true,
             children: [
               selTabel([tr(String(b.nomor))], lebar[0], { tengah: true }),
-              selTabel([...teksKeRun(b.soal.isi_json.pokok), ...(b.soal.isi_json.terjemahan?.pokok ? [tr(' / '), ...teksKeRun(b.soal.isi_json.terjemahan.pokok, { miring: true })] : [])], lebar[1]),
+              selTabel([...teksKeRun(b.soal.isi_json.pokok), ...(b.soal.isi_json.terjemahan?.pokok ? [tr(' / '), ...teksKeRun(b.soal.isi_json.terjemahan.pokok, { miring: true })] : [])], lebar[1], { rtl: dominanArab(b.soal.isi_json.pokok) }),
               ...(lingkari ? [selTabel([tr(d.inggris ? 'T        F' : 'B        S')], lebar[2], { tengah: true })] : [selTabel([tr(kotakKecil)], lebar[2], { tengah: true }), selTabel([tr(kotakKecil)], lebar[3], { tengah: true })]),
             ],
           }),
@@ -361,7 +406,7 @@ function sel(teks: string, opsi: { tebal?: boolean; lebar: number; rumus?: boole
   return new TableCell({
     width: { size: opsi.lebar, type: WidthType.PERCENTAGE },
     margins: { top: 60, bottom: 60, left: 80, right: 80 },
-    children: [p(opsi.rumus ? teksKeRun(teks, { tebal: opsi.tebal }) : [tr(teks, { tebal: opsi.tebal })], { spacing: { after: 0 } })],
+    children: [p(opsi.rumus ? teksKeRun(teks, { tebal: opsi.tebal }) : [tr(teks, { tebal: opsi.tebal })], { spacing: { after: 0 }, ...(opsi.rumus ? arah(teks) : {}) })],
   });
 }
 
@@ -440,8 +485,9 @@ export async function buatDocx(d: DokumenSoal, ubahPng: UbahPng): Promise<Blob> 
   if (d.berkas === 'kunci') {
     isi.push(...kepalaLampiran(d, L('KUNCI JAWABAN', 'ANSWER KEY')));
     for (const k of d.kunci) {
-      isi.push(p([tr(`${k.nomor}.\t`), ...teksKeRun(k.teks)], { indent: { left: INDEN, hanging: INDEN }, tabStops: [{ type: TabStopType.LEFT, position: INDEN }], spacing: { after: 40 }, keepNext: !!k.rubrik?.length }));
-      if (k.rubrik?.length) k.rubrik.forEach((r, i) => isi.push(p([tr('– '), ...teksKeRun(r)], { indent: { left: INDEN * 2 }, spacing: { after: 20 }, keepNext: i < k.rubrik!.length - 1 })));
+      const rtlKunci = dominanArab(k.teks);
+      isi.push(p([tr(rtlKunci ? `${LRM}${k.nomor}.${LRM}\t` : `${k.nomor}.\t`), ...teksKeRun(k.teks)], { ...(rtlKunci ? { bidirectional: true, indent: { start: INDEN, hanging: INDEN } } : { indent: { left: INDEN, hanging: INDEN } }), tabStops: [{ type: TabStopType.LEFT, position: INDEN }], spacing: { after: 40 }, keepNext: !!k.rubrik?.length }));
+      if (k.rubrik?.length) k.rubrik.forEach((r, i) => isi.push(p([tr('– '), ...teksKeRun(r)], { ...arah(r), indent: dominanArab(r) ? { start: INDEN * 2 } : { left: INDEN * 2 }, spacing: { after: 20 }, keepNext: i < k.rubrik!.length - 1 })));
     }
     if (d.penskoran) isi.push(...tabelPenskoran(d));
     // Pembahasan ikut berkas kunci jawaban, mulai di halaman baru.
@@ -449,7 +495,7 @@ export async function buatDocx(d: DokumenSoal, ubahPng: UbahPng): Promise<Blob> 
       isi.push(p([tr(L('PEMBAHASAN', 'WORKED SOLUTIONS'), { tebal: true })], { pageBreakBefore: true, alignment: AlignmentType.CENTER, spacing: { after: 200 } }));
       for (const pb of d.pembahasan) {
         isi.push(p([tr(`${pb.nomor}.`, { tebal: true })], { spacing: { before: 120, after: 20 }, keepNext: true }));
-        pb.langkah.forEach((l, i) => isi.push(p([tr('– '), ...teksKeRun(l)], { indent: { left: INDEN }, spacing: { after: 20 }, keepNext: i < pb.langkah.length - 1 })));
+        pb.langkah.forEach((l, i) => isi.push(p([tr('– '), ...teksKeRun(l)], { ...arah(l), indent: dominanArab(l) ? { start: INDEN } : { left: INDEN }, spacing: { after: 20 }, keepNext: i < pb.langkah.length - 1 })));
       }
     }
   }
@@ -489,9 +535,9 @@ export async function buatDocx(d: DokumenSoal, ubahPng: UbahPng): Promise<Blob> 
     title: d.berkas === 'soal' ? d.judul : `${d.judul} · ${d.berkas === 'kunci' ? 'Kunci jawaban' : 'Kisi-kisi'}`,
     styles: {
       default: {
-        document: { run: { font: FONT_DOKUMEN, size: UKURAN }, paragraph: { spacing: { line: 276 } } },
+        document: { run: { font: FONT_DOKUMEN, size: UKURAN, sizeComplexScript: UKURAN_ARAB }, paragraph: { spacing: { line: 276 } } },
       },
-      paragraphStyles: [{ id: 'Normal', name: 'Normal', run: { font: FONT_DOKUMEN, size: UKURAN } }],
+      paragraphStyles: [{ id: 'Normal', name: 'Normal', run: { font: FONT_DOKUMEN, size: UKURAN, sizeComplexScript: UKURAN_ARAB } }],
     },
     sections: [{ properties: { page: { margin: { top: 1134, bottom: 1134, left: 1134, right: 1134 } } }, children: isi }],
   });
