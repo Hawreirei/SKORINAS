@@ -1,7 +1,8 @@
 import { jsPDF } from 'jspdf';
 import type { HurufOpsi } from '../db/tipe';
 import { HURUF_KANAN } from '../db/tipe';
-import { FONT_PDF, gambarParagraf, lebarTeks, tataParagraf, tinggiParagraf, type Baris, type GayaTeks } from './pdf-tata';
+import { FONT_ARAB, FONT_PDF, FONT_SIMBOL, gambarParagraf, lebarTeks, tataParagraf, tinggiParagraf, type Baris, type GayaTeks } from './pdf-tata';
+import { dominanArab } from './arab';
 import { UKURAN_DOKUMEN, kolomOpsi, teksPenskoran, type BagianDok, type ButirDok, type DokumenSoal } from './model';
 
 /** Gambar SVG vektor ke PDF. Di peramban memakai svg2pdf.js; disuntikkan agar dapat diuji. */
@@ -11,6 +12,10 @@ export interface AsetPdf {
   fontBiasa: string;
   fontTebal: string;
   fontMiring: string;
+  /** public/fonts/GenSoalSimbol.ttf: simbol matematika yang tidak ada di Liberation Serif. */
+  fontSimbol: string;
+  /** public/fonts/GenSoalArab.ttf: huruf Arab (potongan Amiri). */
+  fontArab: string;
   gambarSvg: GambarSvg;
 }
 
@@ -61,10 +66,10 @@ class Penulis {
 }
 
 /** Gambar label pendek (nomor, huruf opsi) sejajar garis dasar baris pertama paragraf di sebelahnya. */
-function labelSejajar(doc: jsPDF, label: string, x: number, y: number, lebar: number, gaya: GayaTeks, rujukan: Baris[]) {
+function labelSejajar(doc: jsPDF, label: string, x: number, y: number, lebar: number, gaya: GayaTeks, rujukan: Baris[], rata: 'kiri' | 'kanan' = 'kiri') {
   const t = tataParagraf(doc, label, lebar, gaya);
   const geser = (rujukan[0]?.naik ?? t[0].naik) - t[0].naik;
-  gambarParagraf(doc, t, x, y + geser, gaya);
+  gambarParagraf(doc, t, x, y + geser, gaya, rata, lebar);
 }
 
 function ukuranGambar(b: ButirDok, lebarTersedia: number): { w: number; h: number } {
@@ -98,24 +103,28 @@ async function butir(p: Penulis, b: ButirDok, d: DokumenSoal, x: number, y: numb
   const gaya = g();
   const lebarIsi = LEBAR - INDEN;
   const xi = x + INDEN;
+  // Soal berbahasa Arab ditata dari kanan: nomor di kanan, opsi A paling kanan.
+  const rtl = dominanArab(isi.pokok);
+  const cermin = (xl: number, w: number) => (rtl ? 2 * x + LEBAR - xl - w : xl);
+  const rataLabel = rtl ? 'kanan' : 'kiri';
   let cy = y;
   const pokok = tataParagraf(doc, isi.pokok, lebarIsi, gaya);
   if (gambar) {
-    labelSejajar(doc, `${b.nomor}.`, x, cy, INDEN, gaya, pokok);
-    gambarParagraf(doc, pokok, xi, cy, gaya);
+    labelSejajar(doc, `${b.nomor}.`, cermin(x, INDEN), cy, INDEN, gaya, pokok, rataLabel);
+    gambarParagraf(doc, pokok, cermin(xi, lebarIsi), cy, gaya);
   }
   cy += tinggiParagraf(pokok, gaya);
   if (isi.terjemahan?.pokok) {
     const gt = g({ miring: true, warna: ABU });
     const t = tataParagraf(doc, isi.terjemahan.pokok, lebarIsi, gt);
-    if (gambar) gambarParagraf(doc, t, xi, cy, gt);
+    if (gambar) gambarParagraf(doc, t, cermin(xi, lebarIsi), cy, gt);
     cy += tinggiParagraf(t, gt);
   }
   // Gambar diletakkan di bawah teks soal.
   if (b.gambar && b.svg) {
     const u = ukuranGambar(b, lebarIsi);
     cy += 6;
-    if (gambar) await p.aset.gambarSvg(doc, b.svg, xi, cy, u.w, u.h);
+    if (gambar) await p.aset.gambarSvg(doc, b.svg, cermin(xi, u.w), cy, u.w, u.h);
     cy += u.h + 6;
   }
   if (isi.opsi) {
@@ -127,11 +136,12 @@ async function butir(p: Penulis, b: ButirDok, d: DokumenSoal, x: number, y: numb
       let tinggi = 0;
       huruf.slice(mulai, mulai + kolom).forEach((h, i) => {
         const lebarLabel = 20;
-        const t = tataParagraf(doc, isi.opsi![h] ?? '', lebarSel - lebarLabel - 8, gaya);
+        const lebarTeksOpsi = lebarSel - lebarLabel - 8;
+        const t = tataParagraf(doc, isi.opsi![h] ?? '', lebarTeksOpsi, gaya);
         const sx = xi + i * lebarSel;
         if (gambar) {
-          labelSejajar(doc, `${h}.`, sx, cy, lebarLabel, gaya, t);
-          gambarParagraf(doc, t, sx + lebarLabel, cy, gaya);
+          labelSejajar(doc, `${h}.`, cermin(sx, lebarLabel), cy, lebarLabel, gaya, t, rataLabel);
+          gambarParagraf(doc, t, cermin(sx + lebarLabel, lebarTeksOpsi), cy, gaya);
         }
         tinggi = Math.max(tinggi, tinggiParagraf(t, gaya));
       });
@@ -410,6 +420,10 @@ export async function buatPdf(d: DokumenSoal, aset: AsetPdf): Promise<Blob> {
   doc.addFont('LiberationSerif-Bold.ttf', FONT_PDF, 'bold');
   doc.addFileToVFS('LiberationSerif-Italic.ttf', aset.fontMiring);
   doc.addFont('LiberationSerif-Italic.ttf', FONT_PDF, 'italic');
+  doc.addFileToVFS('GenSoalSimbol.ttf', aset.fontSimbol);
+  doc.addFont('GenSoalSimbol.ttf', FONT_SIMBOL, 'normal');
+  doc.addFileToVFS('GenSoalArab.ttf', aset.fontArab);
+  doc.addFont('GenSoalArab.ttf', FONT_ARAB, 'normal');
   doc.setProperties({ title: d.berkas === 'soal' ? d.judul : `${d.judul} · ${d.berkas === 'kunci' ? 'Kunci jawaban' : 'Kisi-kisi'}`, subject: `${d.mapel} kelas ${d.kelas}`, creator: 'GenSoal' });
   const p = new Penulis(doc, aset);
   const L = (id: string, en: string) => (d.inggris ? en : id);

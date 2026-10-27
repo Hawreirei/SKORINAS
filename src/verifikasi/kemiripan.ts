@@ -1,7 +1,9 @@
 import { teksPolos } from '../matematika/teks';
 
 function trigram(s: string): Set<string> {
-  const t = ` ${teksPolos(s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim()} `;
+  // Harakat, tatwil, dan tanda diakritik diabaikan (NFKD memisahkannya dari huruf), juga hamzah pada alif (أ → ا).
+  const polos = teksPolos(s).normalize('NFKD').replace(/[\p{M}\u0640]/gu, '');
+  const t = ` ${polos.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim()} `;
   const hasil = new Set<string>();
   for (let i = 0; i + 3 <= t.length; i++) hasil.add(t.slice(i, i + 3));
   return hasil;

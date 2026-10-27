@@ -21,7 +21,7 @@
 | `src/verifikasi/` | Skema isi_json, pemeriksa hitung (mathjs), kaidah butir, kemiripan, sebaran kunci |
 | `src/paket/` | Paket mata pelajaran (aturan penulisan, contoh, templat, pemeriksa) |
 | `src/gambar/` | Primitif, SVG, TikZ, sepuluh templat Matematika SD |
-| `src/matematika/` | Pengurai teks bercampur LaTeX dan serialisasi LaTeX |
-| `src/ekspor/` | Model dokumen dan pakem penulisan soal, Word (docx), PDF (jsPDF + svg2pdf, Liberation Serif), LaTeX |
+| `src/matematika/` | Pengurai teks bercampur LaTeX dan serialisasi LaTeX (korpus uji: `tests/korpus-rumus.txt`) |
+| `src/ekspor/` | Model dokumen dan pakem penulisan soal, Word (docx), PDF (jsPDF + svg2pdf, Liberation Serif + GenSoal Simbol + GenSoal Arab), LaTeX, teks Arab (arah dan penyambung huruf, `arab.ts`) |
 | `src/bantuan/` | Daftar video dan langkah teks |
 | `src/komponen/` | Elemen antarmuka bersama |

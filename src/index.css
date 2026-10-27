@@ -270,6 +270,17 @@ input[type='range'] {
   accent-color: var(--gs-main);
 }
 
+/* Huruf Arab lebih besar agar harakat terbaca; baris ayat di tengah teks berbahasa Indonesia rata kanan. */
+.teks-soal .teks-arab {
+  font-family: 'Traditional Arabic', 'Noto Naskh Arabic', 'Amiri', 'Times New Roman', serif;
+  font-size: 1.3em;
+  line-height: 1.7;
+}
+.teks-soal .baris-arab {
+  display: block;
+  text-align: right;
+}
+
 /* Teks soal dengan rumus KaTeX. */
 .teks-soal .katex {
   font-size: 1.08em;

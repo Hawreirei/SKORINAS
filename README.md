@@ -9,7 +9,7 @@ Rancangan lengkap: [`docs/RANCANGAN.md`](docs/RANCANGAN.md) · Keputusan dan per
 ```bash
 npm install
 npm run dev          # pengembangan
-npm test             # uji unit, golden set, ekspor (kompilasi .tex bila pdflatex terpasang)
+npm test             # uji unit, golden set, ekspor (kompilasi .tex bila pdflatex atau xelatex terpasang)
 npm run typecheck
 npm run build        # cek tipe, bundel PWA ke dist/
 npx vite preview --port 4173 & npm run e2e   # alur ujung ke ujung dengan penyedia AI palsu
@@ -46,4 +46,4 @@ Kebijakan keamanan konten juga disisipkan sebagai `<meta>` saat build, karena Gi
 
 ## Struktur
 
-Lihat peta modul di [`AGENTS.md`](AGENTS.md). Golden set ada di `data/golden/`, font PDF (Liberation Serif, OFL) di `public/fonts/`, registri model di `public/models/registri.json` (diperbarui oleh `npm run uji-model -- --tulis`).
+Lihat peta modul di [`AGENTS.md`](AGENTS.md). Golden set ada di `data/golden/`, font PDF (Liberation Serif, OFL; GenSoal Simbol dari DejaVu Sans dan GenSoal Arab dari Amiri, dibuat dengan `scripts/buat-font-simbol.py` dan `scripts/buat-font-arab.py`) di `public/fonts/`, registri model di `public/models/registri.json` (diperbarui oleh `npm run uji-model -- --tulis`).
