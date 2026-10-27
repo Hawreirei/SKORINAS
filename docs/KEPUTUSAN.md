@@ -257,3 +257,15 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | Teks kecil | Pratinjau kop di Profil kini 16 px. Pengecualian yang disengaja: miniatur halaman A4 di pratinjau Unduh (8,5–10 px) karena berupa gambar halaman; tampilan cetak ukuran penuh tersedia di Menu lanjutan | Teks layar minimal 16 px |
 | Copy | Tidak ditemukan lagi Setujui, Disetujui, Mohon cek dulu, "Langkah n dari 3", atau kata generate/preset/ekspor di label. RPM dan RPD hanya di Pengaturan lanjutan dengan petunjuk akibat. Label proses: "Menyiapkan…", "Menjeda…", "Membuat berkas…", "Menguji…" | Aturan "Bahasa di layar" |
 | Mode gelap di e2e | Tangkapan `14-buat-gelap`, `14-paket-gelap`, `14-unduh-gelap` lewat `emulateMedia({ colorScheme: 'dark' })` dengan tema Ikuti sistem | Mode gelap diperiksa setiap kali e2e dijalankan |
+
+## Pilihan model disederhanakan (27 Oktober, permintaan guru)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Masalah | Setelah kunci diuji, semua model dari daftar langsung penyedia ikut tampil di pilihan model, termasuk model gambar, suara, embedding, dan model yang belum dikenal registri | Guru bingung; sebagian model tidak dapat menulis soal sama sekali |
+| Jenis model | `jenisModel(id)` di `src/ai/registri.ts` mengelompokkan model menjadi teks, gambar (termasuk video), suara, dan lainnya (embedding, moderasi, penyaring, OCR, pencarian, model lama non-obrolan) dari pola id. Tanpa perubahan skema: `model_tersedia` tetap daftar id | Penyedia tidak seragam memberi keterangan modalitas; id cukup untuk memilah |
+| Disarankan | Model teks dari registri berstatus direkomendasikan atau stabil yang tersedia untuk kunci itu. Bila penyedia hanya punya model pratinjau di registri (OpenRouter), model pratinjau registri itulah yang disarankan | Mengikuti lencana registri; tidak ada penyedia yang pilihannya kosong |
+| Pilihan model | Hanya model disarankan. Tombol "Tampilkan model lain (n)" menambah kelompok "Model teks lain (belum diuji)". Bila model lain dipilih, muncul peringatan dan kelompoknya tetap terlihat. Model gambar, suara, dan lainnya tidak pernah dapat dipilih | Permintaan guru: yang tidak disarankan disembunyikan, muncul bila mau opsi lanjutan |
+| Model cadangan | Hanya model disarankan, ditambah pilihan tersimpan bila sebelumnya memilih model lain | Daftar tetap pendek |
+| Semua model | Daftar di Pengaturan lanjutan dikelompokkan: Teks · disarankan, Teks · lainnya, Gambar dan video, Suara, Lainnya, masing-masing dengan keterangan dipakai atau tidak | Guru tetap dapat melihat semua model yang dimiliki kuncinya |
+| Uji | `tests/registri.test.ts` (jenis model dan pengelompokan); e2e memeriksa model gambar, suara, dan embedding tidak muncul di pilihan model dan model teks lain muncul lewat tombol | |

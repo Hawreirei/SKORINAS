@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { adaptorUntuk } from '../ai';
 import { batasEfektif, kunciModel, permintaanHariIni } from '../ai/laju';
 import { GalatAi } from '../ai/galat';
-import { gabungModel, penyediaDari, type BarisModel } from '../ai/registri';
+import { gabungModel, penyediaDari, type BarisModel, type JenisModel } from '../ai/registri';
 import type { PenyediaRegistri, StatusModel } from '../ai/tipe';
 import { db } from '../db/skema';
 import { simpanProfil } from '../db/profil';
@@ -20,6 +20,19 @@ import { useJudulHalaman, useProfil, useRegistri } from './kait';
 import { formatBiaya } from './ringkas';
 
 const LABEL_STATUS: Record<StatusModel, string> = { direkomendasikan: 'direkomendasikan', stabil: 'stabil', pratinjau: 'pratinjau', usang: 'usang' };
+
+/** Kelompok di daftar "Semua model": model teks disarankan, model teks lain, lalu jenis yang tidak dipakai. */
+const KELOMPOK: { judul: string; ket: string; cocok: (m: BarisModel) => boolean }[] = [
+  { judul: 'Teks · disarankan', ket: 'Dipakai untuk menulis soal.', cocok: (m) => m.disarankan },
+  { judul: 'Teks · lainnya', ket: 'Dapat dipilih lewat "Tampilkan model lain", tetapi belum diuji untuk membuat soal.', cocok: (m) => !m.disarankan && m.jenis === 'teks' },
+  ...(
+    [
+      ['gambar', 'Gambar dan video', 'Tidak dipakai. Gambar soal dibuat GenSoal sendiri.'],
+      ['suara', 'Suara', 'Tidak dipakai.'],
+      ['lain', 'Lainnya', 'Untuk pencarian, penyaringan, dan keperluan lain. Tidak dipakai.'],
+    ] as [JenisModel, string, string][]
+  ).map(([jenis, judul, ket]) => ({ judul, ket, cocok: (m: BarisModel) => m.jenis === jenis })),
+];
 
 function modelTersedia(p: PenyediaRegistri, k: KunciApi | undefined): BarisModel[] {
   if (k?.status !== 'berfungsi') return [];
@@ -50,6 +63,7 @@ export default function PengaturanAi() {
   const [lihat, setLihat] = useState(false);
   const [menguji, setMenguji] = useState(false);
   const [gantiKunci, setGantiKunci] = useState(false);
+  const [lihatLain, setLihatLain] = useState(false);
   const aktif: PenyediaId = pilih ?? profil.penyedia_utama ?? 'gemini';
   const kunci = daftarKunci?.find((k) => k.penyedia === aktif);
   const modelDipilih = profil.penyedia_utama === aktif ? profil.model_utama ?? '' : '';
@@ -65,6 +79,12 @@ export default function PengaturanAi() {
 
   const p = penyediaDari(reg, aktif)!;
   const tersedia = modelTersedia(p, kunci);
+  const semuaModel = gabungModel(p, kunci?.status === 'berfungsi' ? kunci.model_tersedia.map((id) => ({ id, nama: id })) : null);
+  const disarankan = tersedia.filter((m) => m.disarankan);
+  const teksLain = tersedia.filter((m) => !m.disarankan && m.jenis === 'teks');
+  const dipilihLain = teksLain.some((m) => m.id === modelDipilih);
+  // Tanpa model disarankan (penyedia hanya mengirim model yang belum dikenal), model lain langsung tampil.
+  const tampilLain = lihatLain || dipilihLain || !disarankan.length;
   const siap = !!(profil.penyedia_utama && profil.model_utama && daftarKunci?.some((k) => k.penyedia === profil.penyedia_utama && k.status === 'berfungsi'));
   const namaUtama = profil.penyedia_utama ? penyediaDari(reg, profil.penyedia_utama) : undefined;
   const labelUtama = namaUtama?.model.find((m) => m.id === profil.model_utama)?.label ?? profil.model_utama;
@@ -75,7 +95,12 @@ export default function PengaturanAi() {
   };
 
   // Model cadangan boleh dari penyedia mana pun yang kuncinya berfungsi.
-  const pilihanCadangan = reg.penyedia.flatMap((x) => modelTersedia(x, daftarKunci?.find((k) => k.penyedia === x.id)).map((m) => ({ penyedia: x, m })));
+  // Hanya model disarankan, ditambah pilihan tersimpan bila dulu memilih model lain.
+  const pilihanCadangan = reg.penyedia.flatMap((x) =>
+    modelTersedia(x, daftarKunci?.find((k) => k.penyedia === x.id))
+      .filter((m) => m.disarankan || (profil.penyedia_cadangan === x.id && profil.model_cadangan === m.id))
+      .map((m) => ({ penyedia: x, m })),
+  );
 
   async function simpanDanUji() {
     const k = teksKunci.trim();
@@ -87,7 +112,7 @@ export default function PengaturanAi() {
       await db.kunci_api.put({ penyedia: aktif, kunci: k, diuji_pada: Date.now(), status: 'berfungsi', pesan: `Kunci berfungsi · ${model.length} model tersedia`, model_tersedia: model.map((m) => m.id) });
       // Pilih model terbaik secara otomatis bila belum ada model utama di penyedia ini.
       if (profil.penyedia_utama !== aktif || !profil.model_utama) {
-        const saran = gabungModel(p, model).find((m) => m.tersedia && m.registri);
+        const saran = gabungModel(p, model).find((m) => m.tersedia && m.disarankan);
         if (saran) await simpanProfil({ penyedia_utama: aktif, model_utama: saran.id });
       }
       pesan('Kunci berfungsi. GenSoal siap dipakai.');
@@ -113,17 +138,37 @@ export default function PengaturanAi() {
   const lewatBatasBiaya = biayaHariIni !== null && biayaHariIni > profil.batas_biaya_usd;
 
   const ringkas = siap && !gantiKunci;
+  const opsiModel = (m: BarisModel) => (
+    <option key={m.id} value={m.id}>
+      {m.label}
+      {m.registri && m.status !== 'stabil' ? ` (${LABEL_STATUS[m.status]})` : ''}
+      {m.registri?.catatan ? ` · ${m.registri.catatan}` : ''}
+    </option>
+  );
   const pilihModel = (
-    <PilihanDaftar id="model-utama" label="Model yang dipakai" petunjuk="Pilihan pertama biasanya sudah tepat. Setiap soal tetap dihitung ulang oleh GenSoal, model mana pun yang dipakai." value={modelDipilih} onChange={(e) => simpanProfil({ penyedia_utama: aktif, model_utama: e.target.value })}>
-      {!modelDipilih ? <option value="">Pilih model…</option> : null}
-      {tersedia.map((m) => (
-        <option key={m.id} value={m.id}>
-          {m.label}
-          {m.status !== 'stabil' ? ` (${LABEL_STATUS[m.status]})` : ''}
-          {m.registri?.catatan ? ` · ${m.registri.catatan}` : ''}
-        </option>
-      ))}
-    </PilihanDaftar>
+    <div>
+      <PilihanDaftar id="model-utama" label="Model yang dipakai" petunjuk="Pilihan pertama biasanya sudah tepat. Setiap soal tetap dihitung ulang oleh GenSoal, model mana pun yang dipakai." value={modelDipilih} onChange={(e) => simpanProfil({ penyedia_utama: aktif, model_utama: e.target.value })}>
+        {!modelDipilih ? <option value="">Pilih model…</option> : null}
+        {tampilLain ? (
+          <>
+            {disarankan.length ? <optgroup label="Disarankan">{disarankan.map(opsiModel)}</optgroup> : null}
+            <optgroup label="Model teks lain (belum diuji)">{teksLain.map(opsiModel)}</optgroup>
+          </>
+        ) : (
+          disarankan.map(opsiModel)
+        )}
+      </PilihanDaftar>
+      {dipilihLain ? (
+        <Pemberitahuan nada="awas" className="mt-3">
+          Model ini belum diuji untuk membuat soal. Soalnya bisa kurang sesuai TP; pilih model yang disarankan bila hasilnya kurang baik.
+        </Pemberitahuan>
+      ) : null}
+      {teksLain.length && disarankan.length && !dipilihLain ? (
+        <button type="button" className="mt-2 min-h-11 text-base font-bold text-utama hover:underline" aria-expanded={lihatLain} aria-controls="model-utama" onClick={() => setLihatLain((l) => !l)}>
+          {lihatLain ? 'Sembunyikan model lain' : `Tampilkan model lain (${teksLain.length})`}
+        </button>
+      ) : null}
+    </div>
   );
 
   return (
@@ -218,7 +263,7 @@ export default function PengaturanAi() {
               </div>
               {kunci && kunci.status !== 'belum' && !menguji ? (
                 <div id="kunci-hasil" className="mt-4">
-                  {kunci.status === 'berfungsi' ? <Pemberitahuan nada="berhasil">Kunci berfungsi · {kunci.model_tersedia.length} model tersedia.</Pemberitahuan> : <Pemberitahuan nada="galat">{kunci.pesan}</Pemberitahuan>}
+                  {kunci.status === 'berfungsi' ? <Pemberitahuan nada="berhasil">Kunci berfungsi · {disarankan.length ? `${disarankan.length} model disarankan` : `${teksLain.length} model tersedia`}.</Pemberitahuan> : <Pemberitahuan nada="galat">{kunci.pesan}</Pemberitahuan>}
                 </div>
               ) : null}
               <details className="mt-4">
@@ -295,17 +340,30 @@ export default function PengaturanAi() {
 
             <details>
               <summary className="min-h-11 cursor-pointer py-2 text-base font-bold text-redup">Semua model {p.nama}</summary>
-              <ul className="mt-2 border-t border-garis text-base">
-                {gabungModel(p, kunci?.status === 'berfungsi' ? kunci.model_tersedia.map((id) => ({ id, nama: id })) : null).map((m) => (
-                  <li key={m.id} className="flex flex-wrap justify-between gap-x-4 gap-y-1 border-b border-garis py-3">
-                    <span className={m.tersedia === false ? 'text-redup' : ''}>{m.label}</span>
-                    <span className="text-base text-redup">
-                      {LABEL_STATUS[m.status]}
-                      {m.tersedia === false ? ' · tidak tersedia' : ''}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <p className="mt-1 text-base text-redup">Hanya model teks yang dapat menulis soal. Model gambar, suara, dan lainnya tidak ditampilkan di pilihan model.</p>
+              {KELOMPOK.map((k) => {
+                const isi = semuaModel.filter(k.cocok);
+                if (!isi.length) return null;
+                return (
+                  <section key={k.judul} className="mt-5">
+                    <h3 className="text-base font-bold text-tinta">
+                      {k.judul} <span className="font-normal text-redup tabular-nums">({isi.length})</span>
+                    </h3>
+                    <p className="text-base text-redup">{k.ket}</p>
+                    <ul className="mt-2 border-t border-garis text-base">
+                      {isi.map((m) => (
+                        <li key={m.id} className="flex flex-wrap justify-between gap-x-4 gap-y-1 border-b border-garis py-3">
+                          <span className={m.tersedia === false ? 'break-all text-redup' : 'break-all'}>{m.label}</span>
+                          <span className="text-base text-redup">
+                            {m.jenis !== 'teks' ? '' : m.registri ? LABEL_STATUS[m.status] : 'belum diuji'}
+                            {m.tersedia === false ? ' · tidak tersedia' : ''}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                );
+              })}
             </details>
           </div>
         </BagianLipat>

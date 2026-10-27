@@ -106,7 +106,7 @@ function butirPalsu(bentuk) {
 
   await page.route('https://generativelanguage.googleapis.com/**', async (route) => {
     const url = route.request().url();
-    if (url.includes('/models?')) return route.fulfill({ json: { models: [{ name: 'models/gemini-3.8-flash', displayName: 'Gemini 3.8 Flash', supportedGenerationMethods: ['generateContent'] }, { name: 'models/gemini-3.5-flash', displayName: 'Gemini 3.5 Flash', supportedGenerationMethods: ['generateContent'] }] } });
+    if (url.includes('/models?')) return route.fulfill({ json: { models: [{ name: 'models/gemini-3.8-flash', displayName: 'Gemini 3.8 Flash', supportedGenerationMethods: ['generateContent'] }, { name: 'models/gemini-3.5-flash', displayName: 'Gemini 3.5 Flash', supportedGenerationMethods: ['generateContent'] }, ...['gemini-9-eksperimen', 'gemini-2.5-flash-image', 'gemini-2.5-flash-preview-tts', 'gemini-embedding-001'].map((id) => ({ name: `models/${id}`, displayName: id, supportedGenerationMethods: ['generateContent'] }))] } });
     // Permintaan ke-4: batas per menit gaya Gemini; aplikasi harus menunggu lalu lanjut sendiri.
     jumlahGenerate++;
     waktuKirim.push(Date.now());
@@ -142,6 +142,14 @@ function butirPalsu(bentuk) {
   await page.fill('#kunci', 'AIzaUJI-palsu-1234567890');
   await page.getByRole('button', { name: 'Simpan dan uji' }).click();
   await page.waitForSelector('text=Siap dipakai');
+  // Pilihan model hanya berisi model disarankan; model teks lain muncul lewat tombol, model gambar/suara tidak pernah.
+  const opsiModel = () => page.locator('#model-utama option').allTextContents();
+  if ((await opsiModel()).some((t) => /eksperimen|image|tts|embedding/.test(t))) galat.push('pilihan model memuat model yang tidak disarankan');
+  await page.getByRole('button', { name: 'Tampilkan model lain (1)' }).click();
+  const semuaOpsi = await opsiModel();
+  if (!semuaOpsi.some((t) => t.includes('gemini-9-eksperimen'))) galat.push('model teks lain tidak muncul setelah "Tampilkan model lain"');
+  if (semuaOpsi.some((t) => /image|tts|embedding/.test(t))) galat.push('model gambar, suara, atau embedding dapat dipilih');
+  await page.getByRole('button', { name: 'Sembunyikan model lain' }).click();
   await page.click('text=Pengaturan lanjutan');
   await page.selectOption('#model-cadangan', { index: 2 });
   await foto('02-pengaturan-ai');
