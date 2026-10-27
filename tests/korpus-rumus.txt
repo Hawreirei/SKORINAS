@@ -1,0 +1,18 @@
+$\log_{2} 8 + \ln e$ | $\sin 30^\circ + \cos^2 x = \tan 45^{\circ}$ | $\sec x \csc x \cot x \arcsin x$
+$\lim_{x \to 2} \frac{x^2-4}{x-2}$ | $\lim\limits_{x\to\infty} \frac{1}{x}$ | $\sum_{i=1}^{n} i = \frac{n(n+1)}{2}$ | $\displaystyle\sum_{k=1}^{5} 2k$
+$\int_{0}^{2} x^2 \, dx$ | $\int x\,\mathrm{d}x$ | $\iint$ | $\oint$ | $\prod_{i=1}^{3} i$ | $\binom{5}{2}$ | $\dbinom{n}{r}$ | ${5 \choose 2}$ | ${}^{5}C_{2}$
+$\sqrt[3]{27}$ | $|x - 3| < 5$ | $\left| -5 \right|$ | $\lvert x \rvert$ | $\lfloor 2,7 \rfloor$ | $\lceil x \rceil$ | $\left\{ x \mid x > 0 \right\}$
+$A \cup B \cap C$ | $A \subseteq B$ | $A \supseteq B$ | $x \in \mathbb{R}$ | $\mathbb{N} \subset \mathbb{Z} \subset \mathbb{Q}$ | $\emptyset = \varnothing$
+$\forall x \exists y$ | $p \Rightarrow q$ | $p \Leftrightarrow q$ | $p \iff q$ | $p \implies q$ | $\neg p \wedge q \vee r$ | $p \land q \lor \lnot r$
+$\therefore x = 2$ | $\because$ | $a \equiv b \pmod{5}$ | $17 \bmod 5$ | $\gcd(12, 18)$ | $\operatorname{KPK}(4,6)$ | $\max \min \det(A)$
+$\overline{AB} = 5\text{ cm}$ | $\angle ABC = 90^\circ$ | $\measuredangle ABC$ | $\triangle ABC \cong \triangle PQR$ | $AB \parallel CD \perp EF$
+$\overrightarrow{AB}$ | $\vec{v} = \vec{a} + \vec{b}$ | $\hat{i} + \hat{j}$ | $\bar{x}$ | $\widehat{ABC}$ | $\overset{\frown}{AB}$ | $\stackrel{?}{=}$
+$\dot{x} \ddot{x} \tilde{x}$ | $\pi \approx 3{,}14$ | $30\degree$ | $10\,\mathrm{m/s}$ | $9{,}8\ \text{m/s}^2$ | $25\%$ | $\sigma^2 \mu$
+$\begin{bmatrix} 1 & 2 \end{bmatrix}$ | $A^{T}$ | $\begin{vmatrix} 2 & 1 \\ 3 & 4 \end{vmatrix}$ | $\left[\begin{array}{cc|c} 1 & 2 & 3 \end{array}\right]$
+$\begin{cases} 2x + y = 5 \\ x - y = 1 \end{cases}$ | $\begin{aligned} 2x &= 6 \\ x &= 3 \end{aligned}$ | $\begin{array}{r} 125 \\ \hline 162 \end{array}$
+$a \ne b \le c \ge d \leqslant e \geqslant f \ll g \gg h$ | $\pm \mp \times \div \cdot \ast \star$ | $\infty$ | $\to \leftarrow \leftrightarrow \mapsto \longrightarrow \uparrow \downarrow$
+$\ldots \cdots \vdots \ddots$ | $\alpha \beta \gamma \delta \epsilon \varepsilon \zeta \eta \theta \vartheta \iota \kappa \lambda \mu \nu \xi \pi \rho \sigma \tau \upsilon \phi \varphi \chi \psi \omega$
+$\Gamma \Delta \Theta \Lambda \Xi \Pi \Sigma \Phi \Psi \Omega$ | $\propto \partial \nabla \square \checkmark \ell \circ$ | $\boxed{5}$ | $\underline{\quad}$
+$\textbf{x} \mathbf{v} \boldsymbol{\alpha} \mathit{x} \textit{catatan} \mathcal{A}$ | $\big( x \big) \Big[ x \Big] \bigg\{ x \bigg\}$
+$\left( \frac{1}{2} \right)^2$ | $\left\langle a, b \right\rangle$ | $\left. \frac{dy}{dx} \right|_{x=1}$ | $\hspace{1cm}$ | $\color{red}{x}$ | $\textcolor{blue}{y}$
+$\phantom{0}$ | $x\!+\!y$ | $a\;b\:c$ | $a \over b$ | $\not= \not\in$ | $\cfrac{1}{1+\cfrac{1}{2}}$ | $10^{-3}$ | $(x+1)^2$ | $x^{2}_{1}$

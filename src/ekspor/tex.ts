@@ -88,6 +88,17 @@ export function buatTex(d: DokumenSoal): string {
 \\usepackage{tikz}
 \\usetikzlibrary{arrows.meta}
 \\usepackage{needspace}
+\\usepackage{xcolor}
+% Perintah yang dikenali GenSoal tetapi tidak ada di LaTeX dasar.
+\\providecommand{\\degree}{^{\\circ}}
+\\providecommand{\\bm}[1]{\\boldsymbol{#1}}
+\\providecommand{\\mathbbm}[1]{\\mathbb{#1}}
+\\providecommand{\\mathup}[1]{\\mathrm{#1}}
+\\providecommand{\\mathscr}[1]{\\mathcal{#1}}
+\\providecommand{\\cosec}{\\operatorname{cosec}}
+\\providecommand{\\overarc}[1]{\\overset{\\frown}{#1}}
+\\providecommand{\\wideparen}[1]{\\overset{\\frown}{#1}}
+\\providecommand{\\arc}[1]{\\overset{\\frown}{#1}}
 % Pecahan bertumpuk berukuran penuh agar mudah dibaca siswa.
 \\renewcommand{\\frac}[2]{\\dfrac{#1}{#2}}
 \\linespread{1.15}

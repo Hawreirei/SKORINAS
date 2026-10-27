@@ -46,4 +46,4 @@ Kebijakan keamanan konten juga disisipkan sebagai `<meta>` saat build, karena Gi
 
 ## Struktur
 
-Lihat peta modul di [`AGENTS.md`](AGENTS.md). Golden set ada di `data/golden/`, font PDF (Liberation Serif, OFL) di `public/fonts/`, registri model di `public/models/registri.json` (diperbarui oleh `npm run uji-model -- --tulis`).
+Lihat peta modul di [`AGENTS.md`](AGENTS.md). Golden set ada di `data/golden/`, font PDF (Liberation Serif, OFL; GenSoal Simbol dari DejaVu Sans, dibuat dengan `scripts/buat-font-simbol.py`) di `public/fonts/`, registri model di `public/models/registri.json` (diperbarui oleh `npm run uji-model -- --tulis`).

@@ -1,5 +1,6 @@
 import type { Bentuk, GambarSoal, HurufOpsi, IsiSoal, JenisUraian, Kesukaran, Level, Pernyataan, Verifikasi } from '../db/tipe';
 import { HURUF_KANAN, hurufKunci, petaJodoh, teksJodoh } from '../db/tipe';
+import { PERINTAH_RAWAN_ESCAPE } from '../matematika/teks';
 
 export class GalatSkema extends Error {
   constructor(public readonly daftar: string[]) {
@@ -19,7 +20,7 @@ export function ekstrakJson(teks: string): unknown {
   // sedangkan \times, \frac, \right, dan \neq terbaca sebagai tab, form feed, CR, dan baris baru. Garis miringnya digandakan.
   const isi = s
     .slice(awal, akhir + 1)
-    .replace(/\\(\\|["/]|u[0-9a-fA-F]{4}|n(?!(?:eq|e|ot|otin|abla)(?![a-zA-Z]))|[bfrt](?![a-zA-Z]))|\\/g, (_, sah: string | undefined) => (sah ? '\\' + sah : '\\\\'));
+    .replace(new RegExp(`\\\\(\\\\|["/]|u[0-9a-fA-F]{4}|n(?!(?:${PERINTAH_RAWAN_ESCAPE.n})(?![a-zA-Z]))|[bfrt](?![a-zA-Z]))|\\\\`, 'g'), (_, sah: string | undefined) => (sah ? '\\' + sah : '\\\\'));
   try {
     return JSON.parse(isi);
   } catch {

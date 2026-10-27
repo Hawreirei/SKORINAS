@@ -6,9 +6,19 @@ function esc(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
 }
 
+// Perintah yang dikenali pengurai rumus (Word, PDF) tetapi tidak ada di KaTeX.
+const MAKRO: Record<string, string> = {
+  '\\overarc': '\\overset{\\frown}{#1}',
+  '\\arc': '\\overset{\\frown}{#1}',
+  '\\wideparen': '\\overset{\\frown}{#1}',
+  '\\mathbbm': '\\mathbb{#1}',
+  '\\mathup': '\\mathrm{#1}',
+  '\\textdegree': '{^\\circ}',
+};
+
 export function teksKeHtml(teks: string): string {
   return uraiTeks(teks)
-    .map((g) => (g.jenis === 'teks' ? esc(g.s) : katex.renderToString(g.latex, { throwOnError: false, strict: 'ignore', output: 'html', trust: false })))
+    .map((g) => (g.jenis === 'teks' ? esc(g.s) : katex.renderToString(g.latex, { throwOnError: false, strict: 'ignore', output: 'html', trust: false, macros: { ...MAKRO } })))
     .join('');
 }
 

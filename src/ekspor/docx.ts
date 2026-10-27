@@ -53,15 +53,77 @@ function matriksKeOmml(n: Extract<Simpul, { t: 'matriks' }>): XmlComponent {
   const baris = n.baris.map((b) => elemen('m:mr', Array.from({ length: kolom }, (_, i) => elemen('m:e', simpulKeOmml(b[i] ?? [])))));
   const m = elemen('m:m', [sifat, ...baris]);
   if (!n.kiri && !n.kanan) return m;
-  return elemen('m:d', [elemen('m:dPr', [elemen('m:begChr', [], n.kiri), elemen('m:endChr', [], n.kanan)]), elemen('m:e', [m])]);
+  return kurungOmml(n.kiri, n.kanan, [m]);
+}
+
+/** Tanda kurung yang membesar mengikuti isinya (m:d). */
+function kurungOmml(kiri: string, kanan: string, isi: AnakMath[]): XmlComponent {
+  return elemen('m:d', [elemen('m:dPr', [elemen('m:begChr', [], kiri), elemen('m:endChr', [], kanan)]), elemen('m:e', isi)]);
+}
+
+// Operator besar yang batasnya di bawah dan di atas; selebihnya (integral) di samping kanan.
+const BATAS_BAWAH_ATAS = new Set(['∑', '∏', '∐', '⋃', '⋂', '⊕', '⊗']);
+// Hiasan berupa tanda panjang di atas (m:groupChr), bukan aksen satu huruf (m:acc).
+const TANDA_KELOMPOK = new Set(['→', '←', '↔', '⌒']);
+
+function hiasanKeOmml(n: Extract<Simpul, { t: 'hiasan' }>): XmlComponent {
+  const e = elemen('m:e', simpulKeOmml(n.isi));
+  switch (n.jenis) {
+    case 'garis_atas':
+    case 'garis_bawah':
+      return elemen('m:bar', [elemen('m:barPr', [elemen('m:pos', [], n.jenis === 'garis_atas' ? 'top' : 'bot')]), e]);
+    case 'kotak':
+      return elemen('m:borderBox', [e]);
+    case 'aksen':
+      if (TANDA_KELOMPOK.has(n.tanda)) return elemen('m:groupChr', [elemen('m:groupChrPr', [elemen('m:chr', [], n.tanda), elemen('m:pos', [], 'top'), elemen('m:vertJc', [], 'bot')]), e]);
+      return elemen('m:acc', [elemen('m:accPr', [elemen('m:chr', [], n.tanda)]), e]);
+  }
+}
+
+function besarKeOmml(n: Extract<Simpul, { t: 'besar' }>): XmlComponent {
+  const sifat = [
+    elemen('m:chr', [], n.op),
+    elemen('m:limLoc', [], BATAS_BAWAH_ATAS.has(n.op) ? 'undOvr' : 'subSup'),
+    ...(n.bawah ? [] : [elemen('m:subHide', [], 1)]),
+    ...(n.atas ? [] : [elemen('m:supHide', [], 1)]),
+  ];
+  return elemen('m:nary', [elemen('m:naryPr', sifat), elemen('m:sub', simpulKeOmml(n.bawah ?? [])), elemen('m:sup', simpulKeOmml(n.atas ?? [])), elemen('m:e', simpulKeOmml(n.isi))]);
+}
+
+function batasKeOmml(n: Extract<Simpul, { t: 'batas' }>): XmlComponent {
+  let hasil: AnakMath[] = simpulKeOmml(n.basis);
+  if (n.bawah) hasil = [elemen('m:limLow', [elemen('m:e', hasil), elemen('m:lim', simpulKeOmml(n.bawah))])];
+  if (n.atas) hasil = [elemen('m:limUpp', [elemen('m:e', hasil), elemen('m:lim', simpulKeOmml(n.atas))])];
+  return hasil[0];
+}
+
+function teksKeOmml(n: Extract<Simpul, { t: 'teks' }>, berikut: Simpul | undefined): AnakMath {
+  if (n.mentah) return new MathRun(n.s.slice(1));
+  switch (n.gaya) {
+    case 'tegak':
+      // Seperti tombol "Normal Text" di Word: tegak, berfont dokumen, spasinya tetap.
+      return new MathRun({ text: n.s, normalText: true });
+    case 'tebal':
+      return new MathRun({ text: n.s, style: 'bold' });
+    case 'fungsi': {
+      // sin x, log 2: beri spasi tipis bila argumen langsung menempel.
+      const tempel = berikut && !(berikut.t === 'teks' && /^[\s(\[|]/.test(berikut.s)) && !(berikut.t === 'kurung' && berikut.kiri === '(');
+      return new MathRun({ text: n.s + (tempel ? ' ' : ''), style: 'plain' });
+    }
+    default:
+      return new MathRun(n.s);
+  }
 }
 
 function simpulKeOmml(daftar: Simpul[]): AnakMath[] {
-  return daftar.map((n): AnakMath => {
+  // Wadah kosong (mis. dasar {}^5C_2) diisi spasi nol-lebar agar Word tidak menampilkan kotak tempat isian.
+  if (!daftar.length) return [new MathRun('\u200B')];
+  return daftar.map((n, i): AnakMath => {
     switch (n.t) {
       case 'teks':
-        return new MathRun(n.mentah ? n.s.slice(1) : n.s);
+        return teksKeOmml(n, daftar[i + 1]);
       case 'pecahan':
+        if (n.tanpaGaris) return elemen('m:f', [elemen('m:fPr', [elemen('m:type', [], 'noBar')]), elemen('m:num', simpulKeOmml(n.atas)), elemen('m:den', simpulKeOmml(n.bawah))]);
         return new MathFraction({ numerator: simpulKeOmml(n.atas), denominator: simpulKeOmml(n.bawah) });
       case 'pangkat':
         return new MathSuperScript({ children: simpulKeOmml(n.basis), superScript: simpulKeOmml(n.atas) });
@@ -71,6 +133,14 @@ function simpulKeOmml(daftar: Simpul[]): AnakMath[] {
         return new MathRadical({ children: simpulKeOmml(n.isi), ...(n.derajat ? { degree: simpulKeOmml(n.derajat) } : {}) });
       case 'matriks':
         return matriksKeOmml(n);
+      case 'kurung':
+        return kurungOmml(n.kiri, n.kanan, simpulKeOmml(n.isi));
+      case 'hiasan':
+        return hiasanKeOmml(n);
+      case 'besar':
+        return besarKeOmml(n);
+      case 'batas':
+        return batasKeOmml(n);
     }
   });
 }

@@ -350,7 +350,7 @@ Aturan templat: ukuran dasar tetap (viewBox seragam), hitam putih yang terbaca s
 | Format | Cara (di peramban) | Catatan |
 | --- | --- | --- |
 | Word (.docx) | docx-js dari model soal; rumus dalam subset LaTeX menjadi Office Math asli, gambar PNG | Times New Roman 12 diatur pada gaya dokumen (bukan per paragraf); pakem penulisan soal; kunci, pembahasan, kisi-kisi di halaman terpisah |
-| PDF | jsPDF dengan penata huruf sendiri (pecahan bertumpuk), gambar soal vektor lewat svg2pdf.js | Liberation Serif 12 pt ditanam (metrik sama dengan Times New Roman; Times New Roman berlisensi dan tidak boleh disebarkan bersama aplikasi); pakem penulisan soal |
+| PDF | jsPDF dengan penata huruf sendiri (pecahan bertumpuk), gambar soal vektor lewat svg2pdf.js | Liberation Serif 12 pt ditanam (metrik sama dengan Times New Roman; Times New Roman berlisensi dan tidak boleh disebarkan bersama aplikasi), simbol matematika dari GenSoal Simbol (potongan DejaVu Sans); pakem penulisan soal |
 | LaTeX (.tex), menu lanjutan | Templat .tex dari model soal; gambar diterjemahkan ke TikZ | Berkas teks untuk dikompilasi sendiri; templat sendiri (14 pt, dua kolom untuk soal sederhana) yang tidak memengaruhi Word dan PDF |
 | Cetak, menu lanjutan | Tampilan cetak peramban sebagai cadangan bila PDF gagal | Pakem dan font yang sama dengan Word dan PDF |
 | xlsx (V1) | Kisi-kisi dan rekap | Satu lembar per dokumen |

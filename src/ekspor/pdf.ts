@@ -1,7 +1,7 @@
 import { jsPDF } from 'jspdf';
 import type { HurufOpsi } from '../db/tipe';
 import { HURUF_KANAN } from '../db/tipe';
-import { FONT_PDF, gambarParagraf, lebarTeks, tataParagraf, tinggiParagraf, type Baris, type GayaTeks } from './pdf-tata';
+import { FONT_PDF, FONT_SIMBOL, gambarParagraf, lebarTeks, tataParagraf, tinggiParagraf, type Baris, type GayaTeks } from './pdf-tata';
 import { UKURAN_DOKUMEN, kolomOpsi, teksPenskoran, type BagianDok, type ButirDok, type DokumenSoal } from './model';
 
 /** Gambar SVG vektor ke PDF. Di peramban memakai svg2pdf.js; disuntikkan agar dapat diuji. */
@@ -11,6 +11,8 @@ export interface AsetPdf {
   fontBiasa: string;
   fontTebal: string;
   fontMiring: string;
+  /** public/fonts/GenSoalSimbol.ttf: simbol matematika yang tidak ada di Liberation Serif. */
+  fontSimbol: string;
   gambarSvg: GambarSvg;
 }
 
@@ -410,6 +412,8 @@ export async function buatPdf(d: DokumenSoal, aset: AsetPdf): Promise<Blob> {
   doc.addFont('LiberationSerif-Bold.ttf', FONT_PDF, 'bold');
   doc.addFileToVFS('LiberationSerif-Italic.ttf', aset.fontMiring);
   doc.addFont('LiberationSerif-Italic.ttf', FONT_PDF, 'italic');
+  doc.addFileToVFS('GenSoalSimbol.ttf', aset.fontSimbol);
+  doc.addFont('GenSoalSimbol.ttf', FONT_SIMBOL, 'normal');
   doc.setProperties({ title: d.berkas === 'soal' ? d.judul : `${d.judul} · ${d.berkas === 'kunci' ? 'Kunci jawaban' : 'Kisi-kisi'}`, subject: `${d.mapel} kelas ${d.kelas}`, creator: 'GenSoal' });
   const p = new Penulis(doc, aset);
   const L = (id: string, en: string) => (d.inggris ? en : id);
