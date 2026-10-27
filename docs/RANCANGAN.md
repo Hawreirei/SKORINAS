@@ -313,6 +313,7 @@ Aplikasi tidak terikat pada satu model. Setiap penyedia memiliki satu adaptor de
 
 - Daftar model langsung: setelah kunci ditempel, aplikasi memanggil endpoint daftar model penyedia sehingga hanya model yang benar-benar dapat dipakai yang tampil.
 - Registri bawaan: berkas JSON di repositori berisi label, tingkat harga (gratis, murah, premium), dan status model (direkomendasikan, stabil, pratinjau, usang). Pratinjau diberi peringatan, usang disembunyikan.
+- Jenis model: daftar langsung penyedia juga memuat model gambar, video, suara, embedding, dan penyaring. GenSoal hanya memakai model teks (gambar soal digambar dari templat), sehingga model dikelompokkan menurut jenisnya. Pilihan model hanya menampilkan model teks yang disarankan; model teks lain muncul lewat "Tampilkan model lain"; jenis lain hanya terlihat di daftar "Semua model" pada Pengaturan lanjutan.
 - Lencana kelayakan: sebuah model baru mendapat status direkomendasikan hanya bila lolos golden set (kunci benar diloloskan, kunci salah ditolak, JSON sesuai skema) pada mapel yang dibuka.
 - Cadangan antarmodel: bila model mencapai batas penyedia, aplikasi menawarkan model lain yang kuncinya sudah dimiliki guru (F-18).
 - Pembaruan registri: dikerjakan lewat rilis aplikasi; setiap rilis memeriksa model usang dan menandai model baru sebagai pratinjau sampai diuji.
