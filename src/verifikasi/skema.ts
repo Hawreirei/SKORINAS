@@ -15,8 +15,13 @@ export function ekstrakJson(teks: string): unknown {
   const awal = s.indexOf('{');
   const akhir = s.lastIndexOf('}');
   if (awal < 0 || akhir <= awal) throw new GalatSkema(['Keluaran model bukan objek JSON.']);
+  // Model kadang menulis LaTeX dengan satu garis miring: \sqrt dan \left bukan escape JSON yang sah,
+  // sedangkan \times, \frac, \right, dan \neq terbaca sebagai tab, form feed, CR, dan baris baru. Garis miringnya digandakan.
+  const isi = s
+    .slice(awal, akhir + 1)
+    .replace(/\\(\\|["/]|u[0-9a-fA-F]{4}|n(?!(?:eq|e|ot|otin|abla)(?![a-zA-Z]))|[bfrt](?![a-zA-Z]))|\\/g, (_, sah: string | undefined) => (sah ? '\\' + sah : '\\\\'));
   try {
-    return JSON.parse(s.slice(awal, akhir + 1));
+    return JSON.parse(isi);
   } catch {
     throw new GalatSkema(['Keluaran model bukan JSON yang sah.']);
   }

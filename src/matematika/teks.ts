@@ -7,7 +7,8 @@ export type Simpul =
   | { t: 'pecahan'; atas: Simpul[]; bawah: Simpul[] }
   | { t: 'pangkat'; basis: Simpul[]; atas: Simpul[] }
   | { t: 'indeks'; basis: Simpul[]; bawah: Simpul[] }
-  | { t: 'akar'; isi: Simpul[]; derajat: Simpul[] | null };
+  | { t: 'akar'; isi: Simpul[]; derajat: Simpul[] | null }
+  | { t: 'matriks'; kiri: string; kanan: string; baris: Simpul[][][] };
 
 export type Segmen = { jenis: 'teks'; s: string } | { jenis: 'mat'; latex: string; simpul: Simpul[] };
 
@@ -19,11 +20,17 @@ const SIMBOL: Record<string, string> = {
   parallel: '∥', cong: '≅', sim: '∼', in: '∈', notin: '∉', subset: '⊂', cup: '∪', cap: '∩', emptyset: '∅',
   lt: '<', gt: '>', colon: ':', '%': '%', '{': '{', '}': '}', '$': '$', '#': '#', '&': '&', _: '_',
   ',': ' ', ';': ' ', ':': ' ', '!': '', quad: ' ', qquad: '  ', ' ': ' ', left: '', right: '', displaystyle: '',
-  textstyle: '', mid: '|', vert: '|', cdotp: '·', bullet: '•', prime: '′',
+  textstyle: '', mid: '|', vert: '|', cdotp: '·', bullet: '•', prime: '′', '\\': ' ', hline: '',
 };
 
 const PERINTAH_TEKS = new Set(['text', 'textrm', 'mathrm', 'textbf', 'mathbf', 'textit', 'mathit', 'mbox', 'operatorname', 'overline', 'underline', 'boxed']);
 const PERINTAH_PECAHAN = new Set(['frac', 'dfrac', 'tfrac', 'cfrac']);
+
+// Lingkungan matriks: tanda kurung kiri dan kanan.
+const KURUNG_MATRIKS: Record<string, [string, string]> = {
+  matrix: ['', ''], array: ['', ''], pmatrix: ['(', ')'], bmatrix: ['[', ']'], Bmatrix: ['{', '}'],
+  vmatrix: ['|', '|'], Vmatrix: ['‖', '‖'], cases: ['{', ''], smallmatrix: ['', ''], aligned: ['', ''],
+};
 
 class PenguraiLatex {
   private i = 0;
@@ -33,10 +40,14 @@ class PenguraiLatex {
     return this.daftar(null);
   }
 
+  /** penutup '&' berarti isi sel matriks: berhenti sebelum &, \\\\, atau \\end. */
   private daftar(penutup: string | null): Simpul[] {
     const hasil: Simpul[] = [];
     while (this.i < this.s.length) {
       const c = this.s[this.i];
+      if (penutup === '&' && (c === '&' || this.s.startsWith('\\\\', this.i) || /^\\end(?![a-zA-Z])/.test(this.s.slice(this.i, this.i + 5)))) {
+        return gabungTeks(hasil);
+      }
       if (penutup && c === penutup) {
         this.i++;
         return gabungTeks(hasil);
@@ -68,6 +79,51 @@ class PenguraiLatex {
     while (this.s[this.i] === ' ') this.i++;
   }
 
+  private namaLingkungan(): string {
+    this.lewatiSpasi();
+    const m = this.s.slice(this.i).match(/^\{([a-zA-Z]+\*?)\}/);
+    if (!m) return '';
+    this.i += m[0].length;
+    return m[1].replace('*', '');
+  }
+
+  /** \\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}, juga bmatrix, vmatrix, array, dan cases. */
+  private matriks(): Simpul {
+    const nama = this.namaLingkungan();
+    if (nama === 'array') {
+      // Lewati penentu kolom, misalnya {cc|c}.
+      this.lewatiSpasi();
+      if (this.s[this.i] === '{') {
+        const tutup = this.s.indexOf('}', this.i);
+        this.i = tutup < 0 ? this.s.length : tutup + 1;
+      }
+    }
+    const [kiri, kanan] = KURUNG_MATRIKS[nama] ?? ['', ''];
+    const baris: Simpul[][][] = [];
+    let sel: Simpul[][] = [];
+    while (this.i < this.s.length) {
+      sel.push(rapikanSel(this.daftar('&')));
+      if (this.s[this.i] === '&') {
+        this.i++;
+        continue;
+      }
+      baris.push(sel);
+      sel = [];
+      if (this.s.startsWith('\\\\', this.i)) {
+        this.i += 2;
+        continue;
+      }
+      if (this.s.startsWith('\\end', this.i)) {
+        this.i += 4;
+        this.namaLingkungan();
+      }
+      break;
+    }
+    // Baris kosong di akhir (dari \\\\ sebelum \\end) dibuang.
+    while (baris.length && baris[baris.length - 1].every((x) => !simpulKePolos(x).trim())) baris.pop();
+    return { t: 'matriks', kiri, kanan, baris };
+  }
+
   private atom(): Simpul[] | null {
     const c = this.s[this.i];
     if (c === undefined) return null;
@@ -86,6 +142,11 @@ class PenguraiLatex {
         while (/[a-zA-Z]/.test(this.s[this.i] ?? '')) nama += this.s[this.i++];
       } else {
         nama = this.s[this.i++] ?? '';
+      }
+      if (nama === 'begin') return [this.matriks()];
+      if (nama === 'end') {
+        this.namaLingkungan();
+        return [];
       }
       if (PERINTAH_PECAHAN.has(nama)) {
         const atas = this.argumen();
@@ -126,6 +187,16 @@ class PenguraiLatex {
   }
 }
 
+/** Spasi di tepi sel matriks tidak berarti dalam LaTeX; dibuang agar Word tidak menampilkannya. */
+function rapikanSel(sel: Simpul[]): Simpul[] {
+  const hasil = [...sel];
+  const awal = hasil[0];
+  if (awal?.t === 'teks' && !awal.mentah) hasil[0] = { t: 'teks', s: awal.s.trimStart() };
+  const akhir = hasil[hasil.length - 1];
+  if (akhir?.t === 'teks' && !akhir.mentah) hasil[hasil.length - 1] = { t: 'teks', s: akhir.s.trimEnd() };
+  return hasil.filter((x) => x.t !== 'teks' || x.s !== '');
+}
+
 function ambilBasis(hasil: Simpul[]): Simpul[] {
   const akhir = hasil.pop();
   if (!akhir) return [];
@@ -155,11 +226,27 @@ export function uraiLatex(latex: string): Simpul[] {
   return new PenguraiLatex(latex).urai();
 }
 
-const POLA_RUMUS = /\$([^$]+)\$|\\\((.+?)\\\)/g;
+// $...$, \(...\), atau LaTeX yang lupa diberi pembatas: lingkungan \begin..\end dan perintah seperti \frac{1}{2}.
+const POLA_RUMUS = /\$([^$]+)\$|\\\((.+?)\\\)|(\\begin\{([a-zA-Z]+\*?)\}[\s\S]*?\\end\{\4\}|\\(?:[dtc]?frac|sqrt|times|div|cdot|pm|le|leq|ge|geq|ne|neq|approx|pi|circ|degree|alpha|beta|theta)(?![a-zA-Z])(?:\[[^\]]*\])?(?:\s*\{[^{}]*\})*)/g;
+
+/**
+ * Perbaiki LaTeX yang rusak karena garis miring terbaca sebagai escape JSON:
+ * "\times" menjadi tab + "imes", "\frac" menjadi form feed + "rac", "\begin" menjadi backspace + "egin".
+ */
+export function pulihkanLatex(teks: string): string {
+  return teks
+    .replace(/\x08(?=[a-zA-Z])/g, '\\b')
+    .replace(/\f(?=[a-zA-Z])/g, '\\f')
+    .replace(/\r(?=[a-zA-Z])/g, '\\r')
+    .replace(/\t(?=(?:imes|heta|ext[a-z]*|frac|riangle|au|an|o|ilde|op)(?![a-zA-Z]))/g, '\\t')
+    .replace(/\n(?=(?:eq|e|ot|otin)(?![a-zA-Z]))/g, '\\n');
+}
+
 const POLA_PECAHAN_POLOS = /(?<![\d/.,\w])(\d+)\s?\/\s?(\d+)(?![\d/,.]?\d)/g;
 
 /** Pecah teks menjadi segmen kalimat dan rumus. */
 export function uraiTeks(teks: string, pecahanOtomatis = true): Segmen[] {
+  teks = pulihkanLatex(teks);
   const hasil: Segmen[] = [];
   const dorongTeks = (s: string) => {
     if (!s) return;
@@ -181,7 +268,7 @@ export function uraiTeks(teks: string, pecahanOtomatis = true): Segmen[] {
   for (const m of teks.matchAll(POLA_RUMUS)) {
     const idx = m.index ?? 0;
     dorongTeks(teks.slice(akhir, idx));
-    const latex = (m[1] ?? m[2] ?? '').trim();
+    const latex = (m[1] ?? m[2] ?? m[3] ?? '').trim();
     hasil.push({ jenis: 'mat', latex, simpul: uraiLatex(latex) });
     akhir = idx + m[0].length;
   }
@@ -210,6 +297,8 @@ export function simpulKePolos(daftar: Simpul[]): string {
           return `${simpulKePolos(n.basis)}_${simpulKePolos(n.bawah)}`;
         case 'akar':
           return `√(${simpulKePolos(n.isi)})`;
+        case 'matriks':
+          return `${n.kiri}${n.baris.map((b) => b.map(simpulKePolos).join(' ')).join('; ')}${n.kanan}`;
       }
     })
     .join('');

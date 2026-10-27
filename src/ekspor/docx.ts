@@ -1,6 +1,7 @@
 import {
   AlignmentType,
   BorderStyle,
+  BuilderElement,
   Document,
   HeightRule,
   ImageRun,
@@ -20,6 +21,7 @@ import {
   VerticalAlign,
   WidthType,
   type ParagraphChild,
+  type XmlComponent,
 } from 'docx';
 import type { HurufOpsi } from '../db/tipe';
 import { HURUF_KANAN } from '../db/tipe';
@@ -36,7 +38,23 @@ const INDEN = 425; // nomor rata kiri, isi soal menggantung 0,75 cm
 const GARIS = { style: BorderStyle.SINGLE, size: 6, color: '000000' } as const;
 const TANPA = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } as const;
 
-type AnakMath = MathRun | MathFraction | MathSuperScript | MathSubScript | MathRadical;
+type AnakMath = MathRun | MathFraction | MathSuperScript | MathSubScript | MathRadical | XmlComponent;
+
+function elemen(name: string, children: XmlComponent[] = [], val?: string | number): XmlComponent {
+  return new BuilderElement<{ val: string | number }>({ name, children, ...(val === undefined ? {} : { attributes: { val: { key: 'm:val', value: val } } }) });
+}
+
+/** Matriks Office Math (m:m) di dalam tanda kurung (m:d); pustaka docx belum menyediakannya. */
+function matriksKeOmml(n: Extract<Simpul, { t: 'matriks' }>): XmlComponent {
+  const kolom = Math.max(1, ...n.baris.map((b) => b.length));
+  const sifat = elemen('m:mPr', [
+    elemen('m:mcs', [elemen('m:mc', [elemen('m:mcPr', [elemen('m:count', [], kolom), elemen('m:mcJc', [], n.kiri === '{' && !n.kanan ? 'left' : 'center')])])]),
+  ]);
+  const baris = n.baris.map((b) => elemen('m:mr', Array.from({ length: kolom }, (_, i) => elemen('m:e', simpulKeOmml(b[i] ?? [])))));
+  const m = elemen('m:m', [sifat, ...baris]);
+  if (!n.kiri && !n.kanan) return m;
+  return elemen('m:d', [elemen('m:dPr', [elemen('m:begChr', [], n.kiri), elemen('m:endChr', [], n.kanan)]), elemen('m:e', [m])]);
+}
 
 function simpulKeOmml(daftar: Simpul[]): AnakMath[] {
   return daftar.map((n): AnakMath => {
@@ -51,6 +69,8 @@ function simpulKeOmml(daftar: Simpul[]): AnakMath[] {
         return new MathSubScript({ children: simpulKeOmml(n.basis), subScript: simpulKeOmml(n.bawah) });
       case 'akar':
         return new MathRadical({ children: simpulKeOmml(n.isi), ...(n.derajat ? { degree: simpulKeOmml(n.derajat) } : {}) });
+      case 'matriks':
+        return matriksKeOmml(n);
     }
   });
 }
