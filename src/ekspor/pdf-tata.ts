@@ -146,6 +146,63 @@ export function kotakMath(doc: jsPDF, daftar: Simpul[], g: GayaTeks): Kotak {
         });
         break;
       }
+      case 'matriks': {
+        const sel = n.baris.map((b) => b.map((x) => kotakMath(doc, x, g)));
+        const kolom = Math.max(1, ...sel.map((b) => b.length));
+        const lebarKolom = Array.from({ length: kolom }, (_, i) => Math.max(0, ...sel.map((b) => b[i]?.w ?? 0)));
+        const tinggi = sel.map((b) => ({ naik: Math.max(g.ukuran * 0.74, ...b.map((k) => k.naik)), turun: Math.max(g.ukuran * 0.24, ...b.map((k) => k.turun)) }));
+        const selaKolom = g.ukuran * 0.8;
+        const selaBaris = g.ukuran * 0.2;
+        const kurung = g.ukuran * 0.4;
+        const wIsi = lebarKolom.reduce((a, w) => a + w, 0) + selaKolom * (kolom - 1);
+        const hIsi = tinggi.reduce((a, t) => a + t.naik + t.turun, 0) + selaBaris * Math.max(0, tinggi.length - 1);
+        const sumbu = g.ukuran * 0.3;
+        const atas = hIsi / 2 + sumbu;
+        const bawah = hIsi / 2 - sumbu;
+        const kiri = n.kiri ? kurung : 0;
+        const kanan = n.kanan ? kurung : 0;
+        // Tanda kurung digambar sebagai garis agar tingginya mengikuti isi matriks. arah -1: kurung kiri, 1: kurung kanan.
+        const gambarKurung = (d: jsPDF, c: string, x: number, y1: number, y2: number, arah: number) => {
+          const h = y2 - y1;
+          const mulai = x + kurung * (arah < 0 ? 0.75 : 0.25);
+          const tarik = (ruas: number[][]) => d.lines(ruas, mulai, y1, [1, 1], 'S', false);
+          if (c === '|') d.line(x + kurung / 2, y1, x + kurung / 2, y2);
+          else if (c === '‖') {
+            d.line(x + kurung * 0.35, y1, x + kurung * 0.35, y2);
+            d.line(x + kurung * 0.65, y1, x + kurung * 0.65, y2);
+          } else if (c === '[' || c === ']') tarik([[arah * kurung * 0.5, 0], [0, h], [-arah * kurung * 0.5, 0]]);
+          else if (c === '{' || c === '}') {
+            const t = Math.min(1.5, h / 4);
+            tarik([[arah * kurung * 0.25, t], [0, h / 2 - 2 * t], [arah * kurung * 0.25, t], [-arah * kurung * 0.25, t], [0, h / 2 - 2 * t], [-arah * kurung * 0.25, t]]);
+          } else tarik([[arah * kurung * 0.6, h * 0.25, arah * kurung * 0.6, h * 0.75, 0, h]]);
+        };
+        anak.push({
+          w: kiri + wIsi + kanan + g.ukuran * 0.3,
+          naik: atas + 1,
+          turun: bawah + 1,
+          gambar(d, x, y) {
+            d.setDrawColor(0, 0, 0);
+            d.setLineWidth(Math.max(0.5, g.ukuran * 0.05));
+            const y1 = y - atas;
+            const y2 = y + bawah;
+            const x0 = x + g.ukuran * 0.15;
+            if (n.kiri) gambarKurung(d, n.kiri, x0, y1, y2, -1);
+            let cy = y1;
+            sel.forEach((b, r) => {
+              const dasar = cy + tinggi[r].naik;
+              let cx = x0 + kiri;
+              lebarKolom.forEach((w, c) => {
+                const k = b[c];
+                if (k) k.gambar(d, cx + (n.kiri === '{' && !n.kanan ? 0 : (w - k.w) / 2), dasar);
+                cx += w + selaKolom;
+              });
+              cy = dasar + tinggi[r].turun + selaBaris;
+            });
+            if (n.kanan) gambarKurung(d, n.kanan, x0 + kiri + wIsi, y1, y2, 1);
+          },
+        });
+        break;
+      }
     }
   }
   return hbox(anak);
