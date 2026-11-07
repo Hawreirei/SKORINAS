@@ -50,7 +50,7 @@ describe('pembatas laju', () => {
   it('RPD habis: melempar galat kuota harian tanpa mengirim', async () => {
     const p = new PembatasLaju();
     await expect(p.izin('gemini', 'm', { rpm: 5, rpd: 20 }, { hitungHarian: async () => 20 })).rejects.toMatchObject({ jenis: 'batas', batas: { lingkup: 'harian' } });
-    await expect(p.izin('gemini', 'm', { rpm: 5, rpd: 20 }, { hitungHarian: async () => 19 })).resolves.toBeUndefined();
+    await expect(p.izin('gemini', 'm', { rpm: 5, rpd: 20 }, { hitungHarian: async () => 19 })).resolves.toBeTypeOf('function');
     expect(GalatAi).toBeDefined();
   });
 

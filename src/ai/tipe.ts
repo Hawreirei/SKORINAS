@@ -7,6 +7,11 @@ export interface PermintaanAi {
   pesan: string;
   suhu?: number;
   signal?: AbortSignal;
+  /**
+   * 'rendah': minta model penalaran berpikir singkat (Gemini thinkingLevel/thinkingBudget,
+   * reasoning_effort ala OpenAI) agar jawaban lebih cepat. Diambil dari registri model.
+   */
+  penalaran?: 'rendah';
 }
 
 export interface JawabanAi {
@@ -15,6 +20,8 @@ export interface JawabanAi {
   token_keluar: number;
   /** Sisa kuota dari header penyedia bila tersedia, mis. "48 permintaan". */
   sisa_kuota: string | null;
+  /** Diisi pengirim yang dijaga pembatas laju: lepaskan jatah harian setelah percobaan tercatat. */
+  lepas?: () => void;
 }
 
 export interface ModelLangsung {
@@ -40,6 +47,8 @@ export interface ModelRegistri {
   harga: { masuk: number; keluar: number } | null;
   /** Batas tingkat gratis: permintaan per menit dan per hari. null bila tidak diketahui atau berbayar. */
   batas_gratis?: { rpm: number | null; rpd: number | null } | null;
+  /** 'rendah' bila model penalaran ini cukup berpikir singkat untuk satu butir soal (F-37). */
+  penalaran?: 'rendah' | null;
   golden: { status: 'lolos' | 'gagal' | 'belum'; tanggal: string | null; benar_lolos?: number; salah_ditolak?: number; json_sah?: number };
   catatan: string;
 }
