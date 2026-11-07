@@ -22,8 +22,10 @@ async function ambilSoal(id: string): Promise<Soal> {
 /** Slot untuk mengganti atau membuat ulang soal; gaya diambil dari rencana paket bila paket memakai campuran gaya. */
 async function slotDari(s: Soal): Promise<Slot> {
   const kerja = await db.pekerjaan_generasi.where('paket_id').equals(s.paket_id).first();
-  const gaya = kerja?.slot.find((x) => x.id === s.slot_id)?.gaya;
-  return { id: s.slot_id, urutan: s.urutan, tp_index: 0, kesukaran: s.kesukaran_rancangan, level: s.level_kognitif, bentuk: s.bentuk, status: 'berjalan', percobaan: 0, pengganti: false, galat: null, soal_id: s.id, ...(gaya ? { gaya } : {}) };
+  const asal = kerja?.slot.find((x) => x.id === s.slot_id);
+  const gaya = asal?.gaya;
+  const variasi = asal?.variasi;
+  return { id: s.slot_id, urutan: s.urutan, tp_index: 0, kesukaran: s.kesukaran_rancangan, level: s.level_kognitif, bentuk: s.bentuk, status: 'berjalan', percobaan: 0, pengganti: false, galat: null, soal_id: s.id, ...(gaya ? { gaya } : {}), ...(variasi ? { variasi } : {}) };
 }
 
 export interface Kandidat {

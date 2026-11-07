@@ -22,6 +22,7 @@ export function lengkapiParameter(p: ParameterPaket): ParameterPaket {
     konteks: p.konteks ?? '',
     // Paket bertanda format ujian dari versi 4 mendapat salinan aturan format, agar tetap dapat disunting.
     aturan_tambahan: p.aturan_tambahan ?? [...(formatUjian(p.ujian?.id)?.aturan ?? [])],
+    wajib_stimulus: p.wajib_stimulus ?? false,
   };
 }
 
@@ -86,6 +87,15 @@ export class GenSoalDb extends Dexie {
     // Versi 5: opsi lanjutan v2 (F-36): susunan per baris, rincian tiap bentuk, skor salah, waktu, campuran gaya,
     // bahasa lain, konteks, dan aturan tambahan. Paket format ujian mendapat salinan aturan formatnya.
     this.version(5).upgrade(async (tx) => {
+      await tx.table('preset').toCollection().modify((p: Preset) => {
+        p.parameter_json = lengkapiParameter(p.parameter_json);
+      });
+      await tx.table('paket_soal').toCollection().modify((p: PaketSoal) => {
+        p.parameter_json = lengkapiParameter(p.parameter_json);
+      });
+    });
+    // Versi 6: stimulus wajib dan variasi per butir (F-38). Paket lama tetap tanpa stimulus wajib.
+    this.version(6).upgrade(async (tx) => {
       await tx.table('preset').toCollection().modify((p: Preset) => {
         p.parameter_json = lengkapiParameter(p.parameter_json);
       });

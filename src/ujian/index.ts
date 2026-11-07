@@ -5,7 +5,7 @@ import { URUTAN_BENTUK } from '../generasi/rencana';
 /**
  * Format ujian: TKA, TKAD, dan OSN jenjang SD sampai SMA (F-35). Setiap format mengisi layar Buat dengan atribut
  * ujiannya (jumlah soal, bentuk, banyak opsi, level, gaya, bahasa) dan menambah aturan penulisan ke prompt.
- * Isinya hanya atribut ujian, bukan CP atau TP (AGENTS.md butir 7): TP tetap dari guru.
+ * Isinya atribut ujian; cakupan materi ada di ./cakupan.ts dan hanya dipakai bila guru mengosongkan CP dan TP (F-38).
  * Hasil riset dan sumbernya: docs/referensi/format-ujian.md. Angka yang belum pasti ditandai di sana.
  */
 
@@ -44,6 +44,13 @@ export interface FormatUjian {
   aturan: string[];
 }
 
+/** Kompetensi membaca TKA (Bahasa Indonesia dan Inggris) per level. */
+const KOMPETENSI_BACA: Record<string, string> = {
+  'Pengetahuan dan Pemahaman': 'pemahaman tekstual, yaitu menemukan informasi yang tersurat dalam teks (siapa, apa, kapan, di mana, berapa, urutan kejadian).',
+  Aplikasi: 'pemahaman inferensial, yaitu menyimpulkan informasi tersirat: gagasan utama, makna kata dalam konteks, hubungan sebab-akibat, watak tokoh, atau tujuan penulis.',
+  Penalaran: 'evaluasi dan apresiasi, yaitu menilai isi, keakuratan, atau kesesuaian informasi, membandingkan dua bagian atau dua teks, menilai sikap tokoh, atau menilai penggunaan bahasa.',
+};
+
 /** Level kognitif TKA (kerangka asesmen BSKAP 2025) dipetakan ke C1–C6 GenSoal. */
 export function levelTka(level: Level): string {
   return level === 'C1' || level === 'C2' ? 'Pengetahuan dan Pemahaman' : level === 'C3' ? 'Aplikasi' : 'Penalaran';
@@ -76,13 +83,13 @@ const ATURAN_MATEMATIKA_TKA = [
 
 const ATURAN_BINDO_TKA = [
   'Bahasa Indonesia TKA menguji membaca: setiap soal memuat teks asli yang pendek (teks informasi atau teks sastra) lalu pertanyaan tentang teks itu.',
-  'Ukur salah satu kompetensi: pemahaman tekstual (informasi tersurat), pemahaman inferensial (simpulan, gagasan utama, makna kata dalam konteks), atau evaluasi dan apresiasi (menilai isi, sikap tokoh, atau penggunaan bahasa).',
+  'Kompetensi membaca tiap butir mengikuti levelnya: pemahaman tekstual (informasi tersurat), pemahaman inferensial (simpulan, gagasan utama, makna kata dalam konteks), atau evaluasi dan apresiasi (menilai isi, sikap tokoh, atau penggunaan bahasa).',
   'Jawaban harus dapat ditemukan atau disimpulkan dari teks, bukan dari pengetahuan di luar teks.',
 ];
 
-const SD_TEKS = 'Teks untuk SD pendek (sekitar 60–150 kata), kalimat sederhana, dan kosakata sehari-hari.';
-const SMP_TEKS = 'Teks untuk SMP sekitar 150–300 kata dengan kalimat yang lebih beragam.';
-const SMA_TEKS = 'Teks untuk SMA sekitar 250–450 kata, boleh berupa teks eksposisi, argumentasi, berita, atau sastra.';
+const SD_TEKS = 'Teks untuk SD sekitar 80–150 kata dengan kalimat sederhana (pola dasar SPOK) dan kosakata sehari-hari; cerita beralur maju dengan tokoh berkarakter datar.';
+const SMP_TEKS = 'Teks untuk SMP sekitar 180–250 kata (puisi boleh lebih pendek) dengan kalimat yang lebih beragam; cerita boleh beralur campuran dengan tokoh berkarakter bulat.';
+const SMA_TEKS = 'Teks untuk SMA sekitar 230–300 kata, boleh berupa teks tunggal atau dua teks yang saling berkaitan.';
 
 const ATURAN_OSN = [
   'Soal setara Olimpiade Sains Nasional (OSN): pemecahan masalah tidak rutin yang menuntut penalaran mendalam, melampaui soal latihan kelas. Jangan menyalin soal OSN atau olimpiade lain; tulis soal baru yang setara.',
@@ -334,6 +341,7 @@ export interface IsianUjian {
   atur_bentuk: AturBentuk | null;
   durasi_menit: number | null;
   aturan_tambahan: string[];
+  wajib_stimulus: boolean;
   skor_bentuk: Partial<Record<Bentuk, number>> | null;
   gaya: GayaSoal;
   bahasa: BahasaSoal;
@@ -354,6 +362,8 @@ export function isianUjian(u: FormatUjian, n = jumlahSoalUjian(u)): IsianUjian {
     atur_bentuk: u.aturBentuk ? { pgk_benar: null, jodoh: null, isian: null, uraian: null, ...u.aturBentuk } : null,
     durasi_menit: u.asli.menit,
     aturan_tambahan: [...u.aturan],
+    // TKA dan TKAD selalu berbasis stimulus; OSN boleh soal langsung.
+    wajib_stimulus: u.keluarga !== 'OSN',
     skor_bentuk: u.skor,
     gaya: u.gaya,
     bahasa: u.bahasa,
@@ -377,6 +387,8 @@ export function bagianPromptUjian(p: Pick<ParameterPaket, 'ujian'>, level: Level
   if (!u) return '';
   const aturan = [`Soal disusun setara ${u.nama}.`];
   if (u.keluarga === 'TKA' || u.keluarga === 'TKAD') aturan.push(`Butir ini berlevel TKA "${levelTka(level)}".`);
+  // Mapel bahasa: kompetensi membaca butir mengikuti level TKA-nya, agar level dan kompetensi selalu cocok.
+  if ((u.keluarga === 'TKA' || u.keluarga === 'TKAD') && /bahasa/i.test(u.mapel)) aturan.push(`Kompetensi membaca butir ini: ${KOMPETENSI_BACA[levelTka(level)]}`);
   if (u.keluarga === 'TKAD') {
     const daerah = p.ujian?.daerah?.trim();
     aturan.push(

@@ -5,6 +5,7 @@ import type { Gambar } from '../gambar/primitif';
 import { keSvg } from '../gambar/svg';
 import { teksPolos } from '../matematika/teks';
 import { URUTAN_BENTUK } from '../generasi/rencana';
+import { formatUjian } from '../ujian';
 
 export interface OpsiEkspor {
   kop: boolean;
@@ -277,7 +278,16 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
     : null;
   const semua = bagian.flatMap((b) => b.butir);
   // Paket dari versi 0.3 masih mencatat kurikulum resminya; paket baru memakai CP dan TP yang ditulis guru.
-  const kurikulumLabel = p.kurikulum_nama && p.tp.some((t) => t.sumber === 'resmi') ? `${p.kurikulum_nama} ${p.kurikulum_versi ?? ''}`.trim() : inggris ? "Teacher's learning objectives" : 'CP dan TP dari guru';
+  const formatCakupan = p.tp.some((t) => t.sumber === 'ujian') ? formatUjian(p.ujian?.id) : null;
+  const kurikulumLabel = p.kurikulum_nama && p.tp.some((t) => t.sumber === 'resmi')
+    ? `${p.kurikulum_nama} ${p.kurikulum_versi ?? ''}`.trim()
+    : formatCakupan
+      ? inggris
+        ? `Assessment framework scope: ${formatCakupan.nama}`
+        : `Cakupan materi ${formatCakupan.nama}`
+      : inggris
+        ? "Teacher's learning objectives"
+        : 'CP dan TP dari guru';
   return {
     judul: paket.judul,
     mapel: p.mapel,

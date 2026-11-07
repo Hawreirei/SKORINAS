@@ -38,6 +38,7 @@ function param(n: number, bentuk: ParameterPaket['bentuk'] = ['pilihan_ganda']):
     bahasa_lain: '',
     konteks: '',
     aturan_tambahan: [],
+    wajib_stimulus: false,
   };
 }
 

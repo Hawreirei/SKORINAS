@@ -115,6 +115,21 @@ Penilaian Matematika: soal dasar benar 2, salah atau kosong 0; soal lanjut benar
 | Jumlah soal tidak pasti | 30 |
 | Skor | Hanya bila aturannya seragam (OSN-K SMP Matematika: 4 per soal) |
 
+## 5. Cakupan materi (F-38)
+
+Dipakai di `src/ujian/cakupan.ts` bila guru mengosongkan CP dan TP. Dokumen resmi Perkaban BSKAP 045 dan 047/H/AN/2025 tetap tidak dapat diunduh dari lingkungan pengembangan (semua situs, termasuk blog yang menyalinnya, ditolak jaringan), jadi daftar disusun dari sumber berikut dengan tingkat kepastian berbeda.
+
+| Mapel dan jenjang | Isi di katalog | Kepastian |
+| --- | --- | --- |
+| Matematika SMP | Bilangan (Bilangan Real: 6 butir), Aljabar (Persamaan dan Pertidaksamaan Linear, Bentuk Aljabar, Fungsi, Barisan dan Deret), Geometri dan Pengukuran (Objek Geometri, Transformasi Geometri, Pengukuran), Data dan Peluang (Data, Peluang); 21 butir | Tinggi: kata per kata dari kerangka asesmen hlm. 21–25 (salinan di skill TKA pemilik), dikonfirmasi ringkasan tirto, detik, dan situs madrasah |
+| Matematika SD | Bilangan (cacah, faktor dan kelipatan, rasional: pecahan, desimal, persen, perbandingan), Geometri dan Pengukuran (objek geometri: bangun datar, kubus dan balok, pandangan depan/atas/samping, sudut; pengukuran: satuan, keliling dan luas, volume), Data (tabel, piktogram, diagram batang, rata-rata) | Sedang: tiga elemen dan butir utama sepakat di Pakar TKA, Pintarly, BIC, Kompas, Akurat, Bimbel PLC; batas bilangan dan jenis diagram belum terverifikasi; peluang tidak ada di SD |
+| Matematika SMA (wajib) | Lima elemen resmi: Bilangan, Aljabar, Geometri dan Pengukuran, Trigonometri, Data dan Peluang; butir (eksponen dan logaritma, SPLTV, program linear, fungsi, barisan dan deret, transformasi, perbandingan trigonometri, statistika, pencacahan dan peluang) | Elemen tinggi (detik, CNN, aimasukptn); butir sedang (antarsumber berbeda; vektor dan kejadian majemuk tidak disebut) |
+| Bahasa Indonesia SD, SMP, SMA | Teks informasi (tunggal; SMP dan SMA juga jamak) dan teks fiksi; jenis teks rinci (deskripsi, laporan, prosedur, berita, pengumuman, eksplanasi, eksposisi, opini, infografis; dongeng, fabel, cerita rakyat, cerpen, puisi, drama, hikayat) | Teks informasi dan fiksi, kompetensi, dan ciri teks (SD: kalimat 3–7 kata pola SPOK, tokoh datar, alur maju, sudut pandang orang pertama; SMP: 200–250 kata, tokoh bulat, alur campuran, sudut pandang orang ketiga; SMA: 250–300 kata) tinggi. Jenis teks rinci adalah usulan dari jenis teks Kurikulum Merdeka, tidak disebut sumber |
+| Bahasa Inggris SMA | Descriptive, recount, narrative, procedure, analytical exposition (resmi menurut ringkasan), ditambah report, teks fungsional, dan puisi pendek (usulan); B1 (Tingkat Lanjut B2) | Sedang |
+| OSN | Ranah per bidang dari pedoman (Matematika SD lima ranah masing-masing sekitar 20%; SMP dan SMA aljabar, geometri, kombinatorika, teori bilangan; IPA dan IPS empat ranah) | Sedang |
+
+Porsi elemen selain SMP Matematika adalah usulan (lihat `docs/KEPUTUSAN.md`, F-38).
+
 ## Sumber
 
 - detik.com, 3 bentuk soal di TKA SMA/SMK: https://www.detik.com/edu/sekolah/d-8019585/3-bentuk-soal-di-tka-sma-smk-ketahui-juga-daftar-mapel-pilihannya
@@ -144,3 +159,18 @@ Penilaian Matematika: soal dasar benar 2, salah atau kosong 0; soal lanjut benar
 - tirto.id, ketentuan OSN-K Fisika SMA 2025: https://tirto.id/ketentuan-osn-k-bidang-fisika-sma-smk-dan-kisi-kisinya-haWV
 - pasla.jambiprov.go.id, cabang dan bentuk soal OSN SMA 2026: https://pasla.jambiprov.go.id/osn-sma-2026-cabang-lomba-dan-syarat-peserta/
 - medcom.id, kisi-kisi OSN Geografi SMA 2026: https://www.medcom.id/pendidikan/news-pendidikan/akWm19LN-kisi-kisi-soal-osn-geografi-sma-2026-materi-bentuk-tes-dan-jadwal-seleksi
+- detik.com, materi TKA SD dan SMP: https://www.detik.com/edu/detikpedia/d-8391094/soal-tka-matematika-tentang-apa-cek-bocoran-materi-yang-diujikan-bagi-sd-dan-smp
+- detik.com, kisi-kisi materi TKA SD 2026: https://www.detik.com/edu/sekolah/d-8314151/kisi-kisi-materi-tka-sd-2026-plus-contoh-soalnya-ortu-bisa-dampingi-anak-belajar
+- Bimbel PLC, kisi-kisi TKA Matematika SD 2026: https://www.plcpekanbaru.com/artikel/detail/1486/kisikisi-resmi-tka-matematika-sd-tahun-2026-ini-materi-yang-wajib-dipelajari/
+- Akurat, kisi-kisi TKA SD, SMP, SMA 2026: https://www.akurat.co/pendidikan/899723/kisi-kisi-tka-sd-smp-dan-sma-terbaru-2026-lengkap-dengan-jadwal-pelaksanaan
+- BIC, materi TKA SD: https://bic.id/artikel/hal-penting-materi-tka-sd-contoh-soalnya/
+- tirto.id, kisi-kisi TKA SMP: https://tirto.id/daftar-mata-pelajaran-tka-smp-dan-kisi-kisi-materinya-hnqx
+- MTs Muslimin, kerangka asesmen TKA SMP Matematika: https://www.mtssmusliminbjp.sch.id/2026/02/kerangka-asesmen-tka-smp-mts-sederajat-matematika.html
+- tirto.id, kisi-kisi TKA SMP Bahasa Indonesia: https://tirto.id/kisi-kisi-materi-tka-smp-2026-bahasa-indonesia-contoh-soal-hpx1
+- Zenius, kisi-kisi TKA Bahasa Indonesia SMP: https://www.zenius.net/blog/contoh-soal-tka-bahasa-indonesia-smp/
+- Zenius, kisi-kisi TKA Bahasa Indonesia SD: https://www.zenius.net/blog/contoh-soal-tka-bahasa-indonesia-sd/
+- detik.com, kisi-kisi TKA Matematika SMA 2026: https://www.detik.com/edu/detikpedia/d-8694941/kisi-kisi-tka-matematika-sma-2026-dan-contoh-soal-yang-perlu-dipelajari
+- CNN Indonesia, kisi-kisi mapel wajib TKA SMA 2026: https://www.cnnindonesia.com/edukasi/20261019164135-569-1417162/kisi-kisi-mapel-wajib-tka-sma-smk-2026-siswa-kelas-12-bersiap
+- aimasukptn.com, cakupan materi TKA 2026: https://aimasukptn.com/kisi-kisi-tka-2026
+- Zenius, kisi-kisi TKA Bahasa Inggris SMA: https://www.zenius.net/blog/kisi-kisi-dan-contoh-soal-bahasa-inggris-tka/
+- Cerebrum, kisi-kisi TKA SMA 2026: https://cerebrum.id/kisi-kisi-tka-sma-2026-resmi-pusmendik-cek-materi-wajib-dan-mata-pelajaran-pilihan/

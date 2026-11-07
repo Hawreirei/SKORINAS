@@ -395,6 +395,9 @@ function butirPalsu(bentuk) {
   const isiUjian = await hp.evaluate(() => ['#kelas', '#mapel', '#jumlah'].map((q) => document.querySelector(q).value));
   if (isiUjian.join('|') !== '6|Matematika|30') galat.push(`format ujian tidak mengisi layar Buat: ${isiUjian.join('|')}`);
   await hp.getByText('Ujian aslinya 30 soal dalam 75 menit.').waitFor();
+  // Cakupan materi dan stimulus wajib (F-38): tanpa CP dan TP, soal disebar ke cakupan ujian dan diawali cerita.
+  await hp.getByText(/disebar ke \d+ butir cakupan materi ujian ini/).waitFor();
+  await hp.getByText('Tanpa CP dan TP: soal disebar ke cakupan materi TKAD SD · Matematika').waitFor();
   await hp.screenshot({ path: path.join(KELUAR, '09d-buat-format-ujian-ponsel.png'), fullPage: true });
   lebar = Math.max(lebar, await hp.evaluate(() => document.documentElement.scrollWidth));
   await page.goto(DASAR + '/soal/baru');

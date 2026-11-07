@@ -5,6 +5,7 @@ import { bentukDipakai, galatKomposisi, rencanakanSlot, URUTAN_BENTUK } from '..
 import { faseDariKelas } from '../kurikulum/fase';
 import { rumpunDariMapel } from '../paket';
 import { bagiPorsi, formatUjian, isianUjian } from '../ujian';
+import { cakupanFormat, pilihCakupan, type Cakupan } from '../ujian/cakupan';
 import { SKOR_BAWAAN } from './rencana-buat';
 
 /**
@@ -40,6 +41,7 @@ export interface Isian {
   konteks: string;
   /** Aturan tambahan untuk AI, satu aturan per baris. */
   aturanTeks: string;
+  wajibStimulus: boolean;
 }
 
 export const ATUR_BENTUK_KOSONG: AturBentuk = { pgk_benar: null, jodoh: null, isian: null, uraian: null };
@@ -73,6 +75,7 @@ export function isianKosong(): Isian {
     bahasaLain: '',
     konteks: '',
     aturanTeks: '',
+    wajibStimulus: false,
   };
 }
 
@@ -81,7 +84,8 @@ export function isianDariParameter(p: ParameterPaket): Isian {
     kelas: p.kelas,
     mapel: p.mapel,
     cp: p.cp,
-    tpTeks: p.tp.map((t) => t.rumusan).join('\n'),
+    // TP dari cakupan format ujian tidak dikembalikan ke isian: paket berikutnya memilih cakupan baru.
+    tpTeks: p.tp.filter((t) => t.sumber !== 'ujian').map((t) => t.rumusan).join('\n'),
     tpAsal: p.tp,
     n: p.n,
     persen: p.persen,
@@ -93,7 +97,7 @@ export function isianDariParameter(p: ParameterPaket): Isian {
     cara_bs: p.cara_bs ?? 'centang',
     jumlahBentuk: p.jumlah_bentuk ?? null,
     sebaranLevel: p.sebaran_level ?? null,
-    jumlahTp: p.jumlah_tp ?? null,
+    jumlahTp: p.tp.some((t) => t.sumber === 'ujian') ? null : (p.jumlah_tp ?? null),
     opsiPg: p.opsi_pg ?? null,
     skorBentuk: p.skor_bentuk ?? null,
     ujian: p.ujian ?? null,
@@ -105,6 +109,7 @@ export function isianDariParameter(p: ParameterPaket): Isian {
     bahasaLain: p.bahasa_lain ?? '',
     konteks: p.konteks ?? '',
     aturanTeks: (p.aturan_tambahan ?? []).join('\n'),
+    wajibStimulus: p.wajib_stimulus ?? false,
   };
 }
 
@@ -166,11 +171,20 @@ export function masukanRencana(f: Isian) {
   };
 }
 
-export function keParameter(f: Isian): ParameterPaket {
-  const tp: TpDipakai[] = tpUntuk(f).map((rumusan) => {
-    const asal = f.tpAsal.find((t) => t.rumusan === rumusan);
-    return { id: asal?.id ?? '', rumusan, sumber: 'guru', versi: 1 };
-  });
+/** Cakupan format ujian yang dipakai bila guru mengosongkan CP dan TP; null bila tidak berlaku. */
+export function cakupanIsian(f: Pick<Isian, 'tpTeks' | 'cp' | 'ujian'>): Cakupan | null {
+  return !barisTp(f.tpTeks).length && !f.cp.trim() ? cakupanFormat(f.ujian?.id) : null;
+}
+
+export function keParameter(f: Isian, acak: () => number = Math.random): ParameterPaket {
+  const cakupan = cakupanIsian(f);
+  const pilihan = cakupan ? pilihCakupan(cakupan, f.n, acak) : null;
+  const tp: TpDipakai[] = pilihan
+    ? pilihan.rumusan.map((rumusan) => ({ id: '', rumusan, sumber: 'ujian', versi: 1 }))
+    : tpUntuk(f).map((rumusan) => {
+        const asal = f.tpAsal.find((t) => t.rumusan === rumusan);
+        return { id: asal?.id ?? '', rumusan, sumber: 'guru', versi: 1 };
+      });
   const jumlah_bentuk = f.rincian ? null : jumlahBentukDipakai(f);
   const bentuk = bentukDipakai({ bentuk: f.bentuk, jumlah_bentuk, rincian: f.rincian });
   const skor = (x: Partial<Record<Bentuk, number>> | null, bawaan: (b: Bentuk) => number) => (x ? Object.fromEntries(bentuk.map((b) => [b, x[b] ?? bawaan(b)])) : null);
@@ -193,7 +207,8 @@ export function keParameter(f: Isian): ParameterPaket {
     jumlah_bentuk,
     sebaran_level: f.rincian ? null : f.sebaranLevel,
     // Jumlah per TP hanya berlaku bila TP ditulis guru, sejajar baris TP.
-    jumlah_tp: !f.rincian && f.jumlahTp && f.jumlahTp.length === tp.length && barisTp(f.tpTeks).length > 1 ? f.jumlahTp : null,
+    // Cakupan format ujian: jumlah per butir cakupan mengikuti porsi elemennya.
+    jumlah_tp: f.rincian ? null : pilihan ? (pilihan.rumusan.length > 1 ? pilihan.jumlah : null) : f.jumlahTp && f.jumlahTp.length === tp.length && barisTp(f.tpTeks).length > 1 ? f.jumlahTp : null,
     opsi_pg: f.opsiPg,
     skor_bentuk: skor(f.skorBentuk, (b) => SKOR_BAWAAN[b]),
     ujian: f.ujian && formatUjian(f.ujian.id) ? { id: f.ujian.id, daerah: f.ujian.daerah.trim() } : null,
@@ -205,6 +220,7 @@ export function keParameter(f: Isian): ParameterPaket {
     bahasa_lain: f.bahasa === 'lain' ? f.bahasaLain.trim() : '',
     konteks: f.konteks.trim(),
     aturan_tambahan: aturanDariTeks(f.aturanTeks),
+    wajib_stimulus: f.wajibStimulus,
   };
 }
 
@@ -233,6 +249,7 @@ export function isianDariUjian(f: Isian, id: string): Isian {
     bahasa: x.bahasa,
     gambar: x.gambar,
     aturanTeks: x.aturan_tambahan.join('\n'),
+    wajibStimulus: x.wajib_stimulus,
     ujian: { id, daerah: f.ujian?.daerah ?? '' },
   };
 }

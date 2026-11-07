@@ -508,7 +508,7 @@ export default function OpsiLanjutanBuat(p: PropsOpsiLanjutan) {
         />
       </KartuLipat>
 
-      <KartuLipat judul="Gaya, bahasa, dan konteks" ket="Gaya soal (boleh campuran), bahasa (boleh bahasa lain), dan tema soal" ingat="buat-kartu-gaya" paksaBuka={dicoba && galat.gaya.length > 0} tanda={galat.gaya.length ? <TandaPerbaiki /> : null}>
+      <KartuLipat judul="Gaya, bahasa, dan konteks" ket="Stimulus cerita, gaya soal (boleh campuran), bahasa (boleh bahasa lain), dan tema soal" ingat="buat-kartu-gaya" paksaBuka={dicoba && galat.gaya.length > 0} tanda={galat.gaya.length ? <TandaPerbaiki /> : null}>
         <div>
           {f.jumlahGaya ? null : (
             <PilihanDaftar id="gaya" className="sm:max-w-sm" label="Gaya soal" value={f.gaya} onChange={(e) => ubah({ gaya: e.target.value as GayaSoal })}>
@@ -544,6 +544,16 @@ export default function OpsiLanjutanBuat(p: PropsOpsiLanjutan) {
           </PilihanDaftar>
           {f.bahasa === 'lain' ? <IsianTeks id="bahasa-lain" label="Nama bahasa" value={f.bahasaLain} onChange={(e) => ubah({ bahasaLain: e.target.value })} placeholder="mis. Arab, Jawa, Jepang" galat={dicoba && !f.bahasaLain.trim() ? 'Tulis nama bahasa soal.' : undefined} /> : null}
         </div>
+        <Sakelar
+          label="Setiap soal diawali cerita atau bacaan (stimulus)"
+          petunjuk={
+            f.wajibStimulus
+              ? 'Soal tanpa stimulus yang cukup panjang dibuat ulang otomatis. Tema, bentuk stimulus, dan nama tokoh dibuat berbeda di tiap soal.'
+              : 'Nyalakan agar setiap soal berbasis cerita, teks, atau situasi nyata seperti soal TKA.'
+          }
+          checked={f.wajibStimulus}
+          ubah={(wajibStimulus) => ubah({ wajibStimulus })}
+        />
         <IsianTeks id="konteks" label="Konteks atau tema soal (boleh kosong)" value={f.konteks} onChange={(e) => ubah({ konteks: e.target.value })} placeholder="mis. pertanian, pasar tradisional, budaya Bugis" petunjuk="AI memakai konteks ini untuk cerita, nama, dan situasi dalam soal." />
         {galat.gaya
           .filter((g) => !g.startsWith('Tulis nama bahasa'))

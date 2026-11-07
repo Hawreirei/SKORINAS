@@ -81,7 +81,8 @@ export interface TpDipakai {
   kode?: string;
   rumusan: string;
   /** Data dari versi 0.3: 'resmi' bila diambil dari data kurikulum bundel. */
-  sumber?: 'resmi' | 'kustom' | 'guru';
+  /** 'ujian': butir cakupan format ujian yang dipakai karena guru mengosongkan CP dan TP (F-38). */
+  sumber?: 'resmi' | 'kustom' | 'guru' | 'ujian';
   versi?: number | string;
   induk_id?: string | null;
 }
@@ -138,6 +139,8 @@ export interface ParameterPaket {
   konteks: string;
   /** Aturan tambahan untuk AI, satu aturan per butir. Diisi format ujian dan dapat disunting guru. */
   aturan_tambahan: string[];
+  /** Setiap soal wajib diawali stimulus (cerita, teks, atau situasi) yang dibutuhkan untuk menjawab (F-38, Dexie versi 6). */
+  wajib_stimulus: boolean;
   /** Data dari versi 0.3 (sebelum aplikasi berhenti membawa data kurikulum). Tidak diisi lagi. */
   kurikulum_id?: string;
   kurikulum_nama?: string;
@@ -319,6 +322,8 @@ export interface Slot {
   soal_id: string | null;
   /** Gaya butir ini bila paket memakai campuran gaya; selain itu gaya paket. */
   gaya?: GayaSoal;
+  /** Variasi butir (F-38): tema konteks, bentuk stimulus, dan nama tokoh yang berbeda antarbutir. */
+  variasi?: { tema: string; stimulus: string; tokoh: string };
 }
 
 export interface PekerjaanGenerasi extends Rekaman {

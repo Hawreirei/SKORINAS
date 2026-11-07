@@ -41,6 +41,7 @@ export function paketUji(): PaketSoal {
       bahasa_lain: '',
       konteks: '',
       aturan_tambahan: [],
+      wajib_stimulus: false,
     },
   };
 }

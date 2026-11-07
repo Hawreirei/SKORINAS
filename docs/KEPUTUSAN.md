@@ -4,7 +4,7 @@ Catatan ini melengkapi `docs/RANCANGAN.md` v0.4. Bagian "Keputusan saat membangu
 
 ## Perlu diputuskan (dari rancangan)
 
-- [ ] **Format ujian: cakupan materi.** Format TKA hanya menyebut nama elemen (mis. Bilangan, Aljabar, Geometri dan Pengukuran, Data dan Peluang) di aturan prompt, bukan sub-elemen dan butir cakupan kerangka asesmen, karena AGENTS.md butir 7 melarang membawa data kurikulum. Bila pemilik ingin daftar cakupan resmi ikut dibawa (mis. sebagai TP siap pakai), aturan butir 7 perlu diubah dulu.
+- [x] **Format ujian: cakupan materi.** Diputuskan pemilik (7 November 2026, F-38): soal TKA terasa seragam, jadi cakupan kerangka asesmen TKA dan ranah OSN dibawa di `src/ujian/cakupan.ts`. Cakupan ini bukan CP atau TP sekolah: hanya dipakai bila guru mengosongkan CP dan TP, dan TP guru selalu didahulukan. AGENTS.md butir 7 tetap berlaku untuk CP dan TP.
 - [ ] **Bentuk "pilihan ganda kompleks kategori" (TKA).** Sementara dibuat sebagai soal benar-salah satu pernyataan; bentuk aslinya satu stimulus dengan beberapa pernyataan Benar/Salah dalam satu tabel dan satu nomor. Bentuk baru memerlukan skema, verifikasi per pernyataan, dan tata letak ekspor sendiri (usul fitur lanjutan).
 
 - [ ] Urutan mata pelajaran yang dibuka setelah Matematika (usul: IPAS, Bahasa Indonesia, Bahasa Inggris).
@@ -319,3 +319,20 @@ Permintaan pemilik: pembuatan soal terasa sangat lama; percepat sebisa mungkin d
 | Kemajuan di layar | `slotAktif` kini nomor kemajuan (soal selesai + 1), bukan nomor butir yang sedang dikerjakan | Dengan butir serentak, nomor butir terkecil dapat tertahan dan membingungkan |
 | Tidak diubah | Angka batas per menit dan per hari di registri, jumlah percobaan (3 + 1 putaran pengganti), jeda aman 1,5 detik | Permintaan pemilik: batas dipertahankan; mengurangi percobaan menambah slot gagal |
 
+
+## Soal format ujian bervariasi dan berstimulus (F-38, 7 November 2026)
+
+Permintaan pemilik: soal TKA cenderung sama dan kurang variatif; riset cakupan materinya, pastikan ada stimulus cerita, dan buat format ujian menghasilkan soal yang sangat baik. Riset cakupan: `docs/referensi/format-ujian.md`, bagian 5.
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Penyebab seragam | Tanpa TP guru, semua butir paket dikirim dengan TP yang sama ("Materi Matematika kelas 6") dan tanpa arahan tema, tokoh, atau bentuk stimulus yang berbeda; model lalu mengulang topik dan pola cerita | Temuan dari prompt butir |
+| Cakupan sebagai TP | Bila CP dan TP kosong dan format punya cakupan, `keParameter` memilih butir cakupan per elemen sesuai porsi (sisa terbesar) dari titik mulai acak, lalu menyimpannya sebagai TP paket bersumber `ujian` dengan jumlah per TP. Rencana butir, kisi-kisi (kolom TP), dan label "Cakupan materi …" memakai mekanisme TP yang sudah ada. Buat paket serupa dan pengaturan tersimpan tidak mengembalikan TP `ujian` ke isian, sehingga paket berikutnya memilih campuran baru | Satu mekanisme; tidak ada isian baru di layar |
+| Porsi elemen | SMP Matematika 7/8/8/7 (contoh paket 30 soal); SD Matematika 5/3/2, SMA Matematika 4/7/5/3/6, bahasa 1:1 teks informasi dan fiksi, OSN rata: usulan, tidak ada angka resmi di sumber | Dapat dikoreksi di katalog tanpa mengubah data paket lama |
+| Stimulus wajib | Isian parameter `wajib_stimulus` (Dexie versi 6). Format TKA dan TKAD menyalakannya, OSN tidak; guru dapat mengubahnya di kartu Gaya, bahasa, dan konteks untuk paket apa pun. Prompt meminta stimulus asli berisi semua data untuk menjawab, pertanyaan di akhir, tanpa label "Stimulus:" | Ciri utama soal TKA: berbasis stimulus |
+| Pemeriksa stimulus | `periksaStimulus`: sedikitnya dua kalimat dan batas kata per jenjang (bukan bahasa SD 25, SMP 30, SMA 35; bahasa SD 50, SMP 100, SMA 130). Batas lebih rendah dari sasaran prompt (mis. bahasa SMP 180–250 kata) agar soal yang wajar tidak terus dibuat ulang. Menjodohkan dikecualikan. Golden set `data/golden/stimulus.json` (6 lolos, 6 ditolak) | Prinsip 2: soal tanpa stimulus tidak sampai ke layar |
+| Variasi per butir | Slot pekerjaan menyimpan `variasi` { tema, stimulus, tokoh } yang ditetapkan saat paket dibuat: tema bergiliran personal, sosial budaya, saintifik (34 tema), 48 nama tokoh dari berbagai daerah, dan bentuk stimulus bergiliran (cerita, daftar data, percakapan, brosur, jadwal, pengamatan); diacak per paket. Ganti dan buat ulang soal memakai variasi slotnya. Konteks dari guru didahulukan atas tema; TKAD memakai nama tokoh khas daerahnya | Variasi tidak bergantung pada urutan butir serentak (F-37) |
+| Kompetensi membaca | Format Bahasa Indonesia dan Inggris: Pengetahuan dan Pemahaman → pemahaman tekstual, Aplikasi → pemahaman inferensial, Penalaran → evaluasi dan apresiasi; jenis teks dari cakupan (TP), bukan dari kompetensi | Level dan kompetensi tidak pernah bertentangan |
+| Keterbacaan | Paket berstimulus wajib dianggap literasi oleh kaidah keterbacaan (batas kata per kalimat × 1,5; hanya catatan) | Cerita lebih panjang kalimatnya |
+| Belum | PG kompleks kategori TKA (satu stimulus, beberapa pernyataan dalam satu nomor) dan satu stimulus untuk beberapa soal masih belum ada; benar-salah berstimulus menulis stimulus lalu satu pernyataan | Bentuk baru, fitur terpisah |
+| E2E | Satu run lolos penuh; run lain gagal tidak menentu di langkah lama (penelusuran Tab di layar Unduh), lihat F-35 | Masalah lama |

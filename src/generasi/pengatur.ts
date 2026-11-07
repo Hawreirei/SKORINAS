@@ -10,6 +10,7 @@ import { sekarang, tanggalLokal, uuid } from '../db/util';
 import { teksPolos } from '../matematika/teks';
 import { buatButir, type HasilButir, type Pengirim, type Percobaan } from './butir';
 import { rencanakanSlot } from './rencana';
+import { beriVariasi } from './variasi';
 import { seimbangkanKunci } from '../verifikasi/acak';
 import { AMBANG_KEMIRIPAN, kemiripan } from '../verifikasi/kemiripan';
 
@@ -76,7 +77,8 @@ export async function buatPaket(param: ParameterPaket, judul: string): Promise<s
   // TP ditulis guru di formulir; tiap TP diberi id agar soal dan kisi-kisi dapat merujuknya.
   const tp = param.tp.map((x) => ({ ...x, id: x.id || uuid(), sumber: x.sumber ?? ('guru' as const), versi: x.versi ?? 1 }));
   const p: ParameterPaket = { ...param, tp };
-  const slot = rencanakanSlot(p);
+  // Variasi per butir (tema, bentuk stimulus, tokoh) agar soal paket berstimulus tidak seragam (F-38).
+  const slot = beriVariasi(rencanakanSlot(p), p);
   const t = sekarang();
   const paket: PaketSoal = { id: uuid(), judul: judul.trim() || tp[0]?.rumusan.slice(0, 80) || 'Paket soal', parameter_json: p, status: 'membuat', penyedia: null, model: null, dibuat_pada: t, diubah_pada: t, dihapus_pada: null };
   const kerja: PekerjaanGenerasi = { id: uuid(), paket_id: paket.id, status: 'menunggu', slot, percobaan: 0, galat: null, mulai: null, selesai: null, dibuat_pada: t, diubah_pada: t };

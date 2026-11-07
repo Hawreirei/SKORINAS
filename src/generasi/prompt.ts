@@ -2,7 +2,8 @@ import type { Bentuk, IsiSoal, JenisIsian, ParameterPaket, Slot } from '../db/ti
 import { BENTUK_LABEL } from '../db/tipe';
 import { TEMPLAT } from '../gambar';
 import { paketUntuk } from '../paket';
-import { bagianPromptUjian } from '../ujian';
+import { bagianPromptUjian, formatPaket } from '../ujian';
+import { panjangStimulus } from './variasi';
 
 export const SISTEM = `Anda penulis butir soal asesmen untuk sekolah di Indonesia yang memakai Kurikulum Merdeka.
 Kontrak keluaran:
@@ -108,6 +109,39 @@ export function rincianBentuk(p: ParameterPaket, bentuk: Bentuk): string[] {
   return r;
 }
 
+/**
+ * Stimulus wajib dan variasi butir (F-38): setiap soal diawali cerita, teks, atau situasi yang dibutuhkan untuk
+ * menjawab, dengan tema, bentuk stimulus, dan tokoh yang ditetapkan per butir agar soal satu paket tidak seragam.
+ */
+export function bagianStimulus(p: Pick<ParameterPaket, 'wajib_stimulus' | 'kelas' | 'rumpun' | 'materi' | 'konteks' | 'ujian'>, slot: Pick<Slot, 'bentuk' | 'variasi'>): string {
+  if (!p.wajib_stimulus || slot.bentuk === 'menjodohkan') return '';
+  const bahasa = p.rumpun === 'bahasa';
+  const { sasaran } = panjangStimulus(p.kelas, bahasa);
+  const v = slot.variasi;
+  const aturan = [
+    bahasa
+      ? `Awali "pokok" dengan teks bacaan asli sekitar ${sasaran[0]}–${sasaran[1]} kata sesuai jenis teks pada tujuan pembelajaran, lalu tulis pertanyaan tentang teks itu di paragraf terakhir.`
+      : `Awali "pokok" dengan stimulus asli berupa cerita atau situasi nyata sekitar ${sasaran[0]}–${sasaran[1]} kata (sedikitnya dua kalimat) yang memuat semua data untuk menjawab, lalu tulis pertanyaan di kalimat terakhir.`,
+    'Jawaban hanya dapat diperoleh dengan mengolah informasi dalam stimulus; stimulus bukan hiasan, dan pertanyaan tidak boleh dapat dijawab tanpa membacanya.',
+    'Jangan membuka dengan "Perhatikan cerita berikut" tanpa cerita, dan jangan menulis judul atau label "Stimulus:".',
+    'Pisahkan stimulus dan pertanyaan dengan baris baru. Data berbentuk tabel ditulis sebagai daftar singkat di dalam teks; diagram memakai gambar terprogram bila tersedia.',
+  ];
+  if (slot.bentuk === 'benar_salah') aturan.push('Untuk benar-salah: setelah stimulus, tulis satu pernyataan tentang isi stimulus yang dinilai Benar atau Salah.');
+  if (p.materi.trim()) aturan.push('Bila materi dari guru dipakai, stimulus boleh berupa kutipan atau ringkasannya.');
+  if (v) {
+    // Konteks dari guru didahulukan atas tema rotasi; soal TKAD memakai nama tokoh khas daerahnya.
+    const konteksGuru = p.konteks?.trim();
+    const daerah = formatPaket(p)?.keluarga === 'TKAD';
+    const bagianVariasi = [
+      konteksGuru ? `tema di dalam konteks "${konteksGuru}" dengan sisi yang berbeda dari soal lain` : `tema "${v.tema}"`,
+      `bentuk stimulus: ${v.stimulus}`,
+      daerah ? 'tokoh bernama khas daerah soal, berbeda dari soal lain' : `tokoh utama bernama ${v.tokoh} (tokoh lain boleh ditambah dengan nama yang berbeda dari soal lain)`,
+    ];
+    aturan.push(`Variasi butir ini (wajib, agar berbeda dari soal lain dalam paket): ${bagianVariasi.join('; ')}.`);
+  }
+  return `## Stimulus (wajib)\n${aturan.map((a) => `- ${a}`).join('\n')}`;
+}
+
 export interface KonteksPrompt {
   param: ParameterPaket;
   slot: Slot;
@@ -136,6 +170,9 @@ ${p.cp.trim() ? `- Capaian pembelajaran: ${p.cp.trim()}` : ''}
 - Kesukaran rancangan: ${slot.kesukaran}; level kognitif ${slot.level}.
 - Gaya: ${GAYA[slot.gaya ?? p.gaya]}
 - Bahasa: ${teksBahasa(p)}${p.konteks?.trim() ? `\n- Konteks atau tema yang diminta guru: ${p.konteks.trim()}` : ''}`);
+
+  const stimulus = bagianStimulus(p, slot);
+  if (stimulus) bagian.push(stimulus);
 
   const ujian = bagianPromptUjian(p, slot.level);
   if (ujian) bagian.push(ujian);

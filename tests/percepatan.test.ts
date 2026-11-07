@@ -43,6 +43,7 @@ function param(n: number): ParameterPaket {
     bahasa_lain: '',
     konteks: '',
     aturan_tambahan: [],
+    wajib_stimulus: false,
   };
 }
 

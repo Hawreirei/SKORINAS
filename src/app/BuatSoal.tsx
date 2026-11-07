@@ -20,8 +20,9 @@ import { batasEfektif, permintaanHariIni } from '../ai/laju';
 import { modelDari } from '../ai/registri';
 import { bacaDraf, bagiRata, hapusDraf, hitungRencana, MAKS_SOAL, MIN_SOAL, simpanDraf, SKOR_BAWAAN } from './rencana-buat';
 import { formatBiaya } from './ringkas';
+import { cakupanFormat } from '../ujian/cakupan';
 import { FORMAT_UJIAN, formatUjian, KELUARGA_LABEL, ringkasUjian, type KeluargaUjian } from '../ujian';
-import { barisTp, bentukIsian, galatKartu, isianDariParameter, isianDariUjian, isianKosong, keParameter, kuotaKesukaran, masukanRencana, ubahJumlah, type Isian } from './isian-buat';
+import { barisTp, bentukIsian, cakupanIsian, galatKartu, isianDariParameter, isianDariUjian, isianKosong, keParameter, kuotaKesukaran, masukanRencana, ubahJumlah, type Isian } from './isian-buat';
 import OpsiLanjutanBuat from './OpsiLanjutanBuat';
 
 const MAKS_TP = 500;
@@ -139,6 +140,7 @@ export default function BuatSoal() {
   }
 
   const ujianKini = formatUjian(f.ujian?.id);
+  const cakupan = cakupanFormat(f.ujian?.id);
   const judulBawaan = ujianKini ? `Latihan ${ujianKini.mapel ? ujianKini.nama : `${ujianKini.nama.replace(' · Mapel pilihan', '')} · ${f.mapel.trim() || 'mapel pilihan'}`}` : `${f.mapel.trim()} kelas ${f.kelas || '…'}`;
 
   function pakaiUjian(id: string) {
@@ -449,6 +451,8 @@ export default function BuatSoal() {
                   <p className="mt-1">
                     {[
                       'Kelas, jumlah soal, bentuk soal, dan level sudah disesuaikan; semuanya masih bisa diubah.',
+                      cakupan ? `Bila CP dan TP dikosongkan, soal disebar ke ${cakupan.butir.length} butir cakupan materi ujian ini.` : null,
+                      f.wajibStimulus ? 'Setiap soal diawali cerita atau bacaan dengan tema dan tokoh yang berbeda-beda.' : null,
                       !ujianKini.mapel ? 'Isi mapel pilihan pada kolom mapel.' : null,
                       ujianKini.asli.soal && ujianKini.asli.soal > MAKS_SOAL ? `Satu paket paling banyak ${MAKS_SOAL} soal; buat dua paket untuk ${ujianKini.asli.soal} soal.` : null,
                       ujianKini.keluarga !== 'OSN' ? 'Soal kategori Benar/Salah dibuat sebagai soal benar-salah.' : null,
@@ -523,7 +527,15 @@ export default function BuatSoal() {
                 value={f.tpTeks}
                 onChange={(e) => ubah({ tpTeks: e.target.value })}
                 placeholder="Peserta didik dapat membandingkan dua pecahan berpenyebut berbeda dengan menyamakan penyebutnya."
-                petunjuk={daftarTp.length ? `${daftarTp.length} TP · jumlah soal dibagi ke tiap TP.` : f.cp.trim() ? 'Tanpa TP: soal dibuat dari CP.' : 'Tanpa CP dan TP: soal dibuat dari topik atau mapel.'}
+                petunjuk={
+                  daftarTp.length
+                    ? `${daftarTp.length} TP · jumlah soal dibagi ke tiap TP.`
+                    : f.cp.trim()
+                      ? 'Tanpa TP: soal dibuat dari CP.'
+                      : cakupanIsian(f) && ujianKini
+                        ? `Tanpa CP dan TP: soal disebar ke cakupan materi ${ujianKini.nama} (elemen dan butirnya tercatat di kisi-kisi).`
+                        : 'Tanpa CP dan TP: soal dibuat dari topik atau mapel.'
+                }
               />
               {saranTp.length ? (
                 <details className="mt-2">
