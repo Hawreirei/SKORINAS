@@ -42,7 +42,7 @@ export function paketUntuk(rumpun: Rumpun | null): PaketMapel | null {
 // Urutan penting: "Matematika" diperiksa sebelum kata umum lain.
 const POLA_RUMPUN: [Rumpun, RegExp][] = [
   ['matematika', /matemati|\bmtk\b|\bmath/i],
-  ['ipa', /\bipas?\b|fisika|kimia|biologi|sains|science|ilmu pengetahuan alam/i],
+  ['ipa', /\bipas?\b|fisika|kimia|biologi|sains|science|ilmu pengetahuan alam|astronomi|kebumian/i],
   ['pancasila_agama', /pancasila|\bppkn\b|\bpkn\b|agama|budi pekerti|kewarganegaraan|akidah|fikih|fiqih|quran|hadis|hadits|sejarah kebudayaan islam/i],
   ['ips', /\bips\b|sejarah|geografi|ekonomi|sosiologi|antropologi|ilmu pengetahuan sosial/i],
   ['bahasa', /bahasa|english|inggris|arab|jawa|sunda|mandarin|literasi/i],

@@ -32,6 +32,7 @@ export function paketUji(): PaketSoal {
       jumlah_tp: null,
       opsi_pg: null,
       skor_bentuk: null,
+      ujian: null,
     },
   };
 }

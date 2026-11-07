@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { db } from '../db/skema';
-import type { Bentuk, BahasaSoal, CaraBenarSalah, GayaSoal, Level, ModeGambar, ParameterPaket, Preset, TpDipakai } from '../db/tipe';
+import type { Bentuk, BahasaSoal, CaraBenarSalah, GayaSoal, Level, ModeGambar, ParameterPaket, Preset, TpDipakai, UjianDipakai } from '../db/tipe';
 import { BENTUK_LABEL, LEVEL } from '../db/tipe';
 import { sekarang, tanggalLokal, uuid } from '../db/util';
 import { bagiKomposisi, geserPersen } from '../generasi/komposisi';
@@ -22,6 +22,7 @@ import { batasEfektif, permintaanHariIni } from '../ai/laju';
 import { modelDari } from '../ai/registri';
 import { bacaDraf, bagiRata, hapusDraf, hitungRencana, levelDariPersen, MAKS_SOAL, MIN_SOAL, simpanDraf, SKOR_BAWAAN } from './rencana-buat';
 import { formatBiaya } from './ringkas';
+import { bagiPorsi, FORMAT_UJIAN, formatUjian, isianUjian, KELUARGA_LABEL, ringkasUjian, type KeluargaUjian } from '../ujian';
 
 const MAKS_TP = 500;
 const MAKS_KATA_MATERI = 3000;
@@ -45,6 +46,7 @@ interface Isian {
   jumlahTp: number[] | null;
   opsiPg: 4 | 5 | null;
   skorBentuk: Partial<Record<Bentuk, number>> | null;
+  ujian: UjianDipakai | null;
 }
 
 function isianKosong(): Isian {
@@ -67,6 +69,7 @@ function isianKosong(): Isian {
     jumlahTp: null,
     opsiPg: null,
     skorBentuk: null,
+    ujian: null,
   };
 }
 
@@ -90,6 +93,7 @@ function isianDariParameter(p: ParameterPaket): Isian {
     jumlahTp: p.jumlah_tp ?? null,
     opsiPg: p.opsi_pg ?? null,
     skorBentuk: p.skor_bentuk ?? null,
+    ujian: p.ujian ?? null,
   };
 }
 
@@ -141,8 +145,54 @@ function keParameter(f: Isian): ParameterPaket {
     jumlah_tp: f.jumlahTp && f.jumlahTp.length === tp.length && barisTp(f.tpTeks).length > 1 ? f.jumlahTp : null,
     opsi_pg: f.opsiPg,
     skor_bentuk: f.skorBentuk ? Object.fromEntries(bentuk.map((b) => [b, f.skorBentuk![b] ?? SKOR_BAWAAN[b]])) : null,
+    ujian: f.ujian && formatUjian(f.ujian.id) ? { id: f.ujian.id, daerah: f.ujian.daerah.trim() } : null,
   };
 }
+
+/** Isian dari format ujian: menimpa kelas, jumlah soal, bentuk, level, opsi, skor, gaya, bahasa, dan gambar. */
+function isianDariUjian(f: Isian, id: string): Isian {
+  const u = formatUjian(id);
+  if (!u) return { ...f, ujian: null };
+  const x = isianUjian(u);
+  return {
+    ...f,
+    kelas: x.kelas,
+    mapel: x.mapel ?? (u.saranMapel?.some((m) => m === f.mapel.trim()) ? f.mapel : ''),
+    n: x.n,
+    bentuk: x.bentuk,
+    jumlahBentuk: x.jumlah_bentuk,
+    sebaranLevel: x.sebaran_level,
+    persen: [30, 50, 20],
+    opsiPg: x.opsi_pg,
+    skorBentuk: x.skor_bentuk,
+    gaya: x.gaya,
+    bahasa: x.bahasa,
+    gambar: x.gambar,
+    ujian: { id, daerah: f.ujian?.daerah ?? '' },
+  };
+}
+
+/** Jumlah soal berubah saat format ujian dipakai: jumlah per bentuk dan per level ikut dibagi ulang menurut porsinya. */
+function ubahJumlahUjian(f: Isian, n: number): Isian {
+  const u = formatUjian(f.ujian?.id);
+  if (!u || n === f.n) return { ...f, n };
+  // Selama guru belum mengubahnya, bagi ulang dari porsi format agar pembulatan tidak bergeser; selain itu dari isian guru.
+  const asal = isianUjian(u, f.n);
+  const bentuk = f.jumlahBentuk && samaJumlah(f.jumlahBentuk, asal.jumlah_bentuk) ? u.porsiBentuk : f.jumlahBentuk;
+  const level = f.sebaranLevel && samaJumlah(f.sebaranLevel, asal.sebaran_level) ? u.porsiLevel : f.sebaranLevel;
+  return {
+    ...f,
+    n,
+    jumlahBentuk: bentuk ? bagiPorsi(bentuk, n, URUTAN_BENTUK) : null,
+    sebaranLevel: level ? bagiPorsi(level, n, LEVEL) : null,
+  };
+}
+
+function samaJumlah(a: Partial<Record<string, number>>, b: Partial<Record<string, number>>): boolean {
+  return [...new Set([...Object.keys(a), ...Object.keys(b)])].every((k) => (a[k] ?? 0) === (b[k] ?? 0));
+}
+
+const KELUARGA: KeluargaUjian[] = ['TKA', 'TKAD', 'OSN'];
 
 const KOMPOSISI = [
   { nilai: 'bawaan', label: 'Bawaan', persen: [30, 50, 20], akibat: 'Seimbang untuk penilaian harian.' },
@@ -329,6 +379,14 @@ export default function BuatSoal() {
     setGalat([]);
   }
 
+  const ujianKini = formatUjian(f.ujian?.id);
+  const judulBawaan = ujianKini ? `Latihan ${ujianKini.mapel ? ujianKini.nama : `${ujianKini.nama.replace(' · Mapel pilihan', '')} · ${f.mapel.trim() || 'mapel pilihan'}`}` : `${f.mapel.trim()} kelas ${f.kelas || '…'}`;
+
+  function pakaiUjian(id: string) {
+    setAturSendiri(false);
+    setF((x) => (id ? isianDariUjian(x, id) : { ...x, ujian: null }));
+  }
+
   const daftarTp = useMemo(() => barisTp(f.tpTeks), [f.tpTeks]);
   const saranTp = useMemo(() => daftarTp.map((t) => ({ t, n: nilaiTp(t) })).filter((x) => x.n.nilai !== 'baik'), [daftarTp]);
   const kuota = bagiKomposisi(f.n, f.persen);
@@ -433,7 +491,7 @@ export default function BuatSoal() {
       const param = keParameter(f);
       const idPreset = simpanPreset ? await simpanSebagaiPreset(param) : presetId;
       if (!simpanPreset && presetId) await db.preset.update(presetId, { terakhir_dipakai: sekarang() });
-      const id = await buatPaket(param, judul || `${param.mapel} kelas ${param.kelas}`.slice(0, 80));
+      const id = await buatPaket(param, (judul.trim() || judulBawaan).slice(0, 80));
       if (simpanPreset && idPreset) {
         // Pengaturan tersimpan memakai id TP yang baru diberikan agar paket berikutnya merujuk TP yang sama.
         const paket = await db.paket_soal.get(id);
@@ -472,6 +530,7 @@ export default function BuatSoal() {
   const isiRencana = (
     <>
       <p className="text-base font-bold text-tinta tabular-nums">{ringkasan}</p>
+      {ujianKini ? <p className="mt-1 text-base text-isi">Format {ujianKini.nama}</p> : null}
       <p className="mt-1 text-base text-redup tabular-nums">
         {kuotaTampil[0]} mudah · {kuotaTampil[1]} sedang · {kuotaTampil[2]} sulit
       </p>
@@ -603,6 +662,48 @@ export default function BuatSoal() {
               <h2 id="judul-soal" className="text-[20px] font-extrabold text-judul">
                 Soal yang dibuat
               </h2>
+              <div className={`mt-4 grid items-start gap-4 ${ujianKini?.keluarga === 'TKAD' ? 'sm:grid-cols-2' : 'sm:max-w-md'}`}>
+                <PilihanDaftar id="ujian" label="Format ujian (boleh kosong)" value={ujianKini?.id ?? ''} onChange={(e) => pakaiUjian(e.target.value)}>
+                  <option value="">Soal biasa</option>
+                  {KELUARGA.map((k) => (
+                    <optgroup key={k} label={KELUARGA_LABEL[k]}>
+                      {FORMAT_UJIAN.filter((u) => u.keluarga === k).map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.nama}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </PilihanDaftar>
+                {ujianKini?.keluarga === 'TKAD' ? (
+                  <IsianTeks
+                    id="daerah"
+                    label="Daerah (untuk soal bernuansa lokal)"
+                    value={f.ujian?.daerah ?? ''}
+                    onChange={(e) => ubah({ ujian: { id: ujianKini.id, daerah: e.target.value } })}
+                    placeholder="mis. Kabupaten Tegal"
+                    autoComplete="off"
+                  />
+                ) : null}
+              </div>
+              {ujianKini ? (
+                <Pemberitahuan nada="info" className="mt-4">
+                  <p>
+                    <span className="font-bold">{ujianKini.nama}.</span> {ringkasUjian(ujianKini)} {ujianKini.bentukResmi}
+                  </p>
+                  <p className="mt-1">Penilaian: {ujianKini.penilaian}</p>
+                  <p className="mt-1">
+                    {[
+                      'Kelas, jumlah soal, bentuk soal, dan level sudah disesuaikan; semuanya masih bisa diubah.',
+                      !ujianKini.mapel ? 'Isi mapel pilihan pada kolom mapel.' : null,
+                      ujianKini.asli.soal && ujianKini.asli.soal > MAKS_SOAL ? `Satu paket paling banyak ${MAKS_SOAL} soal; buat dua paket untuk ${ujianKini.asli.soal} soal.` : null,
+                      ujianKini.keluarga !== 'OSN' ? 'Soal kategori Benar/Salah dibuat sebagai soal benar-salah.' : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  </p>
+                </Pemberitahuan>
+              ) : null}
               <div className="mt-4 grid items-start gap-4 sm:grid-cols-[160px_minmax(0,1fr)_128px]">
                 <PilihanDaftar id="kelas" label="Kelas" value={f.kelas} galat={tampilGalat('kelas')} onBlur={() => sentuh('kelas')} onChange={(e) => ubah({ kelas: Number(e.target.value) })}>
                   <option value={0} disabled>
@@ -637,19 +738,19 @@ export default function BuatSoal() {
                     const s = e.target.value.replace(/\D/g, '').slice(0, 3);
                     setTeksN(s);
                     const n = Number(s);
-                    if (s && n >= MIN_SOAL && n <= MAKS_SOAL) ubah({ n });
+                    if (s && n >= MIN_SOAL && n <= MAKS_SOAL) setF((x) => ubahJumlahUjian(x, n));
                   }}
                   onBlur={() => {
                     sentuh('jumlah');
                     if (!teksN.trim()) return;
                     const n = Math.max(MIN_SOAL, Math.min(MAKS_SOAL, Number(teksN) || f.n));
-                    ubah({ n });
+                    setF((x) => ubahJumlahUjian(x, n));
                     setTeksN(String(n));
                   }}
                 />
               </div>
               <datalist id="daftar-mapel">
-                {(mapelLama ?? []).map((m) => (
+                {[...new Set([...(ujianKini?.saranMapel ?? []), ...(mapelLama ?? [])])].map((m) => (
                   <option key={m} value={m} />
                 ))}
               </datalist>
@@ -897,7 +998,7 @@ export default function BuatSoal() {
                   value={judul}
                   onChange={(e) => setJudul(e.target.value)}
                   placeholder="mis. Penilaian harian pecahan"
-                  petunjuk={`Bila kosong: ${f.mapel.trim() ? `${f.mapel.trim()} kelas ${f.kelas || '…'}` : 'mapel dan kelas'}.`}
+                  petunjuk={`Bila kosong: ${ujianKini || f.mapel.trim() ? judulBawaan : 'mapel dan kelas'}.`}
                 />
                 <div>
                 <Sakelar label="Simpan pengaturan ini" petunjuk="Lain kali cukup pilih namanya di atas formulir." checked={simpanPreset} ubah={setSimpanPreset} />

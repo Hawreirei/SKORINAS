@@ -375,6 +375,21 @@ function butirPalsu(bentuk) {
   await hp.waitForSelector('h1');
   await hp.screenshot({ path: path.join(KELUAR, '09-buat-ponsel.png'), fullPage: true });
   let lebar = await hp.evaluate(() => document.documentElement.scrollWidth);
+  // Format ujian (F-35): memilih TKAD mengisi kelas, jumlah soal, dan menampilkan isian daerah.
+  await hp.selectOption('#ujian', 'tkad-sd-matematika');
+  await hp.fill('#daerah', 'Kabupaten Tegal');
+  const isiUjian = await hp.evaluate(() => ['#kelas', '#mapel', '#jumlah'].map((q) => document.querySelector(q).value));
+  if (isiUjian.join('|') !== '6|Matematika|30') galat.push(`format ujian tidak mengisi layar Buat: ${isiUjian.join('|')}`);
+  await hp.getByText('Ujian aslinya 30 soal dalam 75 menit.').waitFor();
+  await hp.screenshot({ path: path.join(KELUAR, '09d-buat-format-ujian-ponsel.png'), fullPage: true });
+  lebar = Math.max(lebar, await hp.evaluate(() => document.documentElement.scrollWidth));
+  await page.goto(DASAR + '/soal/baru');
+  await page.waitForSelector('#ujian');
+  await page.selectOption('#ujian', 'osnk-smp-matematika');
+  await page.locator('aside[aria-label="Rencana"]').getByText('Format OSN-K SMP · Matematika').waitFor();
+  if ((await page.inputValue('#jumlah')) !== '25') galat.push('format OSN-K SMP tidak mengisi 25 soal');
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await foto('03c-buat-format-ujian');
   for (const [n, u] of [['09b-periksa-ponsel', urlPeriksa], ['09c-unduh-ponsel', urlUnduh]]) {
     await hp.goto(u);
     await hp.waitForSelector('h1');

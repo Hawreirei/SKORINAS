@@ -99,6 +99,8 @@ describe('rumpun dari nama mapel', () => {
     ['Sejarah', 'ips'],
     ['PJOK', 'seni_pjok_informatika'],
     ['Informatika', 'seni_pjok_informatika'],
+    ['Astronomi', 'ipa'],
+    ['Kebumian', 'ipa'],
     ['Muatan lokal batik', null],
     ['', null],
   ])('%s → %s', (mapel, rumpun) => {

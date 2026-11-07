@@ -11,6 +11,7 @@ export function lengkapiParameter(p: ParameterPaket): ParameterPaket {
     jumlah_tp: p.jumlah_tp ?? null,
     opsi_pg: p.opsi_pg ?? null,
     skor_bentuk: p.skor_bentuk ?? null,
+    ujian: p.ujian ?? null,
   };
 }
 
@@ -56,6 +57,15 @@ export class GenSoalDb extends Dexie {
     // Versi 3: Pengaturan lanjutan yang lebih rinci. Parameter paket dan preset mendapat isian jumlah_bentuk,
     // sebaran_level, jumlah_tp, opsi_pg, dan skor_bentuk (null = perilaku lama). Indeks tidak berubah.
     this.version(3).upgrade(async (tx) => {
+      await tx.table('preset').toCollection().modify((p: Preset) => {
+        p.parameter_json = lengkapiParameter(p.parameter_json);
+      });
+      await tx.table('paket_soal').toCollection().modify((p: PaketSoal) => {
+        p.parameter_json = lengkapiParameter(p.parameter_json);
+      });
+    });
+    // Versi 4: format ujian (F-35). Parameter paket dan preset mendapat isian ujian (null = soal biasa).
+    this.version(4).upgrade(async (tx) => {
       await tx.table('preset').toCollection().modify((p: Preset) => {
         p.parameter_json = lengkapiParameter(p.parameter_json);
       });

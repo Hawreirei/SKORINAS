@@ -4,12 +4,17 @@ Catatan ini melengkapi `docs/RANCANGAN.md` v0.4. Bagian "Keputusan saat membangu
 
 ## Perlu diputuskan (dari rancangan)
 
+- [ ] **Format ujian: cakupan materi.** Format TKA hanya menyebut nama elemen (mis. Bilangan, Aljabar, Geometri dan Pengukuran, Data dan Peluang) di aturan prompt, bukan sub-elemen dan butir cakupan kerangka asesmen, karena AGENTS.md butir 7 melarang membawa data kurikulum. Bila pemilik ingin daftar cakupan resmi ikut dibawa (mis. sebagai TP siap pakai), aturan butir 7 perlu diubah dulu.
+- [ ] **Bentuk "pilihan ganda kompleks kategori" (TKA).** Sementara dibuat sebagai soal benar-salah satu pernyataan; bentuk aslinya satu stimulus dengan beberapa pernyataan Benar/Salah dalam satu tabel dan satu nomor. Bentuk baru memerlukan skema, verifikasi per pernyataan, dan tata letak ekspor sendiri (usul fitur lanjutan).
+
 - [ ] Urutan mata pelajaran yang dibuka setelah Matematika (usul: IPAS, Bahasa Indonesia, Bahasa Inggris).
 - [ ] Penyedia AI MVP. Kode sudah mendukung keenamnya; yang perlu diputuskan adalah mana yang diuji golden set dan ditampilkan lebih dulu.
 - [ ] Harga dan bentuk lisensi sekali bayar, batas perangkat per kode (F-19, V1).
 - [x] Apakah PDF boleh berbeda tampilan dari hasil kompilasi LaTeX. Diputuskan v0.4: Word dan PDF mengikuti pakem penulisan soal (Times New Roman 12); .tex memakai templatnya sendiri di menu lanjutan.
 
 ## Perlu diverifikasi sebelum rilis
+
+- [ ] **Angka format ujian (F-35).** Dokumen resmi (Perkaban BSKAP 045 dan 047/H/AN/2025, panduan OSN Puspresnas) tidak dapat diunduh dari lingkungan pengembangan; angka di `src/ujian/index.ts` dari berita yang mengutipnya. Butir bertanda **perlu dicek** di `docs/referensi/format-ujian.md` (durasi TKA SD, banyak opsi TKA SMA, daftar mapel pilihan, OSN-K SD, jumlah soal OSN-K SMA Astronomi/Kebumian/Ekonomi/Geografi/Informatika, penilaian OSN) dicocokkan dengan dokumen resmi tahun berjalan.
 
 - [ ] **Lisensi font PDF.** PDF menanam Liberation Serif 2.1.5 (SIL OFL 1.1, metrik sama dengan Times New Roman; lisensi di `public/fonts/OFL-LiberationSerif.txt`), bukan Times New Roman yang berlisensi Monotype. Cek ulang sebelum rilis bahwa pengganti ini dapat diterima; Word tetap memakai nama font Times New Roman dari komputer guru.
 - [ ] **Uji dengan 3 orang awam** (saran 8): catat titik berhenti mereka, lalu koreksi urutan dan istilah. Siap dijalankan: tahap UI-00 sampai UI-12 rancangan UI v0.5 selesai.
@@ -257,3 +262,23 @@ Rancangan dan tahap kerja ada di `docs/RANCANGAN-UI.md` (issue induk #1).
 | Teks kecil | Pratinjau kop di Profil kini 16 px. Pengecualian yang disengaja: miniatur halaman A4 di pratinjau Unduh (8,5–10 px) karena berupa gambar halaman; tampilan cetak ukuran penuh tersedia di Menu lanjutan | Teks layar minimal 16 px |
 | Copy | Tidak ditemukan lagi Setujui, Disetujui, Mohon cek dulu, "Langkah n dari 3", atau kata generate/preset/ekspor di label. RPM dan RPD hanya di Pengaturan lanjutan dengan petunjuk akibat. Label proses: "Menyiapkan…", "Menjeda…", "Membuat berkas…", "Menguji…" | Aturan "Bahasa di layar" |
 | Mode gelap di e2e | Tangkapan `14-buat-gelap`, `14-paket-gelap`, `14-unduh-gelap` lewat `emulateMedia({ colorScheme: 'dark' })` dengan tema Ikuti sistem | Mode gelap diperiksa setiap kali e2e dijalankan |
+
+## Format ujian TKA, TKAD, OSN (F-35, 7 November 2026)
+
+Permintaan pemilik: format untuk membuat soal TKA, TKAD, dan OSN tingkat SD sampai SMA setelah meriset atribut ujiannya. Riset: `docs/referensi/format-ujian.md`.
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Letak | Satu pilihan "Format ujian (boleh kosong)" di kartu Soal yang dibuat, dikelompokkan TKA · TKAD · OSN, dengan kotak keterangan ujian asli di bawahnya. Bukan pengaturan tersimpan: guru tetap dapat menyimpan isian hasil format sebagai pengaturan tersimpan | Tidak menambah langkah; kata "preset" tidak dipakai di layar |
+| Data | Parameter paket mendapat isian `ujian` (`{ id, daerah }` atau null) lewat Dexie versi 4; atribut format dibaca dari katalog `src/ujian/` saat dipakai, sehingga perbaikan angka di rilis berikut ikut berlaku untuk prompt. Id yang tidak dikenal diabaikan | Satu sumber atribut; cadangan lama tetap terbaca |
+| Isian yang diisi | Kelas, mapel, jumlah soal, jumlah per bentuk, jumlah per level, banyak opsi, skor, gaya, bahasa, gambar. CP dan TP tidak disentuh | AGENTS.md butir 7 |
+| Jumlah soal | Jumlah asli ujian, dibatasi 5–50 (batas layar Buat); 30 bila jumlah resmi belum pasti. Ujian > 50 soal (OSN-K SD IPA/IPS, OSN-K SMP IPS, OSN-P SD IPS) disarankan dibuat dua paket | Batas 50 dipertahankan (uji komposisi S1) |
+| Ubah jumlah soal | Saat format dipakai, jumlah per bentuk dan per level dibagi ulang menurut porsinya (sisa terbesar). Selama isian belum diubah guru, pembagian memakai porsi format agar pembulatan tidak bergeser | Tanpa ini mengubah jumlah soal langsung memunculkan galat "jumlah per bentuk harus sama" |
+| Level TKA | Tiga level resmi dipetakan: Pengetahuan dan Pemahaman = C1–C2, Aplikasi = C3, Penalaran = C4–C6; sebaran 6/12/12 untuk 30 soal (contoh paket). Prompt menyebut level TKA butir. Kisi-kisi tetap menulis C1–C6: kolom Level di Word dan PDF terlalu sempit (sekitar 1 cm) untuk nama level TKA; menampilkannya perlu tata kolom kisi-kisi baru (tindak lanjut) | Rencana butir dan kesukaran tetap memakai C1–C6 |
+| Level OSN | C3–C6 dengan porsi 2:3:3:2; OSN-K SMA Matematika rata (soal dasar dan lanjut) | Olimpiade tidak menguji hafalan |
+| Bentuk | PG → pilihan ganda; PG kompleks MCMA → pilihan ganda kompleks; PG kompleks kategori → benar-salah (lihat Perlu diputuskan); OSN pilihan jamak → pilihan ganda; isian → isian singkat | Bentuk yang sudah ada |
+| TKAD | Meniru TKA SD/SMP dan menambah aturan kelokalan dengan nama daerah dari isian Daerah (kosong: konteks Nusantara umum) | Tidak ada TKAD nasional; format berbeda per dinas. 30% soal TKA SD/SMP disusun daerah dengan unsur kelokalan |
+| Mapel pilihan TKA SMA | Mapel dikosongkan dan 19 mapel pilihan akademik muncul sebagai saran isian | Guru memilih mapel ujinya sendiri |
+| Rumpun | "Astronomi" dan "Kebumian" kini dikenali sebagai rumpun IPA | Mapel OSN SMA; sebelumnya tidak dikenali |
+| Uji | `tests/ujian.test.ts`: setiap format dapat langsung direncanakan untuk semua jumlah 5–50, angka kunci (TKA SD 19/5/6 dan 6/12/12, OSN-K SMP 25 PG skor 4), prompt TKA/TKAD/OSN, migrasi versi 4, dan cadangan. E2E memilih format TKAD di ponsel dan OSN-K SMP di laptop | AGENTS.md butir 5 |
+| E2E tidak stabil | `npm run e2e` di lingkungan pengembangan gagal tidak menentu di dua langkah lama: "Mulai cepat tidak mengisi layar Buat" (kadang `#kelas` belum ada) dan, di layar Unduh, penelusuran Tab tidak mencapai tombol Unduh sehingga Enter jatuh ke tautan kaki "Profil dan kop". Langkah Mulai cepat juga gagal pada kode sebelum F-35 (dua dari dua run); layar Unduh tidak diubah F-35. Langkah format ujian, lebar ponsel 390 px, dan axe (0 pelanggaran di 16 pemeriksaan) lolos di setiap run | Perlu ditelusuri terpisah |

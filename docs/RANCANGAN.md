@@ -101,6 +101,7 @@ MVP dibatasi pada satu jalur lengkap: dari isian kelas, mapel, CP, dan TP sampai
 | F-32 | Ujian daring dengan penilaian otomatis | V2 |
 | F-33 | Perangkat ajar: ATP, modul ajar, LKPD | V2 |
 | F-34 | Nilai dan deskripsi rapor | V2 |
+| F-35 | Format ujian TKA, TKAD, dan OSN (SD sampai SMA) di layar Buat: mengisi jumlah soal, bentuk, level, opsi, gaya, dan bahasa sesuai ujiannya, serta menambah aturan penulisan ujian ke prompt (permintaan pemilik, 7 November 2026) | MVP |
 
 ## Alur Pengguna
 
@@ -140,6 +141,15 @@ Menu atas berisi Beranda, Buat soal, Soal saya, Pengaturan AI, dan Cadangan. Pro
 3. **CP dan TP** berupa dua kolom teks; satu TP satu baris; jumlah soal dibagi ke tiap TP. Boleh dikosongkan: tanpa TP soal dibuat dari CP, tanpa keduanya dari topik atau mapel. Pemeriksa kualitas TP memberi saran tanpa memblokir.
 4. **Pengaturan lanjutan** tertutup secara bawaan: komposisi mudah/sedang/sulit (bawaan 30/50/20, saling terkunci pada 100%), bentuk soal, cara menjawab benar-salah (centang kotak atau lingkari B/S), bahasa, gaya, soal bergambar, teks materi tempel, dan judul paket.
 5. **Panel Rencana** (samping kanan di laptop, bilah bawah dengan "Rincian" di ponsel): ringkasan isian, perkiraan permintaan AI, waktu, sisa kuota, dan biaya, isian yang masih kurang, tombol Batal (merah), dan tombol utama "Buat n soal" (atau "Pasang kunci AI dulu" bila belum ada kunci). "Simpan pengaturan ini" (dengan nama) ada di akhir Pengaturan lanjutan. Isian tersimpan otomatis sebagai draf. Pembuatan dimulai langsung dan mengarah ke halaman paket soal.
+
+### Format ujian (F-35)
+
+Pilihan "Format ujian (boleh kosong)" di kartu pertama layar Buat berisi format TKA (SD, SMP, SMA), TKAD (SD, SMP), dan OSN (SD, SMP, SMA) dari `src/ujian/`. Memilih satu format mengisi kelas, mapel (kecuali mapel pilihan TKA SMA), jumlah soal, jumlah per bentuk, jumlah per level C1–C6, banyak opsi, skor (bila aturannya seragam), gaya, bahasa, dan gambar; semuanya tetap dapat diubah. Satu kotak keterangan menyebut jumlah soal dan durasi ujian aslinya, bentuk soal resmi, dan cara penilaiannya. Format TKAD menambah isian Daerah untuk soal bernuansa lokal.
+
+- Format hanya membawa atribut ujian, tidak membawa CP atau TP: TP tetap dari guru.
+- Aturan penulisan format (mis. level TKA butir, stimulus, unsur kelokalan) ditambahkan ke prompt; level TKA dipetakan dari C1–C6 (Pengetahuan dan Pemahaman C1–C2, Aplikasi C3, Penalaran C4–C6); kisi-kisi tetap menulis C1–C6.
+- Ujian yang lebih dari 50 soal dibatasi 50 per paket. Mengubah jumlah soal membagi ulang jumlah per bentuk dan per level menurut porsi format.
+- Riset atribut dan sumbernya: `docs/referensi/format-ujian.md`.
 
 Mapel diketik guru; rumpun mapel (penentu pemeriksa jawaban) ditebak dari namanya. Mapel yang belum punya pemeriksa otomatis menghasilkan soal berketerangan "Kunci tidak dicek otomatis".
 
@@ -232,7 +242,7 @@ Semua data milik guru (pengaturan tersimpan, paket, soal, profil) disimpan di In
 - Soal uraian menyimpan `jenis_uraian` (penjelasan atau hitungan) di isi\_json.
 - Tanpa Row Level Security: seluruh data tinggal di perangkat. Konsekuensinya, kehilangan data peramban berarti kehilangan soal, sehingga cadangan .gensoal dan permintaan penyimpanan persisten (navigator.storage.persist) menjadi bagian MVP.
 - Hapus bersifat lunak (dihapus\_pada) untuk soal dan paket, dengan tong sampah yang dikosongkan setelah 30 hari.
-- Setiap perubahan skema IndexedDB lewat nomor versi Dexie baru dengan fungsi migrasi. Pengaturan tersimpan (toko preset): id, nama, parameter\_json, terakhir\_dipakai. Versi 2 skema menghapus toko tp\_kustom. Versi 3 menambah isian parameter jumlah\_bentuk, sebaran\_level, jumlah\_tp, opsi\_pg, dan skor\_bentuk (null berarti perilaku bawaan).
+- Setiap perubahan skema IndexedDB lewat nomor versi Dexie baru dengan fungsi migrasi. Pengaturan tersimpan (toko preset): id, nama, parameter\_json, terakhir\_dipakai. Versi 2 skema menghapus toko tp\_kustom. Versi 3 menambah isian parameter jumlah\_bentuk, sebaran\_level, jumlah\_tp, opsi\_pg, dan skor\_bentuk (null berarti perilaku bawaan). Versi 4 menambah isian ujian (id format dan daerah; null berarti soal biasa).
 
 ## Mesin AI dan Verifikasi
 
