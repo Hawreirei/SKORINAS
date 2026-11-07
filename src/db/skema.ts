@@ -1,4 +1,5 @@
 import Dexie, { type EntityTable } from 'dexie';
+import { formatUjian } from '../ujian';
 import type { KunciApi, LogSoal, PaketSoal, ParameterPaket, PekerjaanGenerasi, PemakaianAi, Preset, Profil, Soal, SoalGambar } from './tipe';
 
 /** Lengkapi parameter paket dari versi lama dengan nilai bawaan isian baru. */
@@ -12,6 +13,15 @@ export function lengkapiParameter(p: ParameterPaket): ParameterPaket {
     opsi_pg: p.opsi_pg ?? null,
     skor_bentuk: p.skor_bentuk ?? null,
     ujian: p.ujian ?? null,
+    rincian: p.rincian ?? null,
+    atur_bentuk: p.atur_bentuk ?? null,
+    skor_salah: p.skor_salah ?? null,
+    durasi_menit: p.durasi_menit ?? null,
+    jumlah_gaya: p.jumlah_gaya ?? null,
+    bahasa_lain: p.bahasa_lain ?? '',
+    konteks: p.konteks ?? '',
+    // Paket bertanda format ujian dari versi 4 mendapat salinan aturan format, agar tetap dapat disunting.
+    aturan_tambahan: p.aturan_tambahan ?? [...(formatUjian(p.ujian?.id)?.aturan ?? [])],
   };
 }
 
@@ -66,6 +76,16 @@ export class GenSoalDb extends Dexie {
     });
     // Versi 4: format ujian (F-35). Parameter paket dan preset mendapat isian ujian (null = soal biasa).
     this.version(4).upgrade(async (tx) => {
+      await tx.table('preset').toCollection().modify((p: Preset) => {
+        p.parameter_json = lengkapiParameter(p.parameter_json);
+      });
+      await tx.table('paket_soal').toCollection().modify((p: PaketSoal) => {
+        p.parameter_json = lengkapiParameter(p.parameter_json);
+      });
+    });
+    // Versi 5: opsi lanjutan v2 (F-36): susunan per baris, rincian tiap bentuk, skor salah, waktu, campuran gaya,
+    // bahasa lain, konteks, dan aturan tambahan. Paket format ujian mendapat salinan aturan formatnya.
+    this.version(5).upgrade(async (tx) => {
       await tx.table('preset').toCollection().modify((p: Preset) => {
         p.parameter_json = lengkapiParameter(p.parameter_json);
       });

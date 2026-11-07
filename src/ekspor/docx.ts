@@ -246,6 +246,7 @@ function tabelPenskoran(d: DokumenSoal): (Paragraph | Table)[] {
       ],
     }),
     p([tr(t.rumus)], { spacing: { before: 120 } }),
+    ...d.penskoran!.catatan.map((c) => p([tr(c)], { spacing: { before: 40 } })),
   ];
 }
 
@@ -338,7 +339,8 @@ function kepalaDokumen(d: DokumenSoal): (Paragraph | Table)[] {
     hasil.push(p(anak, { tabStops: posisi, spacing: { before: 200, after: 120 } }));
   }
   hasil.push(p([tr(d.judul.toUpperCase(), { tebal: true })], { alignment: AlignmentType.CENTER, spacing: { before: 160, after: d.kop ? 160 : 0 } }));
-  if (!d.kop) hasil.push(p([tr(mapelKelas)], { alignment: AlignmentType.CENTER, spacing: { after: 160 } }));
+  if (!d.kop) hasil.push(p([tr(mapelKelas)], { alignment: AlignmentType.CENTER, spacing: { after: d.waktu ? 0 : 160 } }));
+  if (d.waktu) hasil.push(p([tr(d.waktu)], { alignment: AlignmentType.CENTER, spacing: { after: 160 } }));
   return hasil;
 }
 

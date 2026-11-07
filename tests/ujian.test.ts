@@ -19,7 +19,7 @@ function slot(level: Level, bentuk: Bentuk = 'pilihan_ganda'): Slot {
 function paramUjian(id: string, daerah = ''): ParameterPaket {
   const u = formatUjian(id)!;
   const x = isianUjian(u);
-  return { ...paketUji().parameter_json, kelas: x.kelas, mapel: x.mapel ?? 'Fisika', n: x.n, bentuk: x.bentuk, jumlah_bentuk: x.jumlah_bentuk, sebaran_level: x.sebaran_level, opsi_pg: x.opsi_pg, ujian: { id, daerah } };
+  return { ...paketUji().parameter_json, kelas: x.kelas, mapel: x.mapel ?? 'Fisika', n: x.n, bentuk: x.bentuk, jumlah_bentuk: x.jumlah_bentuk, sebaran_level: x.sebaran_level, opsi_pg: x.opsi_pg, atur_bentuk: x.atur_bentuk, aturan_tambahan: x.aturan_tambahan, durasi_menit: x.durasi_menit, ujian: { id, daerah } };
 }
 
 describe('katalog format ujian', () => {
@@ -143,7 +143,7 @@ describe('prompt format ujian', () => {
   it('OSN tanpa level TKA; isian Matematika SMA berjawaban bilangan bulat', () => {
     const pesan = susunPesan({ param: paramUjian('osnk-sma-matematika'), slot: slot('C6', 'isian_singkat'), pokokLain: [], alasanGagal: [] });
     expect(pesan).toContain('## Format ujian: OSN-K SMA · Matematika');
-    expect(pesan).toContain('Jawaban isian berupa satu bilangan bulat.');
+    expect(pesan).toContain('Jawaban isian berupa satu bilangan bulat tanpa satuan.');
     expect(pesan).not.toContain('berlevel TKA');
   });
 

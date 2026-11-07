@@ -18,7 +18,7 @@ export interface KonteksKaidah {
   literasi: boolean;
   pokokLain: string[];
   /** Banyak opsi pilihan ganda yang diatur guru. `wajib` saat dibuat AI (selisih membuat soal dibuat ulang); suntingan guru hanya diberi catatan. */
-  opsiPg?: { jumlah: 4 | 5; wajib: boolean } | null;
+  opsiPg?: { jumlah: 3 | 4 | 5; wajib: boolean } | null;
 }
 
 const OPSI_TERLARANG =
@@ -41,7 +41,9 @@ export function periksaKaidah(isi: IsiSoal, k: KonteksKaidah): HasilKaidah {
   if (isi.bentuk === 'pilihan_ganda' || isi.bentuk === 'pilihan_ganda_kompleks') {
     const opsi = Object.entries(isi.opsi ?? {}) as [HurufOpsi, string][];
     const jumlahDiharapkan = k.opsiPg?.jumlah ?? (k.kelas >= 10 ? 5 : 4);
-    if (opsi.length < 4 || opsi.length > 5) keras.push(`Pilihan ganda harus memiliki 4 atau 5 opsi, bukan ${opsi.length}.`);
+    // Tiga opsi hanya sah bila guru mengaturnya; tanpa pengaturan tetap 4 atau 5 opsi.
+    const minOpsi = k.opsiPg?.jumlah === 3 ? 3 : 4;
+    if (opsi.length < minOpsi || opsi.length > 5) keras.push(`Pilihan ganda harus memiliki ${minOpsi === 3 ? '3 sampai 5' : '4 atau 5'} opsi, bukan ${opsi.length}.`);
     else if (opsi.length !== jumlahDiharapkan) (k.opsiPg?.wajib ? keras : lunak).push(k.opsiPg ? `Paket ini memakai ${jumlahDiharapkan} opsi, bukan ${opsi.length}.` : `Jenjang ini biasanya memakai ${jumlahDiharapkan} opsi.`);
 
     const polos = opsi.map(([, t]) => teksPolos(t).toLowerCase().replace(/\s+/g, ' ').trim());

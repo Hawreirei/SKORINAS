@@ -14,7 +14,7 @@ export interface KonteksPeriksa {
   pokokLain: string[];
   gambarDiizinkan: boolean;
   /** Banyak opsi pilihan ganda yang diatur guru (lihat KonteksKaidah). */
-  opsiPg?: { jumlah: 4 | 5; wajib: boolean } | null;
+  opsiPg?: { jumlah: 3 | 4 | 5; wajib: boolean } | null;
 }
 
 export interface HasilPeriksa {

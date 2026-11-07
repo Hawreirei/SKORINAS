@@ -7,11 +7,13 @@ export type Level = 'C1' | 'C2' | 'C3' | 'C4' | 'C5' | 'C6';
 export type StatusMutu = 'terverifikasi_hitung' | 'terverifikasi_aturan' | 'perlu_telaah' | 'ditolak';
 export type StatusTelaah = 'draf' | 'ditelaah_guru' | 'ditolak';
 export type Rumpun = 'matematika' | 'ipa' | 'bahasa' | 'ips' | 'pancasila_agama' | 'seni_pjok_informatika';
-export type BahasaSoal = 'id' | 'en' | 'dwibahasa';
+export type BahasaSoal = 'id' | 'en' | 'dwibahasa' | 'lain';
 export type GayaSoal = 'biasa' | 'numerasi' | 'literasi' | 'hots';
 export type ModeGambar = 'terprogram' | 'mati' | 'campuran';
 export type JenisUraian = 'penjelasan' | 'hitungan';
 export type CaraBenarSalah = 'centang' | 'lingkari';
+/** Jenis jawaban isian singkat yang diminta guru. */
+export type JenisIsian = 'bebas' | 'bilangan' | 'bilangan_bulat' | 'kata';
 export type PenyediaId = 'gemini' | 'openrouter' | 'groq' | 'mistral' | 'openai' | 'anthropic';
 
 export const BENTUK_LABEL: Record<Bentuk, string> = {
@@ -49,6 +51,29 @@ export const STATUS_MUTU_LABEL: Record<StatusMutu, string> = {
 };
 
 export const JENIS_URAIAN_LABEL: Record<JenisUraian, string> = { penjelasan: 'Penjelasan', hitungan: 'Hitungan' };
+
+export const GAYA: GayaSoal[] = ['biasa', 'numerasi', 'literasi', 'hots'];
+export const GAYA_LABEL: Record<GayaSoal, string> = { biasa: 'Biasa', numerasi: 'Numerasi', literasi: 'Literasi', hots: 'HOTS' };
+
+/** Rincian tiap bentuk soal (opsi lanjutan v2). Setiap isian null berarti perilaku bawaan. */
+export interface AturBentuk {
+  /** Pilihan ganda kompleks: banyak jawaban benar per soal. */
+  pgk_benar: { min: number; maks: number } | null;
+  /** Menjodohkan: banyak butir kolom kiri (3–6) dan pengecoh di kolom kanan (0–2). */
+  jodoh: { kiri: number; pengecoh: number } | null;
+  /** Isian singkat: jenis jawaban. */
+  isian: JenisIsian | null;
+  /** Uraian: semua penjelasan, semua hitungan, atau null (campur, dipilih AI). */
+  uraian: JenisUraian | null;
+}
+
+/** Satu baris susunan rinci: sekian soal berbentuk ini, berlevel ini, untuk TP ini (null: TP bergiliran). */
+export interface BarisRincian {
+  bentuk: Bentuk;
+  level: Level;
+  tp: number | null;
+  jumlah: number;
+}
 
 /** Satu TP yang dipakai paket, ditulis guru. Disalin utuh ke soal agar kisi-kisi lama tidak berubah diam-diam. */
 export interface TpDipakai {
@@ -90,12 +115,29 @@ export interface ParameterPaket {
   sebaran_level: Partial<Record<Level, number>> | null;
   /** Jumlah soal per TP, sejajar urutan `tp` (berjumlah n). null: TP dibagi rata bergiliran. */
   jumlah_tp: number[] | null;
-  /** Banyak opsi pilihan ganda (biasa dan kompleks). null: 5 untuk kelas 10–12, 4 untuk lainnya. */
-  opsi_pg: 4 | 5 | null;
+  /** Banyak opsi pilihan ganda (biasa dan kompleks), 3–5. null: 5 untuk kelas 10–12, 4 untuk lainnya. */
+  opsi_pg: 3 | 4 | 5 | null;
   /** Skor setiap soal per bentuk, dicetak di lembar soal dan pedoman penskoran. null: tanpa skor. */
   skor_bentuk: Partial<Record<Bentuk, number>> | null;
   /** Format ujian (TKA, TKAD, OSN) yang mengisi formulir dan menambah aturan ke prompt. null: soal biasa. */
   ujian: UjianDipakai | null;
+  // ---- Opsi lanjutan v2 (Dexie versi 5). null atau kosong berarti perilaku bawaan. ----
+  /** Susunan rinci per baris (bentuk × level × TP), menggantikan jumlah per bentuk, per level, dan per TP. */
+  rincian: BarisRincian[] | null;
+  /** Rincian tiap bentuk soal. */
+  atur_bentuk: AturBentuk | null;
+  /** Pengurangan skor untuk jawaban salah per bentuk (bilangan positif). Jawaban kosong selalu 0. */
+  skor_salah: Partial<Record<Bentuk, number>> | null;
+  /** Waktu mengerjakan, dicetak di lembar soal. */
+  durasi_menit: number | null;
+  /** Campuran gaya: jumlah soal per gaya (berjumlah n), menggantikan `gaya`. */
+  jumlah_gaya: Partial<Record<GayaSoal, number>> | null;
+  /** Nama bahasa bila `bahasa` = 'lain'. */
+  bahasa_lain: string;
+  /** Konteks atau tema soal yang diinginkan guru, mis. "pertanian dan pasar tradisional". */
+  konteks: string;
+  /** Aturan tambahan untuk AI, satu aturan per butir. Diisi format ujian dan dapat disunting guru. */
+  aturan_tambahan: string[];
   /** Data dari versi 0.3 (sebelum aplikasi berhenti membawa data kurikulum). Tidak diisi lagi. */
   kurikulum_id?: string;
   kurikulum_nama?: string;
@@ -275,6 +317,8 @@ export interface Slot {
   pengganti: boolean;
   galat: string | null;
   soal_id: string | null;
+  /** Gaya butir ini bila paket memakai campuran gaya; selain itu gaya paket. */
+  gaya?: GayaSoal;
 }
 
 export interface PekerjaanGenerasi extends Rekaman {

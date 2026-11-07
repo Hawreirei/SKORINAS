@@ -1,4 +1,4 @@
-import type { BahasaSoal, Bentuk, GayaSoal, Level, ModeGambar, ParameterPaket } from '../db/tipe';
+import type { AturBentuk, BahasaSoal, Bentuk, GayaSoal, Level, ModeGambar, ParameterPaket } from '../db/tipe';
 import { LEVEL } from '../db/tipe';
 import { URUTAN_BENTUK } from '../generasi/rencana';
 
@@ -28,7 +28,9 @@ export interface FormatUjian {
   porsiBentuk: Partial<Record<Bentuk, number>>;
   /** Porsi level C1–C6; dibagi ke jumlah soal paket dengan sisa terbesar. */
   porsiLevel: Partial<Record<Level, number>>;
-  opsiPg: 4 | 5;
+  opsiPg: 3 | 4 | 5;
+  /** Rincian tiap bentuk (mis. jawaban isian berupa bilangan bulat). */
+  aturBentuk?: Partial<AturBentuk>;
   /** Skor per soal bila aturan ujiannya seragam; null bila tidak. */
   skor: Partial<Record<Bentuk, number>> | null;
   gaya: GayaSoal;
@@ -111,7 +113,7 @@ const SARAN_PILIHAN_SMA = [
 
 type Dasar = Omit<FormatUjian, 'id' | 'nama' | 'mapel' | 'asli' | 'aturan' | 'gaya' | 'bahasa' | 'gambar'> & Partial<Pick<FormatUjian, 'gaya' | 'bahasa' | 'gambar'>>;
 
-function tka(keluarga: 'TKA' | 'TKAD', jenjang: Jenjang, kelas: number, opsiPg: 4 | 5): Dasar {
+function tka(keluarga: 'TKA' | 'TKAD', jenjang: Jenjang, kelas: number, opsiPg: 3 | 4 | 5): Dasar {
   return {
     keluarga,
     jenjang,
@@ -125,7 +127,7 @@ function tka(keluarga: 'TKA' | 'TKAD', jenjang: Jenjang, kelas: number, opsiPg: 
   };
 }
 
-function osn(jenjang: Jenjang, kelas: number, opsiPg: 4 | 5, porsiBentuk: Partial<Record<Bentuk, number>>, bentukResmi: string, penilaian: string, skor: FormatUjian['skor'] = null): Dasar {
+function osn(jenjang: Jenjang, kelas: number, opsiPg: 3 | 4 | 5, porsiBentuk: Partial<Record<Bentuk, number>>, bentukResmi: string, penilaian: string, skor: FormatUjian['skor'] = null): Dasar {
   return { keluarga: 'OSN', jenjang, kelas, porsiBentuk, porsiLevel: LEVEL_OSN, opsiPg, skor, bentukResmi, penilaian, gaya: 'hots' };
 }
 
@@ -198,8 +200,7 @@ export const FORMAT_UJIAN: FormatUjian[] = [
   buat('osnp-sd-matematika', 'OSN-P SD · Matematika', 'Matematika', { soal: 20, menit: 60 }, osn('SD', 5, 4, { isian_singkat: 1 }, 'Isian singkat.', PENILAIAN_OSN_TAK_PASTI), [
     ...ATURAN_OSN,
     'Ranah Matematika OSN SD: bilangan, aritmetika, geometri, kombinatorik, serta statistika, data, dan pengukuran.',
-    'Jawaban isian berupa satu bilangan.',
-  ]),
+  ], { aturBentuk: { isian: 'bilangan' } }),
   buat('osnp-sd-ipa', 'OSN-P SD · IPA', 'IPA', { soal: 20, menit: 60 }, osn('SD', 5, 4, { isian_singkat: 1 }, 'Isian singkat.', PENILAIAN_OSN_TAK_PASTI), [
     ...ATURAN_OSN,
     'Soal IPA olimpiade SD menuntut penalaran ilmiah: membaca data atau hasil percobaan sederhana, sebab-akibat, dan penerapan konsep.',
@@ -235,7 +236,8 @@ export const FORMAT_UJIAN: FormatUjian[] = [
     'Matematika',
     { soal: 20, menit: 150 },
     { ...osn('SMA', 11, 5, { isian_singkat: 1 }, 'Isian singkat berjawaban bilangan bulat: 10 soal dasar dan 10 soal lanjut.', 'Soal dasar: benar 2, salah atau kosong 0. Soal lanjut: benar 4, kosong 0, salah −1.'), porsiLevel: { C3: 1, C4: 1, C5: 1, C6: 1 } },
-    [...ATURAN_OSN, 'Ranah Matematika OSN SMA: aljabar, geometri, kombinatorika, dan teori bilangan.', 'Jawaban isian berupa satu bilangan bulat.'],
+    [...ATURAN_OSN, 'Ranah Matematika OSN SMA: aljabar, geometri, kombinatorika, dan teori bilangan.'],
+    { aturBentuk: { isian: 'bilangan_bulat' } },
   ),
   buat('osnk-sma-fisika', 'OSN-K SMA · Fisika', 'Fisika', { soal: 40, menit: 120 }, osn('SMA', 11, 5, { isian_singkat: 1 }, 'Isian singkat.', PENILAIAN_OSN_TAK_PASTI), [
     ...ATURAN_OSN,
@@ -328,7 +330,10 @@ export interface IsianUjian {
   bentuk: Bentuk[];
   jumlah_bentuk: Partial<Record<Bentuk, number>>;
   sebaran_level: Partial<Record<Level, number>>;
-  opsi_pg: 4 | 5;
+  opsi_pg: 3 | 4 | 5;
+  atur_bentuk: AturBentuk | null;
+  durasi_menit: number | null;
+  aturan_tambahan: string[];
   skor_bentuk: Partial<Record<Bentuk, number>> | null;
   gaya: GayaSoal;
   bahasa: BahasaSoal;
@@ -346,6 +351,9 @@ export function isianUjian(u: FormatUjian, n = jumlahSoalUjian(u)): IsianUjian {
     jumlah_bentuk,
     sebaran_level: bagiPorsi(u.porsiLevel, n, LEVEL),
     opsi_pg: u.opsiPg,
+    atur_bentuk: u.aturBentuk ? { pgk_benar: null, jodoh: null, isian: null, uraian: null, ...u.aturBentuk } : null,
+    durasi_menit: u.asli.menit,
+    aturan_tambahan: [...u.aturan],
     skor_bentuk: u.skor,
     gaya: u.gaya,
     bahasa: u.bahasa,
@@ -360,11 +368,14 @@ export function ringkasUjian(u: FormatUjian): string {
   return `Ujian aslinya ${[soal, menit].filter(Boolean).join(' dalam ')}.`;
 }
 
-/** Bagian prompt untuk format ujian paket; kosong bila paket bukan format ujian. */
+/**
+ * Bagian prompt untuk format ujian paket; kosong bila paket bukan format ujian. Aturan penulisan format sudah disalin
+ * ke `aturan_tambahan` paket (dapat disunting guru), jadi di sini hanya nama format, level TKA butir, dan kelokalan TKAD.
+ */
 export function bagianPromptUjian(p: Pick<ParameterPaket, 'ujian'>, level: Level): string {
   const u = formatPaket(p);
   if (!u) return '';
-  const aturan = [...u.aturan];
+  const aturan = [`Soal disusun setara ${u.nama}.`];
   if (u.keluarga === 'TKA' || u.keluarga === 'TKAD') aturan.push(`Butir ini berlevel TKA "${levelTka(level)}".`);
   if (u.keluarga === 'TKAD') {
     const daerah = p.ujian?.daerah?.trim();
@@ -376,4 +387,3 @@ export function bagianPromptUjian(p: Pick<ParameterPaket, 'ujian'>, level: Level
   }
   return `## Format ujian: ${u.nama}\n${aturan.map((a) => `- ${a}`).join('\n')}`;
 }
-

@@ -172,8 +172,8 @@ function butirPalsu(bentuk) {
   // Opsi lanjutan: satu tombol lebar lalu kartu lipat per kelompok, semuanya tertutup di awal.
   await page.getByRole('button', { name: 'Tampilkan opsi lanjutan' }).click();
   const kartu = (judul) => page.getByRole('button', { name: new RegExp(`^${judul}`) });
-  if ((await page.locator('section[aria-label="Opsi lanjutan"] h3 button[aria-expanded="false"]').count()) !== 6) galat.push('opsi lanjutan tidak berisi enam kartu tertutup');
-  await kartu('Bentuk soal').click();
+  if ((await page.locator('section[aria-label="Opsi lanjutan"] h3 button[aria-expanded="false"]').count()) !== 9) galat.push('opsi lanjutan tidak berisi sembilan kartu tertutup');
+  await kartu('Susunan soal').click();
   for (const b of ['Pilihan ganda kompleks', 'Benar-salah', 'Menjodohkan', 'Isian singkat', 'Uraian']) await page.getByRole('button', { name: b, exact: true }).click();
   // Pengaturan lanjutan rinci: jumlah per bentuk, banyak opsi, dan skor.
   await page.getByLabel('Atur jumlah per bentuk soal').check();
@@ -181,8 +181,21 @@ function butirPalsu(bentuk) {
   await page.getByText('Total 13 dari 12 soal, lebih 1.').waitFor();
   await page.fill('#jumlah-uraian', '1');
   await page.getByText('Total 12 soal, sudah pas.').first().waitFor();
+  // Opsi lanjutan v2 (F-36): susunan per baris dapat dinyalakan lalu dimatikan lagi tanpa mengubah jumlah per bentuk.
+  await page.getByLabel('Susun rinci per baris').check();
+  await page.getByText('Bentuk, level, dan TP diatur di susunan per baris di bawah.').waitFor();
+  if (!(await page.locator('#rincian-0-bentuk').count())) galat.push('susunan per baris tidak menampilkan baris');
+  await page.getByLabel('Susun rinci per baris').uncheck();
+  await kartu('Rincian tiap bentuk').click();
   await page.getByRole('radio', { name: /^4 opsi/ }).click();
+  await page.getByLabel('Atur banyak pasangan').check();
+  // AI palsu membuat 3 butir kiri dan 1 pengecoh; pengaturan yang cocok harus tetap lolos pemeriksa.
+  await page.fill('#jodoh-kiri', '3');
+  await kartu('Skor dan waktu').click();
   await page.getByLabel('Cantumkan skor per soal').check();
+  await page.fill('#durasi', '60');
+  await kartu('Aturan tambahan untuk AI').click();
+  await page.fill('#aturan', 'Gunakan nama tokoh dari Sulawesi Selatan.');
   // 3 PG × 1 + 2 PG kompleks × 2 + 2 B-S × 1 + 2 menjodohkan × 3 + 2 isian × 2 + 1 uraian × 5 = 24.
   await page.locator('aside[aria-label="Rencana"]').getByText('Skor maksimal 24').waitFor();
   await kartu('Judul dan simpan').click();
@@ -283,6 +296,7 @@ function butirPalsu(bentuk) {
   if ((await tautanUnduh.getAttribute('aria-disabled')) === 'true') galat.push('Unduh tidak aktif padahal paket sudah selesai');
   await tautanUnduh.click();
   await page.waitForSelector('text=Unduh 3 berkas Word');
+  if (!(await page.getByText('Waktu: 60 menit').count())) galat.push('waktu mengerjakan tidak tampil di pratinjau lembar soal');
   await page.getByRole('link', { name: /Kembali ke soal/ }).waitFor();
   await foto('05-unduh');
   await utamaTerlihat(page, 'Unduh');

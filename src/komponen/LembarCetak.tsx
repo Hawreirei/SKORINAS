@@ -181,6 +181,9 @@ function TabelPenskoran({ d }: { d: DokumenSoal }) {
         </tbody>
       </table>
       <div className="mt-[0.3em]">{t.rumus}</div>
+      {d.penskoran!.catatan.map((c) => (
+        <div key={c}>{c}</div>
+      ))}
     </div>
   );
 }
@@ -239,6 +242,7 @@ export function LembarCetak({ d, hanyaHalamanPertama = false }: { d: DokumenSoal
       <KopLembar kop={d.kop} identitas={d.identitas} mapelKelas={mapelKelas} />
       <div className="mt-[0.8em] text-center font-bold">{d.judul.toUpperCase()}</div>
       {!d.kop ? <div className="text-center">{mapelKelas}</div> : null}
+      {d.waktu ? <div className="text-center">{d.waktu}</div> : null}
       {bagian.map((bg) => (
         <section key={bg.judul} className="mt-[0.9em]">
           <div className="font-bold">{bg.judul}</div>
