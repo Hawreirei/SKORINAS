@@ -2,6 +2,7 @@ import type { Bentuk, IsiSoal, ParameterPaket, Slot } from '../db/tipe';
 import { BENTUK_LABEL } from '../db/tipe';
 import { TEMPLAT } from '../gambar';
 import { paketUntuk } from '../paket';
+import { bagianPromptUjian } from '../ujian';
 
 export const SISTEM = `Anda penulis butir soal asesmen untuk sekolah di Indonesia yang memakai Kurikulum Merdeka.
 Kontrak keluaran:
@@ -97,6 +98,9 @@ ${p.cp.trim() ? `- Capaian pembelajaran: ${p.cp.trim()}` : ''}
 - Kesukaran rancangan: ${slot.kesukaran}; level kognitif ${slot.level}.
 - Gaya: ${GAYA[p.gaya]}
 - Bahasa: ${BAHASA[p.bahasa]}`);
+
+  const ujian = bagianPromptUjian(p, slot.level);
+  if (ujian) bagian.push(ujian);
 
   if (paket?.aturanPenulisan.length) bagian.push(`## Aturan penulisan ${paket.nama}\n${paket.aturanPenulisan.map((a) => `- ${a}`).join('\n')}`);
 

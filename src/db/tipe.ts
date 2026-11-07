@@ -61,6 +61,12 @@ export interface TpDipakai {
   induk_id?: string | null;
 }
 
+/** Format ujian yang dipakai paket (F-35): id katalog `src/ujian` dan, untuk TKAD, nama daerah untuk konteks lokal. */
+export interface UjianDipakai {
+  id: string;
+  daerah: string;
+}
+
 /** Isi formulir Buat soal. Dipakai sama persis oleh pengaturan tersimpan (preset) dan paket_soal.parameter_json. */
 export interface ParameterPaket {
   kelas: number;
@@ -88,6 +94,8 @@ export interface ParameterPaket {
   opsi_pg: 4 | 5 | null;
   /** Skor setiap soal per bentuk, dicetak di lembar soal dan pedoman penskoran. null: tanpa skor. */
   skor_bentuk: Partial<Record<Bentuk, number>> | null;
+  /** Format ujian (TKA, TKAD, OSN) yang mengisi formulir dan menambah aturan ke prompt. null: soal biasa. */
+  ujian: UjianDipakai | null;
   /** Data dari versi 0.3 (sebelum aplikasi berhenti membawa data kurikulum). Tidak diisi lagi. */
   kurikulum_id?: string;
   kurikulum_nama?: string;

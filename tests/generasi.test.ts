@@ -29,6 +29,7 @@ function param(n: number, bentuk: ParameterPaket['bentuk'] = ['pilihan_ganda']):
     jumlah_tp: null,
     opsi_pg: null,
     skor_bentuk: null,
+    ujian: null,
   };
 }
 
