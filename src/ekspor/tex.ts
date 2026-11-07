@@ -1,8 +1,8 @@
 import type { HurufOpsi } from '../db/tipe';
-import { HURUF_KANAN } from '../db/tipe';
+import { HURUF_KANAN, KATEGORI_BAWAAN } from '../db/tipe';
 import { keTikz } from '../gambar/tikz';
 import { escLatex, keLatex } from '../matematika/latex';
-import { opsiPerBaris, teksPenskoran, type ButirDok, type DokumenSoal } from './model';
+import { opsiPerBaris, pengantarBacaan, teksPenskoran, type ButirDok, type DokumenSoal } from './model';
 
 function lebarGambarCm(b: ButirDok): number {
   if (!b.gambar) return 0;
@@ -14,8 +14,17 @@ function butirKeTex(b: ButirDok, d: DokumenSoal): string {
   const isi = b.soal.isi_json;
   // Jaga pokok, gambar, dan opsi tetap satu halaman.
   const ruang = 3 + (isi.opsi ? Math.ceil(Object.keys(isi.opsi).length / opsiPerBaris(b, Object.keys(isi.opsi).length)) * 2 : 1) + (b.gambar ? Math.round((lebarGambarCm(b) * b.gambar.tinggi) / b.gambar.lebar / 0.6) : 0);
-  const baris: string[] = [`${b.sederhana ? '' : `\\needspace{${Math.min(ruang, 30)}\\baselineskip}`}\\item ${keLatex(isi.pokok)}`];
+  const baris: string[] = [`${b.sederhana ? '' : `\\needspace{${Math.min(ruang, 30)}\\baselineskip}`}\\item ${keLatex(isi.pokok)}${b.skorButir ? ` \\hfill\\textbf{(${b.skorButir}~${d.inggris ? 'points' : 'poin'})}` : ''}`];
   if (isi.bentuk === 'benar_salah') baris[0] += ` \\hfill ${d.inggris ? 'T\\quad F' : 'B\\quad S'}`;
+  if (b.bacaan) {
+    // Bacaan bersama: butir tanpa nomor sebelum soal pertama kelompoknya.
+    const teks = b.bacaan.teks
+      .split(/\n+/)
+      .filter((x) => x.trim())
+      .map((x) => keLatex(x.trim()))
+      .join('\\par\n');
+    baris.unshift(`\\item[] {\\bfseries\\itshape ${escLatex(pengantarBacaan(b.bacaan, d.inggris))}}\\par\n${teks}\\par\\medskip`);
+  }
   if (isi.terjemahan?.pokok) baris.push(`\\\\{\\itshape ${keLatex(isi.terjemahan.pokok)}}`);
   if (b.gambar) baris.push(`\\par\\smallskip\\begin{center}\n${keTikz(b.gambar, lebarGambarCm(b))}\n\\end{center}`);
   if (isi.opsi) {
@@ -39,6 +48,11 @@ function butirKeTex(b: ButirDok, d: DokumenSoal): string {
       return `${k} & & ${n} \\\\[0.6em]`;
     });
     baris.push(`\\par\\smallskip\\noindent\\begin{tabular}{@{}p{0.36\\linewidth}@{\\hspace{4pt}}c@{}p{0.16\\linewidth}@{}c@{\\hspace{4pt}}p{0.36\\linewidth}@{}}\n${sel.join('\n')}\n\\end{tabular}`);
+  }
+  if (isi.pernyataan?.length) {
+    const [ka, kb] = isi.kategori ?? KATEGORI_BAWAAN;
+    const sel = isi.pernyataan.map((x, i) => `${i + 1} & ${keLatex(x)} & & \\\\ \\hline`);
+    baris.push(`\\par\\smallskip\\noindent\\begin{tabular}{|c|p{0.58\\linewidth}|c|c|}\n\\hline\n\\textbf{No} & \\textbf{${d.inggris ? 'Statement' : 'Pernyataan'}} & \\textbf{${escLatex(ka)}} & \\textbf{${escLatex(kb)}} \\\\ \\hline\n${sel.join('\n')}\n\\end{tabular}`);
   }
   if (b.kotakJawaban) baris.push(`\\kotakjawaban[${isi.bentuk === 'uraian' ? '5cm' : '2.5cm'}]`);
   if (b.sederhana) {
@@ -125,7 +139,7 @@ ${panjang
   .map((k) => `\\paragraph{${k.nomor}.} ${keLatex(k.teks)}\\par\n${L('Rubrik', 'Rubric')}:\n\\begin{itemize}[itemsep=0pt]\n${k.rubrik!.map((r) => `\\item ${keLatex(r)}`).join('\n')}\n\\end{itemize}`)
   .join('\n')}`);
     if (d.penskoran) {
-      const t = teksPenskoran(en);
+      const t = teksPenskoran(en, !!d.penskoran.perKesukaran);
       const baris = d.penskoran.baris.map((b) => `${escLatex(b.bentuk)} & ${b.jumlah} & ${b.skor} & ${b.maks} \\\\ \\hline`);
       bagian.push(`\\subsection*{${escLatex(t.judul)}}
 \\begin{tabular}{|p{6cm}|c|c|c|}

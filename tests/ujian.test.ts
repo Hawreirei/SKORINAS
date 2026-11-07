@@ -74,10 +74,10 @@ describe('katalog format ujian', () => {
     expect(ringkasUjian(u)).toBe('Ujian aslinya jumlah soal belum dipastikan dalam 150 menit.');
   });
 
-  it('TKA SD Matematika: 30 soal, 19 PG, 5 PG kompleks, 6 benar-salah; level 6/12/12', () => {
+  it('TKA SD Matematika: 30 soal, 19 PG, 5 PG kompleks, 6 PG kompleks kategori; level 6/12/12', () => {
     const x = isianUjian(formatUjian('tka-sd-matematika')!);
     expect(x).toMatchObject({ kelas: 6, mapel: 'Matematika', n: 30, opsi_pg: 4, gaya: 'numerasi' });
-    expect(x.jumlah_bentuk).toEqual({ pilihan_ganda: 19, pilihan_ganda_kompleks: 5, benar_salah: 6 });
+    expect(x.jumlah_bentuk).toEqual({ pilihan_ganda: 19, pilihan_ganda_kompleks: 5, pilihan_ganda_kategori: 6 });
     const lv = x.sebaran_level;
     expect((lv.C1 ?? 0) + (lv.C2 ?? 0)).toBe(6);
     expect(lv.C3).toBe(12);

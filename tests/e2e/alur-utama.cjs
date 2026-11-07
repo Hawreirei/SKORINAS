@@ -159,20 +159,24 @@ function butirPalsu(bentuk) {
   await foto('01b-beranda-mulai-cepat', { fullPage: false });
   await cepat.getByRole('button', { name: /Lanjut isi CP dan TP/ }).click();
   await page.waitForURL(/\/soal\/baru$/);
-  await page.waitForSelector('h1:has-text("Buat soal")');
-  const isiCepat = await page.evaluate(() => ['#kelas', '#mapel', '#jumlah'].map((q) => document.querySelector(q).value));
+  // Judul beranda juga memuat "Buat soal", dan layar Buat dimuat belakangan serta menerapkan draf setelah tampil:
+  // tunggu isian layar Buat terisi (paling lama 10 detik) sebelum membacanya.
+  const isianBuat = async () => {
+    await page.waitForFunction(() => document.querySelector('#kelas')?.value === '4', null, { timeout: 10000 }).catch(() => {});
+    return page.evaluate(() => ['#kelas', '#mapel', '#jumlah'].map((q) => document.querySelector(q)?.value ?? '(tidak ada)'));
+  };
+  const isiCepat = await isianBuat();
   if (isiCepat.join('|') !== '4|Matematika|12') galat.push(`Mulai cepat tidak mengisi layar Buat: ${isiCepat.join('|')}`);
   await page.fill('#tp', 'Peserta didik dapat menjumlahkan dua pecahan berpenyebut sama.\nPeserta didik dapat membandingkan dua pecahan berpenyebut berbeda dengan menyamakan penyebutnya.');
   // Panel Rencana menghitung permintaan sebelum tombol ditekan; isian tersimpan sebagai draf.
   await page.locator('aside[aria-label="Rencana"]').getByText('12–16').waitFor();
   await page.reload();
-  await page.waitForSelector('h1:has-text("Buat soal")');
-  const draf = await page.evaluate(() => ['#kelas', '#mapel', '#jumlah'].map((q) => document.querySelector(q).value));
+  const draf = await isianBuat();
   if (draf.join('|') !== '4|Matematika|12') galat.push(`draf layar Buat tidak pulih setelah muat ulang: ${draf.join('|')}`);
   // Opsi lanjutan: satu tombol lebar lalu kartu lipat per kelompok, semuanya tertutup di awal.
   await page.getByRole('button', { name: 'Tampilkan opsi lanjutan' }).click();
   const kartu = (judul) => page.getByRole('button', { name: new RegExp(`^${judul}`) });
-  if ((await page.locator('section[aria-label="Opsi lanjutan"] h3 button[aria-expanded="false"]').count()) !== 9) galat.push('opsi lanjutan tidak berisi sembilan kartu tertutup');
+  if ((await page.locator('section[aria-label="Opsi lanjutan"] h3 button[aria-expanded="false"]').count()) !== 11) galat.push('opsi lanjutan tidak berisi sebelas kartu tertutup');
   await kartu('Susunan soal').click();
   for (const b of ['Pilihan ganda kompleks', 'Benar-salah', 'Menjodohkan', 'Isian singkat', 'Uraian']) await page.getByRole('button', { name: b, exact: true }).click();
   // Pengaturan lanjutan rinci: jumlah per bentuk, banyak opsi, dan skor.
@@ -499,14 +503,15 @@ function butirPalsu(bentuk) {
     return dilihat.size;
   };
   await page.goto(DASAR + '/soal/baru');
-  await page.waitForSelector('h1');
+  await page.waitForSelector('#kelas');
   const nBuat = await telusuriTab(page, 'buat (papan ketik)', /^Buat \d+ soal/);
   await page.goto(urlPeriksa);
   await page.waitForSelector('h1');
   const nPaket = await telusuriTab(page, 'paket (papan ketik)', /^Unduh/);
   await page.keyboard.press('Enter');
   await page.waitForURL(/\/ekspor$/);
-  await page.waitForSelector('h1');
+  // Layar Unduh dimuat belakangan; judul halaman paket masih ada sesaat, jadi tunggu tombol unduhnya.
+  await page.getByRole('button', { name: /^Unduh \d+ berkas/ }).waitFor();
   const nUnduh = await telusuriTab(page, 'unduh (papan ketik)', /^Unduh/);
   const unduhan = [];
   const catat = (d) => unduhan.push(d.suggestedFilename());

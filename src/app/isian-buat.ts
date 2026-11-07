@@ -1,11 +1,11 @@
-import type { AturBentuk, BahasaSoal, BarisRincian, Bentuk, CaraBenarSalah, GayaSoal, Level, ModeGambar, ParameterPaket, TpDipakai, UjianDipakai } from '../db/tipe';
+import type { AturBentuk, BahasaSoal, BarisRincian, Bentuk, CaraBenarSalah, GayaPembahasan, GayaSoal, Kesukaran, Level, ModeGambar, ParameterPaket, TpDipakai, UjianDipakai } from '../db/tipe';
 import { GAYA, kesukaranDariLevel, LEVEL } from '../db/tipe';
 import { bagiKomposisi } from '../generasi/komposisi';
 import { bentukDipakai, galatKomposisi, rencanakanSlot, URUTAN_BENTUK } from '../generasi/rencana';
 import { faseDariKelas } from '../kurikulum/fase';
 import { rumpunDariMapel } from '../paket';
 import { bagiPorsi, formatUjian, isianUjian } from '../ujian';
-import { cakupanFormat, pilihCakupan, type Cakupan } from '../ujian/cakupan';
+import { cakupanFormat, pilihCakupan, rumusanCakupan, type Cakupan } from '../ujian/cakupan';
 import { SKOR_BAWAAN } from './rencana-buat';
 
 /**
@@ -42,6 +42,18 @@ export interface Isian {
   /** Aturan tambahan untuk AI, satu aturan per baris. */
   aturanTeks: string;
   wajibStimulus: boolean;
+  // ---- Pengaturan mendalam (F-39) ----
+  soalPerBacaan: number | null;
+  skorKesukaran: Record<Kesukaran, { benar: number; salah: number }> | null;
+  cakupanPilih: { butir: string[] | null; porsi: Record<string, number> | null } | null;
+  /** Daftar variasi sendiri sebagai teks, satu per baris. */
+  temaTeks: string;
+  tokohTeks: string;
+  stimulusTeks: string;
+  panjangStimulus: { min: number; maks: number } | null;
+  petunjukBagian: Partial<Record<Bentuk, string>> | null;
+  urutanBentuk: Bentuk[] | null;
+  gayaPembahasan: GayaPembahasan | null;
 }
 
 export const ATUR_BENTUK_KOSONG: AturBentuk = { pgk_benar: null, jodoh: null, isian: null, uraian: null };
@@ -76,6 +88,16 @@ export function isianKosong(): Isian {
     konteks: '',
     aturanTeks: '',
     wajibStimulus: false,
+    soalPerBacaan: null,
+    skorKesukaran: null,
+    cakupanPilih: null,
+    temaTeks: '',
+    tokohTeks: '',
+    stimulusTeks: '',
+    panjangStimulus: null,
+    petunjukBagian: null,
+    urutanBentuk: null,
+    gayaPembahasan: null,
   };
 }
 
@@ -110,6 +132,16 @@ export function isianDariParameter(p: ParameterPaket): Isian {
     konteks: p.konteks ?? '',
     aturanTeks: (p.aturan_tambahan ?? []).join('\n'),
     wajibStimulus: p.wajib_stimulus ?? false,
+    soalPerBacaan: p.soal_per_bacaan ?? null,
+    skorKesukaran: p.skor_kesukaran ?? null,
+    cakupanPilih: p.cakupan_pilih ?? null,
+    temaTeks: (p.variasi_sendiri?.tema ?? []).join('\n'),
+    tokohTeks: (p.variasi_sendiri?.tokoh ?? []).join('\n'),
+    stimulusTeks: (p.variasi_sendiri?.stimulus ?? []).join('\n'),
+    panjangStimulus: p.panjang_stimulus ?? null,
+    petunjukBagian: p.petunjuk_bagian ?? null,
+    urutanBentuk: p.urutan_bentuk ?? null,
+    gayaPembahasan: p.gaya_pembahasan ?? null,
   };
 }
 
@@ -150,6 +182,7 @@ function aturBentukDipakai(f: Isian, bentuk: Bentuk[]): AturBentuk | null {
     jodoh: bentuk.includes('menjodohkan') ? f.aturBentuk.jodoh : null,
     isian: bentuk.includes('isian_singkat') && f.aturBentuk.isian !== 'bebas' ? f.aturBentuk.isian : null,
     uraian: bentuk.includes('uraian') ? f.aturBentuk.uraian : null,
+    kategori: bentuk.includes('pilihan_ganda_kategori') ? (f.aturBentuk.kategori ?? null) : null,
   };
   return Object.values(a).some((x) => x !== null) ? a : null;
 }
@@ -177,7 +210,8 @@ export function cakupanIsian(f: Pick<Isian, 'tpTeks' | 'cp' | 'ujian'>): Cakupan
 }
 
 export function keParameter(f: Isian, acak: () => number = Math.random): ParameterPaket {
-  const cakupan = cakupanIsian(f);
+  const cakupanAsli = cakupanIsian(f);
+  const cakupan = cakupanAsli ? terapkanPilihanCakupan(cakupanAsli, f.cakupanPilih) : null;
   const pilihan = cakupan ? pilihCakupan(cakupan, f.n, acak) : null;
   const tp: TpDipakai[] = pilihan
     ? pilihan.rumusan.map((rumusan) => ({ id: '', rumusan, sumber: 'ujian', versi: 1 }))
@@ -221,7 +255,26 @@ export function keParameter(f: Isian, acak: () => number = Math.random): Paramet
     konteks: f.konteks.trim(),
     aturan_tambahan: aturanDariTeks(f.aturanTeks),
     wajib_stimulus: f.wajibStimulus,
+    soal_per_bacaan: f.soalPerBacaan && f.soalPerBacaan >= 2 ? f.soalPerBacaan : null,
+    skor_kesukaran: f.skorKesukaran,
+    cakupan_pilih: cakupanAsli ? f.cakupanPilih : null,
+    variasi_sendiri: (() => {
+      const v = { tema: aturanDariTeks(f.temaTeks), tokoh: aturanDariTeks(f.tokohTeks), stimulus: aturanDariTeks(f.stimulusTeks) };
+      return v.tema.length || v.tokoh.length || v.stimulus.length ? v : null;
+    })(),
+    panjang_stimulus: f.panjangStimulus,
+    petunjuk_bagian: f.petunjukBagian && Object.values(f.petunjukBagian).some((x) => x?.trim()) ? Object.fromEntries(Object.entries(f.petunjukBagian).filter(([, x]) => x?.trim()).map(([b, x]) => [b, x!.trim()])) : null,
+    urutan_bentuk: f.urutanBentuk,
+    gaya_pembahasan: f.gayaPembahasan,
   };
+}
+
+/** Terapkan pilihan guru pada cakupan format: hanya butir yang dicentang dan porsi elemen yang diatur. */
+export function terapkanPilihanCakupan(c: Cakupan, pilih: Isian['cakupanPilih']): Cakupan {
+  if (!pilih) return c;
+  const butir = pilih.butir ? c.butir.filter((b) => pilih.butir!.includes(rumusanCakupan(b))) : c.butir;
+  const porsi = Object.fromEntries(Object.entries({ ...c.porsi, ...pilih.porsi }).filter(([e, x]) => x > 0 && butir.some((b) => b.elemen === e)));
+  return Object.keys(porsi).length ? { porsi, butir } : c;
 }
 
 /** Isian dari format ujian: menimpa kelas, jumlah soal, bentuk, level, opsi, rincian bentuk, skor, waktu, gaya, bahasa, gambar, dan aturan tambahan. */
@@ -250,6 +303,8 @@ export function isianDariUjian(f: Isian, id: string): Isian {
     gambar: x.gambar,
     aturanTeks: x.aturan_tambahan.join('\n'),
     wajibStimulus: x.wajib_stimulus,
+    soalPerBacaan: x.soal_per_bacaan,
+    cakupanPilih: null,
     ujian: { id, daerah: f.ujian?.daerah ?? '' },
   };
 }
@@ -333,5 +388,10 @@ export function galatKartu(f: Isian) {
   }
   if (f.jumlahGaya) gaya.push(...galatKomposisi({ ...m, jumlah_bentuk: null, sebaran_level: null, jumlah_tp: null, rincian: null }));
   if (f.bahasa === 'lain' && !f.bahasaLain.trim()) gaya.push('Tulis nama bahasa soal.');
+  if (cakupanIsian(f) && f.cakupanPilih?.butir && !f.cakupanPilih.butir.length) susunan.push('Centang sedikitnya satu butir cakupan materi.');
+  if (cakupanIsian(f) && f.cakupanPilih?.porsi && Object.values({ ...cakupanIsian(f)!.porsi, ...f.cakupanPilih.porsi }).every((x) => !x)) susunan.push('Porsi cakupan materi tidak boleh nol semua.');
+  const kat = f.aturBentuk.kategori;
+  if (kat && bentukIsian(f).includes('pilihan_ganda_kategori') && (!kat.label[0].trim() || !kat.label[1].trim() || kat.label[0].trim().toLowerCase() === kat.label[1].trim().toLowerCase()))
+    rincianBentuk.push('Isi dua nama kategori yang berbeda untuk PG kompleks kategori.');
   return { susunan, kesukaran, rincianBentuk, gaya };
 }

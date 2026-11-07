@@ -18,10 +18,10 @@ export function ukurPokok(pokok: string): { kata: number; kalimat: number } {
  * panjang (sedikitnya dua kalimat dan batas kata per jenjang) sebelum pertanyaan. Menjodohkan dikecualikan karena
  * pokoknya perintah singkat. Pelanggaran membuat butir dibuat ulang.
  */
-export function periksaStimulus(isi: IsiSoal, k: { kelas: number; bahasa: boolean }): string[] {
+export function periksaStimulus(isi: IsiSoal, k: { kelas: number; bahasa: boolean; panjang?: { min: number; maks: number } | null }): string[] {
   if (isi.bentuk === 'menjodohkan') return [];
   const { kata, kalimat } = ukurPokok(isi.pokok);
-  const { min } = panjangStimulus(k.kelas, k.bahasa);
+  const { min } = panjangStimulus(k.kelas, k.bahasa, k.panjang);
   const alasan: string[] = [];
   if (kalimat < 2) alasan.push('Soal harus diawali stimulus (cerita, teks, atau situasi) sedikitnya dua kalimat sebelum pertanyaan.');
   else if (kata < min) alasan.push(`Stimulus terlalu pendek: ${kata} kata, perlu sedikitnya ${min} kata cerita atau bacaan sebelum pertanyaan.`);

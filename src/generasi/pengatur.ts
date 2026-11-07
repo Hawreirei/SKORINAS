@@ -8,9 +8,10 @@ import type { HurufOpsi, IsiSoal, PaketSoal, ParameterPaket, PekerjaanGenerasi, 
 import { teksPembanding } from '../db/tipe';
 import { sekarang, tanggalLokal, uuid } from '../db/util';
 import { teksPolos } from '../matematika/teks';
-import { buatButir, type HasilButir, type Pengirim, type Percobaan } from './butir';
+import { buatButir, type HasilButir, type MasukanButir, type Pengirim, type Percobaan } from './butir';
 import { rencanakanSlot } from './rencana';
 import { beriVariasi } from './variasi';
+import { buatBacaan, kelompokkanBacaan } from './bacaan';
 import { seimbangkanKunci } from '../verifikasi/acak';
 import { AMBANG_KEMIRIPAN, kemiripan } from '../verifikasi/kemiripan';
 
@@ -78,7 +79,8 @@ export async function buatPaket(param: ParameterPaket, judul: string): Promise<s
   const tp = param.tp.map((x) => ({ ...x, id: x.id || uuid(), sumber: x.sumber ?? ('guru' as const), versi: x.versi ?? 1 }));
   const p: ParameterPaket = { ...param, tp };
   // Variasi per butir (tema, bentuk stimulus, tokoh) agar soal paket berstimulus tidak seragam (F-38).
-  const slot = beriVariasi(rencanakanSlot(p), p);
+  // Bacaan bersama (F-39): slot berurutan dalam satu bentuk dikelompokkan untuk satu bacaan.
+  const slot = kelompokkanBacaan(beriVariasi(rencanakanSlot(p), p), p.soal_per_bacaan);
   const t = sekarang();
   const paket: PaketSoal = { id: uuid(), judul: judul.trim() || tp[0]?.rumusan.slice(0, 80) || 'Paket soal', parameter_json: p, status: 'membuat', penyedia: null, model: null, dibuat_pada: t, diubah_pada: t, dihapus_pada: null };
   const kerja: PekerjaanGenerasi = { id: uuid(), paket_id: paket.id, status: 'menunggu', slot, percobaan: 0, galat: null, mulai: null, selesai: null, dibuat_pada: t, diubah_pada: t };
@@ -291,12 +293,40 @@ class PengaturGenerasi {
 
       const konteks = () => konteksPaket(paketId);
 
+      // Bacaan bersama dibuat sekali per kelompok walau anggotanya dikerjakan serentak.
+      const bacaanJalan = new Map<string, Promise<string>>();
+      const bacaanUntuk = (slot: Slot): MasukanButir['bacaan'] => {
+        const id = slot.kelompok;
+        if (!id) return null;
+        return {
+          id,
+          teks: kj.bacaan?.[id] ?? null,
+          ambil: (kirim, signal, catat) => {
+            const ada = kj.bacaan?.[id];
+            if (ada) return Promise.resolve(ada);
+            let jalan = bacaanJalan.get(id);
+            if (!jalan) {
+              const anggota = kj.slot.filter((s) => s.kelompok === id).length;
+              jalan = buatBacaan(kirim, paket.parameter_json, slot, anggota, signal, catat).then(async (teks) => {
+                kj.bacaan = { ...kj.bacaan, [id]: teks };
+                await db.pekerjaan_generasi.update(kj.id, { bacaan: kj.bacaan });
+                return teks;
+              });
+              // Bila gagal, percobaan berikutnya boleh mencoba lagi.
+              jalan.catch(() => bacaanJalan.delete(id));
+              bacaanJalan.set(id, jalan);
+            }
+            return jalan;
+          },
+        };
+      };
+
       /** Satu putaran buatButir yang sabar terhadap batas penyedia: tunggu bila per menit, pindah ke cadangan bila habis. */
       const buatSabar = async (slot: Slot, biaya: { total: number | null }): Promise<{ h: HasilButir; m: ModelAktif }> => {
         let beruntun = 0;
         for (;;) {
           const dipakai = aktif;
-          const h = await buatButir(dipakai.kirim, { param: paket.parameter_json, slot, ...(await konteks()), konteks, signal: kendali.signal }, pencatat(dipakai.m, paketId, biaya));
+          const h = await buatButir(dipakai.kirim, { param: paket.parameter_json, slot, ...(await konteks()), konteks, signal: kendali.signal, bacaan: bacaanUntuk(slot) }, pencatat(dipakai.m, paketId, biaya));
           const g = h.henti;
           if (!g || g.jenis !== 'batas') return { h, m: dipakai.m };
           const tunggu = g.batas?.tungguMs ?? TUNGGU_BAWAAN_MS;

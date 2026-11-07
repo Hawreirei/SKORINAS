@@ -100,11 +100,13 @@ function deretTema(acak: () => number): string[] {
 }
 
 /** Beri setiap butir tema, bentuk stimulus, dan nama tokoh yang berbeda; hanya untuk paket berstimulus wajib. */
-export function beriVariasi(slot: Slot[], p: Pick<ParameterPaket, 'wajib_stimulus' | 'rumpun'>, acak: () => number = Math.random): Slot[] {
+export function beriVariasi(slot: Slot[], p: Pick<ParameterPaket, 'wajib_stimulus' | 'rumpun'> & Partial<Pick<ParameterPaket, 'variasi_sendiri'>>, acak: () => number = Math.random): Slot[] {
   if (!p.wajib_stimulus) return slot;
-  const tema = deretTema(acak);
-  const tokoh = acakUrutan(TOKOH, acak);
-  const bentuk = p.rumpun === 'bahasa' ? STIMULUS_BAHASA : acakUrutan(p.rumpun === 'matematika' || p.rumpun === 'ipa' ? STIMULUS_HITUNG : STIMULUS_UMUM, acak);
+  // Daftar dari guru (bila ada) menggantikan daftar bawaan; urutannya tetap diacak per paket.
+  const sendiri = p.variasi_sendiri;
+  const tema = sendiri?.tema.length ? acakUrutan(sendiri.tema, acak) : deretTema(acak);
+  const tokoh = acakUrutan(sendiri?.tokoh.length ? sendiri.tokoh : TOKOH, acak);
+  const bentuk = sendiri?.stimulus.length ? acakUrutan(sendiri.stimulus, acak) : p.rumpun === 'bahasa' ? STIMULUS_BAHASA : acakUrutan(p.rumpun === 'matematika' || p.rumpun === 'ipa' ? STIMULUS_HITUNG : STIMULUS_UMUM, acak);
   return slot.map((s, i) => ({ ...s, variasi: { tema: tema[i % tema.length], stimulus: bentuk[i % bentuk.length], tokoh: tokoh[i % tokoh.length] } }));
 }
 
@@ -118,7 +120,9 @@ export function jenjangDariKelas(kelas: number): Jenjang {
  * Panjang stimulus: sasaran untuk prompt dan batas minimal untuk pemeriksa. Mapel bahasa mengikuti panjang teks
  * kerangka asesmen TKA (SMP 200–250 kata, SMA 250–300 kata); mapel lain cukup satu paragraf cerita.
  */
-export function panjangStimulus(kelas: number, bahasa: boolean): { min: number; sasaran: [number, number] } {
+export function panjangStimulus(kelas: number, bahasa: boolean, sendiri?: { min: number; maks: number } | null): { min: number; sasaran: [number, number] } {
+  // Panjang dari guru: sasaran persis seperti diatur, batas pemeriksa 70% dari minimalnya.
+  if (sendiri && sendiri.min > 0 && sendiri.maks >= sendiri.min) return { min: Math.max(10, Math.floor(sendiri.min * 0.7)), sasaran: [sendiri.min, sendiri.maks] };
   const j = jenjangDariKelas(kelas);
   if (bahasa) return j === 'SD' ? { min: 50, sasaran: [80, 150] } : j === 'SMP' ? { min: 100, sasaran: [180, 250] } : { min: 130, sasaran: [230, 300] };
   return j === 'SD' ? { min: 25, sasaran: [35, 80] } : j === 'SMP' ? { min: 30, sasaran: [45, 100] } : { min: 35, sasaran: [50, 120] };

@@ -163,7 +163,11 @@ export default function BuatSoal() {
   }, [JSON.stringify(rencanaMasuk)]);
   const kuotaTampil = kuotaKesukaran(f);
   const teksBentuk = f.rincian ? ringkasBentuk({ bentuk: f.bentuk, rincian: f.rincian }) : ringkasBentuk({ bentuk: rencanaMasuk.bentuk, jumlah_bentuk: rencanaMasuk.jumlah_bentuk });
-  const skorMaks = f.skorBentuk && perBentuk ? dipakai.reduce((a, b) => a + (perBentuk[b] ?? 0) * (f.skorBentuk![b] ?? SKOR_BAWAAN[b]), 0) : null;
+  const skorMaks = f.skorKesukaran
+    ? kuotaTampil[0] * f.skorKesukaran.mudah.benar + kuotaTampil[1] * f.skorKesukaran.sedang.benar + kuotaTampil[2] * f.skorKesukaran.sulit.benar
+    : f.skorBentuk && perBentuk
+      ? dipakai.reduce((a, b) => a + (perBentuk[b] ?? 0) * (f.skorBentuk![b] ?? SKOR_BAWAAN[b]), 0)
+      : null;
   const teksGaya = f.jumlahGaya ? GAYA.filter((g) => (f.jumlahGaya![g] ?? 0) > 0).map((g) => `${f.jumlahGaya![g]} ${GAYA_LABEL[g].toLowerCase()}`).join(' · ') : null;
 
   // Daftar TP berubah: jumlah per TP dibagi ulang agar tetap sejajar baris TP.
@@ -291,6 +295,7 @@ export default function BuatSoal() {
       <p className="text-base text-redup tabular-nums">{teksBentuk}</p>
       {teksGaya ? <p className="text-base text-redup tabular-nums">Gaya: {teksGaya}</p> : null}
       {f.durasi ? <p className="text-base text-redup tabular-nums">Waktu {f.durasi} menit</p> : null}
+      {f.wajibStimulus ? <p className="text-base text-redup">{f.soalPerBacaan ? `Satu bacaan untuk ${f.soalPerBacaan} soal` : 'Setiap soal diawali cerita'}</p> : f.soalPerBacaan ? <p className="text-base text-redup">Satu bacaan untuk {f.soalPerBacaan} soal</p> : null}
       {skorMaks !== null ? <p className="text-base text-redup tabular-nums">Skor maksimal {skorMaks}</p> : null}
       <dl className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 border-t border-garis pt-4 text-base tabular-nums">
         <dt className="text-redup">Permintaan AI</dt>
@@ -455,7 +460,6 @@ export default function BuatSoal() {
                       f.wajibStimulus ? 'Setiap soal diawali cerita atau bacaan dengan tema dan tokoh yang berbeda-beda.' : null,
                       !ujianKini.mapel ? 'Isi mapel pilihan pada kolom mapel.' : null,
                       ujianKini.asli.soal && ujianKini.asli.soal > MAKS_SOAL ? `Satu paket paling banyak ${MAKS_SOAL} soal; buat dua paket untuk ${ujianKini.asli.soal} soal.` : null,
-                      ujianKini.keluarga !== 'OSN' ? 'Soal kategori Benar/Salah dibuat sebagai soal benar-salah.' : null,
                     ]
                       .filter(Boolean)
                       .join(' ')}
@@ -562,6 +566,7 @@ export default function BuatSoal() {
               perBentuk={perBentuk}
               skorMaks={skorMaks}
               ujianKini={ujianKini}
+              cakupan={cakupanIsian(f)}
               kataMateri={kataMateri}
               maksKataMateri={MAKS_KATA_MATERI}
               judul={judul}

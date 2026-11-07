@@ -1,7 +1,7 @@
 // Bentuk data milik guru (IndexedDB). Aplikasi tidak membawa data kurikulum:
 // kelas, mapel, CP, dan TP diisi guru (docs/RANCANGAN.md v0.4, bagian Model Data).
 
-export type Bentuk = 'pilihan_ganda' | 'pilihan_ganda_kompleks' | 'isian_singkat' | 'benar_salah' | 'menjodohkan' | 'uraian';
+export type Bentuk = 'pilihan_ganda' | 'pilihan_ganda_kompleks' | 'pilihan_ganda_kategori' | 'isian_singkat' | 'benar_salah' | 'menjodohkan' | 'uraian';
 export type Kesukaran = 'mudah' | 'sedang' | 'sulit';
 export type Level = 'C1' | 'C2' | 'C3' | 'C4' | 'C5' | 'C6';
 export type StatusMutu = 'terverifikasi_hitung' | 'terverifikasi_aturan' | 'perlu_telaah' | 'ditolak';
@@ -12,6 +12,7 @@ export type GayaSoal = 'biasa' | 'numerasi' | 'literasi' | 'hots';
 export type ModeGambar = 'terprogram' | 'mati' | 'campuran';
 export type JenisUraian = 'penjelasan' | 'hitungan';
 export type CaraBenarSalah = 'centang' | 'lingkari';
+export type GayaPembahasan = 'singkat' | 'langkah' | 'dddj';
 /** Jenis jawaban isian singkat yang diminta guru. */
 export type JenisIsian = 'bebas' | 'bilangan' | 'bilangan_bulat' | 'kata';
 export type PenyediaId = 'gemini' | 'openrouter' | 'groq' | 'mistral' | 'openai' | 'anthropic';
@@ -19,6 +20,7 @@ export type PenyediaId = 'gemini' | 'openrouter' | 'groq' | 'mistral' | 'openai'
 export const BENTUK_LABEL: Record<Bentuk, string> = {
   pilihan_ganda: 'Pilihan ganda',
   pilihan_ganda_kompleks: 'Pilihan ganda kompleks',
+  pilihan_ganda_kategori: 'PG kompleks kategori',
   isian_singkat: 'Isian singkat',
   benar_salah: 'Benar-salah',
   menjodohkan: 'Menjodohkan',
@@ -65,7 +67,12 @@ export interface AturBentuk {
   isian: JenisIsian | null;
   /** Uraian: semua penjelasan, semua hitungan, atau null (campur, dipilih AI). */
   uraian: JenisUraian | null;
+  /** PG kompleks kategori (F-39): dua label kategori dan banyak pernyataan per soal (3–6). null: Benar/Salah, 4 pernyataan. */
+  kategori?: { label: [string, string]; pernyataan: number } | null;
 }
+
+/** Label kategori bawaan PG kompleks kategori. */
+export const KATEGORI_BAWAAN: [string, string] = ['Benar', 'Salah'];
 
 /** Satu baris susunan rinci: sekian soal berbentuk ini, berlevel ini, untuk TP ini (null: TP bergiliran). */
 export interface BarisRincian {
@@ -141,6 +148,23 @@ export interface ParameterPaket {
   aturan_tambahan: string[];
   /** Setiap soal wajib diawali stimulus (cerita, teks, atau situasi) yang dibutuhkan untuk menjawab (F-38, Dexie versi 6). */
   wajib_stimulus: boolean;
+  // ---- Pengaturan mendalam (F-39, Dexie versi 7). null berarti perilaku bawaan. ----
+  /** Bacaan bersama: banyak soal per bacaan (2–5) dalam satu bentuk. */
+  soal_per_bacaan: number | null;
+  /** Skor per kesukaran (benar dan pengurangan bila salah), menggantikan skor per bentuk. */
+  skor_kesukaran: Record<Kesukaran, { benar: number; salah: number }> | null;
+  /** Cakupan materi pilihan guru: butir yang dipakai (null: semua) dan porsi per elemen (null: bawaan format). */
+  cakupan_pilih: { butir: string[] | null; porsi: Record<string, number> | null } | null;
+  /** Daftar variasi sendiri; daftar kosong memakai bawaan. */
+  variasi_sendiri: { tema: string[]; tokoh: string[]; stimulus: string[] } | null;
+  /** Panjang stimulus (kata) sendiri. */
+  panjang_stimulus: { min: number; maks: number } | null;
+  /** Kalimat petunjuk bagian sendiri per bentuk di lembar soal. */
+  petunjuk_bagian: Partial<Record<Bentuk, string>> | null;
+  /** Urutan bentuk di lembar soal dan rencana butir. */
+  urutan_bentuk: Bentuk[] | null;
+  /** Gaya pembahasan: singkat, langkah demi langkah, atau Diketahui–Ditanya–Dijawab. */
+  gaya_pembahasan: GayaPembahasan | null;
   /** Data dari versi 0.3 (sebelum aplikasi berhenti membawa data kurikulum). Tidak diisi lagi. */
   kurikulum_id?: string;
   kurikulum_nama?: string;
@@ -163,6 +187,8 @@ export type Verifikasi =
   | { tipe: 'per_opsi'; opsi: Partial<Record<HurufOpsi, Pernyataan>> }
   /** Menjodohkan: nilai tiap butir kolom kiri dan kanan; pasangan benar bernilai sama. */
   | { tipe: 'pasangan'; kiri: string[]; kanan: string[] }
+  /** PG kompleks kategori: satu pernyataan hitung per butir; benar = kategori pertama (mis. Benar), salah = kedua. */
+  | { tipe: 'per_pernyataan'; pernyataan: Pernyataan[] }
   | { tipe: 'tidak_ada'; alasan?: string };
 
 export interface GambarSoal {
@@ -180,6 +206,12 @@ export interface IsiSoal {
   opsi?: Partial<Record<HurufOpsi, string>>;
   /** Hanya menjodohkan: kolom kiri bernomor 1, 2, …; kolom kanan berhuruf A, B, … (boleh lebih banyak sebagai pengecoh). */
   pasangan?: { kiri: string[]; kanan: string[] };
+  /** Hanya PG kompleks kategori: pernyataan yang masing-masing digolongkan ke salah satu kategori. */
+  pernyataan?: string[];
+  /** Hanya PG kompleks kategori: dua label kategori, mis. ['Benar', 'Salah']. */
+  kategori?: [string, string];
+  /** Bacaan bersama (F-39): teks yang dipakai beberapa soal; dicetak sekali sebelum soal pertama kelompoknya. */
+  stimulus?: { id: string; teks: string } | null;
   /**
    * Pilihan ganda: satu huruf. Pilihan ganda kompleks: huruf dipisah koma ("A,C").
    * Benar-salah: "B" atau "S". Menjodohkan: "1-B, 2-A, 3-C". Isian dan uraian: jawaban.
@@ -196,8 +228,31 @@ export interface IsiSoal {
 }
 
 /** Teks pembanding kemiripan antarsoal: pokok, ditambah kolom kiri untuk menjodohkan karena pokoknya sering sama. */
-export function teksPembanding(isi: Pick<IsiSoal, 'pokok' | 'pasangan'>): string {
-  return isi.pasangan ? `${isi.pokok} ${isi.pasangan.kiri.join(' ')}` : isi.pokok;
+export function teksPembanding(isi: Pick<IsiSoal, 'pokok' | 'pasangan' | 'pernyataan'>): string {
+  if (isi.pasangan) return `${isi.pokok} ${isi.pasangan.kiri.join(' ')}`;
+  if (isi.pernyataan) return `${isi.pokok} ${isi.pernyataan.join(' ')}`;
+  return isi.pokok;
+}
+
+/**
+ * Kunci PG kompleks kategori disimpan "B-S-B": B = kategori pertama, S = kategori kedua, satu huruf per pernyataan.
+ * Membaca juga label kategori ("Benar, Salah"), Y/T, atau 1/2. Hasil: 0 (pertama), 1 (kedua), -1 (tidak terbaca).
+ */
+export function petaKategori(kunci: string | string[], jumlah: number, label: [string, string] = KATEGORI_BAWAAN): number[] {
+  const token = (Array.isArray(kunci) ? kunci : kunci.split(/[\s,;|/]*[-–—,;|/][\s,;|/]*|\s+/)).map((t) => String(t).trim().toLowerCase()).filter(Boolean);
+  const [a, b] = label.map((l) => l.toLowerCase());
+  const baca = (t: string) => {
+    if (t === a || (t.length > 1 && a.startsWith(t) && !b.startsWith(t))) return 0;
+    if (t === b || (t.length > 1 && b.startsWith(t) && !a.startsWith(t))) return 1;
+    if (['b', 'y', '1', 'v', '✓'].includes(t)) return 0;
+    if (['s', 't', '2', 'x', '✗'].includes(t)) return 1;
+    return -1;
+  };
+  return Array.from({ length: jumlah }, (_, i) => (i < token.length ? baca(token[i]) : -1));
+}
+
+export function teksKategori(peta: number[]): string {
+  return peta.map((j) => (j === 0 ? 'B' : j === 1 ? 'S' : '?')).join('-');
 }
 
 /** Huruf kunci pilihan ganda kompleks, terurut. */
@@ -324,6 +379,8 @@ export interface Slot {
   gaya?: GayaSoal;
   /** Variasi butir (F-38): tema konteks, bentuk stimulus, dan nama tokoh yang berbeda antarbutir. */
   variasi?: { tema: string; stimulus: string; tokoh: string };
+  /** Bacaan bersama (F-39): id kelompok slot yang memakai satu bacaan. */
+  kelompok?: string;
 }
 
 export interface PekerjaanGenerasi extends Rekaman {
@@ -334,6 +391,8 @@ export interface PekerjaanGenerasi extends Rekaman {
   galat: string | null;
   mulai: number | null;
   selesai: number | null;
+  /** Bacaan bersama per kelompok slot (F-39), dibuat sekali lalu dipakai semua anggota. */
+  bacaan?: Record<string, string>;
 }
 
 export interface PemakaianAi {

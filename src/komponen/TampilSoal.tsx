@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { HurufOpsi, IsiSoal } from '../db/tipe';
-import { HURUF_KANAN, hurufKunci } from '../db/tipe';
+import { HURUF_KANAN, KATEGORI_BAWAAN, hurufKunci, petaKategori } from '../db/tipe';
 import { bangkitkanGambar } from '../gambar';
 import { GambarSvg, TeksSoal } from './TeksSoal';
 
@@ -20,6 +20,12 @@ export function teksKunciLayar(isi: IsiSoal): string {
   if (isi.bentuk === 'pilihan_ganda_kompleks') return `Kunci: ${hurufKunci(isi.kunci).join(', ')}`;
   if (isi.bentuk === 'benar_salah') return `Kunci: ${isi.kunci === 'B' ? 'Benar' : 'Salah'}`;
   if (isi.bentuk === 'menjodohkan') return `Kunci: ${isi.kunci.replace(/-/g, '–')}`;
+  if (isi.bentuk === 'pilihan_ganda_kategori') {
+    const label = isi.kategori ?? KATEGORI_BAWAAN;
+    return `Kunci: ${petaKategori(isi.kunci, isi.pernyataan?.length ?? 0, label)
+      .map((j) => label[j] ?? '?')
+      .join(' – ')}`;
+  }
   return 'Kunci';
 }
 
@@ -91,6 +97,57 @@ function KolomJodoh({ isi }: { isi: IsiSoal }) {
   );
 }
 
+/** Tabel PG kompleks kategori: No, Pernyataan, dan dua kolom kategori; kunci ditandai bila tidak ringkas. */
+function TabelKategori({ isi, ringkas }: { isi: IsiSoal; ringkas: boolean }) {
+  if (!isi.pernyataan?.length) return null;
+  const label = isi.kategori ?? KATEGORI_BAWAAN;
+  const kunci = petaKategori(isi.kunci, isi.pernyataan.length, label);
+  const sel = 'border border-garis-kuat px-3 py-2';
+  return (
+    <div className="mt-5 overflow-x-auto">
+      <table className="w-full border-collapse text-left text-base">
+        <thead>
+          <tr className="bg-lembut">
+            <th className={`${sel} w-12 text-center`}>No</th>
+            <th className={sel}>Pernyataan</th>
+            {label.map((l) => (
+              <th key={l} className={`${sel} w-24 text-center`}>
+                {l}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {isi.pernyataan.map((p, i) => (
+            <tr key={i}>
+              <td className={`${sel} text-center`}>{i + 1}</td>
+              <td className={sel}>
+                <TeksSoal teks={p} />
+              </td>
+              {[0, 1].map((j) => (
+                <td key={j} className={`${sel} text-center font-bold text-baik`}>
+                  {!ringkas && kunci[i] === j ? <span aria-label={`Kunci: ${label[j]}`}>✓</span> : null}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** Bacaan bersama beberapa soal (F-39), dilipat agar kartu soal tidak memanjang. */
+export function BacaanBersama({ isi }: { isi: IsiSoal }) {
+  if (!isi.stimulus?.teks) return null;
+  return (
+    <details className="mt-4 rounded-lg border border-garis bg-lembut px-4 py-3" open>
+      <summary className="cursor-pointer text-base font-bold text-judul">Bacaan untuk beberapa soal</summary>
+      <TeksSoal as="p" teks={isi.stimulus.teks} className="mt-2 whitespace-pre-line text-[17px] leading-relaxed text-isi" />
+    </details>
+  );
+}
+
 /** Tampilan satu soal: pokok, gambar, opsi, kunci, dan (kecuali `tanpaPembahasan`) rubrik serta pembahasan. */
 export function TampilSoal({ isi, ringkas = false, besar = true, tanpaPembahasan = false }: { isi: IsiSoal; ringkas?: boolean; besar?: boolean; tanpaPembahasan?: boolean }) {
   const { svg, galat } = useSvgSoal(isi);
@@ -100,6 +157,7 @@ export function TampilSoal({ isi, ringkas = false, besar = true, tanpaPembahasan
   const opsiPendek = !isi.terjemahan?.opsi && opsi.every(([, t]) => t.replace(/\\[a-z]+|[{}$]/g, '').length <= 24);
   return (
     <div>
+      <BacaanBersama isi={isi} />
       <TeksSoal as="p" teks={isi.pokok} className={`mt-4 leading-normal ${besar ? 'text-[18px] sm:text-[20px]' : 'text-[17px]'}`} />
       {isi.terjemahan?.pokok ? <TeksSoal as="p" teks={isi.terjemahan.pokok} className="mt-2 text-[16px] italic text-redup" /> : null}
       {svg ? <GambarSvg svg={svg} className="mt-5" /> : null}
@@ -124,6 +182,7 @@ export function TampilSoal({ isi, ringkas = false, besar = true, tanpaPembahasan
         </ol>
       ) : null}
       <KolomJodoh isi={isi} />
+      <TabelKategori isi={isi} ringkas={ringkas} />
       {!ringkas ? (
         <>
           {(isi.bentuk === 'pilihan_ganda' || isi.bentuk === 'pilihan_ganda_kompleks') && opsi.length ? null : (

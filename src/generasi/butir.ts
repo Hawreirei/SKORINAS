@@ -38,6 +38,11 @@ export interface MasukanButir {
   konteks?: () => Promise<{ pokokLain: string[]; kunciTerpakai: Partial<Record<HurufOpsi, number>> }>;
   maksPercobaan?: number;
   signal?: AbortSignal;
+  /**
+   * Bacaan bersama kelompok slot ini (F-39). `teks` bila sudah ada; bila belum, `ambil` membuatnya sekali untuk
+   * seluruh kelompok (pengatur mencegah pembuatan ganda saat butir dikerjakan serentak).
+   */
+  bacaan?: { id: string; teks: string | null; ambil?: (kirim: Pengirim, signal?: AbortSignal, catat?: PencatatPercobaan) => Promise<string> } | null;
 }
 
 export type Pengirim = (sistem: string, pesan: string, signal?: AbortSignal) => Promise<JawabanAi>;
@@ -57,13 +62,27 @@ export async function buatButir(kirim: Pengirim, m: MasukanButir, catat?: Pencat
   let alasan: string[] = [];
   const maks = m.maksPercobaan ?? MAKS_PERCOBAAN;
   const tp = m.param.tp[m.slot.tp_index];
+  let teksBacaan = m.bacaan?.teks ?? null;
   for (let i = 0; i < maks; i++) {
     if (m.signal?.aborted) return { ok: false, isi: null, periksa: null, percobaan, henti: new GalatAi('dibatalkan', 'Dibatalkan.') };
     // Jatah harian yang dipesan pembatas laju dilepas setelah percobaan ini tercatat (atau tidak akan tercatat).
     let lepas: (() => void) | undefined;
     try {
+      if (m.bacaan && !teksBacaan) {
+        if (!m.bacaan.ambil) throw new Error('Bacaan bersama belum ada.');
+        try {
+          teksBacaan = await m.bacaan.ambil(kirim, m.signal, catat);
+        } catch (e) {
+          const g = e instanceof GalatAi ? e : new GalatAi('lain', (e as Error).message);
+          lepas = g.lepas;
+          percobaan.push({ jawaban: null, alasan: [g.message], isi: null });
+          if (harusBerhenti(g)) return { ok: false, isi: null, periksa: null, percobaan, henti: g };
+          alasan = [g.message];
+          continue;
+        }
+      }
       const ctx = m.konteks ? await m.konteks() : { pokokLain: m.pokokLain, kunciTerpakai: m.kunciTerpakai };
-      const pesan = susunPesan({ param: m.param, slot: m.slot, pokokLain: ctx.pokokLain, alasanGagal: alasan, revisi: m.revisi });
+      const pesan = susunPesan({ param: m.param, slot: m.slot, pokokLain: ctx.pokokLain, alasanGagal: alasan, revisi: m.revisi, bacaan: teksBacaan });
       let jawaban: JawabanAi;
       try {
         jawaban = await kirim(SISTEM, pesan, m.signal);
@@ -80,7 +99,7 @@ export async function buatButir(kirim: Pengirim, m: MasukanButir, catat?: Pencat
       }
       let isi: IsiSoal;
       try {
-        isi = bacaIsiSoal(ekstrakJson(jawaban.teks), { bentuk: m.slot.bentuk, level: m.slot.level, kesukaran: m.slot.kesukaran, tp: tp.rumusan });
+        isi = bacaIsiSoal(ekstrakJson(jawaban.teks), { bentuk: m.slot.bentuk, level: m.slot.level, kesukaran: m.slot.kesukaran, tp: tp.rumusan, kategori: m.param.atur_bentuk?.kategori?.label });
       } catch (e) {
         alasan = e instanceof GalatSkema ? e.daftar : [(e as Error).message];
         const p = { jawaban, alasan, isi: null };
@@ -89,6 +108,7 @@ export async function buatButir(kirim: Pengirim, m: MasukanButir, catat?: Pencat
         continue;
       }
       isi = terapkanPengaturan(isi, m.param.atur_bentuk);
+      if (m.bacaan && teksBacaan) isi = { ...isi, stimulus: { id: m.bacaan.id, teks: teksBacaan } };
       const terbaru = m.konteks ? await m.konteks() : ctx;
       const periksa = periksaSoal(isi, {
         rumpun: m.param.rumpun,
@@ -104,7 +124,7 @@ export async function buatButir(kirim: Pengirim, m: MasukanButir, catat?: Pencat
       const langgar = [
         ...periksaPengaturan(isi, m.param.atur_bentuk, m.param.bahasa === 'en' ? 'en' : 'id'),
         // Paket berstimulus wajib (mis. TKA): soal tanpa cerita atau bacaan yang cukup dibuat ulang.
-        ...(m.param.wajib_stimulus ? periksaStimulus(isi, { kelas: m.param.kelas, bahasa: m.param.rumpun === 'bahasa' }) : []),
+        ...(m.param.wajib_stimulus && !isi.stimulus ? periksaStimulus(isi, { kelas: m.param.kelas, bahasa: m.param.rumpun === 'bahasa', panjang: m.param.panjang_stimulus }) : []),
       ];
       const lolos = periksa.lolos && !langgar.length;
       const p: Percobaan = { jawaban, alasan: [...periksa.alasan, ...langgar], isi };

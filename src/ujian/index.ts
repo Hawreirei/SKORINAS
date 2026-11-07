@@ -59,7 +59,7 @@ export function levelTka(level: Level): string {
 // ---- Atribut bersama -------------------------------------------------------------------------------------------
 
 /** Contoh paket 30 soal: 19 PG, 5 PG kompleks, 6 kategori (benar-salah). Level 6/12/12. */
-const BENTUK_TKA: Partial<Record<Bentuk, number>> = { pilihan_ganda: 19, pilihan_ganda_kompleks: 5, benar_salah: 6 };
+const BENTUK_TKA: Partial<Record<Bentuk, number>> = { pilihan_ganda: 19, pilihan_ganda_kompleks: 5, pilihan_ganda_kategori: 6 };
 /** Pengetahuan dan Pemahaman 6 (C1–C2), Aplikasi 12 (C3), Penalaran 12 (C4–C6). */
 const LEVEL_TKA: Partial<Record<Level, number>> = { C1: 2, C2: 4, C3: 12, C4: 6, C5: 4, C6: 2 };
 /** Olimpiade: tanpa soal hafalan, condong ke penalaran. */
@@ -73,7 +73,7 @@ const ATURAN_TKA = [
   'Utamakan soal berbasis stimulus singkat yang asli (teks, tabel, grafik, gambar, atau situasi nyata) dengan konteks personal, sosial budaya, atau saintifik.',
   'Level kognitif TKA hanya tiga: Pengetahuan dan Pemahaman, Aplikasi, dan Penalaran.',
   'Pilihan ganda kompleks mengikuti model TKA: pokok diakhiri "Pilihlah semua jawaban yang benar! (jawaban benar lebih dari satu)".',
-  'Soal benar-salah mewakili pilihan ganda kompleks kategori TKA: satu pernyataan tentang stimulus yang dinilai Benar atau Salah.',
+  'PG kompleks kategori mengikuti model TKA: satu stimulus, lalu beberapa pernyataan yang masing-masing dinilai Benar atau Salah dalam satu tabel.',
 ];
 
 const ATURAN_MATEMATIKA_TKA = [
@@ -342,6 +342,7 @@ export interface IsianUjian {
   durasi_menit: number | null;
   aturan_tambahan: string[];
   wajib_stimulus: boolean;
+  soal_per_bacaan: number | null;
   skor_bentuk: Partial<Record<Bentuk, number>> | null;
   gaya: GayaSoal;
   bahasa: BahasaSoal;
@@ -364,6 +365,8 @@ export function isianUjian(u: FormatUjian, n = jumlahSoalUjian(u)): IsianUjian {
     aturan_tambahan: [...u.aturan],
     // TKA dan TKAD selalu berbasis stimulus; OSN boleh soal langsung.
     wajib_stimulus: u.keluarga !== 'OSN',
+    // Bahasa TKA dan TKAD: satu bacaan untuk tiga soal, seperti teks bacaan ujian.
+    soal_per_bacaan: u.keluarga !== 'OSN' && /bahasa/i.test(u.mapel) ? 3 : null,
     skor_bentuk: u.skor,
     gaya: u.gaya,
     bahasa: u.bahasa,

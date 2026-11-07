@@ -42,6 +42,14 @@ export function paketUji(): PaketSoal {
       konteks: '',
       aturan_tambahan: [],
       wajib_stimulus: false,
+      soal_per_bacaan: null,
+      skor_kesukaran: null,
+      cakupan_pilih: null,
+      variasi_sendiri: null,
+      panjang_stimulus: null,
+      petunjuk_bagian: null,
+      urutan_bentuk: null,
+      gaya_pembahasan: null,
     },
   };
 }
