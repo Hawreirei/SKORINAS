@@ -103,6 +103,7 @@ MVP dibatasi pada satu jalur lengkap: dari isian kelas, mapel, CP, dan TP sampai
 | F-34 | Nilai dan deskripsi rapor | V2 |
 | F-36 | Opsi lanjutan v2 di layar Buat: susunan rinci per baris (bentuk × level × TP × jumlah), persen kesukaran diketik, rincian tiap bentuk (3–5 opsi, banyak jawaban benar PG kompleks, banyak pasangan menjodohkan, jenis jawaban isian dan uraian), skor jawaban salah, waktu mengerjakan, campuran gaya, bahasa lain, konteks soal, dan aturan tambahan untuk AI yang dapat disunting (permintaan pemilik, 7 November 2026) | MVP |
 | F-35 | Format ujian TKA, TKAD, dan OSN (SD sampai SMA) di layar Buat: mengisi jumlah soal, bentuk, level, opsi, gaya, dan bahasa sesuai ujiannya, serta menambah aturan penulisan ujian ke prompt (permintaan pemilik, 7 November 2026) | MVP |
+| F-37 | Percepatan pembuatan soal tanpa melewati batas per menit dan per hari: beberapa butir dikerjakan serentak sesuai batas per menit model (paling banyak 3), jatah harian dipesan sebelum mengirim, model penalaran diminta berpikir singkat, dan batas waktu 2 menit per permintaan (permintaan pemilik, 7 November 2026) | MVP |
 
 ## Alur Pengguna
 
@@ -404,7 +405,7 @@ Satu aplikasi web statis (PWA) yang berjalan sepenuhnya di peramban. Tidak ada b
 
 &#91;embedded content: arsitektur · 4 lapis, 1 layanan eksternal\]
 
-Antarmuka membaca dan menulis IndexedDB secara langsung. Pekerjaan generasi diatur oleh peramban per butir: tiap butir dikirim ke penyedia yang dipilih guru, hasilnya diverifikasi di perangkat, lalu disimpan sebelum butir berikutnya, sehingga dapat dilanjutkan setelah tab ditutup. Kunci API guru tersimpan lokal dan tidak pernah melewati server kita. Server hanya muncul pada V1: validasi lisensi sekali bayar, dan proxy isi ulang opsional bagi guru yang tidak mau mengurus kunci.
+Antarmuka membaca dan menulis IndexedDB secara langsung. Pekerjaan generasi diatur oleh peramban per butir: tiap butir dikirim ke penyedia yang dipilih guru, hasilnya diverifikasi di perangkat, lalu disimpan begitu lolos, sehingga dapat dilanjutkan setelah tab ditutup. Beberapa butir dapat dikerjakan serentak bila batas per menit model mengizinkan (F-37); batas per menit dan per hari tetap dijaga pembatas laju. Kunci API guru tersimpan lokal dan tidak pernah melewati server kita. Server hanya muncul pada V1: validasi lisensi sekali bayar, dan proxy isi ulang opsional bagi guru yang tidak mau mengurus kunci.
 
 ### Daftar API MVP
 

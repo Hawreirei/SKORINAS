@@ -66,8 +66,17 @@ const tundaBawaan = (ms: number, signal?: AbortSignal) =>
     });
   });
 
+/** Lepaskan jatah permintaan yang dipesan izin(); aman dipanggil lebih dari sekali. */
+export type Lepas = () => void;
+
 export class PembatasLaju {
   private kirim = new Map<string, number[]>();
+  /**
+   * Permintaan yang sudah diberi izin tetapi belum tercatat di pemakaian_ai (sedang menunggu jendela
+   * per menit, sedang dikirim, atau jawabannya sedang diperiksa). Ikut dihitung dalam batas per hari
+   * agar beberapa butir yang dikerjakan serentak tidak melewati kuota harian.
+   */
+  private dipesan = new Map<string, number>();
 
   /** Lama tunggu agar permintaan berikutnya tidak melewati RPM (0 bila boleh langsung). */
   tungguRpm(kunci: string, rpm: number | null, kini: number): number {
@@ -82,13 +91,24 @@ export class PembatasLaju {
     this.kirim.set(kunci, [...(this.kirim.get(kunci) ?? []), waktu]);
   }
 
-  /** Tunggu sampai boleh mengirim, lalu catat waktu kirim. Melempar GalatAi 'batas' harian bila RPD habis. */
-  async izin(penyedia: PenyediaId, model: string, batas: BatasLaju, o: OpsiIzin = {}): Promise<void> {
+  /** Banyak izin yang belum dilepas untuk model ini. */
+  sedangDipesan(penyedia: PenyediaId, model: string): number {
+    return this.dipesan.get(kunciModel(penyedia, model)) ?? 0;
+  }
+
+  /**
+   * Tunggu sampai boleh mengirim, lalu catat waktu kirim. Melempar GalatAi 'batas' harian bila RPD habis.
+   * Mengembalikan fungsi lepas: panggil setelah permintaan tercatat di pemakaian_ai (atau bila tidak akan
+   * tercatat), agar jatah harian yang dipesan tidak terhitung dua kali.
+   */
+  async izin(penyedia: PenyediaId, model: string, batas: BatasLaju, o: OpsiIzin = {}): Promise<Lepas> {
     const kunci = kunciModel(penyedia, model);
     const sekarang = o.sekarang ?? Date.now;
     const tunda = o.tunda ?? tundaBawaan;
     if (batas.rpd) {
-      const terpakai = await (o.hitungHarian ?? (() => permintaanHariIni(penyedia, model)))();
+      const tercatat = await (o.hitungHarian ?? (() => permintaanHariIni(penyedia, model)))();
+      // Pemeriksaan dan pemesanan berjalan tanpa jeda (tanpa await) sehingga tidak dapat disela izin lain.
+      const terpakai = tercatat + (this.dipesan.get(kunci) ?? 0);
       if (terpakai >= batas.rpd)
         throw new GalatAi(
           'batas',
@@ -98,13 +118,26 @@ export class PembatasLaju {
           `Dihitung GenSoal dari catatan pemakaian di perangkat ini: ${terpakai} permintaan sejak kuota terakhir pulih. Ubah angka di Pengaturan AI bila kuota Anda lebih besar.`,
         );
     }
-    for (;;) {
-      const ms = this.tungguRpm(kunci, batas.rpm, sekarang());
-      if (ms <= 0) break;
-      o.saatMenunggu?.(ms, `Menjaga batas ${batas.rpm} permintaan per menit.`);
-      await tunda(ms, o.signal);
+    this.dipesan.set(kunci, (this.dipesan.get(kunci) ?? 0) + 1);
+    let lepas = false;
+    const lepaskan: Lepas = () => {
+      if (lepas) return;
+      lepas = true;
+      this.dipesan.set(kunci, Math.max(0, (this.dipesan.get(kunci) ?? 1) - 1));
+    };
+    try {
+      for (;;) {
+        const ms = this.tungguRpm(kunci, batas.rpm, sekarang());
+        if (ms <= 0) break;
+        o.saatMenunggu?.(ms, `Menjaga batas ${batas.rpm} permintaan per menit.`);
+        await tunda(ms, o.signal);
+      }
+    } catch (e) {
+      lepaskan();
+      throw e;
     }
     this.catat(kunci, sekarang());
+    return lepaskan;
   }
 }
 

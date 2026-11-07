@@ -13,6 +13,8 @@ interface Opsi {
 
 /** Adaptor untuk penyedia berantarmuka chat/completions ala OpenAI: OpenRouter, Groq, Mistral, OpenAI. */
 export function buatAdaptorKompat(o: Opsi): Adaptor {
+  /** Model yang menolak reasoning_effort; percobaan berikutnya dikirim tanpa isian itu. */
+  const tanpaPenalaran = new Set<string>();
   return {
     id: o.id,
     async kirim(p) {
@@ -25,6 +27,8 @@ export function buatAdaptorKompat(o: Opsi): Adaptor {
       };
       if (o.jsonMode) badan.response_format = { type: 'json_object' };
       if (o.suhu) badan.temperature = p.suhu ?? 0.7;
+      const pikir = p.penalaran === 'rendah' && !tanpaPenalaran.has(p.model);
+      if (pikir) badan.reasoning_effort = 'low';
       const r = await ambil(
         `${o.dasar}/chat/completions`,
         {
@@ -34,7 +38,10 @@ export function buatAdaptorKompat(o: Opsi): Adaptor {
           body: JSON.stringify(badan),
         },
         o.nama,
-      );
+      ).catch((e: unknown) => {
+        if (pikir && e instanceof GalatAi && e.status === 400 && /reasoning/i.test(e.message)) tanpaPenalaran.add(p.model);
+        throw e;
+      });
       const j = await r.json();
       const isi = j?.choices?.[0]?.message?.content;
       const teks = Array.isArray(isi) ? isi.map((x: { text?: string }) => x.text ?? '').join('') : (isi ?? '');

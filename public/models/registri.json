@@ -15,6 +15,7 @@
       "model": [
         {
           "id": "gemini-3.8-flash",
+          "penalaran": "rendah",
           "label": "Gemini 3.8 Flash",
           "status": "stabil",
           "tingkat": "gratis",
@@ -31,6 +32,7 @@
         },
         {
           "id": "gemini-3.5-flash",
+          "penalaran": "rendah",
           "label": "Gemini 3.5 Flash",
           "status": "stabil",
           "tingkat": "gratis",
@@ -63,6 +65,7 @@
         },
         {
           "id": "gemini-2.5-flash",
+          "penalaran": "rendah",
           "label": "Gemini 2.5 Flash",
           "status": "stabil",
           "tingkat": "gratis",
@@ -167,6 +170,7 @@
       "model": [
         {
           "id": "openai/gpt-oss-120b",
+          "penalaran": "rendah",
           "label": "GPT-OSS 120B",
           "status": "stabil",
           "tingkat": "gratis",
@@ -183,6 +187,7 @@
         },
         {
           "id": "openai/gpt-oss-20b",
+          "penalaran": "rendah",
           "label": "GPT-OSS 20B",
           "status": "stabil",
           "tingkat": "gratis",

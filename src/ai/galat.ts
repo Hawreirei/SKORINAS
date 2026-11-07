@@ -19,6 +19,8 @@ export class GalatAi extends Error {
   ) {
     super(pesan);
   }
+  /** Diisi pengirim yang dijaga pembatas laju: lepaskan jatah harian setelah percobaan tercatat. */
+  lepas?: () => void;
 }
 
 /** "37s", "1.5s", "2m59.56s", "120" (detik) -> milidetik. */
@@ -97,13 +99,31 @@ export async function galatDariRespons(r: Response, nama: string): Promise<Galat
   return new GalatAi('lain', `${nama} mengembalikan galat ${r.status}. ${rinci}`, r.status);
 }
 
-export async function ambil(url: string, init: RequestInit, nama: string): Promise<Response> {
+/** Batas waktu satu permintaan ke penyedia (F-37): permintaan yang macet tidak menahan pembuatan soal. */
+export const BATAS_WAKTU_MS = 120_000;
+
+export async function ambil(url: string, init: RequestInit, nama: string, batasMs = BATAS_WAKTU_MS): Promise<Response> {
+  const kendali = new AbortController();
+  let habis = false;
+  const waktu = setTimeout(() => {
+    habis = true;
+    kendali.abort();
+  }, batasMs);
+  const luar = init.signal;
+  const teruskan = () => kendali.abort();
+  if (luar?.aborted) kendali.abort();
+  else luar?.addEventListener('abort', teruskan, { once: true });
   let r: Response;
   try {
-    r = await fetch(url, init);
+    r = await fetch(url, { ...init, signal: kendali.signal });
   } catch (e) {
+    // Waktu habis bukan galat jaringan: butir dicoba lagi lewat pembatas laju, bukan dijeda.
+    if (habis) throw new GalatAi('server', `${nama} tidak menjawab dalam ${Math.round(batasMs / 1000)} detik.`);
     if ((e as Error).name === 'AbortError') throw new GalatAi('dibatalkan', 'Dibatalkan.');
     throw new GalatAi('jaringan', `Tidak dapat menghubungi ${nama}. Periksa koneksi internet, atau penyedia ini tidak mengizinkan panggilan langsung dari peramban.`);
+  } finally {
+    clearTimeout(waktu);
+    luar?.removeEventListener('abort', teruskan);
   }
   if (!r.ok) throw await galatDariRespons(r, nama);
   return r;

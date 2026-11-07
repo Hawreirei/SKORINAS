@@ -3,9 +3,19 @@ import type { Adaptor } from '../tipe';
 
 const DASAR = 'https://generativelanguage.googleapis.com/v1beta';
 
+/** Model yang menolak thinkingConfig; percobaan berikutnya dikirim tanpa pengaturan itu. */
+const tanpaPenalaran = new Set<string>();
+
+/** Pengaturan berpikir singkat: Gemini 2.5 memakai anggaran token, Gemini 3 ke atas memakai tingkat. */
+export function konfigPenalaranGemini(model: string, penalaran: 'rendah' | undefined): Record<string, unknown> | undefined {
+  if (penalaran !== 'rendah' || tanpaPenalaran.has(model)) return undefined;
+  return /^gemini-2\.5/.test(model) ? { thinkingBudget: 1024 } : { thinkingLevel: 'low' };
+}
+
 export const gemini: Adaptor = {
   id: 'gemini',
   async kirim(p) {
+    const pikir = konfigPenalaranGemini(p.model, p.penalaran);
     const r = await ambil(
       `${DASAR}/models/${encodeURIComponent(p.model)}:generateContent`,
       {
@@ -15,11 +25,14 @@ export const gemini: Adaptor = {
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: p.sistem }] },
           contents: [{ role: 'user', parts: [{ text: p.pesan }] }],
-          generationConfig: { responseMimeType: 'application/json', temperature: p.suhu ?? 0.7 },
+          generationConfig: { responseMimeType: 'application/json', temperature: p.suhu ?? 0.7, ...(pikir ? { thinkingConfig: pikir } : {}) },
         }),
       },
       'Gemini',
-    );
+    ).catch((e: unknown) => {
+      if (pikir && e instanceof GalatAi && e.status === 400 && /think/i.test(e.message)) tanpaPenalaran.add(p.model);
+      throw e;
+    });
     const j = await r.json();
     const teks = (j?.candidates?.[0]?.content?.parts ?? []).map((x: { text?: string }) => x.text ?? '').join('');
     if (!teks) throw new GalatAi('model', `Gemini tidak mengembalikan teks (${j?.candidates?.[0]?.finishReason ?? j?.promptFeedback?.blockReason ?? 'tanpa alasan'}).`);
