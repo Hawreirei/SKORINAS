@@ -1,4 +1,4 @@
-import type { Bentuk, IsiSoal, ParameterPaket, Slot } from '../db/tipe';
+import type { Bentuk, IsiSoal, JenisIsian, ParameterPaket, Slot } from '../db/tipe';
 import { BENTUK_LABEL } from '../db/tipe';
 import { TEMPLAT } from '../gambar';
 import { paketUntuk } from '../paket';
@@ -47,7 +47,7 @@ Bila memakai gambar, ekspresi boleh memakai variabel gambar (lihat daftar templa
 const PETUNJUK_BENTUK: Record<Bentuk, string> = {
   pilihan_ganda: 'Pilihan ganda dengan tepat satu jawaban benar.',
   pilihan_ganda_kompleks: 'Pilihan ganda kompleks: sedikitnya dua opsi benar dan sedikitnya satu opsi salah. Pokok meminta siswa memilih semua jawaban yang benar (mis. "Pilihlah semua pernyataan yang benar."). Kunci berisi semua huruf benar.',
-  menjodohkan: 'Menjodohkan (tarik garis): pokok berupa perintah singkat; "pasangan.kiri" berisi 3 sampai 5 pernyataan atau soal pendek, "pasangan.kanan" berisi jawabannya ditambah 1 pengecoh, diacak (urutan kanan tidak sejajar dengan kiri). Setiap butir kiri tepat satu pasangan.',
+  menjodohkan: 'Menjodohkan (tarik garis): pokok berupa perintah singkat; "pasangan.kiri" berisi 3 sampai 5 pernyataan atau soal pendek (kecuali diatur lain di bawah), "pasangan.kanan" berisi jawabannya ditambah 1 pengecoh, diacak (urutan kanan tidak sejajar dengan kiri). Setiap butir kiri tepat satu pasangan.',
   isian_singkat: 'Isian singkat: jawaban satu bilangan, kata, atau tanda. Pokok diakhiri titik-titik "....".',
   benar_salah: 'Benar-salah: pokok berupa satu pernyataan (bukan pertanyaan). Kunci "B" atau "S".',
   uraian: 'Uraian: soal cerita atau penalaran dengan jawaban model lengkap dan rubrik penskoran. Isi "jenis_uraian": "penjelasan" bila siswa diminta memberi alasan atau pernyataan (dijawab pada garis), "hitungan" bila siswa diminta menghitung (dijawab pada kotak cara pengerjaan dan jawaban akhir).',
@@ -60,15 +60,52 @@ const GAYA: Record<ParameterPaket['gaya'], string> = {
   hots: 'Soal HOTS: menuntut analisis, evaluasi, atau kreasi; hindari soal hafalan.',
 };
 
-const BAHASA: Record<ParameterPaket['bahasa'], string> = {
-  id: 'Tulis soal dalam bahasa Indonesia baku sesuai jenjang.',
-  en: 'Write the item in English suitable for the grade level. Use a decimal point and comma thousands separators in the item text.',
-  dwibahasa: 'Tulis soal dalam bahasa Indonesia, lalu isi "terjemahan" dengan versi bahasa Inggris dari pokok dan opsi.',
+function teksBahasa(p: Pick<ParameterPaket, 'bahasa' | 'bahasa_lain'>): string {
+  switch (p.bahasa) {
+    case 'en':
+      return 'Write the item in English suitable for the grade level. Use a decimal point and comma thousands separators in the item text.';
+    case 'dwibahasa':
+      return 'Tulis soal dalam bahasa Indonesia, lalu isi "terjemahan" dengan versi bahasa Inggris dari pokok dan opsi.';
+    case 'lain': {
+      const nama = p.bahasa_lain?.trim() || 'yang diminta guru';
+      return `Tulis pokok, opsi, kunci, dan pembahasan dalam bahasa ${nama} yang sesuai jenjang; nama kolom JSON tetap seperti skema. Desimal dan ribuan mengikuti kebiasaan Indonesia (2,5 dan 12.500).`;
+    }
+    default:
+      return 'Tulis soal dalam bahasa Indonesia baku sesuai jenjang.';
+  }
+}
+
+/** Banyak opsi pilihan ganda: diatur guru (3–5), atau 5 untuk kelas 10–12 dan 4 untuk lainnya. */
+export function jumlahOpsiPg(p: Pick<ParameterPaket, 'kelas' | 'opsi_pg'>): 3 | 4 | 5 {
+  return p.opsi_pg ?? (p.kelas >= 10 ? 5 : 4);
+}
+
+const HURUF_AKHIR = { 3: 'C', 4: 'D', 5: 'E' } as const;
+
+const JENIS_ISIAN: Record<JenisIsian, string> = {
+  bebas: '',
+  bilangan: 'Jawaban isian berupa satu bilangan (boleh pecahan atau desimal, dengan satuan bila perlu).',
+  bilangan_bulat: 'Jawaban isian berupa satu bilangan bulat tanpa satuan.',
+  kata: 'Jawaban isian berupa satu kata atau istilah, bukan bilangan.',
 };
 
-/** Banyak opsi pilihan ganda: diatur guru, atau 5 untuk kelas 10–12 dan 4 untuk lainnya. */
-export function jumlahOpsiPg(p: Pick<ParameterPaket, 'kelas' | 'opsi_pg'>): 4 | 5 {
-  return p.opsi_pg ?? (p.kelas >= 10 ? 5 : 4);
+/** Rincian tambahan untuk bentuk butir ini dari pengaturan guru (opsi, jawaban benar, pasangan, jenis jawaban, skor). */
+export function rincianBentuk(p: ParameterPaket, bentuk: Bentuk): string[] {
+  const a = p.atur_bentuk;
+  const r: string[] = [];
+  if (bentuk === 'pilihan_ganda' || bentuk === 'pilihan_ganda_kompleks') {
+    const n = jumlahOpsiPg(p);
+    r.push(`Gunakan ${n} opsi (A–${HURUF_AKHIR[n]}).`);
+  }
+  if (bentuk === 'pilihan_ganda_kompleks' && a?.pgk_benar) {
+    const { min, maks } = a.pgk_benar;
+    r.push(min === maks ? `Tepat ${min} opsi benar.` : `Banyak opsi benar ${min} sampai ${maks}.`);
+  }
+  if (bentuk === 'menjodohkan' && a?.jodoh) r.push(`Kolom kiri tepat ${a.jodoh.kiri} butir; kolom kanan ${a.jodoh.kiri + a.jodoh.pengecoh} butir (${a.jodoh.pengecoh ? `${a.jodoh.pengecoh} pengecoh` : 'tanpa pengecoh'}).`);
+  if (bentuk === 'isian_singkat' && a?.isian && JENIS_ISIAN[a.isian]) r.push(JENIS_ISIAN[a.isian]);
+  if (bentuk === 'uraian' && a?.uraian) r.push(a.uraian === 'hitungan' ? 'Soal meminta perhitungan: isi "jenis_uraian": "hitungan".' : 'Soal meminta alasan atau penjelasan, bukan hitungan: isi "jenis_uraian": "penjelasan".');
+  if (bentuk === 'uraian' && p.skor_bentuk?.uraian) r.push(`Skor soal ini ${p.skor_bentuk.uraian}: jumlah skor dalam kurung pada rubrik harus ${p.skor_bentuk.uraian}.`);
+  return r;
 }
 
 export interface KonteksPrompt {
@@ -93,14 +130,18 @@ export function susunPesan(k: KonteksPrompt): string {
 ${p.cp.trim() ? `- Capaian pembelajaran: ${p.cp.trim()}` : ''}
 - Tujuan pembelajaran: ${tp.rumusan}`);
 
+  const rincian = rincianBentuk(p, slot.bentuk);
   bagian.push(`## Butir yang diminta
-- Bentuk: ${BENTUK_LABEL[slot.bentuk]} ("${slot.bentuk}"). ${PETUNJUK_BENTUK[slot.bentuk]}${slot.bentuk === 'pilihan_ganda' || slot.bentuk === 'pilihan_ganda_kompleks' ? ` Gunakan ${jumlahOpsiPg(p) === 5 ? '5 opsi (A–E)' : '4 opsi (A–D)'}.` : ''}${slot.bentuk === 'uraian' && p.skor_bentuk?.uraian ? ` Skor soal ini ${p.skor_bentuk.uraian}: jumlah skor dalam kurung pada rubrik harus ${p.skor_bentuk.uraian}.` : ''}
+- Bentuk: ${BENTUK_LABEL[slot.bentuk]} ("${slot.bentuk}"). ${PETUNJUK_BENTUK[slot.bentuk]}${rincian.length ? ` ${rincian.join(' ')}` : ''}
 - Kesukaran rancangan: ${slot.kesukaran}; level kognitif ${slot.level}.
-- Gaya: ${GAYA[p.gaya]}
-- Bahasa: ${BAHASA[p.bahasa]}`);
+- Gaya: ${GAYA[slot.gaya ?? p.gaya]}
+- Bahasa: ${teksBahasa(p)}${p.konteks?.trim() ? `\n- Konteks atau tema yang diminta guru: ${p.konteks.trim()}` : ''}`);
 
   const ujian = bagianPromptUjian(p, slot.level);
   if (ujian) bagian.push(ujian);
+
+  const tambahan = (p.aturan_tambahan ?? []).map((a) => a.trim()).filter(Boolean);
+  if (tambahan.length) bagian.push(`## Aturan tambahan dari guru (wajib diikuti)\n${tambahan.slice(0, 40).map((a) => `- ${a.slice(0, 500)}`).join('\n')}`);
 
   if (paket?.aturanPenulisan.length) bagian.push(`## Aturan penulisan ${paket.nama}\n${paket.aturanPenulisan.map((a) => `- ${a}`).join('\n')}`);
 

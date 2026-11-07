@@ -345,6 +345,7 @@ function tabelPenskoran(p: Penulis, d: DokumenSoal) {
   });
   p.y += 6;
   p.paragraf(t.rumus, g());
+  for (const c of d.penskoran!.catatan) p.paragraf(c, g());
 }
 
 function kepalaDokumen(p: Penulis, d: DokumenSoal) {
@@ -391,6 +392,7 @@ function kepalaDokumen(p: Penulis, d: DokumenSoal) {
   }
   p.paragraf(d.judul.toUpperCase(), g({ tebal: true }), { rata: 'tengah', jarak: d.kop ? 4 : 0 });
   if (!d.kop) p.paragraf(mapelKelas, g(), { rata: 'tengah', jarak: 4 });
+  if (d.waktu) p.paragraf(d.waktu, g(), { rata: 'tengah', jarak: 4 });
 }
 
 /** Kepala berkas kunci jawaban dan kisi-kisi: judul berkas, nama sekolah bila kop dipakai, judul paket, mapel, dan kelas. */

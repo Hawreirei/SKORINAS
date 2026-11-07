@@ -19,8 +19,11 @@ async function ambilSoal(id: string): Promise<Soal> {
   return s;
 }
 
-function slotDari(s: Soal): Slot {
-  return { id: s.slot_id, urutan: s.urutan, tp_index: 0, kesukaran: s.kesukaran_rancangan, level: s.level_kognitif, bentuk: s.bentuk, status: 'berjalan', percobaan: 0, pengganti: false, galat: null, soal_id: s.id };
+/** Slot untuk mengganti atau membuat ulang soal; gaya diambil dari rencana paket bila paket memakai campuran gaya. */
+async function slotDari(s: Soal): Promise<Slot> {
+  const kerja = await db.pekerjaan_generasi.where('paket_id').equals(s.paket_id).first();
+  const gaya = kerja?.slot.find((x) => x.id === s.slot_id)?.gaya;
+  return { id: s.slot_id, urutan: s.urutan, tp_index: 0, kesukaran: s.kesukaran_rancangan, level: s.level_kognitif, bentuk: s.bentuk, status: 'berjalan', percobaan: 0, pengganti: false, galat: null, soal_id: s.id, ...(gaya ? { gaya } : {}) };
 }
 
 export interface Kandidat {
@@ -44,7 +47,7 @@ export async function buatKandidat(soalId: string, catatan: string | null, signa
   let biaya: number | null = 0;
   const hasil = await buatButir(
     kirim,
-    { param, slot: slotDari(s), ...ctx, revisi: catatan !== null ? { lama: s.isi_json, catatan } : null, signal },
+    { param, slot: await slotDari(s), ...ctx, revisi: catatan !== null ? { lama: s.isi_json, catatan } : null, signal },
     async (p, lolos) => {
       const b = hitungBiaya(info, p.jawaban?.token_masuk ?? 0, p.jawaban?.token_keluar ?? 0);
       biaya = biaya === null || b === null ? null : biaya + b;
@@ -97,7 +100,7 @@ export async function periksaSuntingan(soalId: string, isi: IsiSoal): Promise<Ha
     kelas: p.kelas,
     fase: p.fase,
     lokal: p.bahasa === 'en' ? 'en' : 'id',
-    literasi: p.gaya === 'literasi',
+    literasi: p.gaya === 'literasi' || (p.jumlah_gaya?.literasi ?? 0) > 0,
     pokokLain: lain,
     gambarDiizinkan: true,
     opsiPg: p.opsi_pg ? { jumlah: p.opsi_pg, wajib: false } : null,

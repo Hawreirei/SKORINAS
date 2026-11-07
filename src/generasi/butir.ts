@@ -4,6 +4,7 @@ import type { JawabanAi } from '../ai/tipe';
 import { bacaIsiSoal, ekstrakJson, GalatSkema } from '../verifikasi/skema';
 import { periksaSoal, type HasilPeriksa } from '../verifikasi';
 import { seimbangkanKunci } from '../verifikasi/acak';
+import { periksaPengaturan, terapkanPengaturan } from '../verifikasi/pengaturan';
 import { susunPesan, SISTEM } from './prompt';
 
 export const MAKS_PERCOBAAN = 3;
@@ -75,21 +76,25 @@ export async function buatButir(kirim: Pengirim, m: MasukanButir, catat?: Pencat
       await catat?.(p, false);
       continue;
     }
+    isi = terapkanPengaturan(isi, m.param.atur_bentuk);
     const periksa = periksaSoal(isi, {
       rumpun: m.param.rumpun,
       kelas: m.param.kelas,
       fase: m.param.fase,
       lokal: m.param.bahasa === 'en' ? 'en' : 'id',
-      literasi: m.param.gaya === 'literasi',
+      literasi: (m.slot.gaya ?? m.param.gaya) === 'literasi',
       pokokLain: m.pokokLain,
       gambarDiizinkan: m.param.gambar !== 'mati',
       opsiPg: m.param.opsi_pg ? { jumlah: m.param.opsi_pg, wajib: true } : null,
     });
-    const p: Percobaan = { jawaban, alasan: periksa.alasan, isi };
+    // Rincian tiap bentuk dari guru (jumlah jawaban benar, pasangan, jenis jawaban isian) juga wajib dipenuhi.
+    const langgar = periksaPengaturan(isi, m.param.atur_bentuk, m.param.bahasa === 'en' ? 'en' : 'id');
+    const lolos = periksa.lolos && !langgar.length;
+    const p: Percobaan = { jawaban, alasan: [...periksa.alasan, ...langgar], isi };
     percobaan.push(p);
-    await catat?.(p, periksa.lolos);
-    if (periksa.lolos) return { ok: true, isi: seimbangkanKunci(isi, m.kunciTerpakai), periksa, percobaan, henti: null };
-    alasan = periksa.alasan;
+    await catat?.(p, lolos);
+    if (lolos) return { ok: true, isi: seimbangkanKunci(isi, m.kunciTerpakai), periksa, percobaan, henti: null };
+    alasan = p.alasan;
   }
   return { ok: false, isi: percobaan.at(-1)?.isi ?? null, periksa: null, percobaan, henti: null };
 }

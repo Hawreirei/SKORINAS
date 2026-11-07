@@ -54,7 +54,7 @@ async function ujiModel(penyedia: PenyediaId, model: string, kunci: string) {
   const bentuk: Bentuk[] = ['pilihan_ganda', 'isian_singkat', 'benar_salah'];
   for (let i = 0; i < jumlah; i++) {
     const acuan = ACUAN[i % ACUAN.length];
-    const param: ParameterPaket = { ...acuan, cara_bs: 'centang', jumlah_bentuk: null, sebaran_level: null, jumlah_tp: null, opsi_pg: null, skor_bentuk: null, ujian: null, mapel: 'Matematika', rumpun: 'matematika', n: 1, persen: [0, 100, 0], bentuk: [bentuk[i % bentuk.length]], bahasa: 'id', gaya: 'biasa', gambar: 'campuran', materi: '' };
+    const param: ParameterPaket = { ...acuan, cara_bs: 'centang', jumlah_bentuk: null, sebaran_level: null, jumlah_tp: null, opsi_pg: null, skor_bentuk: null, ujian: null, rincian: null, atur_bentuk: null, skor_salah: null, durasi_menit: null, jumlah_gaya: null, bahasa_lain: '', konteks: '', aturan_tambahan: [], mapel: 'Matematika', rumpun: 'matematika', n: 1, persen: [0, 100, 0], bentuk: [bentuk[i % bentuk.length]], bahasa: 'id', gaya: 'biasa', gambar: 'campuran', materi: '' };
     const slot = rencanakanSlot(param)[0];
     try {
       const j = await a.kirim({ kunci, model, sistem: SISTEM, pesan: susunPesan({ param, slot, pokokLain: [], alasanGagal: [] }), suhu: 0.7 });

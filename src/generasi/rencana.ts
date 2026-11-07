@@ -1,5 +1,5 @@
-import type { Bentuk, Kesukaran, Level, ParameterPaket, Slot } from '../db/tipe';
-import { BENTUK_LABEL, LEVEL, kesukaranDariLevel } from '../db/tipe';
+import type { Bentuk, GayaSoal, Kesukaran, Level, ParameterPaket, Slot } from '../db/tipe';
+import { BENTUK_LABEL, GAYA, LEVEL, kesukaranDariLevel } from '../db/tipe';
 import { uuid } from '../db/util';
 import { KATEGORI, bagiKomposisi } from './komposisi';
 
@@ -11,12 +11,13 @@ const LEVEL_KATEGORI: Record<Kesukaran, [Level, Level]> = {
 
 export const URUTAN_BENTUK: Bentuk[] = ['pilihan_ganda', 'pilihan_ganda_kompleks', 'benar_salah', 'menjodohkan', 'isian_singkat', 'uraian'];
 
-export type MasukanRencana = Pick<ParameterPaket, 'n' | 'persen' | 'bentuk' | 'tp'> & Partial<Pick<ParameterPaket, 'jumlah_bentuk' | 'sebaran_level' | 'jumlah_tp'>>;
+export type MasukanRencana = Pick<ParameterPaket, 'n' | 'persen' | 'bentuk' | 'tp'> & Partial<Pick<ParameterPaket, 'jumlah_bentuk' | 'sebaran_level' | 'jumlah_tp' | 'rincian' | 'jumlah_gaya'>>;
 
 const jumlah = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
 
-/** Bentuk yang dipakai paket: dari jumlah per bentuk bila diatur, selain itu bentuk yang dicentang. */
-export function bentukDipakai(p: Pick<ParameterPaket, 'bentuk'> & Partial<Pick<ParameterPaket, 'jumlah_bentuk'>>): Bentuk[] {
+/** Bentuk yang dipakai paket: dari susunan per baris atau jumlah per bentuk bila diatur, selain itu bentuk yang dicentang. */
+export function bentukDipakai(p: Pick<ParameterPaket, 'bentuk'> & Partial<Pick<ParameterPaket, 'jumlah_bentuk' | 'rincian'>>): Bentuk[] {
+  if (p.rincian) return URUTAN_BENTUK.filter((b) => p.rincian!.some((r) => r.bentuk === b && r.jumlah > 0));
   if (p.jumlah_bentuk) return URUTAN_BENTUK.filter((b) => (p.jumlah_bentuk![b] ?? 0) > 0);
   return URUTAN_BENTUK.filter((b) => p.bentuk.includes(b));
 }
@@ -24,6 +25,17 @@ export function bentukDipakai(p: Pick<ParameterPaket, 'bentuk'> & Partial<Pick<P
 /** Masalah komposisi yang membuat rencana tidak dapat disusun; kosong bila sah. */
 export function galatKomposisi(p: MasukanRencana): string[] {
   const galat: string[] = [];
+  if (p.jumlah_gaya) {
+    const t = jumlah(GAYA.map((g) => p.jumlah_gaya![g] ?? 0));
+    if (t !== p.n) galat.push(`Jumlah per gaya soal ${t}, harus sama dengan jumlah soal (${p.n}).`);
+  }
+  if (p.rincian) {
+    const t = jumlah(p.rincian.map((r) => r.jumlah));
+    if (!p.rincian.length) galat.push('Susunan per baris masih kosong. Tambah baris atau matikan susunan per baris.');
+    else if (t !== p.n) galat.push(`Jumlah pada susunan per baris ${t}, harus sama dengan jumlah soal (${p.n}).`);
+    if (p.rincian.some((r) => r.tp !== null && (r.tp < 0 || r.tp >= p.tp.length))) galat.push('Ada baris susunan yang memakai TP yang sudah dihapus. Pilih ulang TP-nya.');
+    return galat;
+  }
   if (p.jumlah_bentuk) {
     const t = jumlah(URUTAN_BENTUK.map((b) => p.jumlah_bentuk![b] ?? 0));
     if (t !== p.n) galat.push(`Jumlah per bentuk soal ${t}, harus sama dengan jumlah soal (${p.n}).`);
@@ -75,6 +87,42 @@ export function rencanakanSlot(p: MasukanRencana): Slot[] {
   if (p.tp.length === 0) throw new Error('Minimal satu TP.');
   const galat = galatKomposisi(p);
   if (galat.length) throw new Error(galat.join(' '));
+  return beriGaya(p.rincian ? slotDariRincian(p) : slotDariKuota(p), p);
+}
+
+/** Susunan per baris: setiap baris menjadi sekian butir; baris tanpa TP mendapat TP bergiliran. */
+function slotDariRincian(p: MasukanRencana): Omit<Slot, 'urutan'>[] {
+  let giliran = 0;
+  return p.rincian!.flatMap((r) =>
+    Array.from({ length: r.jumlah }, () => ({
+      id: uuid(),
+      tp_index: r.tp ?? giliran++ % p.tp.length,
+      kesukaran: kesukaranDariLevel(r.level),
+      level: r.level,
+      bentuk: r.bentuk,
+      status: 'menunggu' as const,
+      percobaan: 0,
+      pengganti: false,
+      galat: null,
+      soal_id: null,
+    })),
+  );
+}
+
+/** Urutkan butir per bentuk lalu dari mudah ke sulit, beri nomor, lalu sebar campuran gaya bila diatur. */
+function beriGaya(mentah: Omit<Slot, 'urutan'>[], p: MasukanRencana): Slot[] {
+  const urutK = (k: Kesukaran) => KATEGORI.indexOf(k);
+  const urut = [...mentah].sort((a, b) => URUTAN_BENTUK.indexOf(a.bentuk) - URUTAN_BENTUK.indexOf(b.bentuk) || urutK(a.kesukaran) - urutK(b.kesukaran));
+  const gaya: GayaSoal[] | null = p.jumlah_gaya
+    ? (() => {
+        const dipakai = GAYA.filter((g) => (p.jumlah_gaya![g] ?? 0) > 0);
+        return sebarKuota(dipakai.map((g) => p.jumlah_gaya![g] ?? 0)).map((i) => dipakai[i]);
+      })()
+    : null;
+  return urut.map((s, i) => ({ ...s, urutan: i + 1, ...(gaya ? { gaya: gaya[i] } : {}) }));
+}
+
+function slotDariKuota(p: MasukanRencana): Omit<Slot, 'urutan'>[] {
 
   // 1. Deret level dari mudah ke sulit.
   const deretLevel: { kesukaran: Kesukaran; level: Level }[] = [];
@@ -121,15 +169,14 @@ export function rencanakanSlot(p: MasukanRencana): Slot[] {
     galat: null,
     soal_id: null,
   }));
-  const urutK = (k: Kesukaran) => KATEGORI.indexOf(k);
-  mentah.sort((a, b) => URUTAN_BENTUK.indexOf(a.bentuk) - URUTAN_BENTUK.indexOf(b.bentuk) || urutK(a.kesukaran) - urutK(b.kesukaran));
-  return mentah.map((s, i) => ({ ...s, urutan: i + 1 }));
+  return mentah;
 }
 
 /** Ringkasan bentuk untuk layar, mis. "20 pilihan ganda · 5 uraian" atau "pilihan ganda, uraian". */
-export function ringkasBentuk(p: Pick<ParameterPaket, 'bentuk'> & Partial<Pick<ParameterPaket, 'jumlah_bentuk'>>): string {
+export function ringkasBentuk(p: Pick<ParameterPaket, 'bentuk'> & Partial<Pick<ParameterPaket, 'jumlah_bentuk' | 'rincian'>>): string {
   const b = bentukDipakai(p);
   if (!b.length) return 'belum ada bentuk soal';
+  if (p.rincian) return b.map((x) => `${jumlah(p.rincian!.filter((r) => r.bentuk === x).map((r) => r.jumlah))} ${BENTUK_LABEL[x].toLowerCase()}`).join(' · ');
   if (p.jumlah_bentuk) return b.map((x) => `${p.jumlah_bentuk![x]} ${BENTUK_LABEL[x].toLowerCase()}`).join(' · ');
   return b.map((x) => BENTUK_LABEL[x].toLowerCase()).join(', ');
 }

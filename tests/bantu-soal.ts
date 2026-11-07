@@ -33,6 +33,14 @@ export function paketUji(): PaketSoal {
       opsi_pg: null,
       skor_bentuk: null,
       ujian: null,
+      rincian: null,
+      atur_bentuk: null,
+      skor_salah: null,
+      durasi_menit: null,
+      jumlah_gaya: null,
+      bahasa_lain: '',
+      konteks: '',
+      aturan_tambahan: [],
     },
   };
 }

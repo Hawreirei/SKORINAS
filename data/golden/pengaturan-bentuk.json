@@ -1,0 +1,485 @@
+{
+ "keterangan": "Golden set pemeriksa rincian tiap bentuk (src/verifikasi/pengaturan.ts, F-36): butir 'patuh' harus lolos tanpa alasan, butir 'langgar' harus ditolak.",
+ "patuh": [
+  {
+   "id": "P-01",
+   "atur": {
+    "pgk_benar": {
+     "min": 2,
+     "maks": 2
+    },
+    "jodoh": null,
+    "isian": null,
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua bilangan genap.",
+    "opsi": {
+     "A": "2",
+     "B": "3",
+     "C": "4",
+     "D": "6",
+     "E": "7"
+    },
+    "kunci": "A,C",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "P-02",
+   "atur": {
+    "pgk_benar": {
+     "min": 2,
+     "maks": 3
+    },
+    "jodoh": null,
+    "isian": null,
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua bilangan genap.",
+    "opsi": {
+     "A": "2",
+     "B": "3",
+     "C": "4",
+     "D": "6",
+     "E": "7"
+    },
+    "kunci": "A,C,D",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "P-03",
+   "atur": {
+    "pgk_benar": null,
+    "jodoh": {
+     "kiri": 4,
+     "pengecoh": 1
+    },
+    "isian": null,
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "menjodohkan",
+    "pokok": "Pasangkan.",
+    "pasangan": {
+     "kiri": [
+      "a",
+      "b",
+      "c",
+      "d"
+     ],
+     "kanan": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+     ]
+    },
+    "kunci": "1-A, 2-B, 3-C, 4-D",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "P-04",
+   "atur": {
+    "pgk_benar": null,
+    "jodoh": {
+     "kiri": 3,
+     "pengecoh": 0
+    },
+    "isian": null,
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "menjodohkan",
+    "pokok": "Pasangkan.",
+    "pasangan": {
+     "kiri": [
+      "a",
+      "b",
+      "c"
+     ],
+     "kanan": [
+      "1",
+      "2",
+      "3"
+     ]
+    },
+    "kunci": "1-A, 2-B, 3-C",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "P-05",
+   "atur": {
+    "pgk_benar": null,
+    "jodoh": null,
+    "isian": "bilangan_bulat",
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "isian_singkat",
+    "pokok": "Hasilnya adalah ....",
+    "kunci": "2026",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "P-06",
+   "atur": {
+    "pgk_benar": null,
+    "jodoh": null,
+    "isian": "bilangan_bulat",
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "isian_singkat",
+    "pokok": "Hasilnya adalah ....",
+    "kunci": "-12",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "P-07",
+   "atur": {
+    "pgk_benar": null,
+    "jodoh": null,
+    "isian": "bilangan",
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "isian_singkat",
+    "pokok": "Hasilnya adalah ....",
+    "kunci": "$\\frac{3}{4}$",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "P-08",
+   "atur": {
+    "pgk_benar": null,
+    "jodoh": null,
+    "isian": "bilangan",
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "isian_singkat",
+    "pokok": "Hasilnya adalah ....",
+    "kunci": "2,5 cm",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "P-09",
+   "atur": {
+    "pgk_benar": null,
+    "jodoh": null,
+    "isian": "kata",
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "isian_singkat",
+    "pokok": "Hasilnya adalah ....",
+    "kunci": "fotosintesis",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "P-10",
+   "atur": null,
+   "isi": {
+    "bentuk": "isian_singkat",
+    "pokok": "Hasilnya adalah ....",
+    "kunci": "apa saja 12",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  }
+ ],
+ "langgar": [
+  {
+   "id": "L-01",
+   "atur": {
+    "pgk_benar": {
+     "min": 2,
+     "maks": 2
+    },
+    "jodoh": null,
+    "isian": null,
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua bilangan genap.",
+    "opsi": {
+     "A": "2",
+     "B": "3",
+     "C": "4",
+     "D": "6",
+     "E": "7"
+    },
+    "kunci": "A,C,D",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "L-02",
+   "atur": {
+    "pgk_benar": {
+     "min": 3,
+     "maks": 4
+    },
+    "jodoh": null,
+    "isian": null,
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "pilihan_ganda_kompleks",
+    "pokok": "Pilihlah semua bilangan genap.",
+    "opsi": {
+     "A": "2",
+     "B": "3",
+     "C": "4",
+     "D": "6",
+     "E": "7"
+    },
+    "kunci": "A,C",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "L-03",
+   "atur": {
+    "pgk_benar": null,
+    "jodoh": {
+     "kiri": 4,
+     "pengecoh": 1
+    },
+    "isian": null,
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "menjodohkan",
+    "pokok": "Pasangkan.",
+    "pasangan": {
+     "kiri": [
+      "a",
+      "b",
+      "c"
+     ],
+     "kanan": [
+      "1",
+      "2",
+      "3",
+      "4"
+     ]
+    },
+    "kunci": "1-A, 2-B, 3-C",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "L-04",
+   "atur": {
+    "pgk_benar": null,
+    "jodoh": {
+     "kiri": 3,
+     "pengecoh": 2
+    },
+    "isian": null,
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "menjodohkan",
+    "pokok": "Pasangkan.",
+    "pasangan": {
+     "kiri": [
+      "a",
+      "b",
+      "c"
+     ],
+     "kanan": [
+      "1",
+      "2",
+      "3",
+      "4"
+     ]
+    },
+    "kunci": "1-A, 2-B, 3-C",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "L-05",
+   "atur": {
+    "pgk_benar": null,
+    "jodoh": null,
+    "isian": "bilangan_bulat",
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "isian_singkat",
+    "pokok": "Hasilnya adalah ....",
+    "kunci": "2,5",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "L-06",
+   "atur": {
+    "pgk_benar": null,
+    "jodoh": null,
+    "isian": "bilangan_bulat",
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "isian_singkat",
+    "pokok": "Hasilnya adalah ....",
+    "kunci": "12 cm",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "L-07",
+   "atur": {
+    "pgk_benar": null,
+    "jodoh": null,
+    "isian": "bilangan",
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "isian_singkat",
+    "pokok": "Hasilnya adalah ....",
+    "kunci": "fotosintesis",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "L-08",
+   "atur": {
+    "pgk_benar": null,
+    "jodoh": null,
+    "isian": "kata",
+    "uraian": null
+   },
+   "isi": {
+    "bentuk": "isian_singkat",
+    "pokok": "Hasilnya adalah ....",
+    "kunci": "45",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   }
+  }
+ ]
+}

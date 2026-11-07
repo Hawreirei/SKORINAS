@@ -106,7 +106,7 @@ export function buatTex(d: DokumenSoal): string {
   \\end{center}
   \\vspace{-0.5em}\\hrule height 1pt\\vspace{0.8em}`);
     }
-    bagian.push(`\\begin{center}{\\bfseries ${escLatex(d.judul)}}\\\\ ${escLatex(d.mapel)} · ${L('Kelas', 'Grade')} ${d.kelas}\\end{center}`);
+    bagian.push(`\\begin{center}{\\bfseries ${escLatex(d.judul)}}\\\\ ${escLatex(d.mapel)} · ${L('Kelas', 'Grade')} ${d.kelas}${d.waktu ? `\\\\ ${escLatex(d.waktu)}` : ''}\\end{center}`);
     if (d.identitas.length) {
       const n = d.identitas.length;
       const lebar = (i: number) => (n === 1 ? 0.98 : i === 0 ? 0.44 : 0.52 / (n - 1)).toFixed(3);
@@ -134,7 +134,7 @@ ${t.kepala.map((k) => `\\textbf{${escLatex(k)}}`).join(' & ')} \\\\ \\hline
 ${baris.join('\n')}
 \\multicolumn{3}{|l|}{\\textbf{${escLatex(t.total)}}} & \\textbf{${d.penskoran.total}} \\\\ \\hline
 \\end{tabular}\\par\\smallskip
-${escLatex(t.rumus)}`);
+${escLatex(t.rumus)}${d.penskoran.catatan.map((c) => `\\par ${escLatex(c)}`).join('')}`);
     }
     // Pembahasan ikut berkas kunci jawaban, mulai di halaman baru.
     if (d.opsi.pembahasan) {

@@ -78,6 +78,8 @@ export interface BagianDok {
 export interface Penskoran {
   baris: { bentuk: string; jumlah: number; skor: number; maks: number }[];
   total: number;
+  /** Aturan pengurangan skor untuk jawaban salah, satu kalimat per bentuk; kosong bila tidak ada. */
+  catatan: string[];
 }
 
 const ANGKA = /^[\d\s.,:/+\-−%°]+$/;
@@ -122,6 +124,8 @@ export interface DokumenSoal {
   cp: string;
   inggris: boolean;
   cara_bs: CaraBenarSalah;
+  /** Waktu mengerjakan untuk lembar soal, mis. "Waktu: 75 menit"; null bila tidak diatur. */
+  waktu: string | null;
   kop: { sekolah: string; baris: string[]; alamat: string; logo: string | null } | null;
   identitas: string[];
   bagian: BagianDok[];
@@ -253,7 +257,12 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
       };
     });
     const skor = p.skor_bentuk?.[bentuk] ?? null;
-    const teksSkor = skor ? (inggris ? ` Each question is worth ${skor} ${skor === 1 ? 'point' : 'points'}.` : ` Skor setiap soal ${skor}.`) : '';
+    const salah = skor ? (p.skor_salah?.[bentuk] ?? 0) : 0;
+    const teksSkor = skor
+      ? inggris
+        ? ` Each question is worth ${skor} ${skor === 1 ? 'point' : 'points'}${salah ? `; a wrong answer loses ${salah}` : ''}.`
+        : ` Skor setiap soal ${skor}${salah ? `; jawaban salah dikurangi ${salah}` : ''}.`
+      : '';
     bagian.push({ bentuk, judul: `${ROMAWI[bagian.length]}. ${JUDUL_BAGIAN[bentuk][inggris ? 1 : 0]}`, petunjuk: petunjukBagian(bentuk, butir, cara, inggris) + teksSkor, butir, skor });
   }
   const berskor = bagian.filter((b) => b.skor);
@@ -261,6 +270,9 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
     ? {
         baris: berskor.map((b) => ({ bentuk: JUDUL_BAGIAN[b.bentuk][inggris ? 1 : 0], jumlah: b.butir.length, skor: b.skor!, maks: b.butir.length * b.skor! })),
         total: berskor.reduce((a, b) => a + b.butir.length * b.skor!, 0),
+        catatan: berskor
+          .filter((b) => p.skor_salah?.[b.bentuk])
+          .map((b) => (inggris ? `${JUDUL_BAGIAN[b.bentuk][1]}: a wrong answer loses ${p.skor_salah![b.bentuk]}, a blank answer scores 0.` : `${JUDUL_BAGIAN[b.bentuk][0]}: jawaban salah dikurangi ${p.skor_salah![b.bentuk]}, jawaban kosong 0.`)),
       }
     : null;
   const semua = bagian.flatMap((b) => b.butir);
@@ -274,6 +286,7 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
     cp: p.cp,
     inggris,
     cara_bs: cara,
+    waktu: p.durasi_menit ? (inggris ? `Time: ${p.durasi_menit} minutes` : `Waktu: ${p.durasi_menit} menit`) : null,
     kop: opsi.kop
       ? { sekolah: profil.sekolah || (inggris ? 'SCHOOL NAME' : 'NAMA SEKOLAH'), baris: profil.kop_json.baris.filter(Boolean), alamat: profil.kop_json.alamat, logo: profil.logo_blob }
       : null,
