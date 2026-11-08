@@ -21,6 +21,11 @@ const TANPA_BACAAN = new Set<Slot['bentuk']>(['benar_salah', 'menjodohkan']);
 export function kelompokkanBacaan(slot: Slot[], k: number | null | undefined): Slot[] {
   if (!k || k < 2) return slot;
   const hasil = slot.map((s) => ({ ...s }));
+  // TP kelompok bergiliran atas semua TP paket (yang paling banyak soalnya lebih dulu), agar bacaan menyebar ke
+  // seluruh cakupan materi; tanpa ini anggota mengikuti TP ketua dan banyak TP tidak terpakai.
+  const banyak = new Map<number, number>();
+  for (const s of slot) banyak.set(s.tp_index, (banyak.get(s.tp_index) ?? 0) + 1);
+  const tpGilir = [...banyak.keys()].sort((a, b) => banyak.get(b)! - banyak.get(a)! || a - b);
   let i = 0;
   let nomor = 0;
   while (i < hasil.length) {
@@ -34,11 +39,12 @@ export function kelompokkanBacaan(slot: Slot[], k: number | null | undefined): S
       if (kelompok.length > 1 && kelompok.at(-1)!.length === 1) kelompok[kelompok.length - 2].push(...kelompok.pop()!);
       for (const g of kelompok) {
         if (g.length < 2) continue;
+        const tp = tpGilir[nomor % tpGilir.length];
         const id = `bacaan-${++nomor}`;
         const ketua = g[0];
         for (const s of g) {
           s.kelompok = id;
-          s.tp_index = ketua.tp_index;
+          s.tp_index = tp;
           if (ketua.variasi) s.variasi = ketua.variasi;
         }
       }

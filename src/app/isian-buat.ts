@@ -205,8 +205,8 @@ export function masukanRencana(f: Isian) {
 }
 
 /** Cakupan format ujian yang dipakai bila guru mengosongkan CP dan TP; null bila tidak berlaku. */
-export function cakupanIsian(f: Pick<Isian, 'tpTeks' | 'cp' | 'ujian'>): Cakupan | null {
-  return !barisTp(f.tpTeks).length && !f.cp.trim() ? cakupanFormat(f.ujian?.id) : null;
+export function cakupanIsian(f: Pick<Isian, 'tpTeks' | 'cp' | 'ujian' | 'mapel'>): Cakupan | null {
+  return !barisTp(f.tpTeks).length && !f.cp.trim() ? cakupanFormat(f.ujian?.id, f.mapel) : null;
 }
 
 export function keParameter(f: Isian, acak: () => number = Math.random): ParameterPaket {

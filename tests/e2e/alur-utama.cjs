@@ -415,7 +415,19 @@ function butirPalsu(bentuk) {
   // Cakupan materi dan stimulus wajib (F-39): tanpa CP dan TP, soal disebar ke cakupan ujian dan diawali cerita.
   await hp.getByText(/disebar ke \d+ butir cakupan materi ujian ini/).waitFor();
   await hp.getByText('Tanpa CP dan TP: soal disebar ke cakupan materi TKAD SD · Matematika').waitFor();
+  // Audit format (8 November 2026): materi yang dipakai tampil di kartu CP dan TP beserta banyak soal per elemen.
+  await hp.getByText('Materi yang dipakai: TKAD SD · Matematika').waitFor();
+  for (const t of ['Bilangan · 15 soal', 'Geometri dan Pengukuran · 9 soal', 'Data · 6 soal']) await hp.getByText(t, { exact: true }).waitFor();
+  await hp.locator('#judul-cakupan-tp').scrollIntoViewIfNeeded();
   await hp.screenshot({ path: path.join(KELUAR, '09d-buat-format-ujian-ponsel.png'), fullPage: true });
+  // Mapel pilihan TKA SMA: cakupan menurut mapel yang dipilih guru.
+  await hp.selectOption('#ujian', 'tka-sma-pilihan');
+  await hp.getByText('Pilih mapel pilihan dari daftar agar cakupan materinya terpakai, atau isi TP sendiri.').waitFor();
+  await hp.fill('#mapel', 'Fisika');
+  await hp.getByText('Materi yang dipakai: TKA SMA · Fisika').waitFor();
+  await hp.getByText(/^Kinematika · \d+ soal$/).waitFor();
+  lebar = Math.max(lebar, await hp.evaluate(() => document.documentElement.scrollWidth));
+  await hp.locator('section[aria-labelledby="judul-cakupan-tp"]').screenshot({ path: path.join(KELUAR, '09e-cakupan-mapel-pilihan-ponsel.png') });
   lebar = Math.max(lebar, await hp.evaluate(() => document.documentElement.scrollWidth));
   await page.goto(DASAR + '/soal/baru');
   await page.waitForSelector('#ujian');

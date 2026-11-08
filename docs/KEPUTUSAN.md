@@ -379,3 +379,17 @@ Permintaan pemilik: tambahkan yang belum tercakup (PG kompleks kategori, satu ba
 | Data | Dexie versi 7; semua isian baru null berarti perilaku lama | AGENTS.md butir 2 |
 | E2E tidak stabil | Penyebabnya di uji, bukan aplikasi: judul beranda ("Buat soal yang kuncinya sudah dicek") juga cocok dengan `h1:has-text("Buat soal")`, dan layar Buat serta Unduh dimuat belakangan, sehingga uji membaca isian atau menekan Tab sebelum layar tujuan tampil. Uji kini menunggu isian layar Buat terisi dan tombol Unduh tampil. Tiga run berturut-turut lolos penuh | Kriteria AGENTS.md butir 5 |
 | Belum | Bacaan bersama lintas bentuk (pakem mencetak per bagian bentuk); skor per butir yang diketik satu per satu | Perlu tata letak berkas per bacaan |
+
+## Audit format ujian (F-41, 8 November 2026)
+
+Laporan pemilik: paket TKA SD Matematika hanya berisi soal desimal dan pecahan; CP, TP, dan materi TKA resmi seolah tidak masuk. Diminta memeriksa semua format.
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Penyebab | (1) Cakupan materi, stimulus, dan variasi (F-39, F-40) belum digabung ke main, jadi aplikasi yang terpasang mengirim TP kosong. (2) Sejak F-38 paket dibuat lewat `susunPesanKelompok`, yang belum membawa fitur itu. (3) Empat dari lima contoh acuan Matematika bertopik pecahan, dan aturan pengecoh hanya menyebut kesalahan pecahan, sehingga model menganggap soal Matematika = soal pecahan | Temuan audit kode |
+| Prompt kelompok | Membawa TP tiap butir dengan perintah "setiap butir mengukur TP pada barisnya sendiri", aturan stimulus wajib sekali, tema/bentuk stimulus/tokoh per butir di daftar butir, bacaan bersama sekali per kelompok (Bacaan A, B, …) dengan butir "pokok hanya pertanyaan", kompetensi membaca per butir (format bahasa TKA/TKAD), skor uraian per kesukaran, dan gaya pembahasan | Kelompok dan satu butir kini setara |
+| Contoh acuan | Matematika: 13 contoh beragam topik (bilangan cacah, KPK, pecahan, luas gabungan, volume, waktu, rata-rata, data, uang) termasuk PG kompleks kategori dan uraian; dipilih bergiliran menurut nomor butir. Judul bagian menegaskan topik mengikuti TP. Uji memastikan setiap contoh yang dapat dihitung lolos pemeriksa | Contoh tidak lagi menarik semua soal ke satu topik |
+| Cakupan baru | TKA SMA mapel pilihan (18 nama mapel di daftar saran, dicocokkan dengan nama yang diisi guru), OSN-K SMA Fisika, Kimia, Biologi, Informatika, Astronomi, Kebumian, Ekonomi, Geografi; IPA dan IPS OSN-K SMP dipisah dari SD. TKA SD Matematika ditambah penaksiran, satuan volume, tabel frekuensi. Rincian dan tingkat kepastian: `docs/referensi/format-ujian.md` bagian 5 | Sebelumnya format itu tanpa cakupan, sehingga tanpa TP soal dibuat dari nama mapel saja |
+| Tampil di layar | Kartu CP dan TP menampilkan "Materi yang dipakai" per elemen dengan banyak soal dan butirnya bila CP dan TP kosong; mapel pilihan tanpa nama yang dikenal mendapat ajakan memilih dari daftar atau mengisi TP | Guru melihat bahwa materi ujian sudah masuk sebelum membuat paket |
+| Bacaan bersama | TP tiap kelompok bacaan bergiliran atas semua TP paket (TP dengan soal terbanyak lebih dulu), bukan TP soal pertama kelompok | Format bahasa SD sebelumnya hanya memakai 5 dari 9 jenis teks |
+| Tidak diubah | Cakupan tetap bukan CP/TP sekolah dan hanya dipakai bila CP dan TP kosong (AGENTS.md butir 7, keputusan F-39); porsi selain Matematika SMP tetap usulan | **Perlu dikonfirmasi** dengan Perkaban BSKAP 045 dan 047/H/AN/2025 bila dokumennya dapat dibuka |

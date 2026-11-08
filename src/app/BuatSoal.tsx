@@ -20,9 +20,9 @@ import { batasEfektif, permintaanHariIni } from '../ai/laju';
 import { butirPerPermintaan, modelDari } from '../ai/registri';
 import { bacaDraf, bagiRata, hapusDraf, hitungRencana, MAKS_SOAL, MIN_SOAL, simpanDraf, SKOR_BAWAAN } from './rencana-buat';
 import { formatBiaya } from './ringkas';
-import { cakupanFormat } from '../ujian/cakupan';
+import { cakupanFormat, kuotaElemen } from '../ujian/cakupan';
 import { FORMAT_UJIAN, formatUjian, KELUARGA_LABEL, ringkasUjian, type KeluargaUjian } from '../ujian';
-import { barisTp, bentukIsian, cakupanIsian, galatKartu, isianDariParameter, isianDariUjian, isianKosong, keParameter, kuotaKesukaran, masukanRencana, ubahJumlah, type Isian } from './isian-buat';
+import { barisTp, bentukIsian, cakupanIsian, galatKartu, terapkanPilihanCakupan, isianDariParameter, isianDariUjian, isianKosong, keParameter, kuotaKesukaran, masukanRencana, ubahJumlah, type Isian } from './isian-buat';
 import OpsiLanjutanBuat from './OpsiLanjutanBuat';
 
 const MAKS_TP = 500;
@@ -140,7 +140,7 @@ export default function BuatSoal() {
   }
 
   const ujianKini = formatUjian(f.ujian?.id);
-  const cakupan = cakupanFormat(f.ujian?.id);
+  const cakupan = cakupanFormat(f.ujian?.id, f.mapel);
   const judulBawaan = ujianKini ? `Latihan ${ujianKini.mapel ? ujianKini.nama : `${ujianKini.nama.replace(' · Mapel pilihan', '')} · ${f.mapel.trim() || 'mapel pilihan'}`}` : `${f.mapel.trim()} kelas ${f.kelas || '…'}`;
 
   function pakaiUjian(id: string) {
@@ -148,6 +148,9 @@ export default function BuatSoal() {
   }
 
   const daftarTp = useMemo(() => barisTp(f.tpTeks), [f.tpTeks]);
+  // Cakupan materi format ujian yang dipakai bila CP dan TP kosong, dengan banyak soal per elemen.
+  const cakupanKini = cakupanIsian(f);
+  const cakupanTampil = useMemo(() => (cakupanKini ? kuotaElemen(terapkanPilihanCakupan(cakupanKini, f.cakupanPilih), f.n).filter((e) => e.soal > 0) : null), [cakupanKini, f.cakupanPilih, f.n]);
   const saranTp = useMemo(() => daftarTp.map((t) => ({ t, n: nilaiTp(t) })).filter((x) => x.n.nilai !== 'baik'), [daftarTp]);
   const rencanaMasuk = masukanRencana(f);
   const kartuGalat = galatKartu(f);
@@ -540,10 +543,30 @@ export default function BuatSoal() {
                     : f.cp.trim()
                       ? 'Tanpa TP: soal dibuat dari CP.'
                       : cakupanIsian(f) && ujianKini
-                        ? `Tanpa CP dan TP: soal disebar ke cakupan materi ${ujianKini.nama} (elemen dan butirnya tercatat di kisi-kisi).`
+                        ? `Tanpa CP dan TP: soal disebar ke cakupan materi ${ujianKini.nama} di bawah ini.`
                         : 'Tanpa CP dan TP: soal dibuat dari topik atau mapel.'
                 }
               />
+              {cakupanTampil ? (
+                <section aria-labelledby="judul-cakupan-tp" className="mt-4 rounded-xl border border-garis bg-latar p-4">
+                  <h3 id="judul-cakupan-tp" className="text-base font-extrabold text-judul">
+                    Materi yang dipakai: {ujianKini?.mapel ? ujianKini.nama : `${ujianKini?.nama.replace(' · Mapel pilihan', '')} · ${f.mapel.trim()}`}
+                  </h3>
+                  <ul className="mt-2 space-y-2 text-base leading-normal">
+                    {cakupanTampil.map((e) => (
+                      <li key={e.elemen}>
+                        <span className="font-bold text-isi">
+                          {e.elemen} · {e.soal} soal
+                        </span>
+                        <span className="block text-redup">{e.butir.join('; ')}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-2 text-base text-redup">Butir dan porsinya dapat diubah di Pengaturan lanjutan, kartu Cakupan materi. Isi TP sendiri bila ingin materi lain.</p>
+                </section>
+              ) : ujianKini && !daftarTp.length && !f.cp.trim() && !cakupan ? (
+                <p className="mt-3 text-base text-awas">{ujianKini.mapel ? 'Format ini belum punya daftar cakupan materi: isi TP agar soal tersebar ke materi yang diujikan.' : 'Pilih mapel pilihan dari daftar agar cakupan materinya terpakai, atau isi TP sendiri.'}</p>
+              ) : null}
               {saranTp.length ? (
                 <details className="mt-2">
                   <summary className="cursor-pointer text-base font-bold text-awas">Saran rumusan untuk {saranTp.length} TP (tidak wajib)</summary>
@@ -569,7 +592,7 @@ export default function BuatSoal() {
               perBentuk={perBentuk}
               skorMaks={skorMaks}
               ujianKini={ujianKini}
-              cakupan={cakupanIsian(f)}
+              cakupan={cakupanKini}
               kataMateri={kataMateri}
               maksKataMateri={MAKS_KATA_MATERI}
               judul={judul}

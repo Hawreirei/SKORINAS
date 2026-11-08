@@ -108,7 +108,7 @@ Penilaian Matematika: soal dasar benar 2, salah atau kosong 0; soal lanjut benar
 | --- | --- |
 | PG sederhana | `pilihan_ganda` |
 | PG kompleks MCMA | `pilihan_ganda_kompleks` |
-| PG kompleks kategori (satu stimulus, beberapa pernyataan B/S) | `benar_salah` (satu pernyataan per soal); bentuk kategori sejati belum ada, lihat `docs/KEPUTUSAN.md` |
+| PG kompleks kategori (satu stimulus, beberapa pernyataan B/S) | `pilihan_ganda_kategori` (F-40): satu nomor, 3–6 pernyataan, dua kategori |
 | Level TKA | Pengetahuan dan Pemahaman = C1–C2, Aplikasi = C3, Penalaran = C4–C6; disebut di prompt, kisi-kisi tetap C1–C6 |
 | Level OSN | C3–C6 (2:3:3:2); OSN-K SMA Matematika C3–C6 rata (dasar dan lanjut) |
 | Lebih dari 50 soal | Dibatasi 50 per paket (batas layar Buat); layar menyarankan dua paket |
@@ -127,10 +127,15 @@ Dipakai di `src/ujian/cakupan.ts` bila guru mengosongkan CP dan TP. Dokumen resm
 | Bahasa Indonesia SD, SMP, SMA | Teks informasi (tunggal; SMP dan SMA juga jamak) dan teks fiksi; jenis teks rinci (deskripsi, laporan, prosedur, berita, pengumuman, eksplanasi, eksposisi, opini, infografis; dongeng, fabel, cerita rakyat, cerpen, puisi, drama, hikayat) | Teks informasi dan fiksi, kompetensi, dan ciri teks (SD: kalimat 3–7 kata pola SPOK, tokoh datar, alur maju, sudut pandang orang pertama; SMP: 200–250 kata, tokoh bulat, alur campuran, sudut pandang orang ketiga; SMA: 250–300 kata) tinggi. Jenis teks rinci adalah usulan dari jenis teks Kurikulum Merdeka, tidak disebut sumber |
 | Bahasa Inggris SMA | Descriptive, recount, narrative, procedure, analytical exposition (resmi menurut ringkasan), ditambah report, teks fungsional, dan puisi pendek (usulan); B1 (Tingkat Lanjut B2) | Sedang |
 | OSN | Ranah per bidang dari pedoman (Matematika SD lima ranah masing-masing sekitar 20%; SMP dan SMA aljabar, geometri, kombinatorika, teori bilangan; IPA dan IPS empat ranah) | Sedang |
+| Matematika SD (tambahan F-41) | Penaksiran dan pembulatan, satuan volume dan penaksiran ukuran, tabel frekuensi; diagram lingkaran tidak termasuk SD | Sedang: ringkasan elpedia, pintarly, bimbelartha atas Perkaban 047/H/AN/2025 |
+| TKA SMA mapel pilihan (F-41) | Matematika Tingkat Lanjut (aljabar: matriks, polinomial, fungsi, bilangan kompleks; geometri: vektor, lingkaran, transformasi, trigonometri lanjut; kalkulus: limit, turunan, integral), Bahasa Indonesia Tingkat Lanjut (teks informasi argumentatif dan sastra: realisme, absurd, puisi, drama, terjemahan), Bahasa Inggris Tingkat Lanjut (exposition, discussion, B2, 300–400 kata), Fisika (kinematika, dinamika, fluida, gelombang, kalor dan termodinamika, kelistrikan), Kimia (dasar, analitik, fisik, organik), Biologi (keanekaragaman hayati, sel dan metabolisme, sistem organ, genetika dan evolusi, keterampilan proses), Ekonomi (konsep dasar, mikro, makro, internasional, akuntansi keuangan dasar), Sosiologi (lima elemen), Geografi (wilayah dan lingkungan, fisik, sosial, interaksi, mitigasi bencana), Sejarah (pengantar sampai Reformasi), Antropologi (konsep dasar, etnografi, multikultural, perubahan sosial budaya, kearifan lokal dan tradisi lisan), PPKn (Pancasila, UUD 1945, Bhinneka Tunggal Ika, NKRI); bahasa asing dan Projek Kreatif dan Kewirausahaan memakai daftar umum | Elemen sedang (medcom, itera, stekom, aimasukptn, pintarly; antarsumber berbeda jumlah elemen, mis. Fisika 4 atau 6 elemen: katalog memakai 6). Sub-butir dan bahasa asing: usulan. Porsi rata |
+| OSN SMP IPA/IPS dan OSN SMA bidang lain (F-41) | IPA SMP terpadu (fisika, kimia, biologi, bumi dan antariksa) dan IPS SMP (geografi, sejarah, ekonomi, sosiologi) dipisah dari SD; OSN-K SMA Fisika, Kimia, Biologi, Informatika, Astronomi, Kebumian, Ekonomi, Geografi dari ranah yang sudah tertulis di aturan format | Sedang: usulan dari ranah pedoman, porsi usulan |
 
-Porsi elemen selain SMP Matematika adalah usulan (lihat `docs/KEPUTUSAN.md`, F-39).
+Porsi elemen selain SMP Matematika adalah usulan (lihat `docs/KEPUTUSAN.md`, F-39 dan F-41). Mapel pilihan TKA SMA dicocokkan dengan nama mapel yang diisi guru (tidak peka huruf besar).
 
 ## Sumber
+
+- Audit 8 November 2026 (F-41): elpedia.net bank soal TKA SD Matematika, pintarly.id soal TKA SD Matematika kelas 6, bimbelartha.id ringkasan ruang lingkup TKA SD, medcom.id kisi-kisi TKA SMA 2026, itera.ac.id dan blog.itera.ac.id kisi-kisi TKA SMA 2026, sbnmpts.stekom.ac.id TKA saintek dan soshum 2026, aimasukptn.com kisi-kisi TKA 2026, mamikos.com kisi-kisi PPKn (ringkasan mesin pencari; halaman tidak dapat dibuka dari lingkungan pengembangan)
 
 - detik.com, 3 bentuk soal di TKA SMA/SMK: https://www.detik.com/edu/sekolah/d-8019585/3-bentuk-soal-di-tka-sma-smk-ketahui-juga-daftar-mapel-pilihannya
 - tirto.id, jenis soal TKA 2025: https://tirto.id/jenis-soal-tes-tka-2025-jenjang-sd-smp-sma-smk-hg6K
