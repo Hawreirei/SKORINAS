@@ -4,8 +4,8 @@ Catatan ini melengkapi `docs/RANCANGAN.md` v0.4. Bagian "Keputusan saat membangu
 
 ## Perlu diputuskan (dari rancangan)
 
-- [x] **Format ujian: cakupan materi.** Diputuskan pemilik (7 November 2026, F-38): soal TKA terasa seragam, jadi cakupan kerangka asesmen TKA dan ranah OSN dibawa di `src/ujian/cakupan.ts`. Cakupan ini bukan CP atau TP sekolah: hanya dipakai bila guru mengosongkan CP dan TP, dan TP guru selalu didahulukan. AGENTS.md butir 7 tetap berlaku untuk CP dan TP.
-- [x] **Bentuk "pilihan ganda kompleks kategori" (TKA).** Dibuat pada F-39 sebagai bentuk sendiri (`pilihan_ganda_kategori`): satu stimulus, 3–6 pernyataan, dua kategori, satu nomor dan satu tabel.
+- [x] **Format ujian: cakupan materi.** Diputuskan pemilik (7 November 2026, F-39): soal TKA terasa seragam, jadi cakupan kerangka asesmen TKA dan ranah OSN dibawa di `src/ujian/cakupan.ts`. Cakupan ini bukan CP atau TP sekolah: hanya dipakai bila guru mengosongkan CP dan TP, dan TP guru selalu didahulukan. AGENTS.md butir 7 tetap berlaku untuk CP dan TP.
+- [x] **Bentuk "pilihan ganda kompleks kategori" (TKA).** Dibuat pada F-40 sebagai bentuk sendiri (`pilihan_ganda_kategori`): satu stimulus, 3–6 pernyataan, dua kategori, satu nomor dan satu tabel.
 
 - [ ] Urutan mata pelajaran yang dibuka setelah Matematika (usul: IPAS, Bahasa Indonesia, Bahasa Inggris).
 - [ ] Penyedia AI MVP. Kode sudah mendukung keenamnya; yang perlu diputuskan adalah mana yang diuji golden set dan ditampilkan lebih dulu.
@@ -281,7 +281,7 @@ Permintaan pemilik: format untuk membuat soal TKA, TKAD, dan OSN tingkat SD samp
 | Mapel pilihan TKA SMA | Mapel dikosongkan dan 19 mapel pilihan akademik muncul sebagai saran isian | Guru memilih mapel ujinya sendiri |
 | Rumpun | "Astronomi" dan "Kebumian" kini dikenali sebagai rumpun IPA | Mapel OSN SMA; sebelumnya tidak dikenali |
 | Uji | `tests/ujian.test.ts`: setiap format dapat langsung direncanakan untuk semua jumlah 5–50, angka kunci (TKA SD 19/5/6 dan 6/12/12, OSN-K SMP 25 PG skor 4), prompt TKA/TKAD/OSN, migrasi versi 4, dan cadangan. E2E memilih format TKAD di ponsel dan OSN-K SMP di laptop | AGENTS.md butir 5 |
-| E2E tidak stabil | `npm run e2e` di lingkungan pengembangan gagal tidak menentu di dua langkah lama: "Mulai cepat tidak mengisi layar Buat" (kadang `#kelas` belum ada) dan, di layar Unduh, penelusuran Tab tidak mencapai tombol Unduh sehingga Enter jatuh ke tautan kaki "Profil dan kop". Langkah Mulai cepat juga gagal pada kode sebelum F-35 (dua dari dua run); layar Unduh tidak diubah F-35. Langkah format ujian, lebar ponsel 390 px, dan axe (0 pelanggaran di 16 pemeriksaan) lolos di setiap run | Diselesaikan pada F-39 (penyebab di uji, lihat F-39) |
+| E2E tidak stabil | `npm run e2e` di lingkungan pengembangan gagal tidak menentu di dua langkah lama: "Mulai cepat tidak mengisi layar Buat" (kadang `#kelas` belum ada) dan, di layar Unduh, penelusuran Tab tidak mencapai tombol Unduh sehingga Enter jatuh ke tautan kaki "Profil dan kop". Langkah Mulai cepat juga gagal pada kode sebelum F-35 (dua dari dua run); layar Unduh tidak diubah F-35. Langkah format ujian, lebar ponsel 390 px, dan axe (0 pelanggaran di 16 pemeriksaan) lolos di setiap run | Diselesaikan pada F-40 (penyebab di uji, lihat F-40) |
 
 ## Opsi lanjutan v2 (F-36, 7 November 2026)
 
@@ -301,7 +301,7 @@ Permintaan pemilik: opsi lanjutan ditulis ulang agar lebih umum dan rinci, dan h
 | Konteks dan aturan tambahan | Konteks satu baris; aturan tambahan satu per baris (maks. 40 aturan, 500 huruf per aturan dikirim). Format ujian kini menyalin aturannya ke sini (dapat disunting, ikut paket dan pengaturan tersimpan) sehingga paket lama tidak berubah bila katalog diperbaiki; prompt format ujian hanya menambah nama format, level TKA, dan kelokalan | Menjawab temuan: aturan format sebelumnya tersembunyi dan tidak tersalin ke paket |
 | Data | Dexie versi 5; semua isian baru null atau kosong berarti perilaku lama. Paket versi 4 bertanda format ujian mendapat salinan aturan formatnya saat migrasi; cadangan lama dilengkapi saat dipulihkan | AGENTS.md butir 2 |
 | Uji | `tests/opsi-lanjutan.test.ts` (susunan per baris, campuran gaya, prompt, pemeriksa dan golden, tiga opsi, isian ↔ parameter, ekspor waktu dan skor salah, migrasi versi 5). E2E membuka kartu baru, menyalakan susunan per baris, mengatur pasangan dan waktu, menulis aturan tambahan, dan memeriksa "Waktu: 60 menit" di pratinjau Unduh | AGENTS.md butir 4 dan 5 |
-| E2E | Seluruh alur dengan langkah baru lolos (axe 0 pelanggaran di 16 pemeriksaan, lebar ponsel 390 px); `npm run e2e` tetap gagal tidak menentu di langkah lama "Mulai cepat" (lihat F-35) | Diselesaikan pada F-39 (penyebab di uji, lihat F-39) |
+| E2E | Seluruh alur dengan langkah baru lolos (axe 0 pelanggaran di 16 pemeriksaan, lebar ponsel 390 px); `npm run e2e` tetap gagal tidak menentu di langkah lama "Mulai cepat" (lihat F-35) | Diselesaikan pada F-40 (penyebab di uji, lihat F-40) |
 
 ## Percepatan pembuatan soal (F-37, 7 November 2026)
 
@@ -319,8 +319,34 @@ Permintaan pemilik: pembuatan soal terasa sangat lama; percepat sebisa mungkin d
 | Kemajuan di layar | `slotAktif` kini nomor kemajuan (soal selesai + 1), bukan nomor butir yang sedang dikerjakan | Dengan butir serentak, nomor butir terkecil dapat tertahan dan membingungkan |
 | Tidak diubah | Angka batas per menit dan per hari di registri, jumlah percobaan (3 + 1 putaran pengganti), jeda aman 1,5 detik | Permintaan pemilik: batas dipertahankan; mengurangi percobaan menambah slot gagal |
 
+## Beberapa butir dalam satu permintaan (F-38, 8 November 2026)
 
-## Soal format ujian bervariasi dan berstimulus (F-38, 7 November 2026)
+Permintaan pemilik: satu kunci API tidak sanggup membuat satu paket 30 soal dalam sehari; guru perlu beberapa paket. Penyebab: satu permintaan hanya menghasilkan satu butir, sehingga 30 soal memakan sedikitnya 30 permintaan (ditambah percobaan ulang), sedangkan Gemini gratis di registri dibatasi 20 permintaan per hari.
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Kelompok | Pengatur mengambil sampai *n* slot berbentuk sama dari antrean dan memintanya dalam satu permintaan (`susunPesanKelompok`, `SISTEM_KELOMPOK`, keluaran `{"butir": [...]}` dengan `nomor`). Konteks bersama (CP, aturan penulisan, skema, aturan verifikasi, materi, soal lain) dikirim sekali; tiap butir punya baris sendiri: bentuk, kesukaran, level (dan level TKA), gaya, TP, alasan penolakan sebelumnya | 30 soal dengan 10 butir per permintaan = 3–4 permintaan. Uji: 20 permintaan menghasilkan 4 paket lengkap 30 soal dengan sekitar 7% butir ditolak |
+| Banyak butir per permintaan | Registri `butir_per_permintaan`: Gemini Flash dan Flash-Lite 10, Gemma 5, Groq 3 (batas token per menit tingkat gratis kecil); model lain 5 (`BUTIR_PER_PERMINTAAN_BAWAAN`), paling banyak 10. Jawaban terpotong (finishReason MAX_TOKENS, finish_reason length, stop_reason max_tokens) atau tidak terbaca sama sekali: kelompok berikutnya untuk model itu dibuat separuhnya. Anthropic: batas keluaran 4096 + 2500 token per butir (paling banyak 32.000) | Angka belum diukur dengan kunci asli: **perlu dikonfirmasi** lewat `npm run uji-model`. Penyesuaian sendiri mencegah paket macet bila angka terlalu besar |
+| Pemeriksaan | Tiap butir divalidasi skema, diverifikasi, dan diperiksa kaidahnya sendiri; butir yang sudah lolos dalam jawaban yang sama ikut dibandingkan kemiripannya. Butir yang hilang dari jawaban dianggap satu percobaan gagal. Cocokkan menurut `nomor`, lalu menurut urutan; larik di tingkat teratas juga diterima | Prinsip 2 tidak berubah: soal bermasalah tidak sampai ke layar guru |
+| Percobaan ulang | Tetap 3 percobaan lalu satu putaran pengganti (3 percobaan) per slot. Butir yang perlu dicoba lagi dimasukkan ke depan antrean, sehingga ikut permintaan berikutnya bersama butir baru dan tidak memakan permintaan sendiri | Penolakan tidak lagi berarti satu permintaan tambahan per butir |
+| Pemakaian dan batas harian | Satu catatan `pemakaian_ai` per permintaan dengan isian baru `jumlah_lolos` (tanpa indeks, jadi tanpa versi Dexie baru); catatan lama dihitung 1 bila lolos (`soalLolos`). Batas harian GenSoal menghitung jumlah soal lolos; kelompok terakhir dipotong agar batas itu tidak terlewati. Biaya permintaan dibagi rata ke butirnya | Batas per hari penyedia tetap menghitung permintaan; batas GenSoal tetap menghitung soal |
+| Panel Rencana | Permintaan = soal ÷ butir per permintaan (maks.: ×1,3 lalu dibagi); peringatan kuota membandingkan sisa kuota dengan permintaan, bukan jumlah soal. Baris baru "Cukup untuk sekitar *n* paket seperti ini" (sisa kuota ÷ perkiraan terbanyak). Angka tunggal bila perkiraan terkecil dan terbesar sama | Guru langsung melihat berapa paket yang masih dapat dibuat hari ini |
+| Tidak diubah | Ganti soal dan buat ulang per butir (`operasi.ts`) tetap satu butir per permintaan dengan prompt lama; batas per menit dan per hari; uji pengatur lama dijalankan dengan `perPermintaan: 1` | Guru membandingkan satu kandidat; uji lama tetap menguji logika per butir |
+
+## Perbaikan pemeriksa setelah uji model (F-38, 8 November 2026)
+
+Uji model pertama dengan kunci asli (`gemini-3.5-flash`; `gemini-3.8-flash` sedang dibalas 502/503 oleh Google) memberi 100% lolos pada 1 butir per permintaan, tetapi hanya 50–65% pada 5–10 butir per permintaan. Penolakan hampir semuanya bukan soal yang salah, melainkan bentuk yang belum dikenali pemeriksa atau tipe verifikasi yang keliru.
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Satuan LaTeX | `angkaDariTeks` membaca `\text{ cm}^2`, `\mathrm{kg}`, `\,`, `m^{3}`, dan koma desimal `2{,}5`. Pangkat dianggap bagian satuan hanya bila menempel pada huruf, jadi `2^3` tetap 8 | Penolakan terbanyak: "Opsi kunci B ("$112\text{ cm}^2$") bukan bilangan" padahal soalnya benar |
+| Pilihan ganda per_opsi | Pilihan ganda biasa boleh memakai `per_opsi`: tepat satu pernyataan benar dan itu milik kunci (`periksaPgPerOpsi`). Penyeimbang kunci ikut menukar pernyataan. Layar sunting menawarkan "Pernyataan per opsi" untuk pilihan ganda | Soal "pecahan yang lebih besar dari 3/5", opsi berupa kalimat perbandingan, atau opsi berupa pernyataan "4/7 < 5/8" tidak dapat dinyatakan dengan ekspresi tunggal |
+| Aturan verifikasi di prompt | Dipakai mode satu butir dan kelompok: perbandingan untuk pilihan ganda HANYA bila opsinya tanda; opsi bilangan memakai ekspresi (`max`/`min`) atau per_opsi; ekspresi berisi < atau > dengan nilai "true" tidak sah; benar-salah: "nilai" adalah angka yang disebut pernyataan; isian berjawaban kata atau nama memakai tidak_ada; opsi boleh bersatuan | Kesalahan tipe yang terlihat di uji model |
+| Golden set | `data/golden/matematika-satuan.json`: 9 butir benar dan 9 butir salah dari pola uji model; empat butir benar ditolak pemeriksa sebelum perbaikan | AGENTS.md butir 4 |
+| uji-model | `--kelompok n`; mode kelompok memakai kesukaran yang sama dengan mode satu butir; varian salah-kunci isian bertanda perbandingan diganti tanda lain (sama dengan golden test); `RINCI=isi` mencetak soal yang ditolak dan varian salah-kunci yang lolos | Hasil sebelumnya tidak sebanding, dan satu "varian lolos" ternyata varian yang sama dengan aslinya |
+| Hasil | Setelah perbaikan: `gemini-3.5-flash`, 20 butir, 10 per permintaan: JSON sah 100%, lolos pemeriksa 100%, salah-kunci ditolak 100% (sebelumnya 60–65% lolos). `gemini-3.8-flash` **perlu diuji ulang** setelah Google tidak sibuk | Sampel kecil; jalankan lagi dengan `--butir 30 --kelompok 10` sebelum menandai model direkomendasikan |
+
+## Soal format ujian bervariasi dan berstimulus (F-39, 7 November 2026)
 
 Permintaan pemilik: soal TKA cenderung sama dan kurang variatif; riset cakupan materinya, pastikan ada stimulus cerita, dan buat format ujian menghasilkan soal yang sangat baik. Riset cakupan: `docs/referensi/format-ujian.md`, bagian 5.
 
@@ -335,9 +361,9 @@ Permintaan pemilik: soal TKA cenderung sama dan kurang variatif; riset cakupan m
 | Kompetensi membaca | Format Bahasa Indonesia dan Inggris: Pengetahuan dan Pemahaman → pemahaman tekstual, Aplikasi → pemahaman inferensial, Penalaran → evaluasi dan apresiasi; jenis teks dari cakupan (TP), bukan dari kompetensi | Level dan kompetensi tidak pernah bertentangan |
 | Keterbacaan | Paket berstimulus wajib dianggap literasi oleh kaidah keterbacaan (batas kata per kalimat × 1,5; hanya catatan) | Cerita lebih panjang kalimatnya |
 | Belum | PG kompleks kategori TKA (satu stimulus, beberapa pernyataan dalam satu nomor) dan satu stimulus untuk beberapa soal masih belum ada; benar-salah berstimulus menulis stimulus lalu satu pernyataan | Bentuk baru, fitur terpisah |
-| E2E | Satu run lolos penuh; run lain gagal tidak menentu di langkah lama (penelusuran Tab di layar Unduh), lihat F-35 | Diselesaikan pada F-39 (penyebab di uji, lihat F-39) |
+| E2E | Satu run lolos penuh; run lain gagal tidak menentu di langkah lama (penelusuran Tab di layar Unduh), lihat F-35 | Diselesaikan pada F-40 (penyebab di uji, lihat F-40) |
 
-## Pengaturan mendalam dan bentuk TKA lengkap (F-39, 7 November 2026)
+## Pengaturan mendalam dan bentuk TKA lengkap (F-40, 7 November 2026)
 
 Permintaan pemilik: tambahkan yang belum tercakup (PG kompleks kategori, satu bacaan untuk beberapa soal, skor per soal yang berbeda) dan buat pengaturan lebih mendalam serta dapat diatur seluruhnya.
 

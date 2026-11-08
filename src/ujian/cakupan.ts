@@ -1,5 +1,5 @@
 /**
- * Cakupan materi format ujian (F-38): elemen → sub-elemen → butir, dengan porsi per elemen.
+ * Cakupan materi format ujian (F-39): elemen → sub-elemen → butir, dengan porsi per elemen.
  *
  * Keputusan pemilik (7 November 2026): cakupan kerangka asesmen TKA dan ranah OSN boleh dibawa aplikasi agar soal
  * format ujian tersebar ke seluruh materi, bukan berulang di satu topik. Ini bukan CP atau TP sekolah: cakupan

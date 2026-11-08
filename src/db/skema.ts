@@ -102,7 +102,7 @@ export class GenSoalDb extends Dexie {
         p.parameter_json = lengkapiParameter(p.parameter_json);
       });
     });
-    // Versi 6: stimulus wajib dan variasi per butir (F-38). Paket lama tetap tanpa stimulus wajib.
+    // Versi 6: stimulus wajib dan variasi per butir (F-39). Paket lama tetap tanpa stimulus wajib.
     this.version(6).upgrade(async (tx) => {
       await tx.table('preset').toCollection().modify((p: Preset) => {
         p.parameter_json = lengkapiParameter(p.parameter_json);
@@ -111,7 +111,7 @@ export class GenSoalDb extends Dexie {
         p.parameter_json = lengkapiParameter(p.parameter_json);
       });
     });
-    // Versi 7: pengaturan mendalam (F-39): bacaan bersama, skor per kesukaran, cakupan pilihan, variasi sendiri,
+    // Versi 7: pengaturan mendalam (F-40): bacaan bersama, skor per kesukaran, cakupan pilihan, variasi sendiri,
     // panjang stimulus, petunjuk bagian, urutan bentuk, dan gaya pembahasan. Semua null = perilaku lama.
     this.version(7).upgrade(async (tx) => {
       await tx.table('preset').toCollection().modify((p: Preset) => {

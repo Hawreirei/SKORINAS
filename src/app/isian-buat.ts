@@ -42,7 +42,7 @@ export interface Isian {
   /** Aturan tambahan untuk AI, satu aturan per baris. */
   aturanTeks: string;
   wajibStimulus: boolean;
-  // ---- Pengaturan mendalam (F-39) ----
+  // ---- Pengaturan mendalam (F-40) ----
   soalPerBacaan: number | null;
   skorKesukaran: Record<Kesukaran, { benar: number; salah: number }> | null;
   cakupanPilih: { butir: string[] | null; porsi: Record<string, number> | null } | null;

@@ -1,0 +1,545 @@
+{
+ "keterangan": "Golden set satuan dan bentuk verifikasi yang sering ditulis model (uji model 8 November 2026): opsi dan kunci bersatuan LaTeX (\\\\text{ cm}^2, \\\\mathrm{kg}, 2{,}5), soal 'pecahan terbesar' dengan max(), dan benar-salah yang 'nilai'-nya angka pada pernyataan. Juga pilihan ganda dengan verifikasi per_opsi (opsi berupa kalimat, pernyataan, atau bilangan yang diuji syarat pada pokok). Setiap butir benar wajib lolos; setiap butir di 'salah' wajib ditolak.",
+ "benar": [
+  {
+   "id": "S-01",
+   "kelas": 5,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Sebuah papan berbentuk persegi panjang dengan panjang 14 cm dan lebar 8 cm. Luas papan tersebut adalah ....",
+    "opsi": {
+     "A": "$44\\text{ cm}^2$",
+     "B": "$112\\text{ cm}^2$",
+     "C": "$22\\text{ cm}^2$",
+     "D": "$102\\text{ cm}^2$"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "Luas persegi panjang = panjang × lebar.",
+     "14 × 8 = 112, jadi luasnya 112 cm²."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "14 * 8",
+     "nilai": "112"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "S-02",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Ibu membeli $1{,}5$ kg gula pasir dan $1$ kg gula merah. Berat seluruh gula yang dibeli Ibu adalah ....",
+    "opsi": {
+     "A": "$2{,}5\\,\\mathrm{kg}$",
+     "B": "$1{,}6\\,\\mathrm{kg}$",
+     "C": "$0{,}5\\,\\mathrm{kg}$",
+     "D": "$3{,}5\\,\\mathrm{kg}$"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "1,5 + 1 = 2,5, jadi beratnya 2,5 kg."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "1.5 + 1",
+     "nilai": "2.5"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "S-03",
+   "kelas": 6,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Sebuah bak mandi berbentuk kubus dengan panjang rusuk 2 m. Volume bak mandi tersebut adalah ....",
+    "opsi": {
+     "A": "$6\\text{ m}^3$",
+     "B": "$4\\text{ m}^3$",
+     "C": "$8\\text{ m}^3$",
+     "D": "$12\\text{ m}^3$"
+    },
+    "kunci": "C",
+    "pembahasan": [
+     "Volume kubus = rusuk × rusuk × rusuk.",
+     "2 × 2 × 2 = 8, jadi volumenya 8 m³."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "2 * 2 * 2",
+     "nilai": "8"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "S-04",
+   "kelas": 4,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Pecahan yang paling besar di antara pilihan berikut adalah ....",
+    "opsi": {
+     "A": "$\\frac{2}{3}$",
+     "B": "$\\frac{3}{4}$",
+     "C": "$\\frac{5}{8}$",
+     "D": "$\\frac{1}{2}$"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "Samakan penyebut menjadi 24: 16/24, 18/24, 15/24, dan 12/24.",
+     "Pembilang terbesar 18, jadi pecahan terbesar adalah 3/4."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "max(2/3, 3/4, 5/8, 1/2)",
+     "nilai": "3/4"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "S-05",
+   "kelas": 5,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "benar_salah",
+    "pokok": "Sebuah trapesium memiliki sisi sejajar 8 cm dan 12 cm serta tinggi 5 cm. Luas trapesium tersebut adalah 60 cm².",
+    "kunci": "S",
+    "pembahasan": [
+     "Luas trapesium = (8 + 12) : 2 × 5 = 50 cm².",
+     "Pernyataan menyebut 60 cm², jadi pernyataan salah."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "(8 + 12) / 2 * 5",
+     "nilai": "60"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "S-06",
+   "kelas": 5,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "isian_singkat",
+    "pokok": "Sebuah taman berbentuk persegi panjang dengan panjang 14 m dan lebar 9 m. Luas taman tersebut adalah ....",
+    "kunci": "$126\\text{ m}^2$",
+    "pembahasan": [
+     "14 × 9 = 126, jadi luasnya 126 m²."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "14 * 9",
+     "nilai": "126"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "S-07",
+   "kelas": 5,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Di antara pecahan-pecahan berikut, pecahan yang nilainya lebih besar dari $\\frac{3}{5}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{1}{2}$",
+     "B": "$\\frac{4}{10}$",
+     "C": "$\\frac{7}{10}$",
+     "D": "$\\frac{4}{15}$"
+    },
+    "kunci": "C",
+    "pembahasan": [
+     "3/5 = 6/10. Pecahan yang lebih dari 6/10 hanya 7/10."
+    ],
+    "verifikasi": {
+     "tipe": "per_opsi",
+     "opsi": {
+      "A": {
+       "kiri": "1/2",
+       "relasi": ">",
+       "kanan": "3/5"
+      },
+      "B": {
+       "kiri": "4/10",
+       "relasi": ">",
+       "kanan": "3/5"
+      },
+      "C": {
+       "kiri": "7/10",
+       "relasi": ">",
+       "kanan": "3/5"
+      },
+      "D": {
+       "kiri": "4/15",
+       "relasi": ">",
+       "kanan": "3/5"
+      }
+     }
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "S-08",
+   "kelas": 5,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Dayu memiliki tali sepanjang $\\frac{3}{4}$ meter, sedangkan Lani memiliki tali sepanjang $\\frac{5}{6}$ meter. Pernyataan yang benar tentang panjang tali mereka adalah ....",
+    "opsi": {
+     "A": "Tali Dayu lebih panjang dari tali Lani",
+     "B": "Tali Dayu lebih pendek dari tali Lani",
+     "C": "Tali Dayu sama panjang dengan tali Lani",
+     "D": "Tali Lani dua kali panjang tali Dayu"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "Samakan penyebut: 3/4 = 9/12 dan 5/6 = 10/12.",
+     "9/12 < 10/12, jadi tali Dayu lebih pendek."
+    ],
+    "verifikasi": {
+     "tipe": "per_opsi",
+     "opsi": {
+      "A": {
+       "kiri": "3/4",
+       "relasi": ">",
+       "kanan": "5/6"
+      },
+      "B": {
+       "kiri": "3/4",
+       "relasi": "<",
+       "kanan": "5/6"
+      },
+      "C": {
+       "kiri": "3/4",
+       "relasi": "=",
+       "kanan": "5/6"
+      },
+      "D": {
+       "kiri": "5/6",
+       "relasi": "=",
+       "kanan": "2 * 3/4"
+      }
+     }
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "S-09",
+   "kelas": 5,
+   "harapan": "terverifikasi_hitung",
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Pernyataan perbandingan yang benar untuk pecahan $\\frac{4}{7}$ dan $\\frac{5}{8}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{4}{7} > \\frac{5}{8}$",
+     "B": "$\\frac{4}{7} < \\frac{5}{8}$",
+     "C": "$\\frac{4}{7} = \\frac{5}{8}$",
+     "D": "$\\frac{5}{8} < \\frac{4}{7}$"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "Samakan penyebut menjadi 56: 4/7 = 32/56 dan 5/8 = 35/56.",
+     "32/56 < 35/56."
+    ],
+    "verifikasi": {
+     "tipe": "per_opsi",
+     "opsi": {
+      "A": {
+       "kiri": "4/7",
+       "relasi": ">",
+       "kanan": "5/8"
+      },
+      "B": {
+       "kiri": "4/7",
+       "relasi": "<",
+       "kanan": "5/8"
+      },
+      "C": {
+       "kiri": "4/7",
+       "relasi": "=",
+       "kanan": "5/8"
+      },
+      "D": {
+       "kiri": "5/8",
+       "relasi": "<",
+       "kanan": "4/7"
+      }
+     }
+    },
+    "gambar": null
+   }
+  }
+ ],
+ "salah": [
+  {
+   "id": "SX-01",
+   "kelas": 5,
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Sebuah papan berbentuk persegi panjang dengan panjang 14 cm dan lebar 8 cm. Luas papan tersebut adalah ....",
+    "opsi": {
+     "A": "$44\\text{ cm}^2$",
+     "B": "$112\\text{ cm}^2$",
+     "C": "$22\\text{ cm}^2$",
+     "D": "$102\\text{ cm}^2$"
+    },
+    "kunci": "D",
+    "pembahasan": [
+     "14 × 8 = 112."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "14 * 8",
+     "nilai": "112"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "SX-02",
+   "kelas": 5,
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Sebuah papan berbentuk persegi panjang dengan panjang 14 cm dan lebar 8 cm. Luas papan tersebut adalah ....",
+    "opsi": {
+     "A": "$44\\text{ cm}^2$",
+     "B": "$112\\text{ cm}^2$",
+     "C": "112 cm²",
+     "D": "$102\\text{ cm}^2$"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "14 × 8 = 112."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "14 * 8",
+     "nilai": "112"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "SX-03",
+   "kelas": 5,
+   "isi": {
+    "bentuk": "benar_salah",
+    "pokok": "Sebuah trapesium memiliki sisi sejajar 8 cm dan 12 cm serta tinggi 5 cm. Luas trapesium tersebut adalah 60 cm².",
+    "kunci": "B",
+    "pembahasan": [
+     "(8 + 12) : 2 × 5 = 50."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "(8 + 12) / 2 * 5",
+     "nilai": "60"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "SX-04",
+   "kelas": 5,
+   "isi": {
+    "bentuk": "isian_singkat",
+    "pokok": "Sebuah taman berbentuk persegi panjang dengan panjang 14 m dan lebar 9 m. Luas taman tersebut adalah ....",
+    "kunci": "$136\\text{ m}^2$",
+    "pembahasan": [
+     "14 × 9 = 126."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "14 * 9",
+     "nilai": "126"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "SX-05",
+   "kelas": 4,
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Pecahan yang paling besar di antara pilihan berikut adalah ....",
+    "opsi": {
+     "A": "$\\frac{2}{3}$",
+     "B": "$\\frac{3}{4}$",
+     "C": "$\\frac{5}{8}$",
+     "D": "$\\frac{1}{2}$"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "Pecahan terbesar adalah 3/4."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "max(2/3, 3/4, 5/8, 1/2)",
+     "nilai": "3/4"
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "SX-06",
+   "kelas": 5,
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Di antara pecahan-pecahan berikut, pecahan yang nilainya lebih besar dari $\\frac{3}{5}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{1}{2}$",
+     "B": "$\\frac{8}{10}$",
+     "C": "$\\frac{7}{10}$",
+     "D": "$\\frac{4}{15}$"
+    },
+    "kunci": "C",
+    "pembahasan": [
+     "3/5 = 6/10."
+    ],
+    "verifikasi": {
+     "tipe": "per_opsi",
+     "opsi": {
+      "A": {
+       "kiri": "1/2",
+       "relasi": ">",
+       "kanan": "3/5"
+      },
+      "B": {
+       "kiri": "8/10",
+       "relasi": ">",
+       "kanan": "3/5"
+      },
+      "C": {
+       "kiri": "7/10",
+       "relasi": ">",
+       "kanan": "3/5"
+      },
+      "D": {
+       "kiri": "4/15",
+       "relasi": ">",
+       "kanan": "3/5"
+      }
+     }
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "SX-07",
+   "kelas": 5,
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Dayu memiliki tali sepanjang $\\frac{3}{4}$ meter, sedangkan Lani memiliki tali sepanjang $\\frac{5}{6}$ meter. Pernyataan yang benar tentang panjang tali mereka adalah ....",
+    "opsi": {
+     "A": "Tali Dayu lebih panjang dari tali Lani",
+     "B": "Tali Dayu lebih pendek dari tali Lani",
+     "C": "Tali Dayu sama panjang dengan tali Lani",
+     "D": "Tali Lani dua kali panjang tali Dayu"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "3/4 < 5/6."
+    ],
+    "verifikasi": {
+     "tipe": "per_opsi",
+     "opsi": {
+      "A": {
+       "kiri": "3/4",
+       "relasi": ">",
+       "kanan": "5/6"
+      },
+      "B": {
+       "kiri": "3/4",
+       "relasi": "<",
+       "kanan": "5/6"
+      },
+      "C": {
+       "kiri": "3/4",
+       "relasi": "=",
+       "kanan": "5/6"
+      },
+      "D": {
+       "kiri": "5/6",
+       "relasi": "=",
+       "kanan": "2 * 3/4"
+      }
+     }
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "SX-08",
+   "kelas": 5,
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Pernyataan perbandingan yang benar untuk pecahan $\\frac{4}{7}$ dan $\\frac{5}{8}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{4}{7} > \\frac{5}{8}$",
+     "B": "$\\frac{4}{7} < \\frac{5}{8}$",
+     "C": "$\\frac{4}{7} = \\frac{5}{8}$",
+     "D": "$\\frac{5}{8} < \\frac{4}{7}$"
+    },
+    "kunci": "B",
+    "pembahasan": [
+     "32/56 < 35/56."
+    ],
+    "verifikasi": {
+     "tipe": "per_opsi",
+     "opsi": {
+      "A": {
+       "kiri": "4/7",
+       "relasi": ">",
+       "kanan": "5/8"
+      },
+      "B": {
+       "kiri": "4/7",
+       "relasi": "<",
+       "kanan": "5/8"
+      },
+      "C": {
+       "kiri": "4/7",
+       "relasi": "=",
+       "kanan": "5/8"
+      }
+     }
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "SX-09",
+   "kelas": 5,
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Di antara pecahan-pecahan berikut, pecahan yang nilainya lebih besar dari $\\frac{3}{5}$ adalah ....",
+    "opsi": {
+     "A": "$\\frac{1}{2}$",
+     "B": "$\\frac{4}{10}$",
+     "C": "$\\frac{7}{10}$",
+     "D": "$\\frac{4}{15}$"
+    },
+    "kunci": "C",
+    "pembahasan": [
+     "3/5 = 6/10."
+    ],
+    "verifikasi": {
+     "tipe": "ekspresi",
+     "ekspresi": "7/10 > 3/5",
+     "nilai": "true"
+    },
+    "gambar": null
+   }
+  }
+ ]
+}

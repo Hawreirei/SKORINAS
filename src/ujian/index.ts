@@ -5,7 +5,7 @@ import { URUTAN_BENTUK } from '../generasi/rencana';
 /**
  * Format ujian: TKA, TKAD, dan OSN jenjang SD sampai SMA (F-35). Setiap format mengisi layar Buat dengan atribut
  * ujiannya (jumlah soal, bentuk, banyak opsi, level, gaya, bahasa) dan menambah aturan penulisan ke prompt.
- * Isinya atribut ujian; cakupan materi ada di ./cakupan.ts dan hanya dipakai bila guru mengosongkan CP dan TP (F-38).
+ * Isinya atribut ujian; cakupan materi ada di ./cakupan.ts dan hanya dipakai bila guru mengosongkan CP dan TP (F-39).
  * Hasil riset dan sumbernya: docs/referensi/format-ujian.md. Angka yang belum pasti ditandai di sana.
  */
 
@@ -385,13 +385,28 @@ export function ringkasUjian(u: FormatUjian): string {
  * Bagian prompt untuk format ujian paket; kosong bila paket bukan format ujian. Aturan penulisan format sudah disalin
  * ke `aturan_tambahan` paket (dapat disunting guru), jadi di sini hanya nama format, level TKA butir, dan kelokalan TKAD.
  */
-export function bagianPromptUjian(p: Pick<ParameterPaket, 'ujian'>, level: Level): string {
+/** Level TKA satu butir untuk daftar butir dalam satu permintaan; null bila format bukan TKA atau TKAD. */
+export function levelTkaButir(p: Pick<ParameterPaket, 'ujian'>, level: Level): string | null {
+  const u = formatPaket(p);
+  return u && (u.keluarga === 'TKA' || u.keluarga === 'TKAD') ? levelTka(level) : null;
+}
+
+/** Kompetensi membaca butir format bahasa TKA/TKAD menurut levelnya; null untuk format lain. */
+export function kompetensiBacaButir(p: Pick<ParameterPaket, 'ujian'>, level: Level): string | null {
+  const u = formatPaket(p);
+  return u && (u.keluarga === 'TKA' || u.keluarga === 'TKAD') && /bahasa/i.test(u.mapel) ? KOMPETENSI_BACA[levelTka(level)] : null;
+}
+
+/** level null: untuk permintaan berisi banyak butir; level TKA lalu disebut per butir (levelTkaButir). */
+export function bagianPromptUjian(p: Pick<ParameterPaket, 'ujian'>, level: Level | null): string {
   const u = formatPaket(p);
   if (!u) return '';
   const aturan = [`Soal disusun setara ${u.nama}.`];
-  if (u.keluarga === 'TKA' || u.keluarga === 'TKAD') aturan.push(`Butir ini berlevel TKA "${levelTka(level)}".`);
-  // Mapel bahasa: kompetensi membaca butir mengikuti level TKA-nya, agar level dan kompetensi selalu cocok.
-  if ((u.keluarga === 'TKA' || u.keluarga === 'TKAD') && /bahasa/i.test(u.mapel)) aturan.push(`Kompetensi membaca butir ini: ${KOMPETENSI_BACA[levelTka(level)]}`);
+  if ((u.keluarga === 'TKA' || u.keluarga === 'TKAD') && level) {
+    aturan.push(`Butir ini berlevel TKA "${levelTka(level)}".`);
+    // Mapel bahasa: kompetensi membaca butir mengikuti level TKA-nya, agar level dan kompetensi selalu cocok.
+    if (/bahasa/i.test(u.mapel)) aturan.push(`Kompetensi membaca butir ini: ${KOMPETENSI_BACA[levelTka(level)]}`);
+  }
   if (u.keluarga === 'TKAD') {
     const daerah = p.ujian?.daerah?.trim();
     aturan.push(

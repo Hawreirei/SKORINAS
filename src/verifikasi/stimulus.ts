@@ -14,7 +14,7 @@ export function ukurPokok(pokok: string): { kata: number; kalimat: number } {
 }
 
 /**
- * Pemeriksa stimulus (F-38): soal dari paket berstimulus wajib harus diawali cerita, teks, atau situasi yang cukup
+ * Pemeriksa stimulus (F-39): soal dari paket berstimulus wajib harus diawali cerita, teks, atau situasi yang cukup
  * panjang (sedikitnya dua kalimat dan batas kata per jenjang) sebelum pertanyaan. Menjodohkan dikecualikan karena
  * pokoknya perintah singkat. Pelanggaran membuat butir dibuat ulang.
  */

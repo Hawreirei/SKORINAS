@@ -67,7 +67,7 @@ export interface AturBentuk {
   isian: JenisIsian | null;
   /** Uraian: semua penjelasan, semua hitungan, atau null (campur, dipilih AI). */
   uraian: JenisUraian | null;
-  /** PG kompleks kategori (F-39): dua label kategori dan banyak pernyataan per soal (3–6). null: Benar/Salah, 4 pernyataan. */
+  /** PG kompleks kategori (F-40): dua label kategori dan banyak pernyataan per soal (3–6). null: Benar/Salah, 4 pernyataan. */
   kategori?: { label: [string, string]; pernyataan: number } | null;
 }
 
@@ -88,7 +88,7 @@ export interface TpDipakai {
   kode?: string;
   rumusan: string;
   /** Data dari versi 0.3: 'resmi' bila diambil dari data kurikulum bundel. */
-  /** 'ujian': butir cakupan format ujian yang dipakai karena guru mengosongkan CP dan TP (F-38). */
+  /** 'ujian': butir cakupan format ujian yang dipakai karena guru mengosongkan CP dan TP (F-39). */
   sumber?: 'resmi' | 'kustom' | 'guru' | 'ujian';
   versi?: number | string;
   induk_id?: string | null;
@@ -146,9 +146,9 @@ export interface ParameterPaket {
   konteks: string;
   /** Aturan tambahan untuk AI, satu aturan per butir. Diisi format ujian dan dapat disunting guru. */
   aturan_tambahan: string[];
-  /** Setiap soal wajib diawali stimulus (cerita, teks, atau situasi) yang dibutuhkan untuk menjawab (F-38, Dexie versi 6). */
+  /** Setiap soal wajib diawali stimulus (cerita, teks, atau situasi) yang dibutuhkan untuk menjawab (F-39, Dexie versi 6). */
   wajib_stimulus: boolean;
-  // ---- Pengaturan mendalam (F-39, Dexie versi 7). null berarti perilaku bawaan. ----
+  // ---- Pengaturan mendalam (F-40, Dexie versi 7). null berarti perilaku bawaan. ----
   /** Bacaan bersama: banyak soal per bacaan (2–5) dalam satu bentuk. */
   soal_per_bacaan: number | null;
   /** Skor per kesukaran (benar dan pengurangan bila salah), menggantikan skor per bentuk. */
@@ -210,7 +210,7 @@ export interface IsiSoal {
   pernyataan?: string[];
   /** Hanya PG kompleks kategori: dua label kategori, mis. ['Benar', 'Salah']. */
   kategori?: [string, string];
-  /** Bacaan bersama (F-39): teks yang dipakai beberapa soal; dicetak sekali sebelum soal pertama kelompoknya. */
+  /** Bacaan bersama (F-40): teks yang dipakai beberapa soal; dicetak sekali sebelum soal pertama kelompoknya. */
   stimulus?: { id: string; teks: string } | null;
   /**
    * Pilihan ganda: satu huruf. Pilihan ganda kompleks: huruf dipisah koma ("A,C").
@@ -377,9 +377,9 @@ export interface Slot {
   soal_id: string | null;
   /** Gaya butir ini bila paket memakai campuran gaya; selain itu gaya paket. */
   gaya?: GayaSoal;
-  /** Variasi butir (F-38): tema konteks, bentuk stimulus, dan nama tokoh yang berbeda antarbutir. */
+  /** Variasi butir (F-39): tema konteks, bentuk stimulus, dan nama tokoh yang berbeda antarbutir. */
   variasi?: { tema: string; stimulus: string; tokoh: string };
-  /** Bacaan bersama (F-39): id kelompok slot yang memakai satu bacaan. */
+  /** Bacaan bersama (F-40): id kelompok slot yang memakai satu bacaan. */
   kelompok?: string;
 }
 
@@ -391,7 +391,7 @@ export interface PekerjaanGenerasi extends Rekaman {
   galat: string | null;
   mulai: number | null;
   selesai: number | null;
-  /** Bacaan bersama per kelompok slot (F-39), dibuat sekali lalu dipakai semua anggota. */
+  /** Bacaan bersama per kelompok slot (F-40), dibuat sekali lalu dipakai semua anggota. */
   bacaan?: Record<string, string>;
 }
 
@@ -405,7 +405,14 @@ export interface PemakaianAi {
   token_keluar: number;
   perkiraan_biaya: number | null;
   lolos: boolean;
+  /** Banyak soal lolos dari permintaan ini (F-38, satu permintaan berisi beberapa butir). Kosong pada catatan lama: 1 bila lolos. */
+  jumlah_lolos?: number;
   paket_id: string | null;
+}
+
+/** Banyak soal lolos yang dihasilkan satu catatan pemakaian. */
+export function soalLolos(p: Pick<PemakaianAi, 'lolos' | 'jumlah_lolos'>): number {
+  return p.jumlah_lolos ?? (p.lolos ? 1 : 0);
 }
 
 export interface LogSoal {

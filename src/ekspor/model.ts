@@ -53,9 +53,9 @@ export interface ButirDok {
   /** Panjang opsi terpanjang (huruf polos), dasar tata letak opsi. */
   panjangOpsi: number;
   tempat: TempatJawab;
-  /** Skor soal ini bila skor diatur per kesukaran (F-39); dicetak di akhir pokok soal. */
+  /** Skor soal ini bila skor diatur per kesukaran (F-40); dicetak di akhir pokok soal. */
   skorButir?: number | null;
-  /** Bacaan bersama (F-39): dicetak sekali sebelum soal pertama kelompoknya, dengan rentang nomor soal yang memakainya. */
+  /** Bacaan bersama (F-40): dicetak sekali sebelum soal pertama kelompoknya, dengan rentang nomor soal yang memakainya. */
   bacaan?: { teks: string; dari: number; sampai: number } | null;
 }
 
@@ -89,7 +89,7 @@ export interface BagianDok {
 export interface Penskoran {
   baris: { bentuk: string; jumlah: number; skor: number; maks: number }[];
   total: number;
-  /** Baris per tingkat kesukaran, bukan per bentuk (F-39). */
+  /** Baris per tingkat kesukaran, bukan per bentuk (F-40). */
   perKesukaran?: boolean;
   /** Aturan pengurangan skor untuk jawaban salah, satu kalimat per bentuk; kosong bila tidak ada. */
   catatan: string[];
@@ -290,7 +290,7 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
       while (j + 1 < butir.length && butir[j + 1].soal.isi_json.stimulus?.id === st.id) j++;
       butir[i].bacaan = { teks: st.teks, dari: butir[i].nomor, sampai: butir[j].nomor };
     }
-    // Skor per kesukaran (F-39) menggantikan skor per bentuk: skor tiap soal dicetak di akhir pokoknya.
+    // Skor per kesukaran (F-40) menggantikan skor per bentuk: skor tiap soal dicetak di akhir pokoknya.
     if (p.skor_kesukaran) for (const b of butir) b.skorButir = p.skor_kesukaran[b.soal.kesukaran_rancangan]?.benar ?? null;
     const skor = p.skor_kesukaran ? null : (p.skor_bentuk?.[bentuk] ?? null);
     const salah = skor ? (p.skor_salah?.[bentuk] ?? 0) : 0;
@@ -303,7 +303,7 @@ export function bangunDokumen(paket: PaketSoal, daftarSoal: Soal[], profil: Prof
         ? ` Each question is worth ${skor} ${skor === 1 ? 'point' : 'points'}${salah ? `; a wrong answer loses ${salah}` : ''}.`
         : ` Skor setiap soal ${skor}${salah ? `; jawaban salah dikurangi ${salah}` : ''}.`
       : '';
-    // Petunjuk bagian sendiri dari guru (F-39) menggantikan kalimat bawaan.
+    // Petunjuk bagian sendiri dari guru (F-40) menggantikan kalimat bawaan.
     const petunjuk = p.petunjuk_bagian?.[bentuk]?.trim() || petunjukBagian(bentuk, butir, cara, inggris);
     bagian.push({ bentuk, judul: `${ROMAWI[bagian.length]}. ${JUDUL_BAGIAN[bentuk][inggris ? 1 : 0]}`, petunjuk: petunjuk + teksSkor, butir, skor });
   }

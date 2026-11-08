@@ -186,7 +186,7 @@ const PETUNJUK_CONTOH: Record<Bentuk, string> = {
   uraian: 'Jawablah dengan jelas pada tempat yang tersedia.',
 };
 
-/** Cakupan materi format ujian (F-39): centang butir yang dipakai dan atur porsi tiap elemen. */
+/** Cakupan materi format ujian (F-40): centang butir yang dipakai dan atur porsi tiap elemen. */
 function KartuCakupan({ cakupan, f, ubah }: { cakupan: Cakupan; f: Isian; ubah: (u: Partial<Isian>) => void }) {
   const pilih = f.cakupanPilih;
   const semua = cakupan.butir.map(rumusanCakupan);

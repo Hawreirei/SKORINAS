@@ -115,7 +115,7 @@ Penilaian Matematika: soal dasar benar 2, salah atau kosong 0; soal lanjut benar
 | Jumlah soal tidak pasti | 30 |
 | Skor | Hanya bila aturannya seragam (OSN-K SMP Matematika: 4 per soal) |
 
-## 5. Cakupan materi (F-38)
+## 5. Cakupan materi (F-39)
 
 Dipakai di `src/ujian/cakupan.ts` bila guru mengosongkan CP dan TP. Dokumen resmi Perkaban BSKAP 045 dan 047/H/AN/2025 tetap tidak dapat diunduh dari lingkungan pengembangan (semua situs, termasuk blog yang menyalinnya, ditolak jaringan), jadi daftar disusun dari sumber berikut dengan tingkat kepastian berbeda.
 
@@ -128,7 +128,7 @@ Dipakai di `src/ujian/cakupan.ts` bila guru mengosongkan CP dan TP. Dokumen resm
 | Bahasa Inggris SMA | Descriptive, recount, narrative, procedure, analytical exposition (resmi menurut ringkasan), ditambah report, teks fungsional, dan puisi pendek (usulan); B1 (Tingkat Lanjut B2) | Sedang |
 | OSN | Ranah per bidang dari pedoman (Matematika SD lima ranah masing-masing sekitar 20%; SMP dan SMA aljabar, geometri, kombinatorika, teori bilangan; IPA dan IPS empat ranah) | Sedang |
 
-Porsi elemen selain SMP Matematika adalah usulan (lihat `docs/KEPUTUSAN.md`, F-38).
+Porsi elemen selain SMP Matematika adalah usulan (lihat `docs/KEPUTUSAN.md`, F-39).
 
 ## Sumber
 

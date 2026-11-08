@@ -115,7 +115,7 @@ describe('banyak butir serentak', () => {
   it('mengerjakan beberapa butir bersamaan dan semua soal tersimpan berurutan', async () => {
     const id = await buatPaket(param(9), 'Uji');
     const m = modelLambat();
-    await pengatur.mulai(id, { pengirim: m.kirim, model: MODEL, cadangan: null, serentak: 3 });
+    await pengatur.mulai(id, { perPermintaan: 1, pengirim: m.kirim, model: MODEL, cadangan: null, serentak: 3 });
     expect(m.puncak()).toBe(3);
     const soal = await db.soal.where('paket_id').equals(id).toArray();
     expect(soal).toHaveLength(9);
@@ -132,7 +132,7 @@ describe('banyak butir serentak', () => {
   it('serentak 1 tetap berurutan seperti sebelumnya', async () => {
     const id = await buatPaket(param(4), 'Uji');
     const m = modelLambat();
-    await pengatur.mulai(id, { pengirim: m.kirim, model: MODEL, cadangan: null, serentak: 1 });
+    await pengatur.mulai(id, { perPermintaan: 1, pengirim: m.kirim, model: MODEL, cadangan: null, serentak: 1 });
     expect(m.puncak()).toBe(1);
     expect(await db.soal.where('paket_id').equals(id).count()).toBe(4);
   });
@@ -141,7 +141,7 @@ describe('banyak butir serentak', () => {
     const id = await buatPaket(param(2), 'Uji');
     // Panggilan 1 dan 2 berjalan bersamaan dan menghasilkan soal yang sama persis.
     const m = modelLambat({ nomor: (ke) => (ke <= 2 ? 1 : ke) });
-    await pengatur.mulai(id, { pengirim: m.kirim, model: MODEL, cadangan: null, serentak: 2 });
+    await pengatur.mulai(id, { perPermintaan: 1, pengirim: m.kirim, model: MODEL, cadangan: null, serentak: 2 });
     const lolos = (await db.soal.where('paket_id').equals(id).toArray()).filter((s) => s.status_mutu !== 'ditolak');
     expect(lolos).toHaveLength(2);
     expect(kemiripan(lolos[0].isi_json.pokok, lolos[1].isi_json.pokok)).toBeLessThan(0.8);
@@ -151,7 +151,7 @@ describe('banyak butir serentak', () => {
     await simpanProfil({ batas_harian: 2 });
     const id = await buatPaket(param(6), 'Uji');
     const m = modelLambat();
-    await pengatur.mulai(id, { pengirim: m.kirim, model: MODEL, cadangan: null, serentak: 3 });
+    await pengatur.mulai(id, { perPermintaan: 1, pengirim: m.kirim, model: MODEL, cadangan: null, serentak: 3 });
     expect(await db.soal.where('paket_id').equals(id).count()).toBe(2);
     expect(m.jumlah()).toBe(2);
     expect(pengatur.ambil().pesan).toMatch(/Batas harian/);
@@ -164,7 +164,7 @@ describe('banyak butir serentak', () => {
     ADAPTOR.gemini = { ...asli, kirim: m.kirim } as Adaptor;
     try {
       const id = await buatPaket(param(6), 'Uji');
-      await pengatur.mulai(id, { model: { penyedia: 'gemini', model: 'uji-rpd', kunci: 'x' }, cadangan: null, serentak: 3 });
+      await pengatur.mulai(id, { perPermintaan: 1, model: { penyedia: 'gemini', model: 'uji-rpd', kunci: 'x' }, cadangan: null, serentak: 3 });
       expect(m.jumlah()).toBe(4);
       expect(await db.soal.where('paket_id').equals(id).count()).toBe(4);
       expect(pengatur.ambil().jenisGalat).toBe('batas');

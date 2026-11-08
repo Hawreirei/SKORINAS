@@ -66,6 +66,22 @@ function periksaKompleks(isi: IsiSoal, lokal: Lokal, lingkup: Lingkup): HasilHit
   return lolos(`Dihitung dari ${dasar}: opsi benar ${daftarHuruf(benar)}.`);
 }
 
+/**
+ * Pilihan ganda dengan satu pernyataan per opsi (uji model 8 November 2026): mis. "pecahan yang lebih besar dari 3/5"
+ * atau opsi berupa kalimat perbandingan. Tepat satu pernyataan benar, dan itu milik opsi kunci.
+ */
+function periksaPgPerOpsi(isi: IsiSoal, lingkup: Lingkup): HasilHitung {
+  const v = isi.verifikasi;
+  if (v.tipe !== 'per_opsi') return gagal('Verifikasi bukan per_opsi.');
+  const huruf = (Object.keys(isi.opsi ?? {}) as HurufOpsi[]).sort();
+  const kurang = huruf.filter((x) => !v.opsi[x]);
+  if (kurang.length) return gagal(`Pernyataan verifikasi untuk opsi ${kurang.join(', ')} belum ada.`);
+  const benar = huruf.filter((x) => benarPernyataan(v.opsi[x]!, lingkup));
+  if (benar.length !== 1) return gagal(`Menurut hitungan pernyataan yang benar ada pada opsi ${daftarHuruf(benar)}; pilihan ganda harus tepat satu.`);
+  if (benar[0] !== isi.kunci) return gagal(`Menurut hitungan opsi yang benar ${benar[0]}, tetapi kunci ${isi.kunci}.`);
+  return lolos(`Dihitung dari pernyataan tiap opsi: hanya opsi ${benar[0]} yang benar.`);
+}
+
 /** Menjodohkan: setiap pasangan pada kunci bernilai sama, dan tidak ada butir kolom kanan lain yang juga cocok. */
 function periksaJodoh(isi: IsiSoal, lingkup: Lingkup): HasilHitung {
   const v = isi.verifikasi;
@@ -112,9 +128,12 @@ export function periksaHitung(isi: IsiSoal, lokal: Lokal, lingkup: Lingkup = {})
     if (isi.bentuk === 'pilihan_ganda_kategori') return periksaKategori(isi, lingkup);
     switch (v.tipe) {
       case 'per_opsi':
+        if (isi.bentuk === 'pilihan_ganda') return periksaPgPerOpsi(isi, lingkup);
+        return gagal('Verifikasi per_opsi hanya untuk pilihan ganda dan pilihan ganda kompleks.');
       case 'pasangan':
+        return gagal('Verifikasi pasangan hanya untuk menjodohkan.');
       case 'per_pernyataan':
-        return gagal(`Verifikasi ${v.tipe} hanya untuk ${v.tipe === 'per_opsi' ? 'pilihan ganda kompleks' : v.tipe === 'pasangan' ? 'menjodohkan' : 'PG kompleks kategori'}.`);
+        return gagal('Verifikasi per_pernyataan hanya untuk PG kompleks kategori.');
 
       case 'ekspresi': {
         const h = hitung(v.ekspresi, lingkup);

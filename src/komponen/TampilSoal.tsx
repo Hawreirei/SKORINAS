@@ -137,7 +137,7 @@ function TabelKategori({ isi, ringkas }: { isi: IsiSoal; ringkas: boolean }) {
   );
 }
 
-/** Bacaan bersama beberapa soal (F-39), dilipat agar kartu soal tidak memanjang. */
+/** Bacaan bersama beberapa soal (F-40), dilipat agar kartu soal tidak memanjang. */
 export function BacaanBersama({ isi }: { isi: IsiSoal }) {
   if (!isi.stimulus?.teks) return null;
   return (

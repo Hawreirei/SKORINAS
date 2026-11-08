@@ -14,6 +14,7 @@ const BENDA = ['pita', 'tali', 'kue', 'roti', 'kertas', 'kain', 'pizza', 'semang
 
 let panggil = 0;
 let jumlahGenerate = 0;
+let permintaanJadi = 0;
 const waktuKirim = [];
 function butirPalsu(bentuk) {
   panggil++;
@@ -117,8 +118,15 @@ function butirPalsu(bentuk) {
       });
     const body = JSON.parse(route.request().postData() ?? '{}');
     const teks = body.contents[0].parts[0].text;
-    const bentuk = teks.match(/\("(pilihan_ganda_kompleks|pilihan_ganda|benar_salah|menjodohkan|isian_singkat|uraian)"\)/)[1];
     await new Promise((r) => setTimeout(r, 60));
+    permintaanJadi++;
+    // Pembuatan paket meminta beberapa butir sekaligus (F-38): satu baris "n. Bentuk "..."" per butir.
+    const daftar = [...teks.matchAll(/^(\d+)\. Bentuk "(\w+)"/gm)];
+    if (daftar.length) {
+      const butir = daftar.map((d) => ({ nomor: Number(d[1]), ...butirPalsu(d[2]) }));
+      return route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify({ butir }) }] } }], usageMetadata: { promptTokenCount: 2500, candidatesTokenCount: 400 * butir.length } } });
+    }
+    const bentuk = teks.match(/\("(pilihan_ganda_kompleks|pilihan_ganda|benar_salah|menjodohkan|isian_singkat|uraian)"\)/)[1];
     return route.fulfill({ json: { candidates: [{ content: { parts: [{ text: JSON.stringify(butirPalsu(bentuk)) }] } }], usageMetadata: { promptTokenCount: 1800, candidatesTokenCount: 400 } } });
   });
 
@@ -169,7 +177,12 @@ function butirPalsu(bentuk) {
   if (isiCepat.join('|') !== '4|Matematika|12') galat.push(`Mulai cepat tidak mengisi layar Buat: ${isiCepat.join('|')}`);
   await page.fill('#tp', 'Peserta didik dapat menjumlahkan dua pecahan berpenyebut sama.\nPeserta didik dapat membandingkan dua pecahan berpenyebut berbeda dengan menyamakan penyebutnya.');
   // Panel Rencana menghitung permintaan sebelum tombol ditekan; isian tersimpan sebagai draf.
-  await page.locator('aside[aria-label="Rencana"]').getByText('12–16').waitFor();
+  // Gemini 3.8 Flash meminta 10 butir per permintaan (F-38): 12 soal = 2 permintaan.
+  await page.waitForFunction(() => {
+    const dt = [...document.querySelectorAll('aside[aria-label="Rencana"] dt')].find((x) => x.textContent === 'Permintaan AI');
+    return dt?.nextElementSibling?.textContent === '2';
+  });
+  if (!(await page.locator('aside[aria-label="Rencana"]').getByText(/sekitar \d+ paket seperti ini/).isVisible())) galat.push('panel Rencana tidak menyebut berapa paket yang cukup');
   await page.reload();
   const draf = await isianBuat();
   if (draf.join('|') !== '4|Matematika|12') galat.push(`draf layar Buat tidak pulih setelah muat ulang: ${draf.join('|')}`);
@@ -399,7 +412,7 @@ function butirPalsu(bentuk) {
   const isiUjian = await hp.evaluate(() => ['#kelas', '#mapel', '#jumlah'].map((q) => document.querySelector(q).value));
   if (isiUjian.join('|') !== '6|Matematika|30') galat.push(`format ujian tidak mengisi layar Buat: ${isiUjian.join('|')}`);
   await hp.getByText('Ujian aslinya 30 soal dalam 75 menit.').waitFor();
-  // Cakupan materi dan stimulus wajib (F-38): tanpa CP dan TP, soal disebar ke cakupan ujian dan diawali cerita.
+  // Cakupan materi dan stimulus wajib (F-39): tanpa CP dan TP, soal disebar ke cakupan ujian dan diawali cerita.
   await hp.getByText(/disebar ke \d+ butir cakupan materi ujian ini/).waitFor();
   await hp.getByText('Tanpa CP dan TP: soal disebar ke cakupan materi TKAD SD · Matematika').waitFor();
   await hp.screenshot({ path: path.join(KELUAR, '09d-buat-format-ujian-ponsel.png'), fullPage: true });
@@ -569,7 +582,7 @@ function butirPalsu(bentuk) {
   const padat = Math.max(...waktuKirim.map((t) => waktuKirim.filter((u) => u >= t && u < t + 60000).length));
   console.log('permintaan terbanyak dalam 60 detik:', padat, '(batas 5)');
   if (padat > 5) galat.push(`RPM terlampaui: ${padat}`);
-  console.log('permintaan AI', panggil, '· termasuk satu 429 yang ditunggu:', jumlahGenerate === panggil + 1);
+  console.log('permintaan AI', permintaanJadi, '· butir', panggil, '· termasuk satu 429 yang ditunggu:', jumlahGenerate === permintaanJadi + 1);
   console.log('galat halaman', galat.length ? galat : 'tidak ada');
   await browser.close();
   if (galat.length || lebar > 390) process.exit(1);

@@ -1,14 +1,17 @@
 import { adaptorUntuk, hitungBiaya } from '../ai';
 import { GalatAi } from '../ai/galat';
 import { batasEfektif, pembatas, awalHariKuota } from '../ai/laju';
-import { modelDari, muatRegistri } from '../ai/registri';
+import { butirPerPermintaan, modelDari, muatRegistri } from '../ai/registri';
 import { db } from '../db/skema';
 import { ambilProfil } from '../db/profil';
 import type { HurufOpsi, IsiSoal, PaketSoal, ParameterPaket, PekerjaanGenerasi, PenyediaId, Slot, Soal } from '../db/tipe';
-import { teksPembanding } from '../db/tipe';
+import { soalLolos, teksPembanding } from '../db/tipe';
 import { sekarang, tanggalLokal, uuid } from '../db/util';
 import { teksPolos } from '../matematika/teks';
-import { buatButir, type HasilButir, type MasukanButir, type Pengirim, type Percobaan } from './butir';
+import type { JawabanAi } from '../ai/tipe';
+import { buatKelompok, harusBerhenti, MAKS_PERCOBAAN, type HasilButir, type HasilKelompok, type Pengirim } from './butir';
+import type { ButirDiminta } from './prompt';
+import type { HasilPeriksa } from '../verifikasi';
 import { rencanakanSlot } from './rencana';
 import { beriVariasi } from './variasi';
 import { buatBacaan, kelompokkanBacaan } from './bacaan';
@@ -41,7 +44,7 @@ const MAKS_PESAN_MS = 60_000;
  */
 export function pengirimDari(m: ModelAktif, opsi: { saatMenunggu?: (ms: number, alasan: string) => void } = {}): Pengirim {
   const a = adaptorUntuk(m.penyedia);
-  return async (sistem, pesan, signal) => {
+  return async (sistem, pesan, signal, tambahan) => {
     const [prof, reg] = await Promise.all([ambilProfil(), muatRegistri().catch(() => null)]);
     let menunggu = false;
     const lepasIzin = await pembatas.izin(m.penyedia, m.model, batasEfektif(prof, reg, m.penyedia, m.model), {
@@ -60,7 +63,7 @@ export function pengirimDari(m: ModelAktif, opsi: { saatMenunggu?: (ms: number, 
     };
     const penalaran = (reg ? modelDari(reg, m.penyedia, m.model)?.penalaran : null) ?? undefined;
     try {
-      return { ...(await a.kirim({ kunci: m.kunci, model: m.model, sistem, pesan, signal, penalaran })), lepas };
+      return { ...(await a.kirim({ kunci: m.kunci, model: m.model, sistem, pesan, signal, penalaran, maksKeluar: tambahan?.maksKeluar })), lepas };
     } catch (e) {
       if (e instanceof GalatAi) e.lepas = lepas;
       else lepas();
@@ -69,8 +72,10 @@ export function pengirimDari(m: ModelAktif, opsi: { saatMenunggu?: (ms: number, 
   };
 }
 
+/** Soal lolos hari ini. Satu permintaan dapat menghasilkan beberapa soal (jumlah_lolos, F-38). */
 export async function jumlahLolosHariIni(): Promise<number> {
-  return db.pemakaian_ai.where('tanggal').equals(tanggalLokal()).filter((p) => p.lolos).count();
+  const daftar = await db.pemakaian_ai.where('tanggal').equals(tanggalLokal()).toArray();
+  return daftar.reduce((n, p) => n + soalLolos(p), 0);
 }
 
 /** Buat paket dan rencana butir. Generasi dimulai terpisah lewat pengatur.mulai(). */
@@ -78,8 +83,8 @@ export async function buatPaket(param: ParameterPaket, judul: string): Promise<s
   // TP ditulis guru di formulir; tiap TP diberi id agar soal dan kisi-kisi dapat merujuknya.
   const tp = param.tp.map((x) => ({ ...x, id: x.id || uuid(), sumber: x.sumber ?? ('guru' as const), versi: x.versi ?? 1 }));
   const p: ParameterPaket = { ...param, tp };
-  // Variasi per butir (tema, bentuk stimulus, tokoh) agar soal paket berstimulus tidak seragam (F-38).
-  // Bacaan bersama (F-39): slot berurutan dalam satu bentuk dikelompokkan untuk satu bacaan.
+  // Variasi per butir (tema, bentuk stimulus, tokoh) agar soal paket berstimulus tidak seragam (F-39).
+  // Bacaan bersama (F-40): slot berurutan dalam satu bentuk dikelompokkan untuk satu bacaan.
   const slot = kelompokkanBacaan(beriVariasi(rencanakanSlot(p), p), p.soal_per_bacaan);
   const t = sekarang();
   const paket: PaketSoal = { id: uuid(), judul: judul.trim() || tp[0]?.rumusan.slice(0, 80) || 'Paket soal', parameter_json: p, status: 'membuat', penyedia: null, model: null, dibuat_pada: t, diubah_pada: t, dihapus_pada: null };
@@ -102,15 +107,16 @@ export async function konteksPaket(paketId: string, kecuali?: string): Promise<{
   return { pokokLain: daftar.map((s) => teksPolos(teksPembanding(s.isi_json))), kunciTerpakai };
 }
 
-function pencatat(m: ModelAktif, paketId: string, biaya: { total: number | null }) {
-  return async (p: Percobaan, lolos: boolean) => {
+/** Catat satu permintaan di pemakaian AI beserta banyak soal yang lolos darinya (F-38). */
+function pencatatKelompok(m: ModelAktif, paketId: string, biaya: { total: number | null }) {
+  return async (jawaban: JawabanAi | null, jumlahLolos: number) => {
     const reg = await muatRegistri().catch(() => null);
     const info = reg ? modelDari(reg, m.penyedia, m.model) : undefined;
-    const masuk = p.jawaban?.token_masuk ?? 0;
-    const keluar = p.jawaban?.token_keluar ?? 0;
+    const masuk = jawaban?.token_masuk ?? 0;
+    const keluar = jawaban?.token_keluar ?? 0;
     const b = hitungBiaya(info, masuk, keluar);
     biaya.total = biaya.total === null || b === null ? null : biaya.total + b;
-    await db.pemakaian_ai.add({ id: uuid(), tanggal: tanggalLokal(), dibuat_pada: sekarang(), penyedia: m.penyedia, model: m.model, token_masuk: masuk, token_keluar: keluar, perkiraan_biaya: b, lolos, paket_id: paketId });
+    await db.pemakaian_ai.add({ id: uuid(), tanggal: tanggalLokal(), dibuat_pada: sekarang(), penyedia: m.penyedia, model: m.model, token_masuk: masuk, token_keluar: keluar, perkiraan_biaya: b, lolos: jumlahLolos > 0, jumlah_lolos: jumlahLolos, paket_id: paketId });
   };
 }
 
@@ -258,7 +264,7 @@ class PengaturGenerasi {
 
   async mulai(
     paketId: string,
-    opsi: { pakaiCadangan?: boolean; pengirim?: Pengirim; model?: ModelAktif; cadangan?: { model: ModelAktif; pengirim?: Pengirim } | null; tunda?: Tunda; serentak?: number } = {},
+    opsi: { pakaiCadangan?: boolean; pengirim?: Pengirim; model?: ModelAktif; cadangan?: { model: ModelAktif; pengirim?: Pengirim } | null; tunda?: Tunda; serentak?: number; perPermintaan?: number } = {},
   ): Promise<void> {
     if (this.status.berjalan) {
       if (this.status.paketId === paketId) return;
@@ -293,40 +299,54 @@ class PengaturGenerasi {
 
       const konteks = () => konteksPaket(paketId);
 
-      // Bacaan bersama dibuat sekali per kelompok walau anggotanya dikerjakan serentak.
+      // Banyak butir per permintaan per model (F-38); diperkecil sendiri bila jawaban terpotong atau rusak.
+      const ukuran = new Map<string, number>();
+      const ukuranUntuk = (m: ModelAktif) => {
+        const kunci = `${m.penyedia}|${m.model}`;
+        if (!ukuran.has(kunci)) ukuran.set(kunci, Math.max(1, Math.floor(opsi.perPermintaan ?? butirPerPermintaan(reg, m.penyedia, m.model))));
+        return ukuran.get(kunci)!;
+      };
+      const perkecil = (m: ModelAktif, dari: number) => ukuran.set(`${m.penyedia}|${m.model}`, Math.max(1, Math.min(ukuranUntuk(m), Math.floor(dari / 2))));
+
+      // Bacaan bersama (F-40) dibuat sekali per kelompok slot sebelum butirnya diminta, walau dikerjakan serentak.
       const bacaanJalan = new Map<string, Promise<string>>();
-      const bacaanUntuk = (slot: Slot): MasukanButir['bacaan'] => {
-        const id = slot.kelompok;
-        if (!id) return null;
-        return {
-          id,
-          teks: kj.bacaan?.[id] ?? null,
-          ambil: (kirim, signal, catat) => {
-            const ada = kj.bacaan?.[id];
-            if (ada) return Promise.resolve(ada);
-            let jalan = bacaanJalan.get(id);
-            if (!jalan) {
-              const anggota = kj.slot.filter((s) => s.kelompok === id).length;
-              jalan = buatBacaan(kirim, paket.parameter_json, slot, anggota, signal, catat).then(async (teks) => {
-                kj.bacaan = { ...kj.bacaan, [id]: teks };
-                await db.pekerjaan_generasi.update(kj.id, { bacaan: kj.bacaan });
-                return teks;
-              });
-              // Bila gagal, percobaan berikutnya boleh mencoba lagi.
-              jalan.catch(() => bacaanJalan.delete(id));
-              bacaanJalan.set(id, jalan);
-            }
-            return jalan;
-          },
-        };
+      const siapkanBacaan = async (butir: ButirDiminta[], dipakai: { m: ModelAktif; kirim: Pengirim }, biaya: { total: number | null }): Promise<ButirDiminta[]> => {
+        const catat = pencatatKelompok(dipakai.m, paketId, biaya);
+        for (const id of [...new Set(butir.map((b) => b.slot.kelompok).filter((x): x is string => !!x))]) {
+          if (kj.bacaan?.[id]) continue;
+          let jalan = bacaanJalan.get(id);
+          if (!jalan) {
+            const ketua = kj.slot.find((s) => s.kelompok === id)!;
+            const anggota = kj.slot.filter((s) => s.kelompok === id).length;
+            jalan = buatBacaan(dipakai.kirim, paket.parameter_json, ketua, anggota, kendali.signal, (p) => catat(p.jawaban, 0)).then(async (teks) => {
+              kj.bacaan = { ...kj.bacaan, [id]: teks };
+              await db.pekerjaan_generasi.update(kj.id, { bacaan: kj.bacaan });
+              return teks;
+            });
+            // Bila gagal, permintaan berikutnya boleh mencoba lagi.
+            jalan.catch(() => bacaanJalan.delete(id));
+            bacaanJalan.set(id, jalan);
+          }
+          await jalan;
+        }
+        return butir.map((b) => ({ ...b, bacaan: b.slot.kelompok ? { id: b.slot.kelompok, teks: kj.bacaan![b.slot.kelompok] } : null }));
       };
 
-      /** Satu putaran buatButir yang sabar terhadap batas penyedia: tunggu bila per menit, pindah ke cadangan bila habis. */
-      const buatSabar = async (slot: Slot, biaya: { total: number | null }): Promise<{ h: HasilButir; m: ModelAktif }> => {
+      /** Satu permintaan berkelompok yang sabar terhadap batas penyedia: tunggu bila per menit, pindah ke cadangan bila habis. */
+      const buatSabar = async (butirAwal: ButirDiminta[], biaya: { total: number | null }): Promise<{ h: HasilKelompok; m: ModelAktif }> => {
         let beruntun = 0;
         for (;;) {
           const dipakai = aktif;
-          const h = await buatButir(dipakai.kirim, { param: paket.parameter_json, slot, ...(await konteks()), konteks, signal: kendali.signal, bacaan: bacaanUntuk(slot) }, pencatat(dipakai.m, paketId, biaya));
+          let h: HasilKelompok;
+          try {
+            const butir = await siapkanBacaan(butirAwal, dipakai, biaya);
+            h = await buatKelompok(dipakai.kirim, { param: paket.parameter_json, butir, konteks, signal: kendali.signal }, pencatatKelompok(dipakai.m, paketId, biaya));
+          } catch (e) {
+            // Galat saat membuat bacaan diperlakukan seperti galat permintaan kelompok.
+            const g = e instanceof GalatAi ? e : new GalatAi('lain', (e as Error).message);
+            g.lepas?.();
+            h = { butir: butirAwal.map(() => ({ ok: false, isi: null, periksa: null, alasan: [g.message] })), jawaban: null, henti: harusBerhenti(g) ? g : null, gagalSemua: true, terpotong: false };
+          }
           const g = h.henti;
           if (!g || g.jenis !== 'batas') return { h, m: dipakai.m };
           const tunggu = g.batas?.tungguMs ?? TUNGGU_BAWAAN_MS;
@@ -338,7 +358,7 @@ class PengaturGenerasi {
             this.ubah({ menunggu: null });
             continue;
           }
-          // Butir lain yang dikerjakan serentak sudah memindahkan pekerjaan ke model cadangan.
+          // Kelompok lain yang dikerjakan serentak sudah memindahkan pekerjaan ke model cadangan.
           if (aktif !== dipakai) {
             beruntun = 0;
             continue;
@@ -362,73 +382,113 @@ class PengaturGenerasi {
         antreSimpan = hasil.catch(() => undefined);
         return hasil;
       };
-      /** Simpan butir lolos; null bila ternyata terlalu mirip dengan soal yang tersimpan saat butir ini dibuat. */
-      const simpanLolos = (slot: Slot, h: HasilButir, m: ModelAktif, biaya: number | null) =>
-        berurut(async (): Promise<{ id: string | null } | { ditolak: HasilButir }> => {
+      /** Simpan butir lolos; alasan penolakan bila ternyata terlalu mirip dengan soal yang tersimpan saat butir ini dibuat. */
+      const simpanLolos = (slot: Slot, isi: IsiSoal, periksa: HasilPeriksa, m: ModelAktif, biaya: number | null) =>
+        berurut(async (): Promise<{ id: string | null } | { alasan: string }> => {
           const ctx = await konteksPaket(paketId);
-          const isi = h.isi!;
           const mirip = Math.max(0, ...ctx.pokokLain.map((lain) => kemiripan(teksPembanding(isi), lain)));
-          if (mirip >= AMBANG_KEMIRIPAN) {
-            const alasan = `Terlalu mirip dengan soal lain dalam paket (${Math.round(mirip * 100)}%).`;
-            const akhir = h.percobaan.at(-1);
-            return { ditolak: { ...h, ok: false, percobaan: [...h.percobaan.slice(0, -1), ...(akhir ? [{ ...akhir, alasan: [...akhir.alasan, alasan] }] : [])] } };
-          }
-          return { id: await simpanSoal(paket, slot, { ...h, isi: rapikanKunci(isi, ctx.kunciTerpakai) }, m, biaya, false) };
+          if (mirip >= AMBANG_KEMIRIPAN) return { alasan: `Terlalu mirip dengan soal lain dalam paket (${Math.round(mirip * 100)}%).` };
+          const h: HasilButir = { ok: true, isi: rapikanKunci(isi, ctx.kunciTerpakai), periksa, percobaan: [], henti: null };
+          return { id: await simpanSoal(paket, slot, h, m, biaya, false) };
         });
+      /** Jejak soal ditolak (tidak tampil di layar guru), dengan semua alasan penolakannya. */
+      const simpanDitolak = (slot: Slot, isi: IsiSoal | null, alasan: string[], m: ModelAktif, biaya: number | null) =>
+        simpanSoal(paket, slot, { ok: false, isi, periksa: null, percobaan: [{ jawaban: null, alasan, isi }], henti: null }, m, biaya, true);
 
       let berhenti: GalatAi | null = null;
       const henti = (g: GalatAi) => {
         berhenti ??= g;
       };
       const antrean = k.slot.filter((s) => s.status !== 'lolos' && s.status !== 'gagal');
+      /** Keadaan percobaan tiap slot selama pekerjaan ini: percobaan dalam putaran, alasan terakhir, dan biaya. */
+      const keadaan = new Map<string, { kali: number; alasan: string[]; semuaAlasan: string[]; isi: IsiSoal | null; biaya: number | null }>();
+      const keadaanSlot = (s: Slot) => {
+        if (!keadaan.has(s.id)) keadaan.set(s.id, { kali: 0, alasan: [], semuaAlasan: [], isi: null, biaya: 0 });
+        return keadaan.get(s.id)!;
+      };
       const aktifSlot = new Set<number>();
       let sedang = 0;
       const tampilkanAktif = () =>
         this.ubah({ slotAktif: aktifSlot.size ? Math.min(kj.slot.length, kj.slot.filter((s) => s.status === 'lolos' || s.status === 'gagal').length + 1) : null });
       const simpanKerja = () => db.pekerjaan_generasi.update(kj.id, { slot: kj.slot, percobaan: kj.percobaan, diubah_pada: sekarang() });
 
-      const kerjakan = async (slot: Slot) => {
-        aktifSlot.add(slot.urutan);
+      /** Ambil sampai `banyak` slot berbentuk sama dari antrean, menjaga urutan. */
+      const ambilKelompok = (banyak: number): Slot[] => {
+        const bentuk = antrean[0].bentuk;
+        const pilih: Slot[] = [];
+        for (let i = 0; i < antrean.length && pilih.length < banyak; ) {
+          if (antrean[i].bentuk === bentuk) pilih.push(...antrean.splice(i, 1));
+          else i++;
+        }
+        return pilih;
+      };
+
+      const kerjakan = async (kelompok: Slot[]) => {
+        for (const s of kelompok) {
+          aktifSlot.add(s.urutan);
+          s.status = 'berjalan';
+        }
         tampilkanAktif();
-        slot.status = 'berjalan';
         await simpanKerja();
         const biaya = { total: 0 as number | null };
-        const tambah = (h: HasilButir) => {
-          slot.percobaan += h.percobaan.length;
-          kj.percobaan += h.percobaan.length;
-        };
-        let { h, m } = await buatSabar(slot, biaya);
-        tambah(h);
+        const ukuranKirim = kelompok.length;
+        const { h, m } = await buatSabar(
+          kelompok.map((slot) => ({ slot, alasanGagal: keadaanSlot(slot).alasan })),
+          biaya,
+        );
         if (h.henti) {
-          slot.status = 'menunggu';
+          for (const s of kelompok) s.status = 'menunggu';
+          antrean.unshift(...kelompok);
           return henti(h.henti);
         }
-        let hasil = h.ok ? await simpanLolos(slot, h, m, biaya.total) : { ditolak: h };
-        if ('ditolak' in hasil) {
-          // Tiga percobaan gagal: tandai ditolak lalu ganti dengan satu putaran pengganti.
-          await simpanSoal(paket, slot, hasil.ditolak, m, biaya.total, true);
-          slot.pengganti = true;
-          ({ h, m } = await buatSabar(slot, biaya));
-          tambah(h);
-          if (h.henti) {
-            slot.status = 'menunggu';
-            return henti(h.henti);
+        if (h.terpotong || (h.gagalSemua && ukuranKirim > 1)) perkecil(m, ukuranKirim);
+        // Biaya permintaan dibagi rata ke butir di dalamnya.
+        const bagian = biaya.total === null ? null : biaya.total / ukuranKirim;
+        const ulang: Slot[] = [];
+        for (let i = 0; i < kelompok.length; i++) {
+          const slot = kelompok[i];
+          const st = keadaanSlot(slot);
+          st.biaya = st.biaya === null || bagian === null ? null : st.biaya + bagian;
+          slot.percobaan += 1;
+          kj.percobaan += 1;
+          const r = h.butir[i];
+          let alasan = r.alasan;
+          if (r.ok && r.isi && r.periksa) {
+            const simpan = await simpanLolos(slot, r.isi, r.periksa, m, st.biaya);
+            if ('id' in simpan) {
+              slot.soal_id = simpan.id;
+              slot.status = 'lolos';
+              slot.galat = null;
+              continue;
+            }
+            alasan = [...alasan, simpan.alasan];
           }
-          hasil = h.ok ? await simpanLolos(slot, h, m, biaya.total) : { ditolak: h };
-          if ('ditolak' in hasil) await simpanSoal(paket, slot, hasil.ditolak, m, biaya.total, true);
+          st.kali++;
+          st.alasan = alasan;
+          st.semuaAlasan.push(...alasan);
+          st.isi = r.isi ?? st.isi;
+          if (st.kali < MAKS_PERCOBAAN) {
+            slot.status = 'menunggu';
+            ulang.push(slot);
+          } else if (!slot.pengganti) {
+            // Tiga percobaan gagal: tandai ditolak lalu ganti dengan satu putaran pengganti.
+            await simpanDitolak(slot, st.isi, st.semuaAlasan, m, st.biaya);
+            slot.pengganti = true;
+            keadaan.set(slot.id, { kali: 0, alasan: [], semuaAlasan: [], isi: null, biaya: 0 });
+            slot.status = 'menunggu';
+            ulang.push(slot);
+          } else {
+            await simpanDitolak(slot, st.isi, st.semuaAlasan, m, st.biaya);
+            slot.status = 'gagal';
+            slot.galat = alasan.join(' ') || 'Gagal dibuat.';
+          }
         }
-        if ('id' in hasil) {
-          slot.soal_id = hasil.id;
-          slot.status = 'lolos';
-          slot.galat = null;
-        } else {
-          slot.status = 'gagal';
-          slot.galat = hasil.ditolak.percobaan.at(-1)?.alasan.join(' ') ?? 'Gagal dibuat.';
-        }
+        // Butir yang perlu dicoba lagi didahulukan sehingga ikut dalam permintaan berikutnya bersama butir baru.
+        antrean.unshift(...ulang);
         await simpanKerja();
       };
 
-      /** Satu pekerja mengambil slot berikutnya dari antrean sampai habis atau pekerjaan dihentikan. */
+      /** Satu pekerja mengambil kelompok berikutnya dari antrean sampai habis atau pekerjaan dihentikan. */
       const pekerja = async () => {
         for (;;) {
           if (berhenti) return;
@@ -437,20 +497,21 @@ class PengaturGenerasi {
           const lolos = await jumlahLolosHariIni();
           if (berhenti || !antrean.length) return;
           // Butir yang sedang dikerjakan ikut dihitung agar batas harian GenSoal tidak terlewati.
-          if (lolos + sedang >= prof.batas_harian) {
+          const sisa = prof.batas_harian - lolos - sedang;
+          if (sisa <= 0) {
             if (sedang === 0) henti(new GalatAi('batas', `Batas harian GenSoal (${prof.batas_harian} soal) tercapai. Ubah batas di Pengaturan AI → Pengaturan lanjutan, atau lanjutkan besok.`));
             return;
           }
-          const slot = antrean.shift()!;
-          sedang++;
+          const kelompok = ambilKelompok(Math.min(sisa, ukuranUntuk(aktif.m)));
+          sedang += kelompok.length;
           try {
-            await kerjakan(slot);
+            await kerjakan(kelompok);
           } catch (e) {
-            if (slot.status === 'berjalan') slot.status = 'menunggu';
+            for (const s of kelompok) if (s.status === 'berjalan') s.status = 'menunggu';
             henti(e instanceof GalatAi ? e : new GalatAi('lain', (e as Error).message));
           } finally {
-            sedang--;
-            aktifSlot.delete(slot.urutan);
+            sedang -= kelompok.length;
+            for (const s of kelompok) aktifSlot.delete(s.urutan);
             tampilkanAktif();
           }
         }

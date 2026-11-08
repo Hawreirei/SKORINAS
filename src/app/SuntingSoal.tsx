@@ -244,7 +244,7 @@ export function SuntingSoal({ soal, selesai }: { soal: Soal; selesai: () => void
                   <option value="urutan">Urutan</option>
                 </>
               )}
-              {awal.bentuk === 'pilihan_ganda_kompleks' ? <option value="per_opsi">Pernyataan per opsi</option> : null}
+              {awal.bentuk === 'pilihan_ganda_kompleks' || awal.bentuk === 'pilihan_ganda' ? <option value="per_opsi">Pernyataan per opsi</option> : null}
               {awal.bentuk === 'menjodohkan' ? <option value="pasangan">Nilai tiap pasangan</option> : null}
               {awal.bentuk === 'pilihan_ganda_kategori' ? <option value="per_pernyataan">Hitungan tiap pernyataan</option> : null}
               <option value="tidak_ada">Tidak dapat dihitung (kunci tidak dicek otomatis)</option>

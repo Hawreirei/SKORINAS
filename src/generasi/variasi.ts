@@ -1,7 +1,7 @@
 import type { ParameterPaket, Slot } from '../db/tipe';
 
 /**
- * Variasi per butir (F-38). Soal yang dibuat dari prompt yang hampir sama cenderung seragam: tema, tokoh, dan bentuk
+ * Variasi per butir (F-39). Soal yang dibuat dari prompt yang hampir sama cenderung seragam: tema, tokoh, dan bentuk
  * stimulus berulang. Karena itu setiap butir paket berstimulus mendapat kombinasi tema konteks, bentuk stimulus, dan
  * nama tokoh yang berbeda. Urutan diacak per paket sehingga paket berikutnya juga berbeda.
  */

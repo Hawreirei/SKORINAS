@@ -6,7 +6,7 @@ import type { PencatatPercobaan, Pengirim } from './butir';
 import { panjangStimulus } from './variasi';
 
 /**
- * Bacaan bersama (F-39): satu cerita atau teks dipakai beberapa soal berurutan, seperti TKA. Slot dikelompokkan saat
+ * Bacaan bersama (F-40): satu cerita atau teks dipakai beberapa soal berurutan, seperti TKA. Slot dikelompokkan saat
  * paket dibuat; bacaan tiap kelompok dibuat sekali lewat permintaan AI tersendiri dan disimpan di pekerjaan, lalu
  * setiap soal anggota hanya menulis pertanyaannya.
  */

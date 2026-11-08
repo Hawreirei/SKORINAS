@@ -11,7 +11,7 @@ const LEVEL_KATEGORI: Record<Kesukaran, [Level, Level]> = {
 
 export const URUTAN_BENTUK: Bentuk[] = ['pilihan_ganda', 'pilihan_ganda_kompleks', 'pilihan_ganda_kategori', 'benar_salah', 'menjodohkan', 'isian_singkat', 'uraian'];
 
-/** Urutan bentuk paket (F-39): urutan guru bila diatur, bentuk yang tidak disebut menyusul dalam urutan bawaan. */
+/** Urutan bentuk paket (F-40): urutan guru bila diatur, bentuk yang tidak disebut menyusul dalam urutan bawaan. */
 export function urutanBentuk(p: { urutan_bentuk?: Bentuk[] | null }): Bentuk[] {
   const u = (p.urutan_bentuk ?? []).filter((b, i, a) => URUTAN_BENTUK.includes(b) && a.indexOf(b) === i);
   return [...u, ...URUTAN_BENTUK.filter((b) => !u.includes(b))];

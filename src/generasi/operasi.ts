@@ -129,7 +129,7 @@ export async function simpanSuntingan(soalId: string, isi: IsiSoal): Promise<Has
   await db.soal.put(baru);
   await simpanGambar(baru, isi, h.svg ?? (isi.gambar ? bangkitkanGambar(isi.gambar).svg : null));
   await log(s.id, 'sunting', s.isi_json, isi);
-  // Bacaan bersama yang disunting berlaku untuk semua soal yang memakainya (F-39).
+  // Bacaan bersama yang disunting berlaku untuk semua soal yang memakainya (F-40).
   const st = isi.stimulus;
   if (st && st.teks !== s.isi_json.stimulus?.teks) {
     const saudara = (await db.soal.where('paket_id').equals(s.paket_id).toArray()).filter((x) => x.id !== s.id && x.isi_json.stimulus?.id === st.id);

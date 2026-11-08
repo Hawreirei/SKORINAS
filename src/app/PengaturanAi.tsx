@@ -8,6 +8,7 @@ import type { PenyediaRegistri, StatusModel } from '../ai/tipe';
 import { db } from '../db/skema';
 import { simpanProfil } from '../db/profil';
 import type { KunciApi, PenyediaId } from '../db/tipe';
+import { soalLolos } from '../db/tipe';
 import { tanggalLokal } from '../db/util';
 import { BANTUAN } from '../bantuan/daftar';
 import { BagianLipat, IsianAngka, Pemberitahuan, PilihanDaftar } from '../komponen/Formulir';
@@ -108,7 +109,7 @@ export default function PengaturanAi() {
     if (profil.penyedia_cadangan === aktif) await simpanProfil({ penyedia_cadangan: null, model_cadangan: null });
   }
 
-  const lolosHariIni = pemakaian?.filter((x) => x.lolos).length ?? 0;
+  const lolosHariIni = (pemakaian ?? []).reduce((n, x) => n + soalLolos(x), 0);
   const biayaHariIni = (pemakaian ?? []).reduce<number | null>((a, x) => (a === null || x.perkiraan_biaya === null ? null : a + x.perkiraan_biaya), 0);
   const lewatBatasBiaya = biayaHariIni !== null && biayaHariIni > profil.batas_biaya_usd;
 
