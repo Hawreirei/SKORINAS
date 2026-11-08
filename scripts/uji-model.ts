@@ -2,12 +2,16 @@
 // (1) JSON sesuai skema, (2) kunci benar diloloskan pemeriksa, (3) varian salah-kunci ditolak.
 // Kunci dibaca dari variabel lingkungan, tidak pernah dari repositori:
 //   GEMINI_API_KEY, OPENROUTER_API_KEY, GROQ_API_KEY, MISTRAL_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY
-// Jalankan: npm run uji-model -- [--penyedia gemini] [--model id] [--butir 12] [--tulis]
+// Jalankan: npm run uji-model -- [--penyedia gemini] [--model id] [--butir 12] [--kelompok 10] [--tulis]
+// --kelompok n: minta n butir dalam satu permintaan seperti pembuatan paket (F-38); tanpa isian satu butir per permintaan.
+// Hemat kuota: 12 butir dengan --kelompok 10 hanya 2 permintaan. Pakai --model agar tidak semua model diuji.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { adaptorUntuk } from '../src/ai';
 import type { Registri } from '../src/ai/tipe';
 import type { Bentuk, HurufOpsi, IsiSoal, ParameterPaket, PenyediaId } from '../src/db/tipe';
-import { SISTEM, susunPesan } from '../src/generasi/prompt';
+import { SISTEM, SISTEM_KELOMPOK, susunPesan, susunPesanKelompok } from '../src/generasi/prompt';
+import { uraiKelompok } from '../src/generasi/butir';
+import type { Slot } from '../src/db/tipe';
 import { rencanakanSlot } from '../src/generasi/rencana';
 import { periksaSoal } from '../src/verifikasi';
 import { bacaIsiSoal, ekstrakJson } from '../src/verifikasi/skema';
@@ -20,6 +24,10 @@ const ENV: Record<PenyediaId, string> = {
   openai: 'OPENAI_API_KEY',
   anthropic: 'ANTHROPIC_API_KEY',
 };
+/** Penalaran singkat sesuai registri, sama seperti aplikasi (F-37). */
+function penalaranDari(penyedia: PenyediaId, model: string): 'rendah' | undefined {
+  return registri.penyedia.find((p) => p.id === penyedia)?.model.find((m) => m.id === model)?.penalaran ?? undefined;
+}
 const AMBANG = { json_sah: 0.95, benar_lolos: 0.9, salah_ditolak: 1 };
 
 const arg = (n: string) => {
@@ -28,6 +36,7 @@ const arg = (n: string) => {
 };
 const tulis = process.argv.includes('--tulis');
 const jumlah = Number(arg('butir') ?? 12);
+const kelompok = Math.max(1, Number(arg('kelompok') ?? 1));
 const jalurRegistri = 'public/models/registri.json';
 const registri = JSON.parse(readFileSync(jalurRegistri, 'utf8')) as Registri;
 
@@ -52,13 +61,12 @@ async function ujiModel(penyedia: PenyediaId, model: string, kunci: string) {
   let salahTotal = 0;
   let salahDitolak = 0;
   const bentuk: Bentuk[] = ['pilihan_ganda', 'isian_singkat', 'benar_salah'];
-  for (let i = 0; i < jumlah; i++) {
-    const acuan = ACUAN[i % ACUAN.length];
-    const param: ParameterPaket = { ...acuan, cara_bs: 'centang', jumlah_bentuk: null, sebaran_level: null, jumlah_tp: null, opsi_pg: null, skor_bentuk: null, ujian: null, rincian: null, atur_bentuk: null, skor_salah: null, durasi_menit: null, jumlah_gaya: null, bahasa_lain: '', konteks: '', aturan_tambahan: [], mapel: 'Matematika', rumpun: 'matematika', n: 1, persen: [0, 100, 0], bentuk: [bentuk[i % bentuk.length]], bahasa: 'id', gaya: 'biasa', gambar: 'campuran', materi: '' };
-    const slot = rencanakanSlot(param)[0];
+  let permintaan = 0;
+  let terpotong = 0;
+  /** Nilai satu butir dari jawaban model: sah skema, lolos pemeriksa, dan varian salah-kunci ditolak. */
+  const nilai = (data: unknown, param: ParameterPaket, slot: Slot) => {
     try {
-      const j = await a.kirim({ kunci, model, sistem: SISTEM, pesan: susunPesan({ param, slot, pokokLain: [], alasanGagal: [] }), suhu: 0.7 });
-      const isi = bacaIsiSoal(ekstrakJson(j.teks), { bentuk: slot.bentuk, level: slot.level, kesukaran: slot.kesukaran, tp: param.tp[0].rumusan });
+      const isi = bacaIsiSoal(data, { bentuk: slot.bentuk, level: slot.level, kesukaran: slot.kesukaran, tp: param.tp[0].rumusan });
       sah++;
       const k = { rumpun: 'matematika' as const, kelas: param.kelas, fase: param.fase, lokal: 'id' as const, literasi: false, pokokLain: [], gambarDiizinkan: true };
       const h = periksaSoal(isi, k);
@@ -71,10 +79,51 @@ async function ujiModel(penyedia: PenyediaId, model: string, kunci: string) {
         }
       }
       process.stdout.write(h.lolos ? '.' : 'x');
+      if (!h.lolos && process.env.RINCI) console.error('\n', h.alasan.join(' '));
     } catch (e) {
       process.stdout.write('!');
       if (process.env.RINCI) console.error('\n', (e as Error).message);
     }
+  };
+  const buatParam = (i: number): { param: ParameterPaket; slot: Slot } => {
+    const acuan = ACUAN[i % ACUAN.length];
+    const param: ParameterPaket = { ...acuan, cara_bs: 'centang', jumlah_bentuk: null, sebaran_level: null, jumlah_tp: null, opsi_pg: null, skor_bentuk: null, ujian: null, rincian: null, atur_bentuk: null, skor_salah: null, durasi_menit: null, jumlah_gaya: null, bahasa_lain: '', konteks: '', aturan_tambahan: [], mapel: 'Matematika', rumpun: 'matematika', n: 1, persen: [0, 100, 0], bentuk: [bentuk[i % bentuk.length]], bahasa: 'id', gaya: 'biasa', gambar: 'campuran', materi: '' };
+    return { param, slot: rencanakanSlot(param)[0] };
+  };
+  for (let i = 0; i < jumlah; ) {
+    if (kelompok === 1) {
+      const { param, slot } = buatParam(i);
+      permintaan++;
+      try {
+        const j = await a.kirim({ kunci, model, sistem: SISTEM, pesan: susunPesan({ param, slot, pokokLain: [], alasanGagal: [] }), suhu: 0.7, penalaran: penalaranDari(penyedia, model) });
+        nilai(ekstrakJson(j.teks), param, slot);
+      } catch (e) {
+        process.stdout.write('!');
+        if (process.env.RINCI) console.error('\n', (e as Error).message);
+      }
+      i++;
+      continue;
+    }
+    // Satu permintaan berisi beberapa butir dengan TP acuan yang sama, seperti satu paket (F-38).
+    const acuan = ACUAN[(i / kelompok) % ACUAN.length | 0];
+    const banyak = Math.min(kelompok, jumlah - i);
+    const param: ParameterPaket = { ...buatParam(0).param, ...acuan, n: banyak, bentuk: ['pilihan_ganda', 'isian_singkat', 'benar_salah'], persen: [30, 50, 20] };
+    const slots = rencanakanSlot(param);
+    permintaan++;
+    try {
+      const j = await a.kirim({ kunci, model, sistem: SISTEM_KELOMPOK, pesan: susunPesanKelompok({ param, butir: slots.map((slot) => ({ slot, alasanGagal: [] })), pokokLain: [] }), suhu: 0.7, penalaran: penalaranDari(penyedia, model), maksKeluar: Math.min(32_000, 4096 + 2500 * banyak) });
+      if (j.terpotong) terpotong++;
+      const teks = /^\s*(```(?:json)?\s*)?\[/i.test(j.teks) ? `{"butir":${j.teks.replace(/```(?:json)?/gi, '')}}` : j.teks;
+      const mentah = uraiKelompok(ekstrakJson(teks), banyak);
+      slots.forEach((slot, k) => {
+        const { nomor: _n, ...data } = (mentah[k] ?? {}) as Record<string, unknown>;
+        nilai(data, param, slot);
+      });
+    } catch (e) {
+      process.stdout.write('!'.repeat(banyak));
+      if (process.env.RINCI) console.error('\n', (e as Error).message);
+    }
+    i += banyak;
   }
   const hasil = {
     json_sah: sah / jumlah,
@@ -83,7 +132,7 @@ async function ujiModel(penyedia: PenyediaId, model: string, kunci: string) {
     dapat_dihitung: dapatDihitung,
   };
   const ok = hasil.json_sah >= AMBANG.json_sah && hasil.benar_lolos >= AMBANG.benar_lolos && hasil.salah_ditolak >= AMBANG.salah_ditolak;
-  console.log(`\n${penyedia}/${model}: JSON sah ${(hasil.json_sah * 100).toFixed(0)}%, lolos pemeriksa ${(hasil.benar_lolos * 100).toFixed(0)}%, salah-kunci ditolak ${(hasil.salah_ditolak * 100).toFixed(0)}% → ${ok ? 'LOLOS' : 'GAGAL'}`);
+  console.log(`\n${penyedia}/${model}${kelompok > 1 ? ` (${kelompok} butir per permintaan)` : ''}: ${permintaan} permintaan${terpotong ? `, ${terpotong} terpotong` : ''}, JSON sah ${(hasil.json_sah * 100).toFixed(0)}%, lolos pemeriksa ${(hasil.benar_lolos * 100).toFixed(0)}%, salah-kunci ditolak ${(hasil.salah_ditolak * 100).toFixed(0)}% → ${ok ? 'LOLOS' : 'GAGAL'}`);
   return { ...hasil, ok };
 }
 
