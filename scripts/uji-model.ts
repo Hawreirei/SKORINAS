@@ -49,7 +49,12 @@ const ACUAN: Pick<ParameterPaket, 'kelas' | 'fase' | 'cp' | 'tp'>[] = [
 function mutan(isi: IsiSoal): IsiSoal[] {
   if (isi.bentuk === 'pilihan_ganda') return (Object.keys(isi.opsi ?? {}) as HurufOpsi[]).filter((h) => h !== isi.kunci).map((h) => ({ ...isi, kunci: h }));
   if (isi.bentuk === 'benar_salah') return [{ ...isi, kunci: isi.kunci === 'B' ? 'S' : 'B' }];
-  if (isi.bentuk === 'isian_singkat') return [{ ...isi, kunci: isi.kunci.replace(/\d+/, (d) => String(Number(d) + 1)) }];
+  if (isi.bentuk === 'isian_singkat') {
+    // Sama dengan tests/golden.test.ts: kunci tanda perbandingan diganti tanda lain, kunci bilangan ditambah satu.
+    const ganti: Record<string, string> = { '=': '<', '<': '>', '>': '=' };
+    const k = isi.kunci.replace(/\$/g, '').trim();
+    return [{ ...isi, kunci: ganti[k] ?? isi.kunci.replace(/\d+/, (d) => String(Number(d) + 1)) }];
+  }
   return [];
 }
 
@@ -76,10 +81,11 @@ async function ujiModel(penyedia: PenyediaId, model: string, kunci: string) {
         for (const m of mutan(isi)) {
           salahTotal++;
           if (!periksaSoal(m, k).lolos) salahDitolak++;
+          else if (process.env.RINCI) console.error('\n Varian salah-kunci lolos:', JSON.stringify({ bentuk: m.bentuk, pokok: m.pokok, opsi: m.opsi, kunci_asli: isi.kunci, kunci_varian: m.kunci, verifikasi: m.verifikasi }));
         }
       }
       process.stdout.write(h.lolos ? '.' : 'x');
-      if (!h.lolos && process.env.RINCI) console.error('\n', h.alasan.join(' '));
+      if (!h.lolos && process.env.RINCI) console.error('\n', h.alasan.join(' '), process.env.RINCI === 'isi' ? JSON.stringify({ pokok: isi.pokok, opsi: isi.opsi, kunci: isi.kunci, verifikasi: isi.verifikasi }) : '');
     } catch (e) {
       process.stdout.write('!');
       if (process.env.RINCI) console.error('\n', (e as Error).message);

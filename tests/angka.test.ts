@@ -32,6 +32,21 @@ describe('angkaDariTeks', () => {
     expect(angkaDariTeks('90°')).toBe(90);
     expect(angkaDariTeks('25%')).toBe(0.25);
   });
+  it('membaca satuan yang ditulis dengan LaTeX (uji model 8 November 2026)', () => {
+    expect(angkaDariTeks('$112\\text{ cm}^2$')).toBe(112);
+    expect(angkaDariTeks('$126\\text{ m}^2$')).toBe(126);
+    expect(angkaDariTeks('3\\ \\text{m}^{3}')).toBe(3);
+    expect(angkaDariTeks('$5\\,\\mathrm{kg}$')).toBe(5);
+    expect(angkaDariTeks('12 cm^2')).toBe(12);
+    expect(angkaDariTeks('$2{,}5\\text{ cm}$')).toBe(2.5);
+    expect(angkaDariTeks('$\\frac{3}{4}\\text{ m}$')).toBeCloseTo(0.75);
+    expect(angkaDariTeks('$12\\text{ m/detik}$')).toBe(12);
+    // pangkat pada bilangan tetap pangkat, bukan satuan
+    expect(angkaDariTeks('$2^3$')).toBe(8);
+    expect(angkaDariTeks('$10^{2}$')).toBe(100);
+    // dua bilangan dalam satu opsi tetap tidak terbaca
+    expect(angkaDariTeks('$\\frac{6}{10}$ dan $\\frac{5}{10}$')).toBeNull();
+  });
   it('membaca format Inggris', () => {
     expect(angkaDariTeks('1,250', 'en')).toBe(1250);
     expect(angkaDariTeks('2.5', 'en')).toBe(2.5);

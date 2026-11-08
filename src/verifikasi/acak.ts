@@ -24,10 +24,22 @@ export function seimbangkanKunci(isi: IsiSoal, terpakai: Partial<Record<HurufOps
     baru[tujuan] = a;
     return baru;
   };
+  // Pernyataan per opsi ikut ditukar agar verifikasi tetap sesuai dengan isi opsi.
+  const v = isi.verifikasi;
+  const verifikasi = v.tipe === 'per_opsi' ? { ...v, opsi: tukarPernyataan(v.opsi, isi.kunci as HurufOpsi, tujuan) } : v;
   return {
     ...isi,
     opsi: tukar(isi.opsi),
     kunci: tujuan,
+    verifikasi,
     terjemahan: isi.terjemahan ? { ...isi.terjemahan, opsi: tukar(isi.terjemahan.opsi) } : isi.terjemahan,
   };
+}
+
+function tukarPernyataan<T>(o: Partial<Record<HurufOpsi, T>>, a: HurufOpsi, b: HurufOpsi): Partial<Record<HurufOpsi, T>> {
+  const baru = { ...o };
+  const x = baru[a];
+  baru[a] = baru[b];
+  baru[b] = x;
+  return baru;
 }
