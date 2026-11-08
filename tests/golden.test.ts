@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import acuan from '../data/golden/matematika-acuan.json';
 import aritmetika from '../data/golden/matematika-aritmetika.json';
 import bentukBaru from '../data/golden/matematika-bentuk-baru.json';
+import satuan from '../data/golden/matematika-satuan.json';
 import type { HurufOpsi, IsiSoal } from '../src/db/tipe';
 import { faseDariKelas } from '../src/kurikulum/fase';
 import { periksaSoal } from '../src/verifikasi';
@@ -21,8 +22,8 @@ function periksa(b: Butir, isi = lengkap(b)) {
   return periksaSoal(isi, { rumpun: 'matematika', kelas: b.kelas, fase: faseDariKelas(b.kelas), lokal: 'id', literasi: false, pokokLain: [], gambarDiizinkan: true });
 }
 
-const benar = [...(acuan.benar as Butir[]), ...(aritmetika.benar as Butir[]), ...(bentukBaru.benar as unknown as Butir[])];
-const salah = [...(acuan.salah as Butir[]), ...(bentukBaru.salah as unknown as Butir[])];
+const benar = [...(acuan.benar as Butir[]), ...(aritmetika.benar as Butir[]), ...(bentukBaru.benar as unknown as Butir[]), ...(satuan.benar as unknown as Butir[])];
+const salah = [...(acuan.salah as Butir[]), ...(bentukBaru.salah as unknown as Butir[]), ...(satuan.salah as unknown as Butir[])];
 
 /** Varian salah-kunci yang sengaja dibuat dari tiap butir benar yang dapat dihitung. */
 function mutasi(b: Butir): { id: string; isi: IsiSoal }[] {

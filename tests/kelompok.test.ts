@@ -9,7 +9,7 @@ import type { ParameterPaket, Slot } from '../src/db/tipe';
 import { soalLolos } from '../src/db/tipe';
 import { buatKelompok, uraiKelompok } from '../src/generasi/butir';
 import { buatPaket, jumlahLolosHariIni, pengatur } from '../src/generasi/pengatur';
-import { SISTEM, SISTEM_KELOMPOK, susunPesanKelompok } from '../src/generasi/prompt';
+import { SISTEM, SISTEM_KELOMPOK, susunPesan, susunPesanKelompok } from '../src/generasi/prompt';
 import { kemiripan } from '../src/verifikasi/kemiripan';
 
 // F-38: beberapa butir dalam satu permintaan agar kuota harian cukup untuk beberapa paket.
@@ -139,6 +139,15 @@ describe('prompt berkelompok', () => {
     expect(pesan.match(/Aturan verifikasi/g)).toHaveLength(1);
     expect(pesan).toContain('Isian singkat ("isian_singkat")');
     expect(pesan).toContain('tepat 3 objek');
+  });
+
+  it('aturan verifikasi menuntun tipe yang sering keliru (uji model 8 November 2026)', () => {
+    for (const pesan of [susunPesanKelompok({ param: param(1), butir: [{ slot: slot(1), alasanGagal: [] }], pokokLain: [] }), susunPesan({ param: param(1), slot: slot(1), pokokLain: [], alasanGagal: [] })]) {
+      expect(pesan).toContain('HANYA bila semua opsi berupa tanda perbandingan');
+      expect(pesan).toContain('max(2/3, 3/4, 5/8)');
+      expect(pesan).toContain('"nilai" adalah angka yang DISEBUT dalam pernyataan');
+      expect(pesan).toContain('boleh memakai satuan');
+    }
   });
 
   it('format TKA: level TKA disebut per butir', () => {
@@ -306,5 +315,37 @@ describe('registri dan perkiraan', () => {
     expect(lama.permintaanMin).toBe(30);
     expect(lama.kuotaKurang).toBe(true);
     expect(lama.paketCukup).toBe(0);
+  });
+});
+
+describe('pilihan ganda dengan pernyataan per opsi', () => {
+  const isi = {
+    bentuk: 'pilihan_ganda' as const,
+    pokok: 'Di antara pecahan-pecahan berikut, pecahan yang nilainya lebih besar dari $\\frac{3}{5}$ adalah ....',
+    opsi: { A: '$\\frac{1}{2}$', B: '$\\frac{4}{10}$', C: '$\\frac{7}{10}$', D: '$\\frac{4}{15}$' },
+    kunci: 'C',
+    pembahasan: ['3/5 = 6/10. Pecahan yang lebih dari 6/10 hanya 7/10.'],
+    verifikasi: {
+      tipe: 'per_opsi' as const,
+      opsi: { A: { kiri: '1/2', relasi: '>', kanan: '3/5' }, B: { kiri: '4/10', relasi: '>', kanan: '3/5' }, C: { kiri: '7/10', relasi: '>', kanan: '3/5' }, D: { kiri: '4/15', relasi: '>', kanan: '3/5' } },
+    },
+    gambar: null,
+    meta: { tp: 'x', indikator: 'Disajikan beberapa pecahan, peserta didik dapat membandingkan pecahan.', level: 'C3' as const, kesukaran: 'sedang' as const },
+  };
+
+  it('penyeimbang kunci menukar pernyataan bersama opsinya sehingga verifikasi tetap sesuai', async () => {
+    const { seimbangkanKunci } = await import('../src/verifikasi/acak');
+    const { periksaHitung } = await import('../src/verifikasi/matematika');
+    expect(periksaHitung(isi, 'id').hasil).toBe('lolos');
+    const baru = seimbangkanKunci(isi, { B: 2, C: 2, D: 2 });
+    expect(baru.kunci).toBe('A');
+    expect(baru.opsi?.A).toBe('$\\frac{7}{10}$');
+    expect(baru.verifikasi.tipe === 'per_opsi' && baru.verifikasi.opsi.A?.kiri).toBe('7/10');
+    expect(periksaHitung(baru, 'id').hasil).toBe('lolos');
+  });
+
+  it('pilihan ganda kompleks tetap memakai aturannya sendiri', async () => {
+    const { periksaHitung } = await import('../src/verifikasi/matematika');
+    expect(periksaHitung({ ...isi, bentuk: 'uraian' }, 'id').alasan).toMatch(/hanya untuk pilihan ganda dan pilihan ganda kompleks/);
   });
 });

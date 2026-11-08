@@ -82,6 +82,22 @@ export function evaluasi(ekspresi: string, lingkup: Lingkup = {}): number {
 
 const KATA_MATEMATIKA = new Set(['pi', 'sqrt']);
 
+/**
+ * Satuan yang ditulis model dengan LaTeX menjadi teks polos agar dapat dibuang buangSatuan:
+ * "112\\text{ cm}^2" -> "112 cm²", "5\\,\\mathrm{kg}" -> "5 kg", "3\\ \\text{m}^{3}" -> "3 m³", "2{,}5" -> "2,5".
+ * Pangkat hanya dianggap bagian satuan bila menempel pada huruf, jadi "2^3" tetap pangkat bilangan.
+ */
+function satuanLatex(s: string): string {
+  return s
+    .replace(/\\(?:text|mathrm|textrm|mbox|operatorname)\s*\{([^{}]*)\}/g, ' $1 ')
+    // Koma desimal LaTeX: 2{,}5 -> 2,5 (dibaca sesuai bahasa soal oleh normalisasiAngka).
+    .replace(/(\d)\{([,.])\}(\d)/g, '$1$2$3')
+    .replace(/\\[,;:! ]|~/g, ' ')
+    .replace(/([a-zA-Z])\s*\^\s*\{?\s*2\s*\}?/g, '$1²')
+    .replace(/([a-zA-Z])\s*\^\s*\{?\s*3\s*\}?/g, '$1³')
+    .replace(/\s+/g, ' ');
+}
+
 /** "12 cm" -> "12", "45 menit" -> "45", "90°" -> "90", "25%" tetap. */
 function buangSatuan(s: string): string {
   const m = s.match(/^(.*?[\d})])\s*([a-zA-Z²³°][a-zA-Z²³°/\s.]*)$/u);
@@ -104,7 +120,7 @@ function normalisasiAngka(angka: string, lokal: Lokal): string {
  * Mengembalikan null bila teks bukan bilangan.
  */
 export function angkaDariTeks(teks: string, lokal: Lokal = 'id'): number | null {
-  let s = teks.trim().replace(/\$/g, '').replace(/\\text\{([^{}]*)\}/g, '$1').trim();
+  let s = satuanLatex(teks.trim().replace(/\$/g, '')).trim();
   if (!s) return null;
   s = s.replace(/^rp\.?\s*/i, '').replace(/^(=|≈)\s*/, '');
   s = buangSatuan(s);

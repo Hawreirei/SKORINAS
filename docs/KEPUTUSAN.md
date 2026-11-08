@@ -333,3 +333,16 @@ Permintaan pemilik: satu kunci API tidak sanggup membuat satu paket 30 soal dala
 | Panel Rencana | Permintaan = soal ÷ butir per permintaan (maks.: ×1,3 lalu dibagi); peringatan kuota membandingkan sisa kuota dengan permintaan, bukan jumlah soal. Baris baru "Cukup untuk sekitar *n* paket seperti ini" (sisa kuota ÷ perkiraan terbanyak). Angka tunggal bila perkiraan terkecil dan terbesar sama | Guru langsung melihat berapa paket yang masih dapat dibuat hari ini |
 | Tidak diubah | Ganti soal dan buat ulang per butir (`operasi.ts`) tetap satu butir per permintaan dengan prompt lama; batas per menit dan per hari; uji pengatur lama dijalankan dengan `perPermintaan: 1` | Guru membandingkan satu kandidat; uji lama tetap menguji logika per butir |
 
+## Perbaikan pemeriksa setelah uji model (F-38, 8 November 2026)
+
+Uji model pertama dengan kunci asli (`gemini-3.5-flash`; `gemini-3.8-flash` sedang dibalas 502/503 oleh Google) memberi 100% lolos pada 1 butir per permintaan, tetapi hanya 50–65% pada 5–10 butir per permintaan. Penolakan hampir semuanya bukan soal yang salah, melainkan bentuk yang belum dikenali pemeriksa atau tipe verifikasi yang keliru.
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Satuan LaTeX | `angkaDariTeks` membaca `\text{ cm}^2`, `\mathrm{kg}`, `\,`, `m^{3}`, dan koma desimal `2{,}5`. Pangkat dianggap bagian satuan hanya bila menempel pada huruf, jadi `2^3` tetap 8 | Penolakan terbanyak: "Opsi kunci B ("$112\text{ cm}^2$") bukan bilangan" padahal soalnya benar |
+| Pilihan ganda per_opsi | Pilihan ganda biasa boleh memakai `per_opsi`: tepat satu pernyataan benar dan itu milik kunci (`periksaPgPerOpsi`). Penyeimbang kunci ikut menukar pernyataan. Layar sunting menawarkan "Pernyataan per opsi" untuk pilihan ganda | Soal "pecahan yang lebih besar dari 3/5", opsi berupa kalimat perbandingan, atau opsi berupa pernyataan "4/7 < 5/8" tidak dapat dinyatakan dengan ekspresi tunggal |
+| Aturan verifikasi di prompt | Dipakai mode satu butir dan kelompok: perbandingan untuk pilihan ganda HANYA bila opsinya tanda; opsi bilangan memakai ekspresi (`max`/`min`) atau per_opsi; ekspresi berisi < atau > dengan nilai "true" tidak sah; benar-salah: "nilai" adalah angka yang disebut pernyataan; isian berjawaban kata atau nama memakai tidak_ada; opsi boleh bersatuan | Kesalahan tipe yang terlihat di uji model |
+| Golden set | `data/golden/matematika-satuan.json`: 9 butir benar dan 9 butir salah dari pola uji model; empat butir benar ditolak pemeriksa sebelum perbaikan | AGENTS.md butir 4 |
+| uji-model | `--kelompok n`; mode kelompok memakai kesukaran yang sama dengan mode satu butir; varian salah-kunci isian bertanda perbandingan diganti tanda lain (sama dengan golden test); `RINCI=isi` mencetak soal yang ditolak dan varian salah-kunci yang lolos | Hasil sebelumnya tidak sebanding, dan satu "varian lolos" ternyata varian yang sama dengan aslinya |
+| Hasil | Setelah perbaikan: `gemini-3.5-flash`, 20 butir, 10 per permintaan: JSON sah 100%, lolos pemeriksa 100%, salah-kunci ditolak 100% (sebelumnya 60–65% lolos). `gemini-3.8-flash` **perlu diuji ulang** setelah Google tidak sibuk | Sampel kecil; jalankan lagi dengan `--butir 30 --kelompok 10` sebelum menandai model direkomendasikan |
+

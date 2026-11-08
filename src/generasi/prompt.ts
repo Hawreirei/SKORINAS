@@ -42,18 +42,22 @@ const SKEMA = `{
   "meta": {"tp": "<rumusan TP>", "indikator": "Disajikan ..., peserta didik dapat ...", "level": "<C1–C6>", "kesukaran": "<mudah|sedang|sulit>"}
 }`;
 
-const ATURAN_VERIFIKASI = `Aturan verifikasi (pilih satu tipe). Ekspresi memakai sintaks mathjs: titik desimal, tanpa pemisah ribuan, pecahan a/b, persen boleh 25%, fungsi lcm(a, b), gcd(a, b), sqrt(x); beri spasi setelah koma argumen.
+const ATURAN_VERIFIKASI = `Aturan verifikasi (pilih satu tipe). Ekspresi memakai sintaks mathjs: titik desimal, tanpa pemisah ribuan, pecahan a/b, persen boleh 25%, fungsi lcm(a, b), gcd(a, b), sqrt(x), max(a, b, ...), min(a, b, ...); beri spasi setelah koma argumen.
 - {"tipe":"ekspresi","ekspresi":"3/4 + 1/8","nilai":"7/8"}
   pilihan_ganda: opsi kunci bernilai sama dengan hasil, opsi lain tidak. isian_singkat: kunci bernilai sama dengan hasil.
-  benar_salah: pokok menyatakan bahwa ekspresi bernilai "nilai"; kunci "B" bila benar, "S" bila salah.
+  benar_salah: "nilai" adalah angka yang DISEBUT dalam pernyataan pada pokok, bukan hasil yang benar. Kunci "B" bila ekspresi memang bernilai "nilai", "S" bila tidak. Contoh pernyataan salah "Luas trapesium itu 60 cm²": {"ekspresi":"(8 + 12) / 2 * 5","nilai":"60"}, kunci "S".
   uraian: jawaban akhir.
 - {"tipe":"perbandingan","kiri":"5/8","relasi":"<","kanan":"3/4"}  relasi salah satu dari = < > <= >= !=
-  pilihan_ganda: opsi berupa tanda perbandingan; benar_salah: pokok menyatakan kiri relasi kanan.
+  pilihan_ganda: HANYA bila semua opsi berupa tanda perbandingan (<, >, =). Bila opsi berupa bilangan (mis. "Pecahan yang paling besar adalah ...."), JANGAN pakai perbandingan: pakai ekspresi yang hasilnya sama dengan opsi kunci, mis. {"tipe":"ekspresi","ekspresi":"max(2/3, 3/4, 5/8)","nilai":"3/4"}, atau per_opsi. Ekspresi berisi tanda < atau > dengan nilai "true" tidak sah.
+  isian_singkat: kunci berupa tanda perbandingan, atau salah satu bilangan yang dibandingkan; bila jawabannya kata atau nama (mis. "Fitri"), pakai tidak_ada. benar_salah: pokok menyatakan kiri relasi kanan apa adanya.
 - {"tipe":"urutan","nilai":["2/3","3/4","5/6"],"arah":"naik"}  untuk soal mengurutkan; kunci memuat daftar yang sama, dipisah koma atau titik koma.
-- {"tipe":"per_opsi","opsi":{"A":{"kiri":"3/4","relasi":">","kanan":"2/3"},"B":{"kiri":"0.5 + 0.25","relasi":"=","kanan":"0.7"}, ...}}  khusus pilihan_ganda_kompleks: satu pernyataan per opsi (semua opsi); opsi benar tepat yang pernyataannya benar.
+- {"tipe":"per_opsi","opsi":{"A":{"kiri":"3/4","relasi":">","kanan":"2/3"},"B":{"kiri":"0.5 + 0.25","relasi":"=","kanan":"0.7"}, ...}}  satu pernyataan per opsi (semua opsi) yang menerjemahkan isi opsi itu.
+  pilihan_ganda_kompleks: opsi benar tepat yang pernyataannya benar.
+  pilihan_ganda: tepat satu pernyataan benar, yaitu milik opsi kunci. Pakai bila opsi berupa kalimat atau pernyataan perbandingan ("Tali Dayu lebih pendek dari tali Lani" → {"kiri":"3/4","relasi":"<","kanan":"5/6"}), atau bila opsi bilangan diuji syarat pada pokok ("pecahan yang lebih besar dari 3/5": A {"kiri":"1/2","relasi":">","kanan":"3/5"}, B {"kiri":"7/10","relasi":">","kanan":"3/5"}, ...).
   pilihan_ganda_kompleks juga boleh memakai tipe "ekspresi" bila setiap opsi berupa bilangan: opsi benar tepat yang bernilai sama dengan hasil.
 - {"tipe":"pasangan","kiri":["3 * 4","20 - 5","6 + 7"],"kanan":["13","12","15","14"]}  khusus menjodohkan: nilai tiap butir kolom kiri dan kanan berurutan; pasangan benar bernilai sama dan tunggal.
-- {"tipe":"tidak_ada","alasan":"..."} bila jawaban tidak dapat dihitung (konsep, sifat, penalaran). Soal ini akan ditelaah guru.
+- {"tipe":"tidak_ada","alasan":"..."} bila jawaban tidak dapat dihitung (konsep, sifat, penalaran), atau bila opsi bukan satu bilangan atau satu tanda (mis. opsi berisi dua pecahan sekaligus). Soal ini akan ditelaah guru.
+Opsi dan kunci bilangan boleh memakai satuan (mis. "112 cm²" atau "$112\\text{ cm}^2$"); satu opsi berisi satu bilangan.
 Bila memakai gambar, ekspresi boleh memakai variabel gambar (lihat daftar templat), mis. "pecahan" atau "nilai[2] - nilai[1]" (indeks mulai 1).`;
 
 const PETUNJUK_BENTUK: Record<Bentuk, string> = {
