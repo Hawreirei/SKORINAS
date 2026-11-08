@@ -341,7 +341,14 @@ export interface PemakaianAi {
   token_keluar: number;
   perkiraan_biaya: number | null;
   lolos: boolean;
+  /** Banyak soal lolos dari permintaan ini (F-38, satu permintaan berisi beberapa butir). Kosong pada catatan lama: 1 bila lolos. */
+  jumlah_lolos?: number;
   paket_id: string | null;
+}
+
+/** Banyak soal lolos yang dihasilkan satu catatan pemakaian. */
+export function soalLolos(p: Pick<PemakaianAi, 'lolos' | 'jumlah_lolos'>): number {
+  return p.jumlah_lolos ?? (p.lolos ? 1 : 0);
 }
 
 export interface LogSoal {

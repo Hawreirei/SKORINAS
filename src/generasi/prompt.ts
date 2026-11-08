@@ -2,7 +2,7 @@ import type { Bentuk, IsiSoal, JenisIsian, ParameterPaket, Slot } from '../db/ti
 import { BENTUK_LABEL } from '../db/tipe';
 import { TEMPLAT } from '../gambar';
 import { paketUntuk } from '../paket';
-import { bagianPromptUjian } from '../ujian';
+import { bagianPromptUjian, levelTkaButir } from '../ujian';
 
 export const SISTEM = `Anda penulis butir soal asesmen untuk sekolah di Indonesia yang memakai Kurikulum Merdeka.
 Kontrak keluaran:
@@ -14,6 +14,18 @@ Kontrak keluaran:
 - Jangan menyebut huruf opsi (A, B, C, D) di pembahasan, karena urutan opsi dapat diacak.
 - Jangan memakai opsi "semua benar", "semua salah", atau gabungan opsi seperti "A dan B".
 - Kolom "verifikasi" adalah instruksi pemeriksaan yang akan dihitung ulang oleh kode. Isi dengan jujur dan tepat.`;
+
+const KONTRAK_SATU = '- Keluarkan HANYA satu objek JSON sesuai skema. Tanpa teks lain, tanpa pagar kode.';
+
+/**
+ * Sistem untuk permintaan berisi banyak butir (F-38). Satu permintaan menghasilkan beberapa butir agar
+ * kuota harian penyedia cukup untuk beberapa paket; tiap butir tetap diperiksa sendiri oleh kode.
+ */
+export const SISTEM_KELOMPOK = SISTEM.replace(
+  KONTRAK_SATU,
+  `- Keluarkan HANYA satu objek JSON {"butir": [...]} berisi semua butir yang diminta, satu objek per butir sesuai skema, berurutan menurut nomor. Tanpa teks lain, tanpa pagar kode.
+- Setiap butir berdiri sendiri dan tidak boleh mirip dengan butir lain dalam permintaan ini: konteks, angka, nama, dan bentuk pertanyaan berbeda.`,
+);
 
 const SKEMA = `{
   "bentuk": "<bentuk>",
@@ -173,5 +185,91 @@ ${p.cp.trim() ? `- Capaian pembelajaran: ${p.cp.trim()}` : ''}
   if (k.alasanGagal.length) bagian.push(`## Percobaan sebelumnya ditolak pemeriksa\n${k.alasanGagal.map((a) => `- ${a}`).join('\n')}\nPerbaiki masalah tersebut. Pastikan kunci benar menurut hitungan.`);
 
   bagian.push(`Isi meta.tp dengan: ${JSON.stringify(tp.rumusan)}, meta.level "${slot.level}", meta.kesukaran "${slot.kesukaran}". Keluarkan JSON saja.`);
+  return bagian.join('\n\n');
+}
+
+/** Bagian gambar: daftar templat bila gambar boleh, atau larangan memakai gambar. */
+function bagianGambar(p: ParameterPaket): string {
+  const paket = paketUntuk(p.rumpun);
+  const gambarBoleh = p.gambar !== 'mati' && (paket?.templatGambar.length ?? 0) > 0;
+  if (!gambarBoleh || !paket) return '## Gambar\nJangan memakai gambar: isi "gambar": null.';
+  const daftar = TEMPLAT.filter((t) => paket.templatGambar.includes(t.id))
+    .map((t) => `- ${t.id} (${t.dipakai}). Parameter: ${t.parameter}. Contoh: ${JSON.stringify(t.contoh)}`)
+    .join('\n');
+  const variabel =
+    'Variabel gambar untuk ekspresi: garis_bilangan → nilai (titik "?"), titik[], lompatan[]; pecahan_batang/pecahan_lingkaran → pecahan, diarsir, penyebut, batang[]; bangun_datar → luas, keliling, sisi[]; grid_luas → luas, total_sel; diagram_batang → nilai[], total, maks, min, rata; piktogram → nilai[], jumlah[], total; jam_analog → jam, menit, total_menit; blok_nilai_tempat → nilai, ratusan, puluhan, satuan; penggaris → panjang, mulai, akhir.';
+  return `## Gambar terprogram\n${p.gambar === 'terprogram' ? 'Pakai gambar bila membantu siswa memahami soal.' : 'Gambar opsional; pakai hanya bila perlu.'} Gambar digambar oleh kode dari parameter, jadi jangan mendeskripsikan gambar yang tidak dapat dibuat templat. Templat tersedia:\n${daftar}\n${variabel}`;
+}
+
+export interface ButirDiminta {
+  slot: Slot;
+  /** Alasan penolakan percobaan sebelumnya untuk butir ini; kosong bila percobaan pertama. */
+  alasanGagal: string[];
+}
+
+export interface KonteksKelompok {
+  param: ParameterPaket;
+  butir: ButirDiminta[];
+  pokokLain: string[];
+}
+
+/**
+ * Pesan untuk beberapa butir sekaligus (F-38). Konteks bersama (CP, aturan, skema, materi) dikirim sekali;
+ * tiap butir punya baris sendiri berisi bentuk, kesukaran, level, gaya, TP, dan alasan penolakan sebelumnya.
+ */
+export function susunPesanKelompok(k: KonteksKelompok): string {
+  const { param: p, butir } = k;
+  const paket = paketUntuk(p.rumpun);
+  const bagian: string[] = [];
+  const indeksTp = [...new Set(butir.map((b) => b.slot.tp_index))].sort((a, b) => a - b);
+
+  bagian.push(`## Konteks pembelajaran (diisi guru)
+- Kelas ${p.kelas}, fase ${p.fase}
+- Mata pelajaran: ${p.mapel}${paket ? ` (rumpun ${paket.nama})` : ''}
+${p.cp.trim() ? `- Capaian pembelajaran: ${p.cp.trim()}\n` : ''}${indeksTp.map((i) => `- TP ${i + 1}: ${p.tp[i].rumusan}`).join('\n')}`);
+
+  const bentuk = [...new Set(butir.map((b) => b.slot.bentuk))];
+  bagian.push(`## Bentuk soal
+${bentuk
+  .map((b) => {
+    const rincian = rincianBentuk(p, b);
+    return `- ${BENTUK_LABEL[b]} ("${b}"): ${PETUNJUK_BENTUK[b]}${rincian.length ? ` ${rincian.join(' ')}` : ''}`;
+  })
+  .join('\n')}
+- Bahasa: ${teksBahasa(p)}${p.konteks?.trim() ? `\n- Konteks atau tema yang diminta guru: ${p.konteks.trim()}` : ''}`);
+
+  const ujian = bagianPromptUjian(p, null);
+  if (ujian) bagian.push(ujian);
+
+  const tambahan = (p.aturan_tambahan ?? []).map((a) => a.trim()).filter(Boolean);
+  if (tambahan.length) bagian.push(`## Aturan tambahan dari guru (wajib diikuti)\n${tambahan.slice(0, 40).map((a) => `- ${a.slice(0, 500)}`).join('\n')}`);
+
+  if (paket?.aturanPenulisan.length) bagian.push(`## Aturan penulisan ${paket.nama}\n${paket.aturanPenulisan.map((a) => `- ${a}`).join('\n')}`);
+
+  bagian.push(bagianGambar(p));
+
+  bagian.push(`## Skema JSON satu butir\n${SKEMA.replace('{\n', '{\n  "nomor": <nomor butir dari daftar>,\n').replace('<bentuk>', 'bentuk butir itu')}\n\n${ATURAN_VERIFIKASI}`);
+
+  if (paket?.contohAcuan.length) {
+    const contoh = bentuk.map((b) => paket.contohAcuan.find((c) => c.bentuk === b)).filter((c) => c !== undefined);
+    const pakai = (contoh.length ? contoh : paket.contohAcuan.slice(0, 1)).slice(0, 3);
+    bagian.push(`## Contoh acuan (gaya, bukan untuk disalin)\n${pakai.map((c) => JSON.stringify(c)).join('\n')}`);
+  }
+
+  if (p.materi.trim()) bagian.push(`## Materi dari guru (boleh dipakai sebagai stimulus)\n"""\n${p.materi.trim().slice(0, 24000)}\n"""`);
+
+  if (k.pokokLain.length) bagian.push(`## Soal lain dalam paket (jangan mirip)\n${k.pokokLain.slice(-12).map((s) => `- ${s.slice(0, 160)}`).join('\n')}`);
+
+  const daftar = butir.map((b, i) => {
+    const s = b.slot;
+    const tka = levelTkaButir(p, s.level);
+    const baris = `${i + 1}. Bentuk "${s.bentuk}"; kesukaran ${s.kesukaran}; level ${s.level}${tka ? ` (level TKA "${tka}")` : ''}; gaya: ${GAYA[s.gaya ?? p.gaya]} TP ${s.tp_index + 1}.`;
+    return b.alasanGagal.length ? `${baris}\n   Percobaan sebelumnya ditolak pemeriksa: ${b.alasanGagal.join(' ')} Perbaiki masalah tersebut dan pastikan kunci benar menurut hitungan.` : baris;
+  });
+  bagian.push(`## Daftar butir yang diminta (${butir.length} butir)\n${daftar.join('\n')}`);
+
+  bagian.push(
+    `Keluarkan {"butir": [...]} dengan tepat ${butir.length} objek, satu untuk setiap nomor di daftar. Isi "nomor" sesuai daftar, meta.tp dengan rumusan TP butir itu, serta meta.level dan meta.kesukaran sesuai butirnya. Keluarkan JSON saja.`,
+  );
   return bagian.join('\n\n');
 }

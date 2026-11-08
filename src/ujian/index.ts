@@ -372,11 +372,18 @@ export function ringkasUjian(u: FormatUjian): string {
  * Bagian prompt untuk format ujian paket; kosong bila paket bukan format ujian. Aturan penulisan format sudah disalin
  * ke `aturan_tambahan` paket (dapat disunting guru), jadi di sini hanya nama format, level TKA butir, dan kelokalan TKAD.
  */
-export function bagianPromptUjian(p: Pick<ParameterPaket, 'ujian'>, level: Level): string {
+/** Level TKA satu butir untuk daftar butir dalam satu permintaan; null bila format bukan TKA atau TKAD. */
+export function levelTkaButir(p: Pick<ParameterPaket, 'ujian'>, level: Level): string | null {
+  const u = formatPaket(p);
+  return u && (u.keluarga === 'TKA' || u.keluarga === 'TKAD') ? levelTka(level) : null;
+}
+
+/** level null: untuk permintaan berisi banyak butir; level TKA lalu disebut per butir (levelTkaButir). */
+export function bagianPromptUjian(p: Pick<ParameterPaket, 'ujian'>, level: Level | null): string {
   const u = formatPaket(p);
   if (!u) return '';
   const aturan = [`Soal disusun setara ${u.nama}.`];
-  if (u.keluarga === 'TKA' || u.keluarga === 'TKAD') aturan.push(`Butir ini berlevel TKA "${levelTka(level)}".`);
+  if ((u.keluarga === 'TKA' || u.keluarga === 'TKAD') && level) aturan.push(`Butir ini berlevel TKA "${levelTka(level)}".`);
   if (u.keluarga === 'TKAD') {
     const daerah = p.ujian?.daerah?.trim();
     aturan.push(

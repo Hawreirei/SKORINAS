@@ -41,6 +41,7 @@ export const gemini: Adaptor = {
       token_masuk: j?.usageMetadata?.promptTokenCount ?? 0,
       token_keluar: (j?.usageMetadata?.candidatesTokenCount ?? 0) + (j?.usageMetadata?.thoughtsTokenCount ?? 0),
       sisa_kuota: null,
+      terpotong: j?.candidates?.[0]?.finishReason === 'MAX_TOKENS',
     };
   },
   async daftarModel(kunci, signal) {

@@ -52,6 +52,7 @@ export function buatAdaptorKompat(o: Opsi): Adaptor {
         token_masuk: j?.usage?.prompt_tokens ?? 0,
         token_keluar: j?.usage?.completion_tokens ?? 0,
         sisa_kuota: sisa ? `${sisa} permintaan` : null,
+        terpotong: j?.choices?.[0]?.finish_reason === 'length',
       };
     },
     async daftarModel(kunci, signal) {

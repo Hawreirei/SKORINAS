@@ -24,6 +24,17 @@ export function modelDari(r: Registri, penyedia: PenyediaId, model: string): Mod
   return penyediaDari(r, penyedia)?.model.find((m) => m.id === model);
 }
 
+/** Banyak butir per permintaan bila registri tidak menyebutnya (F-38). */
+export const BUTIR_PER_PERMINTAAN_BAWAAN = 5;
+/** Batas atas butir per permintaan: lebih dari ini jawaban model makin sering terpotong. */
+export const MAKS_BUTIR_PER_PERMINTAAN = 10;
+
+/** Banyak butir yang diminta sekaligus dalam satu permintaan ke model ini. */
+export function butirPerPermintaan(r: Registri | null, penyedia: PenyediaId, model: string): number {
+  const n = (r ? modelDari(r, penyedia, model)?.butir_per_permintaan : null) ?? BUTIR_PER_PERMINTAAN_BAWAAN;
+  return Math.max(1, Math.min(MAKS_BUTIR_PER_PERMINTAAN, Math.floor(n)));
+}
+
 export interface BarisModel {
   id: string;
   label: string;

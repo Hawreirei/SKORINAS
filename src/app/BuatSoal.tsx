@@ -17,7 +17,7 @@ import { Kartu } from '../komponen/Status';
 import { Panah, Tombol } from '../komponen/Tombol';
 import { useJudulHalaman, useProfil, useRegistri } from './kait';
 import { batasEfektif, permintaanHariIni } from '../ai/laju';
-import { modelDari } from '../ai/registri';
+import { butirPerPermintaan, modelDari } from '../ai/registri';
 import { bacaDraf, bagiRata, hapusDraf, hitungRencana, MAKS_SOAL, MIN_SOAL, simpanDraf, SKOR_BAWAAN } from './rencana-buat';
 import { formatBiaya } from './ringkas';
 import { FORMAT_UJIAN, formatUjian, KELUARGA_LABEL, ringkasUjian, type KeluargaUjian } from '../ujian';
@@ -187,6 +187,7 @@ export default function BuatSoal() {
     tokenRata: riwayat?.tokenRata ?? null,
     biayaHariIni: riwayat?.biayaHariIni ?? null,
     batasBiayaUsd: profil.batas_biaya_usd,
+    perPermintaan: profil.penyedia_utama && profil.model_utama ? butirPerPermintaan(registri ?? null, profil.penyedia_utama, profil.model_utama) : 1,
   });
 
   // Galat per isian: tampil setelah isian ditinggalkan atau setelah tombol Buat ditekan.
@@ -293,7 +294,7 @@ export default function BuatSoal() {
       <dl className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 border-t border-garis pt-4 text-base tabular-nums">
         <dt className="text-redup">Permintaan AI</dt>
         <dd className="text-right font-semibold">
-          {rencana.permintaanMin}–{rencana.permintaanMaks}
+          {rencana.permintaanMin === rencana.permintaanMaks ? rencana.permintaanMin : `${rencana.permintaanMin}–${rencana.permintaanMaks}`}
         </dd>
         {rencana.menit ? (
           <>
@@ -307,6 +308,8 @@ export default function BuatSoal() {
             <dd className="text-right font-semibold">
               {rencana.sisaKuota} dari {batasModel?.rpd}
             </dd>
+            <dt className="text-redup">Cukup untuk</dt>
+            <dd className="text-right font-semibold">sekitar {rencana.paketCukup} paket seperti ini</dd>
           </>
         ) : null}
         {rencana.biayaMaks !== null ? (
@@ -330,7 +333,7 @@ export default function BuatSoal() {
       ) : null}
       {rencana.kuotaKurang && !profil.model_cadangan ? (
         <Pemberitahuan nada="awas" className="mt-4">
-          Sisa kuota AI hari ini {rencana.sisaKuota} permintaan, kurang dari {f.n} soal. Pembuatan akan dijeda di tengah. Kurangi jumlah soal atau pasang model cadangan di{' '}
+          Sisa kuota AI hari ini {rencana.sisaKuota} permintaan, kurang dari {rencana.permintaanMin} permintaan untuk {f.n} soal. Pembuatan akan dijeda di tengah. Kurangi jumlah soal atau pasang model cadangan di{' '}
           <Link to="/pengaturan/ai" className="font-bold underline">
             Pengaturan AI
           </Link>
