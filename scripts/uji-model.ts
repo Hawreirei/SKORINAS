@@ -107,7 +107,7 @@ async function ujiModel(penyedia: PenyediaId, model: string, kunci: string) {
     // Satu permintaan berisi beberapa butir dengan TP acuan yang sama, seperti satu paket (F-38).
     const acuan = ACUAN[(i / kelompok) % ACUAN.length | 0];
     const banyak = Math.min(kelompok, jumlah - i);
-    const param: ParameterPaket = { ...buatParam(0).param, ...acuan, n: banyak, bentuk: ['pilihan_ganda', 'isian_singkat', 'benar_salah'], persen: [30, 50, 20] };
+    const param: ParameterPaket = { ...buatParam(0).param, ...acuan, n: banyak, bentuk: ['pilihan_ganda', 'isian_singkat', 'benar_salah'] }; // persen sama dengan mode satu butir (semua sedang) agar sebanding
     const slots = rencanakanSlot(param);
     permintaan++;
     try {
