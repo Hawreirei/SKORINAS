@@ -104,6 +104,7 @@ MVP dibatasi pada satu jalur lengkap: dari isian kelas, mapel, CP, dan TP sampai
 | F-36 | Opsi lanjutan v2 di layar Buat: susunan rinci per baris (bentuk × level × TP × jumlah), persen kesukaran diketik, rincian tiap bentuk (3–5 opsi, banyak jawaban benar PG kompleks, banyak pasangan menjodohkan, jenis jawaban isian dan uraian), skor jawaban salah, waktu mengerjakan, campuran gaya, bahasa lain, konteks soal, dan aturan tambahan untuk AI yang dapat disunting (permintaan pemilik, 7 November 2026) | MVP |
 | F-35 | Format ujian TKA, TKAD, dan OSN (SD sampai SMA) di layar Buat: mengisi jumlah soal, bentuk, level, opsi, gaya, dan bahasa sesuai ujiannya, serta menambah aturan penulisan ujian ke prompt (permintaan pemilik, 7 November 2026) | MVP |
 | F-37 | Percepatan pembuatan soal tanpa melewati batas per menit dan per hari: beberapa butir dikerjakan serentak sesuai batas per menit model (paling banyak 3), jatah harian dipesan sebelum mengirim, model penalaran diminta berpikir singkat, dan batas waktu 2 menit per permintaan (permintaan pemilik, 7 November 2026) | MVP |
+| F-38 | Beberapa butir dalam satu permintaan AI: konteks bersama dikirim sekali, tiap butir diperiksa sendiri, butir yang ditolak ikut permintaan berikutnya; panel Rencana menyebut berapa paket lagi yang cukup dengan kuota hari ini (permintaan pemilik, 8 November 2026) | MVP |
 
 ## Alur Pengguna
 
@@ -262,8 +263,8 @@ Mesin AI memperlakukan model sebagai pembuat draf yang harus lolos pemeriksaan, 
 1. **Hitung kuota per kategori.** Jumlah soal mudah, sedang, dan sulit per bentuk dihitung dengan metode sisa terbesar (di bawah).
 2. **Bagi ke TP.** Soal disebar merata ke TP terpilih; tiap soal mendapat satu indikator dan level kognitif sesuai kategorinya (mudah C1 dan C2, sedang C3 dan C4, sulit C5 dan C6).
 3. **Susun konteks.** Untuk tiap soal diambil CP, TP, indikator, aturan penulisan bentuk soal, dan contoh soal acuan paket mapel.
-4. **Generasi terstruktur.** Model diminta menghasilkan satu objek JSON sesuai skema; keluaran di luar skema ditolak otomatis.
-5. **Verifikasi.** Pemeriksa untuk rumpun mapel dijalankan (tabel di bawah). Gagal berarti soal dibuat ulang, maksimal 3 percobaan, lalu soal ditandai `ditolak` dan digantikan.
+4. **Generasi terstruktur.** Model diminta menghasilkan objek JSON sesuai skema; keluaran di luar skema ditolak otomatis. Saat membuat paket, beberapa butir diminta dalam satu permintaan (`{"butir": [...]}`, F-38) dan tiap butir tetap diperiksa sendiri; ganti dan buat ulang per soal tetap satu butir.
+5. **Verifikasi.** Pemeriksa untuk rumpun mapel dijalankan (tabel di bawah). Gagal berarti soal dibuat ulang, maksimal 3 percobaan, lalu soal ditandai `ditolak` dan digantikan. Butir yang dibuat ulang ikut permintaan berikutnya bersama butir lain.
 6. **Pemeriksaan kaidah.** Panjang opsi seimbang, kunci tersebar merata, tidak ada "semua benar" berlebihan, keterbacaan sesuai fase, kemiripan dengan soal lain dalam paket di bawah ambang.
 7. **Gambar.** Bila soal menuntut gambar, mesin gambar dipanggil dengan parameter dari soal (bagian berikutnya).
 8. **Simpan dan beri status.** Status mutu ditetapkan dari hasil verifikasi, lalu paket ditandai siap.

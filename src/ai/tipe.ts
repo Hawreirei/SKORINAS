@@ -12,6 +12,8 @@ export interface PermintaanAi {
    * reasoning_effort ala OpenAI) agar jawaban lebih cepat. Diambil dari registri model.
    */
   penalaran?: 'rendah';
+  /** Batas token keluaran bila penyedia mewajibkannya (Anthropic); naik untuk permintaan berisi banyak butir. */
+  maksKeluar?: number;
 }
 
 export interface JawabanAi {
@@ -20,6 +22,8 @@ export interface JawabanAi {
   token_keluar: number;
   /** Sisa kuota dari header penyedia bila tersedia, mis. "48 permintaan". */
   sisa_kuota: string | null;
+  /** Jawaban terpotong karena batas token keluaran (F-38): kelompok berikutnya diperkecil. */
+  terpotong?: boolean;
   /** Diisi pengirim yang dijaga pembatas laju: lepaskan jatah harian setelah percobaan tercatat. */
   lepas?: () => void;
 }
@@ -49,6 +53,8 @@ export interface ModelRegistri {
   batas_gratis?: { rpm: number | null; rpd: number | null } | null;
   /** 'rendah' bila model penalaran ini cukup berpikir singkat untuk satu butir soal (F-37). */
   penalaran?: 'rendah' | null;
+  /** Banyak butir yang diminta dalam satu permintaan (F-38). Tanpa isian: BUTIR_PER_PERMINTAAN_BAWAAN. */
+  butir_per_permintaan?: number | null;
   golden: { status: 'lolos' | 'gagal' | 'belum'; tanggal: string | null; benar_lolos?: number; salah_ditolak?: number; json_sah?: number };
   catatan: string;
 }

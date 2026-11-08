@@ -5,7 +5,9 @@ import { bacaIsiSoal, ekstrakJson, GalatSkema } from '../verifikasi/skema';
 import { periksaSoal, type HasilPeriksa } from '../verifikasi';
 import { seimbangkanKunci } from '../verifikasi/acak';
 import { periksaPengaturan, terapkanPengaturan } from '../verifikasi/pengaturan';
-import { susunPesan, SISTEM } from './prompt';
+import { susunPesan, susunPesanKelompok, SISTEM, SISTEM_KELOMPOK, type ButirDiminta } from './prompt';
+import { teksPembanding } from '../db/tipe';
+import { teksPolos } from '../matematika/teks';
 
 export const MAKS_PERCOBAAN = 3;
 
@@ -39,7 +41,7 @@ export interface MasukanButir {
   signal?: AbortSignal;
 }
 
-export type Pengirim = (sistem: string, pesan: string, signal?: AbortSignal) => Promise<JawabanAi>;
+export type Pengirim = (sistem: string, pesan: string, signal?: AbortSignal, opsi?: { maksKeluar?: number }) => Promise<JawabanAi>;
 export type PencatatPercobaan = (p: Percobaan, lolos: boolean) => Promise<void> | void;
 
 /** Galat yang tidak akan membaik dengan mencoba ulang butir yang sama. */
@@ -112,4 +114,134 @@ export async function buatButir(kirim: Pengirim, m: MasukanButir, catat?: Pencat
     }
   }
   return { ok: false, isi: percobaan.at(-1)?.isi ?? null, periksa: null, percobaan, henti: null };
+}
+
+/** Hasil satu butir dalam permintaan berkelompok. */
+export interface HasilButirKelompok {
+  ok: boolean;
+  isi: IsiSoal | null;
+  periksa: HasilPeriksa | null;
+  alasan: string[];
+}
+
+export interface HasilKelompok {
+  /** Sejajar dengan butir yang diminta. */
+  butir: HasilButirKelompok[];
+  jawaban: JawabanAi | null;
+  /** Galat yang menghentikan pekerjaan (kunci, batas, jaringan, dibatalkan). */
+  henti: GalatAi | null;
+  /** Seluruh jawaban tidak dapat dipakai (galat model, bukan JSON, atau terpotong). */
+  gagalSemua: boolean;
+  terpotong: boolean;
+}
+
+export interface MasukanKelompok {
+  param: ParameterPaket;
+  butir: ButirDiminta[];
+  konteks: () => Promise<{ pokokLain: string[]; kunciTerpakai: Partial<Record<HurufOpsi, number>> }>;
+  signal?: AbortSignal;
+}
+
+/** Satu permintaan tercatat di pemakaian AI beserta banyak butir yang lolos darinya. */
+export type PencatatKelompok = (jawaban: JawabanAi | null, jumlahLolos: number) => Promise<void> | void;
+
+/** Token keluaran per butir untuk penyedia yang mewajibkan batas keluaran. */
+const TOKEN_PER_BUTIR = 2500;
+
+/** Ambil daftar butir dari jawaban: {"butir": [...]}, larik, atau satu objek bila hanya satu butir diminta. */
+export function uraiKelompok(data: unknown, banyak: number): unknown[] {
+  const daftar = Array.isArray(data) ? data : Array.isArray((data as { butir?: unknown })?.butir) ? (data as { butir: unknown[] }).butir : banyak === 1 && data && typeof data === 'object' ? [data] : null;
+  if (!daftar) throw new GalatSkema(['Keluaran model tidak memuat daftar "butir".']);
+  // Cocokkan menurut "nomor" bila ada; selebihnya menurut urutan.
+  const hasil: unknown[] = new Array(banyak).fill(undefined);
+  const sisa: unknown[] = [];
+  for (const x of daftar) {
+    const n = Number((x as { nomor?: unknown })?.nomor);
+    if (Number.isInteger(n) && n >= 1 && n <= banyak && hasil[n - 1] === undefined) hasil[n - 1] = x;
+    else sisa.push(x);
+  }
+  for (let i = 0; i < banyak && sisa.length; i++) if (hasil[i] === undefined) hasil[i] = sisa.shift();
+  return hasil;
+}
+
+/**
+ * Buat beberapa butir dengan satu permintaan (F-38). Tiap butir divalidasi skema, diverifikasi, dan diperiksa
+ * kaidahnya sendiri-sendiri; butir yang gagal dikembalikan dengan alasannya untuk dicoba lagi oleh pengatur.
+ */
+export async function buatKelompok(kirim: Pengirim, m: MasukanKelompok, catat?: PencatatKelompok): Promise<HasilKelompok> {
+  const banyak = m.butir.length;
+  const semuaGagal = (alasan: string[], jawaban: JawabanAi | null, henti: GalatAi | null, terpotong = false): HasilKelompok => ({
+    butir: m.butir.map(() => ({ ok: false, isi: null, periksa: null, alasan })),
+    jawaban,
+    henti,
+    gagalSemua: true,
+    terpotong,
+  });
+  if (m.signal?.aborted) return semuaGagal(['Dibatalkan.'], null, new GalatAi('dibatalkan', 'Dibatalkan.'));
+  let lepas: (() => void) | undefined;
+  try {
+    const ctx = await m.konteks();
+    const pesan = susunPesanKelompok({ param: m.param, butir: m.butir, pokokLain: ctx.pokokLain });
+    let jawaban: JawabanAi;
+    try {
+      jawaban = await kirim(SISTEM_KELOMPOK, pesan, m.signal, { maksKeluar: Math.min(32_000, 4096 + TOKEN_PER_BUTIR * banyak) });
+      lepas = jawaban.lepas;
+    } catch (e) {
+      const g = e instanceof GalatAi ? e : new GalatAi('lain', (e as Error).message);
+      lepas = g.lepas;
+      if (harusBerhenti(g)) return semuaGagal([g.message], null, g);
+      await catat?.(null, 0);
+      return semuaGagal([g.message], null, null);
+    }
+    let mentah: unknown[];
+    try {
+      // Larik di tingkat teratas dibungkus agar ekstrakJson (yang mencari objek) dapat membacanya.
+      const teks = /^\s*(```(?:json)?\s*)?\[/i.test(jawaban.teks) ? `{"butir":${jawaban.teks.replace(/```(?:json)?/gi, '')}}` : jawaban.teks;
+      mentah = uraiKelompok(ekstrakJson(teks), banyak);
+    } catch (e) {
+      const alasan = e instanceof GalatSkema ? e.daftar : [(e as Error).message];
+      await catat?.(jawaban, 0);
+      return semuaGagal(jawaban.terpotong ? ['Jawaban model terpotong sebelum semua butir selesai.', ...alasan] : alasan, jawaban, null, !!jawaban.terpotong);
+    }
+    const terbaru = await m.konteks();
+    const pokok = [...terbaru.pokokLain];
+    const hasil: HasilButirKelompok[] = [];
+    for (let i = 0; i < banyak; i++) {
+      const { slot } = m.butir[i];
+      const tp = m.param.tp[slot.tp_index];
+      const x = mentah[i];
+      if (!x || typeof x !== 'object') {
+        hasil.push({ ok: false, isi: null, periksa: null, alasan: [jawaban.terpotong ? 'Jawaban model terpotong sebelum butir ini.' : 'Butir ini tidak ada dalam keluaran model.'] });
+        continue;
+      }
+      const { nomor: _nomor, ...data } = x as Record<string, unknown>;
+      let isi: IsiSoal;
+      try {
+        isi = bacaIsiSoal(data, { bentuk: slot.bentuk, level: slot.level, kesukaran: slot.kesukaran, tp: tp.rumusan });
+      } catch (e) {
+        hasil.push({ ok: false, isi: null, periksa: null, alasan: e instanceof GalatSkema ? e.daftar : [(e as Error).message] });
+        continue;
+      }
+      isi = terapkanPengaturan(isi, m.param.atur_bentuk);
+      // Butir lain yang sudah lolos dalam permintaan yang sama ikut dibandingkan kemiripannya.
+      const periksa = periksaSoal(isi, {
+        rumpun: m.param.rumpun,
+        kelas: m.param.kelas,
+        fase: m.param.fase,
+        lokal: m.param.bahasa === 'en' ? 'en' : 'id',
+        literasi: (slot.gaya ?? m.param.gaya) === 'literasi',
+        pokokLain: pokok,
+        gambarDiizinkan: m.param.gambar !== 'mati',
+        opsiPg: m.param.opsi_pg ? { jumlah: m.param.opsi_pg, wajib: true } : null,
+      });
+      const langgar = periksaPengaturan(isi, m.param.atur_bentuk, m.param.bahasa === 'en' ? 'en' : 'id');
+      const lolos = periksa.lolos && !langgar.length;
+      if (lolos) pokok.push(teksPolos(teksPembanding(isi)));
+      hasil.push({ ok: lolos, isi, periksa: lolos ? periksa : null, alasan: [...periksa.alasan, ...langgar] });
+    }
+    await catat?.(jawaban, hasil.filter((h) => h.ok).length);
+    return { butir: hasil, jawaban, henti: null, gagalSemua: false, terpotong: !!jawaban.terpotong };
+  } finally {
+    lepas?.();
+  }
 }

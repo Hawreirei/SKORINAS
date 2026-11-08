@@ -8,7 +8,7 @@ import { bagiKomposisi } from '../generasi/komposisi';
  * sebelum guru menekan Buat soal.
  */
 
-/** Soal yang ditolak pemeriksa dibuat ulang; sediakan sekitar 30% permintaan lebih. */
+/** Soal yang ditolak pemeriksa dibuat ulang; sediakan sekitar 30% butir lebih. */
 export const CADANGAN_ULANG = 1.3;
 /** Token per permintaan bila belum ada riwayat pemakaian di perangkat ini. */
 export const TOKEN_BAWAAN = { masuk: 2000, keluar: 600 };
@@ -27,6 +27,8 @@ export interface MasukanRencana {
   /** Perkiraan biaya yang sudah terpakai hari ini; null bila tidak diketahui. */
   biayaHariIni: number | null;
   batasBiayaUsd: number;
+  /** Butir yang diminta dalam satu permintaan (F-38); tanpa isian 1. */
+  perPermintaan?: number;
 }
 
 export interface Rencana {
@@ -35,8 +37,10 @@ export interface Rencana {
   /** Perkiraan menit bila ada batas per menit dan soal lebih banyak dari batas itu. */
   menit: number | null;
   sisaKuota: number | null;
-  /** Sisa kuota hari ini lebih kecil dari jumlah soal. */
+  /** Sisa kuota hari ini lebih kecil dari perkiraan permintaan paket ini. */
   kuotaKurang: boolean;
+  /** Banyak paket seperti ini yang masih cukup dibuat dengan sisa kuota hari ini (perkiraan terburuk); null bila tidak dibatasi. */
+  paketCukup: number | null;
   biayaMin: number | null;
   biayaMaks: number | null;
   /** Biaya hari ini ditambah perkiraan paket ini melewati batas peringatan biaya. */
@@ -44,9 +48,11 @@ export interface Rencana {
 }
 
 export function hitungRencana(m: MasukanRencana): Rencana {
-  const permintaanMin = m.n;
-  const permintaanMaks = Math.ceil(m.n * CADANGAN_ULANG);
-  const menit = m.rpm && m.n > m.rpm ? Math.max(1, Math.ceil((m.n - m.rpm) / m.rpm)) : null;
+  // Butir yang ditolak dicoba lagi bersama butir lain, jadi tambahan permintaannya ikut dibagi per kelompok.
+  const per = Math.max(1, Math.floor(m.perPermintaan ?? 1));
+  const permintaanMin = Math.ceil(m.n / per);
+  const permintaanMaks = Math.ceil((m.n * CADANGAN_ULANG) / per);
+  const menit = m.rpm && permintaanMin > m.rpm ? Math.max(1, Math.ceil((permintaanMin - m.rpm) / m.rpm)) : null;
   const sisaKuota = m.rpd ? Math.max(0, m.rpd - m.terpakaiHariIni) : null;
   const token = m.tokenRata ?? TOKEN_BAWAAN;
   const biaya = (permintaan: number) => hitungBiaya(m.model, token.masuk * permintaan, token.keluar * permintaan);
@@ -57,7 +63,8 @@ export function hitungRencana(m: MasukanRencana): Rencana {
     permintaanMaks,
     menit,
     sisaKuota,
-    kuotaKurang: sisaKuota !== null && sisaKuota < m.n,
+    kuotaKurang: sisaKuota !== null && sisaKuota < permintaanMin,
+    paketCukup: sisaKuota === null ? null : Math.floor(sisaKuota / permintaanMaks),
     biayaMin,
     biayaMaks,
     lewatBatasBiaya: biayaMaks !== null && biayaMaks > 0 && (m.biayaHariIni ?? 0) + biayaMaks > m.batasBiayaUsd,

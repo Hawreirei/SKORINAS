@@ -83,7 +83,7 @@ describe('pengatur generasi', () => {
   it('membuat semua butir, memverifikasi, dan menyebar kunci', async () => {
     const id = await buatPaket(param(8), 'Uji');
     const m = modelPalsu();
-    await pengatur.mulai(id, { pengirim: m.kirim, model: MODEL, cadangan: null });
+    await pengatur.mulai(id, { perPermintaan: 1, pengirim: m.kirim, model: MODEL, cadangan: null });
     const soal = await db.soal.where('paket_id').equals(id).toArray();
     expect(soal).toHaveLength(8);
     expect(soal.every((s) => s.status_mutu === 'terverifikasi_hitung')).toBe(true);
@@ -96,7 +96,7 @@ describe('pengatur generasi', () => {
   it('membuat ulang dengan alasan penolakan bila kunci salah', async () => {
     const id = await buatPaket(param(1), 'Uji');
     const m = modelPalsu({ salahDulu: 2 });
-    await pengatur.mulai(id, { pengirim: m.kirim, model: MODEL, cadangan: null });
+    await pengatur.mulai(id, { perPermintaan: 1, pengirim: m.kirim, model: MODEL, cadangan: null });
     expect(m.jumlah()).toBe(3);
     expect(m.pesan[1]).toMatch(/ditolak pemeriksa/);
     const soal = await db.soal.where('paket_id').equals(id).toArray();
@@ -110,7 +110,7 @@ describe('pengatur generasi', () => {
   it('soal yang selalu salah tidak pernah tampil: ditolak, diganti sekali, lalu slot gagal', async () => {
     const id = await buatPaket(param(1), 'Uji');
     const m = modelPalsu({ selaluSalah: true });
-    await pengatur.mulai(id, { pengirim: m.kirim, model: MODEL, cadangan: null });
+    await pengatur.mulai(id, { perPermintaan: 1, pengirim: m.kirim, model: MODEL, cadangan: null });
     expect(m.jumlah()).toBe(6);
     const soal = await db.soal.where('paket_id').equals(id).toArray();
     expect(soal.every((s) => s.status_mutu === 'ditolak')).toBe(true);
@@ -122,7 +122,7 @@ describe('pengatur generasi', () => {
     const id = await buatPaket(param(4), 'Uji');
     const m = modelPalsu({ galatPada: [2, 3], galat: PER_MENIT });
     const tunggu: number[] = [];
-    await pengatur.mulai(id, { pengirim: m.kirim, model: MODEL, cadangan: null, tunda: async (ms) => void tunggu.push(ms) });
+    await pengatur.mulai(id, { perPermintaan: 1, pengirim: m.kirim, model: MODEL, cadangan: null, tunda: async (ms) => void tunggu.push(ms) });
     expect(tunggu).toEqual([6000, 6000]);
     expect(await db.soal.where('paket_id').equals(id).count()).toBe(4);
     expect((await db.paket_soal.get(id))?.status).toBe('siap');
@@ -132,7 +132,7 @@ describe('pengatur generasi', () => {
     const id = await buatPaket(param(4), 'Uji');
     const utama = modelPalsu({ galatPada: [3, 4, 5, 6, 7, 8, 9, 10] });
     const cadangan = modelPalsu();
-    await pengatur.mulai(id, { pengirim: utama.kirim, model: MODEL, cadangan: { model: { penyedia: 'groq', model: 'cadangan-uji', kunci: 'y' }, pengirim: cadangan.kirim }, tunda: async () => {} });
+    await pengatur.mulai(id, { perPermintaan: 1, pengirim: utama.kirim, model: MODEL, cadangan: { model: { penyedia: 'groq', model: 'cadangan-uji', kunci: 'y' }, pengirim: cadangan.kirim }, tunda: async () => {} });
     expect(await db.soal.where('paket_id').equals(id).count()).toBe(4);
     expect((await db.paket_soal.get(id))?.model).toBe('cadangan-uji');
     expect(pengatur.ambil().catatan).toMatch(/model cadangan/);
@@ -143,7 +143,7 @@ describe('pengatur generasi', () => {
     const id = await buatPaket(param(4), 'Uji');
     const m = modelPalsu({ galatPada: [3] });
     const tunggu: number[] = [];
-    await pengatur.mulai(id, { pengirim: m.kirim, model: MODEL, cadangan: null, tunda: async (ms) => void tunggu.push(ms) });
+    await pengatur.mulai(id, { perPermintaan: 1, pengirim: m.kirim, model: MODEL, cadangan: null, tunda: async (ms) => void tunggu.push(ms) });
     expect(tunggu).toEqual([]);
     expect(pengatur.ambil().jenisGalat).toBe('batas');
     expect(pengatur.ambil().pesan).toMatch(/Kuota harian Google Gemini/);
@@ -151,7 +151,7 @@ describe('pengatur generasi', () => {
     expect(pengatur.ambil().rinci).toMatch(/Quota exceeded/);
     expect((await db.paket_soal.get(id))?.status).toBe('dijeda');
     expect(await db.soal.where('paket_id').equals(id).count()).toBe(2);
-    await pengatur.mulai(id, { pengirim: m.kirim, model: MODEL, cadangan: null });
+    await pengatur.mulai(id, { perPermintaan: 1, pengirim: m.kirim, model: MODEL, cadangan: null });
     expect(await db.soal.where('paket_id').equals(id).count()).toBe(4);
     expect((await db.paket_soal.get(id))?.status).toBe('siap');
   });
@@ -159,7 +159,7 @@ describe('pengatur generasi', () => {
   it('berhenti pada batas harian', async () => {
     await simpanProfil({ batas_harian: 2 });
     const id = await buatPaket(param(4), 'Uji');
-    await pengatur.mulai(id, { pengirim: modelPalsu().kirim, model: MODEL, cadangan: null });
+    await pengatur.mulai(id, { perPermintaan: 1, pengirim: modelPalsu().kirim, model: MODEL, cadangan: null });
     expect(await db.soal.where('paket_id').equals(id).count()).toBe(2);
     expect(pengatur.ambil().pesan).toMatch(/Batas harian/);
   });
