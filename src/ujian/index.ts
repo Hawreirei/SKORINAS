@@ -66,7 +66,10 @@ const LEVEL_TKA: Partial<Record<Level, number>> = { C1: 2, C2: 4, C3: 12, C4: 6,
 const LEVEL_OSN: Partial<Record<Level, number>> = { C3: 2, C4: 3, C5: 3, C6: 2 };
 
 const BENTUK_RESMI_TKA = 'Pilihan ganda, pilihan ganda kompleks (jawaban benar lebih dari satu), dan pilihan ganda kompleks kategori (Benar/Salah per pernyataan).';
-const PENILAIAN_TKA = 'Nilai 0–100 dari banyak jawaban benar; tidak ada pengurangan untuk jawaban salah.';
+// Kepmendikdasmen 56/2026 (Pedoman TKA dan AN), Bab X: nilai SD/SMP 0–100, SMA/SMK 200–800, kategori Baik, Memadai,
+// Kurang; predikat istimewa SD/SMP 95,00 ke atas, SMA/SMK 725,00 ke atas.
+const PENILAIAN_TKA_DASAR = 'Nilai 0–100 per mata uji dengan kategori Baik, Memadai, atau Kurang; predikat istimewa bila nilai 95,00 atau lebih. Tidak ada pengurangan untuk jawaban salah.';
+const PENILAIAN_TKA_SMA = 'Nilai 200–800 per mata uji dengan kategori Baik, Memadai, atau Kurang; predikat istimewa bila nilai 725,00 atau lebih. Tidak ada pengurangan untuk jawaban salah.';
 
 const ATURAN_TKA = [
   'Soal setara Tes Kemampuan Akademik (TKA): mengukur pemahaman dan penalaran, bukan hafalan. Jangan menyalin soal TKA resmi, simulasi, atau bank soal; tulis soal baru yang setara.',
@@ -74,15 +77,31 @@ const ATURAN_TKA = [
   'Level kognitif TKA hanya tiga: Pengetahuan dan Pemahaman, Aplikasi, dan Penalaran.',
   'Pilihan ganda kompleks mengikuti model TKA: pokok diakhiri "Pilihlah semua jawaban yang benar! (jawaban benar lebih dari satu)".',
   'PG kompleks kategori mengikuti model TKA: satu stimulus, lalu beberapa pernyataan yang masing-masing dinilai Benar atau Salah dalam satu tabel.',
+  // Rambu penulisan soal dari Kepmendikdasmen 56/2026, Bab V (berlaku untuk penulis soal daerah; dipakai untuk semua TKA).
+  'Bebas bias SARA, diskriminasi, bias gender, kekerasan, pornografi, unsur provokatif, dan politik; tidak menyinggung kelompok tertentu.',
+  'Jangan memakai nama tokoh yang masih hidup (tokoh politik, pejabat publik, tokoh masyarakat), dan jangan memuat merek, produk komersial, iklan, atau nama instansi.',
+  'Data dan fakta dalam stimulus harus masuk akal dan tidak menyesatkan; bila memakai fakta nyata, pastikan benar.',
 ];
 
-const ATURAN_MATEMATIKA_TKA = [
-  'Elemen Matematika TKA: Bilangan, Aljabar, Geometri dan Pengukuran, serta Data dan Peluang. Soal tetap mengikuti TP guru bila ada.',
+/** Sejak 2026 soal numerasi AN digabung ke mata uji Matematika TKA (Kepmendikdasmen 56/2026, Bab IV D). */
+const NUMERASI_AN = 'Mata uji ini juga memuat soal numerasi Asesmen Nasional: sebagian soal menuntut penerapan matematika untuk memecahkan masalah nyata dalam konteks personal, sosial budaya, atau saintifik.';
+
+const ATURAN_MATEMATIKA_TKA_SD = [
+  'Elemen Matematika TKA SD: Bilangan, Geometri dan Pengukuran, serta Data (tanpa aljabar formal dan tanpa peluang). Soal tetap mengikuti TP guru bila ada.',
+  NUMERASI_AN,
+  'Soal aplikasi dan penalaran boleh menggabungkan beberapa langkah atau konsep dalam satu konteks nyata.',
+];
+
+const ATURAN_MATEMATIKA_TKA_SMP = [
+  'Elemen Matematika TKA SMP: Bilangan, Aljabar, Geometri dan Pengukuran, serta Data dan Peluang. Soal tetap mengikuti TP guru bila ada.',
+  NUMERASI_AN,
   'Soal aplikasi dan penalaran boleh menggabungkan beberapa langkah atau konsep dalam satu konteks nyata.',
 ];
 
 const ATURAN_BINDO_TKA = [
   'Bahasa Indonesia TKA menguji membaca: setiap soal memuat teks asli yang pendek (teks informasi atau teks sastra) lalu pertanyaan tentang teks itu.',
+  // Kepmendikdasmen 56/2026, Bab IV D: soal literasi membaca AN digabung ke mata uji Bahasa Indonesia.
+  'Mata uji ini juga memuat soal literasi membaca Asesmen Nasional: memahami, menggunakan, mengevaluasi, dan merefleksikan teks informasi maupun teks sastra.',
   'Kompetensi membaca tiap butir mengikuti levelnya: pemahaman tekstual (informasi tersurat), pemahaman inferensial (simpulan, gagasan utama, makna kata dalam konteks), atau evaluasi dan apresiasi (menilai isi, sikap tokoh, atau penggunaan bahasa).',
   'Jawaban harus dapat ditemukan atau disimpulkan dari teks, bukan dari pengetahuan di luar teks.',
 ];
@@ -96,10 +115,11 @@ const ATURAN_OSN = [
   'Kunci tunggal dan pasti; pembahasan menunjukkan langkah penalaran lengkap.',
 ];
 
+/** Mata pelajaran pilihan TKA SMA/SMK, nama menurut Kepmendikdasmen 56/2026 Bab IV A angka 3. Nomor 20 hanya SMK. */
 const SARAN_PILIHAN_SMA = [
-  'Matematika Tingkat Lanjut',
-  'Bahasa Indonesia Tingkat Lanjut',
-  'Bahasa Inggris Tingkat Lanjut',
+  'Matematika Lanjutan',
+  'Bahasa Indonesia Lanjutan',
+  'Bahasa Inggris Lanjutan',
   'Fisika',
   'Kimia',
   'Biologi',
@@ -108,14 +128,15 @@ const SARAN_PILIHAN_SMA = [
   'Geografi',
   'Sejarah',
   'Antropologi',
-  'Pendidikan Pancasila dan Kewarganegaraan',
+  'PPKn/Pendidikan Pancasila',
   'Bahasa Arab',
   'Bahasa Jerman',
   'Bahasa Prancis',
   'Bahasa Jepang',
   'Bahasa Korea',
   'Bahasa Mandarin',
-  'Projek Kreatif dan Kewirausahaan',
+  'Produk/Projek Kreatif dan Kewirausahaan',
+  'Teori Kompetensi Kejuruan',
 ];
 
 type Dasar = Omit<FormatUjian, 'id' | 'nama' | 'mapel' | 'asli' | 'aturan' | 'gaya' | 'bahasa' | 'gambar'> & Partial<Pick<FormatUjian, 'gaya' | 'bahasa' | 'gambar'>>;
@@ -130,7 +151,7 @@ function tka(keluarga: 'TKA' | 'TKAD', jenjang: Jenjang, kelas: number, opsiPg: 
     opsiPg,
     skor: null,
     bentukResmi: BENTUK_RESMI_TKA,
-    penilaian: keluarga === 'TKAD' ? 'Mengikuti petunjuk dinas pendidikan setempat; bawaan meniru TKA (nilai 0–100 dari jawaban benar).' : PENILAIAN_TKA,
+    penilaian: keluarga === 'TKAD' ? 'Mengikuti petunjuk dinas pendidikan setempat; bawaan meniru TKA (nilai 0–100 dari jawaban benar).' : jenjang === 'SMA' ? PENILAIAN_TKA_SMA : PENILAIAN_TKA_DASAR,
   };
 }
 
@@ -161,34 +182,37 @@ const PENILAIAN_OSN_TAK_PASTI = 'Lihat panduan OSN tahun berjalan; aturan skor b
 
 export const FORMAT_UJIAN: FormatUjian[] = [
   // TKA SD/MI dan SMP/MTs (Perkaban BSKAP 047/H/AN/2025; pelaksanaan April 2026).
-  buat('tka-sd-matematika', 'TKA SD · Matematika', 'Matematika', { soal: 30, menit: 75 }, { ...tka('TKA', 'SD', 6, 4), gaya: 'numerasi', gambar: 'terprogram' }, [...ATURAN_TKA, ...ATURAN_MATEMATIKA_TKA]),
+  buat('tka-sd-matematika', 'TKA SD · Matematika', 'Matematika', { soal: 30, menit: 75 }, { ...tka('TKA', 'SD', 6, 4), gaya: 'numerasi', gambar: 'terprogram' }, [...ATURAN_TKA, ...ATURAN_MATEMATIKA_TKA_SD]),
   buat('tka-sd-bindo', 'TKA SD · Bahasa Indonesia', 'Bahasa Indonesia', { soal: 30, menit: 75 }, { ...tka('TKA', 'SD', 6, 4), gaya: 'literasi' }, [...ATURAN_TKA, ...ATURAN_BINDO_TKA, SD_TEKS]),
-  buat('tka-smp-matematika', 'TKA SMP · Matematika', 'Matematika', { soal: 30, menit: 75 }, { ...tka('TKA', 'SMP', 9, 4), gaya: 'numerasi', gambar: 'terprogram' }, [...ATURAN_TKA, ...ATURAN_MATEMATIKA_TKA]),
+  buat('tka-smp-matematika', 'TKA SMP · Matematika', 'Matematika', { soal: 30, menit: 75 }, { ...tka('TKA', 'SMP', 9, 4), gaya: 'numerasi', gambar: 'terprogram' }, [...ATURAN_TKA, ...ATURAN_MATEMATIKA_TKA_SMP]),
   buat('tka-smp-bindo', 'TKA SMP · Bahasa Indonesia', 'Bahasa Indonesia', { soal: 30, menit: 75 }, { ...tka('TKA', 'SMP', 9, 4), gaya: 'literasi' }, [...ATURAN_TKA, ...ATURAN_BINDO_TKA, SMP_TEKS]),
 
-  // TKA SMA/MA/SMK (Perkaban BSKAP 045/H/AN/2025; jadwal 2026): 3 mapel wajib dan 2 mapel pilihan.
-  buat('tka-sma-bindo', 'TKA SMA · Bahasa Indonesia', 'Bahasa Indonesia', { soal: 30, menit: 75 }, { ...tka('TKA', 'SMA', 12, 5), gaya: 'literasi' }, [...ATURAN_TKA, ...ATURAN_BINDO_TKA, SMA_TEKS]),
-  buat('tka-sma-matematika', 'TKA SMA · Matematika', 'Matematika', { soal: 25, menit: 75 }, { ...tka('TKA', 'SMA', 12, 5), gaya: 'numerasi' }, [
+  // TKA SMA/MA/SMK (Perkaban BSKAP 045/H/AN/2025): 3 mapel wajib dan 2 mapel pilihan. Durasi menurut
+  // Kepmendikdasmen 56/2026 Bab VIII A angka 5: Bahasa Indonesia 60, Matematika 70, Bahasa Inggris 50, tiap mapel pilihan 50 menit.
+  buat('tka-sma-bindo', 'TKA SMA · Bahasa Indonesia', 'Bahasa Indonesia', { soal: 30, menit: 60 }, { ...tka('TKA', 'SMA', 12, 5), gaya: 'literasi' }, [...ATURAN_TKA, ...ATURAN_BINDO_TKA, SMA_TEKS]),
+  buat('tka-sma-matematika', 'TKA SMA · Matematika', 'Matematika', { soal: 25, menit: 70 }, { ...tka('TKA', 'SMA', 12, 5), gaya: 'numerasi' }, [
     ...ATURAN_TKA,
     'Elemen Matematika TKA SMA: Bilangan, Aljabar dan Fungsi, Geometri dan Pengukuran, Data dan Peluang, termasuk trigonometri. Soal tetap mengikuti TP guru bila ada.',
+    NUMERASI_AN,
     'Soal aplikasi dan penalaran boleh menggabungkan beberapa langkah atau konsep dalam satu konteks nyata.',
   ]),
-  buat('tka-sma-binggris', 'TKA SMA · Bahasa Inggris', 'Bahasa Inggris', { soal: 30, menit: 75 }, { ...tka('TKA', 'SMA', 12, 5), gaya: 'literasi', bahasa: 'en' }, [
+  buat('tka-sma-binggris', 'TKA SMA · Bahasa Inggris', 'Bahasa Inggris', { soal: 30, menit: 50 }, { ...tka('TKA', 'SMA', 12, 5), gaya: 'literasi', bahasa: 'en' }, [
     ...ATURAN_TKA,
     'Bahasa Inggris TKA menguji membaca: setiap soal memuat teks asli berbahasa Inggris (descriptive, narrative, procedural, report, exposition, atau teks fungsional) lalu pertanyaan tentang teks itu.',
     'Tingkat teks sekitar CEFR B1. Ukur pemahaman tekstual, inferensial, atau evaluasi dan apresiasi.',
     'Jawaban harus dapat ditemukan atau disimpulkan dari teks.',
   ]),
-  buat('tka-sma-pilihan', 'TKA SMA · Mapel pilihan', '', { soal: 25, menit: 60 }, { ...tka('TKA', 'SMA', 12, 5), gaya: 'hots' }, [
+  buat('tka-sma-pilihan', 'TKA SMA · Mapel pilihan', '', { soal: 25, menit: 50 }, { ...tka('TKA', 'SMA', 12, 5), gaya: 'hots' }, [
     ...ATURAN_TKA,
     'Mapel pilihan TKA dipakai untuk seleksi masuk perguruan tinggi: soal menuntut penguasaan konsep mapel itu dan penalaran atas data, grafik, atau kasus.',
   ], { saranMapel: SARAN_PILIHAN_SMA }),
 
-  // TKAD: tes kemampuan akademik yang diadakan dinas pendidikan daerah, meniru TKA SD/SMP, dan soal daerah TKA
-  // (sekitar 30% soal TKA SD/SMP disusun daerah dengan unsur kelokalan).
-  buat('tkad-sd-matematika', 'TKAD SD · Matematika', 'Matematika', { soal: 30, menit: 75 }, { ...tka('TKAD', 'SD', 6, 4), gaya: 'numerasi', gambar: 'terprogram' }, [...ATURAN_TKA, ...ATURAN_MATEMATIKA_TKA]),
+  // TKAD: soal daerah TKA. Instrumen TKA kelas 6 dan 9 adalah gabungan soal pusat dan soal yang disusun dinas
+  // pendidikan kabupaten/kota bersama provinsi, sedikitnya satu paket per mapel per jenjang, mengikuti kisi-kisi pusat
+  // (Kepmendikdasmen 56/2026, Bab IV C–D dan Bab V). Format ini juga dipakai untuk tes yang diadakan daerah.
+  buat('tkad-sd-matematika', 'TKAD SD · Matematika', 'Matematika', { soal: 30, menit: 75 }, { ...tka('TKAD', 'SD', 6, 4), gaya: 'numerasi', gambar: 'terprogram' }, [...ATURAN_TKA, ...ATURAN_MATEMATIKA_TKA_SD]),
   buat('tkad-sd-bindo', 'TKAD SD · Bahasa Indonesia', 'Bahasa Indonesia', { soal: 30, menit: 75 }, { ...tka('TKAD', 'SD', 6, 4), gaya: 'literasi' }, [...ATURAN_TKA, ...ATURAN_BINDO_TKA, SD_TEKS]),
-  buat('tkad-smp-matematika', 'TKAD SMP · Matematika', 'Matematika', { soal: 30, menit: 75 }, { ...tka('TKAD', 'SMP', 9, 4), gaya: 'numerasi', gambar: 'terprogram' }, [...ATURAN_TKA, ...ATURAN_MATEMATIKA_TKA]),
+  buat('tkad-smp-matematika', 'TKAD SMP · Matematika', 'Matematika', { soal: 30, menit: 75 }, { ...tka('TKAD', 'SMP', 9, 4), gaya: 'numerasi', gambar: 'terprogram' }, [...ATURAN_TKA, ...ATURAN_MATEMATIKA_TKA_SMP]),
   buat('tkad-smp-bindo', 'TKAD SMP · Bahasa Indonesia', 'Bahasa Indonesia', { soal: 30, menit: 75 }, { ...tka('TKAD', 'SMP', 9, 4), gaya: 'literasi' }, [...ATURAN_TKA, ...ATURAN_BINDO_TKA, SMP_TEKS]),
 
   // OSN SD/MI (peserta kelas 4–5). OSN-K: tingkat kabupaten/kota; OSN-P: tingkat provinsi.

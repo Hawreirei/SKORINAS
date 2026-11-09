@@ -459,10 +459,16 @@ const TKA_PKK: Cakupan = {
   ],
 };
 
-/** Mapel pilihan TKA SMA menurut nama mapel (huruf kecil, tanpa spasi ganda). */
+/**
+ * Mapel pilihan TKA SMA menurut nama mapel (huruf kecil, tanpa spasi ganda); nama resmi Kepmendikdasmen 56/2026 dan
+ * nama lama. Teori Kompetensi Kejuruan (SMK) sengaja tidak ada: materinya mengikuti program keahlian, jadi guru mengisi TP.
+ */
 const PILIHAN_SMA: Record<string, Cakupan> = {
+  'matematika lanjutan': TKA_MAT_LANJUT,
   'matematika tingkat lanjut': TKA_MAT_LANJUT,
+  'bahasa indonesia lanjutan': TKA_BINDO_LANJUT,
   'bahasa indonesia tingkat lanjut': TKA_BINDO_LANJUT,
+  'bahasa inggris lanjutan': TKA_BING_LANJUT,
   'bahasa inggris tingkat lanjut': TKA_BING_LANJUT,
   fisika: TKA_FISIKA,
   kimia: TKA_KIMIA,
@@ -472,6 +478,7 @@ const PILIHAN_SMA: Record<string, Cakupan> = {
   geografi: TKA_GEOGRAFI,
   sejarah: TKA_SEJARAH,
   antropologi: TKA_ANTROPOLOGI,
+  'ppkn/pendidikan pancasila': TKA_PPKN,
   'pendidikan pancasila dan kewarganegaraan': TKA_PPKN,
   'pendidikan pancasila': TKA_PPKN,
   ppkn: TKA_PPKN,
@@ -481,7 +488,9 @@ const PILIHAN_SMA: Record<string, Cakupan> = {
   'bahasa jepang': TKA_BAHASA_ASING,
   'bahasa korea': TKA_BAHASA_ASING,
   'bahasa mandarin': TKA_BAHASA_ASING,
+  'produk/projek kreatif dan kewirausahaan': TKA_PKK,
   'projek kreatif dan kewirausahaan': TKA_PKK,
+  'produk kreatif dan kewirausahaan': TKA_PKK,
 };
 
 const PETA: Record<string, Cakupan> = {

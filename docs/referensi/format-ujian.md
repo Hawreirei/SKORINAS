@@ -24,9 +24,9 @@ Dasar: Permendikdasmen Nomor 9 Tahun 2025; Kepmendikdasmen 95/M/2025 (pedoman pe
 | --- | --- | --- |
 | Mapel | Matematika; Bahasa Indonesia | Matematika; Bahasa Indonesia |
 | Jumlah soal | 30 per mapel | 30 per mapel (15 di antaranya penguatan literasi atau numerasi) |
-| Durasi | 75 menit per mapel (sumber awal menyebut 60 menit; **perlu dicek**) | 75 menit per mapel |
-| Asal soal | Sekitar 70% pusat (21 soal) dan 30% daerah (9 soal), soal daerah bermuatan kelokalan | sama |
-| Matematika | Elemen Bilangan, Aljabar, Geometri dan Pengukuran, Data dan Peluang | sama, dengan cakupan SMP |
+| Durasi | 75 menit per mapel (resmi: Kepmendikdasmen 56/2026) | 75 menit per mapel (resmi) |
+| Asal soal | Gabungan soal pusat (termasuk soal numerasi atau literasi membaca AN) dan soal daerah (resmi). Porsi 70/30 dan kelokalan hanya dari berita, tidak disebut pedoman | sama |
+| Matematika | Elemen Bilangan, Geometri dan Pengukuran, Data (tanpa aljabar formal dan peluang) | Bilangan, Aljabar, Geometri dan Pengukuran, Data dan Peluang |
 | Bahasa Indonesia | Membaca: teks informasi dan teks sastra (fiksi); pemahaman tekstual, inferensial, evaluasi dan apresiasi | sama, teks lebih panjang |
 
 Sebaran contoh untuk 30 soal yang dipakai GenSoal (dari contoh paket, bukan angka resmi): bentuk 19 PG, 5 PG kompleks, 6 kategori; level 6 Pengetahuan dan Pemahaman, 12 Aplikasi, 12 Penalaran.
@@ -35,12 +35,14 @@ Sebaran contoh untuk 30 soal yang dipakai GenSoal (dari contoh paket, bukan angk
 
 | Mapel | Jumlah soal | Durasi |
 | --- | --- | --- |
-| Bahasa Indonesia (wajib) | 30 | 75 menit |
-| Matematika dan Numerasi (wajib) | 25 (2025: 30) | 75 menit |
-| Bahasa Inggris (wajib) | 30 | 75 menit |
-| Dua mapel pilihan | 25 per mapel | 60 menit per mapel |
+| Bahasa Indonesia dan Literasi Membaca (wajib) | 30 (berita) | 60 menit (resmi) |
+| Matematika dan Numerasi (wajib) | 25 (berita; 2025: 30) | 70 menit (resmi) |
+| Bahasa Inggris (wajib) | 30 (berita) | 50 menit (resmi) |
+| Dua mapel pilihan | 25 per mapel (berita) | 50 menit per mapel (resmi) |
 
-Mapel pilihan akademik (19): Matematika Tingkat Lanjut, Bahasa Indonesia Tingkat Lanjut, Bahasa Inggris Tingkat Lanjut, Fisika, Kimia, Biologi, Ekonomi, Sosiologi, Geografi, Sejarah, Antropologi, PPKn, Bahasa Arab, Bahasa Jerman, Bahasa Prancis, Bahasa Jepang, Bahasa Korea, Bahasa Mandarin, Projek Kreatif dan Kewirausahaan (SMK). Sejak Mei 2026 ditambah 50 mapel keahlian vokasi SMK (total 69). Antropologi dan bahasa asing selain Jepang dan Jerman tidak muncul di hasil pencarian 2026: **perlu dicek**.
+Durasi resmi dari Kepmendikdasmen 56/2026 Bab VIII A angka 5. Jumlah soal tidak disebut pedoman, jadi tetap dari berita.
+
+Mapel pilihan (resmi, Kepmendikdasmen 56/2026 Bab IV A angka 3): (1) Matematika lanjutan, (2) Bahasa Indonesia lanjutan, (3) Bahasa Inggris lanjutan, (4) Fisika, (5) Kimia, (6) Biologi, (7) Ekonomi, (8) Sosiologi, (9) Geografi, (10) Sejarah, (11) Antropologi, (12) PPKn/Pendidikan Pancasila, (13) Bahasa Arab, (14) Bahasa Jerman, (15) Bahasa Prancis, (16) Bahasa Jepang, (17) Bahasa Korea, (18) Bahasa Mandarin, (19) Produk/Projek Kreatif dan Kewirausahaan, (20) Teori Kompetensi Kejuruan (Program Keahlian). SMA memilih 2 dari nomor 1–19; SMK dari nomor 1–20. Teori Kompetensi Kejuruan mengikuti program keahlian murid, jadi GenSoal tidak membawa cakupannya (guru mengisi TP).
 
 Bahasa Inggris wajib: membaca, sekitar CEFR B1 (Tingkat Lanjut sekitar B2); kompetensi sama dengan Bahasa Indonesia. Banyak opsi pilihan ganda SMA (GenSoal memakai 5, A–E): **perlu dicek**.
 
@@ -51,7 +53,7 @@ Tidak ada TKAD nasional. Istilah ini dipakai dinas pendidikan kabupaten/kota unt
 - Kabupaten Tegal: TKAD SD 27–29 Oktober 2026, berbasis aplikasi, untuk memetakan kemampuan dan bersiap menghadapi TKA 2027.
 - Kota Yogyakarta: Dindikpora menerbitkan sebaran nilai TKA dan TKAD SD/MI/Paket A sebagai acuan memilih SMP.
 
-Selain itu, sekitar 30% soal TKA SD/SMP disusun pemerintah daerah dan wajib memuat unsur kelokalan. Karena format TKAD berbeda per daerah, GenSoal memakai atribut TKA SD/SMP dan menambah aturan kelokalan dengan nama daerah yang diisi guru.
+Selain itu, instrumen TKA SD/SMP adalah gabungan soal pusat dan soal daerah yang ditulis dinas pendidikan kabupaten/kota bersama provinsi, sedikitnya satu paket per mapel per jenjang, dengan indikator dari kisi-kisi pusat (resmi, Kepmendikdasmen 56/2026 Bab IV dan V). Porsi sekitar 30% dan kewajiban unsur kelokalan hanya dari berita. Karena format TKAD berbeda per daerah, GenSoal memakai atribut TKA SD/SMP dan menambah aturan kelokalan dengan nama daerah yang diisi guru.
 
 ## 3. OSN (Olimpiade Sains Nasional)
 
@@ -132,6 +134,22 @@ Dipakai di `src/ujian/cakupan.ts` bila guru mengosongkan CP dan TP. Dokumen resm
 | OSN SMP IPA/IPS dan OSN SMA bidang lain (F-41) | IPA SMP terpadu (fisika, kimia, biologi, bumi dan antariksa) dan IPS SMP (geografi, sejarah, ekonomi, sosiologi) dipisah dari SD; OSN-K SMA Fisika, Kimia, Biologi, Informatika, Astronomi, Kebumian, Ekonomi, Geografi dari ranah yang sudah tertulis di aturan format | Sedang: usulan dari ranah pedoman, porsi usulan |
 
 Porsi elemen selain SMP Matematika adalah usulan (lihat `docs/KEPUTUSAN.md`, F-39 dan F-41). Mapel pilihan TKA SMA dicocokkan dengan nama mapel yang diisi guru (tidak peka huruf besar).
+
+## 6. Dokumen resmi yang diunggah pemilik (9 November 2026)
+
+Tiga dokumen: Permendikdasmen 9/2025 tentang TKA, Permendikdasmen 9/2026 tentang perubahan Permendikbudristek 17/2021 tentang Asesmen Nasional, dan Kepmendikdasmen 56/2026 tentang Pedoman Penyelenggaraan TKA dan AN (menggantikan Kepmendikdasmen 95/M/2025). Kerangka asesmen (Perkaban BSKAP 045 dan 047/H/AN/2025) tidak termasuk, jadi rincian cakupan materi tetap dari sumber sekunder.
+
+| Isi | Dokumen | Dipakai di GenSoal |
+| --- | --- | --- |
+| Mata uji SD/SMP: Bahasa Indonesia dan Matematika; SMA/SMK: Bahasa Indonesia, Matematika, Bahasa Inggris, dan mapel pilihan | Permendikdasmen 9/2025 Pasal 9; Kepmen 56/2026 Bab IV A | Katalog format sudah sama |
+| Daftar 20 mapel pilihan, 2 dipilih; nomor 20 hanya SMK | Kepmen 56/2026 Bab IV A angka 3–5 | Daftar saran mapel pilihan memakai nama resmi; nama lama tetap dikenali |
+| Bentuk soal: pilihan ganda dan pilihan ganda kompleks (lebih dari satu jawaban benar, dan kategori) | Kepmen 56/2026 Bab IV C a angka 6 | Bentuk TKA sudah sama |
+| Soal literasi membaca AN digabung ke Bahasa Indonesia, soal numerasi AN ke Matematika (semua jenjang) | Permendikdasmen 9/2026 Pasal 9A; Kepmen 56/2026 Bab IV D | Aturan prompt format Matematika dan Bahasa Indonesia |
+| Instrumen SD/SMP = soal pusat + soal daerah; soal daerah ditulis kabupaten/kota bersama provinsi, sedikitnya satu paket per mapel per jenjang, indikator dari kisi-kisi pusat | Kepmen 56/2026 Bab IV C–D, Bab V | Keterangan format TKAD |
+| Rambu penulis soal: bebas SARA, diskriminasi, bias gender, kekerasan, pornografi, provokasi, politik; tanpa nama tokoh yang masih hidup; tanpa iklan, produk komersial, atau instansi; tanpa plagiat; referensi valid | Kepmen 56/2026 Bab V | Aturan prompt semua format TKA dan TKAD |
+| Durasi: SD/SMP Matematika dan Numerasi 75, Bahasa Indonesia dan Literasi 75; SMA/SMK Bahasa Indonesia 60, Bahasa Inggris 50, Matematika 70, tiap mapel pilihan 50 menit | Kepmen 56/2026 Bab VIII A angka 5 | Waktu bawaan format |
+| Nilai SD/SMP 0–100, SMA/SMK 200–800 (dua desimal); kategori Baik, Memadai, Kurang; predikat istimewa 95,00 (SD/SMP) dan 725,00 (SMA/SMK) | Kepmen 56/2026 Bab X B–C | Keterangan penilaian di layar Buat |
+| Kategori AKM (jauh di bawah, di bawah, mencapai, di atas kompetensi minimum) | Kepmen 56/2026 Bab X E | Tidak dipakai (bukan penilaian TKA) |
 
 ## Sumber
 

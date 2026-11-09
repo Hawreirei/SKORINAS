@@ -393,3 +393,19 @@ Laporan pemilik: paket TKA SD Matematika hanya berisi soal desimal dan pecahan; 
 | Tampil di layar | Kartu CP dan TP menampilkan "Materi yang dipakai" per elemen dengan banyak soal dan butirnya bila CP dan TP kosong; mapel pilihan tanpa nama yang dikenal mendapat ajakan memilih dari daftar atau mengisi TP | Guru melihat bahwa materi ujian sudah masuk sebelum membuat paket |
 | Bacaan bersama | TP tiap kelompok bacaan bergiliran atas semua TP paket (TP dengan soal terbanyak lebih dulu), bukan TP soal pertama kelompok | Format bahasa SD sebelumnya hanya memakai 5 dari 9 jenis teks |
 | Tidak diubah | Cakupan tetap bukan CP/TP sekolah dan hanya dipakai bila CP dan TP kosong (AGENTS.md butir 7, keputusan F-39); porsi selain Matematika SMP tetap usulan | **Perlu dikonfirmasi** dengan Perkaban BSKAP 045 dan 047/H/AN/2025 bila dokumennya dapat dibuka |
+
+## Penyesuaian dengan dokumen resmi TKA (F-41, 9 November 2026)
+
+Pemilik mengunggah Permendikdasmen 9/2025 (TKA), Permendikdasmen 9/2026 (perubahan aturan AN), dan Kepmendikdasmen 56/2026 (Pedoman Penyelenggaraan TKA dan AN). Rangkuman per pasal: `docs/referensi/format-ujian.md` bagian 6.
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Durasi TKA SMA | Bahasa Indonesia 60, Matematika 70, Bahasa Inggris 50, mapel pilihan 50 menit (sebelumnya 75, 75, 75, 60) | Kepmen 56/2026 Bab VIII. SD/SMP tetap 75 menit (sama dengan pedoman) |
+| Jumlah soal | Tidak diubah (30/25/30/25 dari berita) | Pedoman tidak menyebut jumlah soal; **perlu dikonfirmasi** dengan kerangka asesmen |
+| Penilaian | SD/SMP 0–100, SMA 200–800, kategori Baik/Memadai/Kurang, predikat istimewa 95 dan 725 | Bab X |
+| Elemen Matematika SD | Aturan prompt SD kini Bilangan, Geometri dan Pengukuran, Data; sebelumnya SD memakai kalimat SMP (Aljabar, Data dan Peluang) | Kesalahan yang ditemukan saat mencocokkan dokumen; cakupan SD sudah benar sejak F-39 |
+| Numerasi dan literasi AN | Matematika (semua jenjang) memuat aturan soal numerasi AN; Bahasa Indonesia memuat aturan literasi membaca AN | Permendikdasmen 9/2026 Pasal 9A, Kepmen 56/2026 Bab IV D |
+| Rambu penulisan | Semua format TKA dan TKAD: bebas SARA dan bias, tanpa nama tokoh yang masih hidup, tanpa merek, produk komersial, atau instansi; fakta benar | Bab V (rambu penulis soal daerah); wajar untuk semua soal setara TKA |
+| Mapel pilihan | Nama resmi (Matematika Lanjutan, PPKn/Pendidikan Pancasila, Produk/Projek Kreatif dan Kewirausahaan, …) dan Teori Kompetensi Kejuruan (SMK) ditambahkan; yang terakhir tanpa cakupan, layar meminta TP sesuai program keahlian | Bab IV A |
+| TKAD | Keterangan diganti: soal daerah adalah bagian instrumen TKA SD/SMP, ditulis kabupaten/kota bersama provinsi dengan kisi-kisi pusat. Aturan kelokalan tetap ada (dari berita, tidak disebut pedoman) | Bab IV–V |
+

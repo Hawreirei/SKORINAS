@@ -89,7 +89,7 @@ describe('katalog format ujian', () => {
     expect(isianUjian(formatUjian('tka-sma-binggris')!).bahasa).toBe('en');
     const pilihan = formatUjian('tka-sma-pilihan')!;
     expect(isianUjian(pilihan).mapel).toBeNull();
-    expect(pilihan.saranMapel).toContain('Matematika Tingkat Lanjut');
+    expect(pilihan.saranMapel).toContain('Matematika Lanjutan');
   });
 
   it('OSN-K SMP Matematika: 25 PG 4 opsi, skor benar 4', () => {

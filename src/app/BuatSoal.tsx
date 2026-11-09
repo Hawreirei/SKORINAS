@@ -565,7 +565,11 @@ export default function BuatSoal() {
                   <p className="mt-2 text-base text-redup">Butir dan porsinya dapat diubah di Pengaturan lanjutan, kartu Cakupan materi. Isi TP sendiri bila ingin materi lain.</p>
                 </section>
               ) : ujianKini && !daftarTp.length && !f.cp.trim() && !cakupan ? (
-                <p className="mt-3 text-base text-awas">{ujianKini.mapel ? 'Format ini belum punya daftar cakupan materi: isi TP agar soal tersebar ke materi yang diujikan.' : 'Pilih mapel pilihan dari daftar agar cakupan materinya terpakai, atau isi TP sendiri.'}</p>
+                <p className="mt-3 text-base text-awas">{ujianKini.mapel
+                    ? 'Format ini belum punya daftar cakupan materi: isi TP agar soal tersebar ke materi yang diujikan.'
+                    : /kompetensi kejuruan/i.test(f.mapel)
+                      ? 'Teori Kompetensi Kejuruan mengikuti program keahlian murid: isi TP sesuai program keahliannya.'
+                      : 'Pilih mapel pilihan dari daftar agar cakupan materinya terpakai, atau isi TP sendiri.'}</p>
               ) : null}
               {saranTp.length ? (
                 <details className="mt-2">

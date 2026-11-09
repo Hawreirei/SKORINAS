@@ -24,7 +24,8 @@ function acakTetap(benih: number): () => number {
 
 /** Isian layar Buat dari format; mapel pilihan TKA SMA diisi tiap mapel dari daftar sarannya. */
 function isianFormat(): { id: string; mapel: string }[] {
-  return FORMAT_UJIAN.flatMap((u) => (u.mapel ? [{ id: u.id, mapel: u.mapel }] : (u.saranMapel ?? []).map((m) => ({ id: u.id, mapel: m }))));
+  // Teori Kompetensi Kejuruan (SMK) mengikuti program keahlian: tanpa cakupan, guru mengisi TP.
+  return FORMAT_UJIAN.flatMap((u) => (u.mapel ? [{ id: u.id, mapel: u.mapel }] : (u.saranMapel ?? []).filter((m) => !/kompetensi kejuruan/i.test(m)).map((m) => ({ id: u.id, mapel: m }))));
 }
 
 describe('audit format ujian: cakupan materi', () => {
@@ -40,6 +41,31 @@ describe('audit format ujian: cakupan materi', () => {
       const r = c.butir.map(rumusanCakupan);
       expect(new Set(r).size, `${x.id} ${x.mapel}`).toBe(r.length);
     }
+  });
+
+  it('daftar mapel pilihan sama dengan Kepmendikdasmen 56/2026 (19 untuk SMA, ditambah Teori Kompetensi Kejuruan untuk SMK)', () => {
+    const saran = formatUjian('tka-sma-pilihan')!.saranMapel!;
+    expect(saran).toHaveLength(20);
+    expect(saran).toContain('Matematika Lanjutan');
+    expect(saran).toContain('PPKn/Pendidikan Pancasila');
+    expect(saran).toContain('Produk/Projek Kreatif dan Kewirausahaan');
+    expect(cakupanFormat('tka-sma-pilihan', 'Teori Kompetensi Kejuruan')).toBeNull();
+    // Nama lama tetap dikenali.
+    expect(cakupanFormat('tka-sma-pilihan', 'Matematika Tingkat Lanjut')).toBe(cakupanFormat('tka-sma-pilihan', 'Matematika Lanjutan'));
+  });
+
+  it('atribut resmi Kepmendikdasmen 56/2026: durasi, skala nilai, numerasi dan literasi AN, rambu penulisan', () => {
+    const menit = (id: string) => formatUjian(id)!.asli.menit;
+    expect([menit('tka-sd-matematika'), menit('tka-sd-bindo'), menit('tka-smp-matematika'), menit('tka-smp-bindo')]).toEqual([75, 75, 75, 75]);
+    expect([menit('tka-sma-bindo'), menit('tka-sma-matematika'), menit('tka-sma-binggris'), menit('tka-sma-pilihan')]).toEqual([60, 70, 50, 50]);
+    expect(formatUjian('tka-sd-matematika')!.penilaian).toContain('0–100');
+    expect(formatUjian('tka-sma-matematika')!.penilaian).toContain('200–800');
+    for (const id of ['tka-sd-matematika', 'tka-smp-matematika', 'tka-sma-matematika']) expect(formatUjian(id)!.aturan.join(' '), id).toContain('numerasi Asesmen Nasional');
+    for (const id of ['tka-sd-bindo', 'tka-smp-bindo', 'tka-sma-bindo']) expect(formatUjian(id)!.aturan.join(' '), id).toContain('literasi membaca Asesmen Nasional');
+    // Elemen Matematika SD tanpa aljabar dan peluang.
+    expect(formatUjian('tka-sd-matematika')!.aturan.join(' ')).toContain('Elemen Matematika TKA SD: Bilangan, Geometri dan Pengukuran, serta Data');
+    expect(formatUjian('tka-sd-matematika')!.aturan.join(' ')).not.toContain('Data dan Peluang');
+    for (const u of FORMAT_UJIAN.filter((x) => x.keluarga !== 'OSN')) expect(u.aturan.join(' '), u.id).toContain('nama tokoh yang masih hidup');
   });
 
   it('nama mapel pilihan tidak peka huruf besar dan spasi', () => {
