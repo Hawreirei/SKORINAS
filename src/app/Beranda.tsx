@@ -6,7 +6,9 @@ import { IsianAngka, IsianTeks, PilihanDaftar } from '../komponen/Formulir';
 import { Kartu, LencanaStatus } from '../komponen/Status';
 import { Panah, TautanTombol, Tombol } from '../komponen/Tombol';
 import { useJudulHalaman, usePengatur } from './kait';
-import { bacaIsianCepat, MAKS_SOAL, MIN_SOAL, simpanIsianCepat } from './rencana-buat';
+import { bacaIsianCepat, simpanIsianCepat } from './isian-buat';
+import { MAKS_SOAL, MIN_SOAL } from './rencana-buat';
+import { FORMAT_UJIAN, formatUjian, jumlahSoalUjian, KELUARGA_LABEL, ringkasUjian, type KeluargaUjian } from '../ujian';
 import { daftarRingkasan, formatTanggal, ringkasPaket, statusRingkasan, teksJumlah, type RingkasanPaket } from './ringkas';
 
 function IkonBerkas({ ukuran = 18 }: { ukuran?: number }) {
@@ -45,10 +47,16 @@ function Centang() {
   );
 }
 
-/** Kartu biru Mulai cepat: tiga isian wajib layar Buat, ditimpakan ke drafnya lalu guru lanjut mengisi CP dan TP. */
+const KELUARGA: KeluargaUjian[] = ['TKA', 'TKAD', 'OSN'];
+
+/**
+ * Kartu biru Mulai cepat: format ujian yang sudah ada (TKA, TKAD, OSN; boleh kosong) dan tiga isian wajib layar Buat,
+ * ditimpakan ke drafnya lalu guru lanjut di layar Buat.
+ */
 function MulaiCepat() {
   const navigasi = useNavigate();
   const [awal] = useState(bacaIsianCepat);
+  const [ujian, setUjian] = useState(formatUjian(awal.ujian)?.id ?? '');
   const [kelas, setKelas] = useState(awal.kelas ?? 0);
   const [mapel, setMapel] = useState(awal.mapel ?? '');
   const [teksN, setTeksN] = useState(String(awal.n ?? 20));
@@ -56,8 +64,19 @@ function MulaiCepat() {
 
   function lanjut(e: FormEvent) {
     e.preventDefault();
-    simpanIsianCepat({ kelas, mapel, n: Number(teksN) });
+    simpanIsianCepat({ ujian: ujian || null, kelas, mapel, n: Number(teksN) });
     navigasi('/soal/baru');
+  }
+
+  const u = formatUjian(ujian);
+  /** Format ujian mengisi kelas, mapel, dan jumlah soalnya; mapel pilihan TKA SMA tetap diisi guru. */
+  function pilihUjian(id: string) {
+    setUjian(id);
+    const f = formatUjian(id);
+    if (!f) return;
+    setKelas(f.kelas);
+    setMapel((m) => f.mapel || (f.saranMapel?.includes(m.trim()) ? m : ''));
+    setTeksN(String(jumlahSoalUjian(f)));
   }
 
   return (
@@ -69,8 +88,26 @@ function MulaiCepat() {
         <h2 id="judul-mulai-cepat" className="text-[22px] font-extrabold text-judul">
           Mulai cepat
         </h2>
-        <p className="mt-0.5 text-base text-redup">Tiga isian ini cukup untuk membuat draf pertama.</p>
+        <p className="mt-0.5 text-base text-redup">Pakai format ujian yang sudah ada, atau isi sendiri kelas, mapel, dan jumlah soal.</p>
         <div className="mt-4 space-y-4">
+          <PilihanDaftar
+            id="cepat-ujian"
+            label="Format ujian (boleh kosong)"
+            value={ujian}
+            onChange={(e) => pilihUjian(e.target.value)}
+            petunjuk={u ? `${ringkasUjian(u)} Kelas, mapel, jumlah soal, bentuk, dan level sudah disesuaikan.${u.mapel ? '' : ' Isi mapel pilihannya.'}` : undefined}
+          >
+            <option value="">Soal biasa</option>
+            {KELUARGA.map((k) => (
+              <optgroup key={k} label={KELUARGA_LABEL[k]}>
+                {FORMAT_UJIAN.filter((x) => x.keluarga === k).map((x) => (
+                  <option key={x.id} value={x.id}>
+                    {x.nama}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </PilihanDaftar>
           <PilihanDaftar id="cepat-kelas" label="Kelas" value={kelas} onChange={(e) => setKelas(Number(e.target.value))}>
             <option value={0} disabled>
               Pilih kelas
@@ -83,14 +120,14 @@ function MulaiCepat() {
           </PilihanDaftar>
           <IsianTeks id="cepat-mapel" label="Mata pelajaran" list="cepat-daftar-mapel" value={mapel} onChange={(e) => setMapel(e.target.value)} placeholder="Contoh: Matematika" autoComplete="off" />
           <datalist id="cepat-daftar-mapel">
-            {(mapelLama ?? []).map((m) => (
+            {(u?.saranMapel ?? mapelLama ?? []).map((m) => (
               <option key={m} value={m} />
             ))}
           </datalist>
           <IsianAngka id="cepat-jumlah" label="Jumlah soal" petunjuk={`${MIN_SOAL}–${MAKS_SOAL}`} value={teksN} onFocus={(e) => e.target.select()} onChange={(e) => setTeksN(e.target.value.replace(/\D/g, '').slice(0, 3))} />
         </div>
         <Tombol type="submit" ukuran="besar" className="mt-5 w-full">
-          Lanjut isi CP dan TP <Panah />
+          {u ? 'Lanjut atur soal' : 'Lanjut isi CP dan TP'} <Panah />
         </Tombol>
       </form>
     </div>

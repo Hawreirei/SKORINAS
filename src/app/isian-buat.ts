@@ -7,7 +7,7 @@ import { rumpunDariMapel } from '../paket';
 import { bagiPorsi, formatUjian, isianUjian } from '../ujian';
 import { cakupanFormat, pilihCakupan, rumusanCakupan, type Cakupan } from '../ujian/cakupan';
 import { kunciKerangka, PANJANG_TEKS } from '../ujian/kerangka';
-import { SKOR_BAWAAN } from './rencana-buat';
+import { bacaDraf, MAKS_SOAL, MIN_SOAL, simpanDraf, SKOR_BAWAAN } from './rencana-buat';
 
 /**
  * Isian layar Buat dan perubahannya (opsi lanjutan v2, F-36). Dipisah dari komponen agar dapat diuji:
@@ -309,6 +309,36 @@ export function isianDariUjian(f: Isian, id: string): Isian {
     cakupanPilih: null,
     ujian: { id, daerah: f.ujian?.daerah ?? '' },
   };
+}
+
+/** Isian kartu Mulai cepat di beranda: format ujian (boleh kosong), kelas, mapel, dan jumlah soal. */
+export interface IsianCepat {
+  ujian: string | null;
+  kelas: number;
+  mapel: string;
+  n: number;
+}
+
+/**
+ * Timpakan Mulai cepat ke isian draf layar Buat. Format ujian diterapkan dulu (mengisi atribut ujiannya seperti di
+ * layar Buat), lalu kelas, mapel, dan jumlah soal yang terisi dan sah. Isian lain di draf tetap.
+ */
+export function terapkanIsianCepat(f: Isian, c: IsianCepat): Isian {
+  let x = c.ujian !== (f.ujian?.id ?? null) ? (c.ujian ? isianDariUjian(f, c.ujian) : { ...f, ujian: null }) : f;
+  if (c.kelas >= 1 && c.kelas <= 12) x = { ...x, kelas: c.kelas };
+  if (c.mapel.trim()) x = { ...x, mapel: c.mapel.trim() };
+  if (Number.isInteger(c.n) && c.n >= MIN_SOAL && c.n <= MAKS_SOAL) x = ubahJumlah(x, c.n);
+  return x;
+}
+
+export function bacaIsianCepat(): Partial<IsianCepat> {
+  const f = bacaDraf<{ f?: Partial<Isian> }>()?.f;
+  return { ujian: f?.ujian?.id ?? null, kelas: f?.kelas || undefined, mapel: f?.mapel || undefined, n: f?.n || undefined };
+}
+
+export function simpanIsianCepat(c: IsianCepat): void {
+  const d = bacaDraf<{ f?: Partial<Isian> }>() ?? {};
+  simpanDraf({ ...d, f: terapkanIsianCepat({ ...isianKosong(), ...d.f }, c) });
 }
 
 function samaJumlah(a: Partial<Record<string, number>>, b: Partial<Record<string, number>>): boolean {
