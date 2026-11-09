@@ -161,6 +161,13 @@ function butirPalsu(bentuk) {
   // Mulai cepat di beranda mengisi tiga isian wajib layar Buat.
   await page.goto(DASAR + '/');
   const cepat = page.getByRole('form', { name: 'Mulai cepat' });
+  // Format ujian yang sudah ada mengisi kelas, mapel, dan jumlah soal; "Soal biasa" kembali ke isian sendiri.
+  await cepat.getByLabel('Format ujian (boleh kosong)').selectOption({ label: 'OSN-K SMP · Matematika' });
+  const isiFormat = await cepat.evaluate((f) => ['#cepat-kelas', '#cepat-mapel', '#cepat-jumlah'].map((q) => f.querySelector(q).value).join('|'));
+  if (isiFormat !== '8|Matematika|25') galat.push(`format ujian di Mulai cepat tidak mengisi kelas, mapel, dan jumlah: ${isiFormat}`);
+  if (!(await cepat.getByRole('button', { name: /Lanjut atur soal/ }).count())) galat.push('tombol Mulai cepat tidak berubah saat format ujian dipilih');
+  await foto('01c-beranda-format-ujian', { fullPage: false });
+  await cepat.getByLabel('Format ujian (boleh kosong)').selectOption({ label: 'Soal biasa' });
   await cepat.getByLabel('Kelas').selectOption('4');
   await cepat.getByLabel('Mata pelajaran').fill('Matematika');
   await cepat.getByLabel('Jumlah soal').fill('12');
