@@ -15,6 +15,8 @@ export function periksaPengaturan(isi: IsiSoal, atur: AturBentuk | null | undefi
     const { min, maks } = atur.pgk_benar;
     if (n < min || n > maks) alasan.push(min === maks ? `Pilihan ganda kompleks harus tepat ${min} jawaban benar, bukan ${n}.` : `Pilihan ganda kompleks harus ${min} sampai ${maks} jawaban benar, bukan ${n}.`);
   }
+  if (isi.bentuk === 'pilihan_ganda_kategori' && atur.kategori && isi.pernyataan && isi.pernyataan.length !== atur.kategori.pernyataan)
+    alasan.push(`PG kompleks kategori harus berisi ${atur.kategori.pernyataan} pernyataan, bukan ${isi.pernyataan.length}.`);
   if (isi.bentuk === 'menjodohkan' && atur.jodoh && isi.pasangan) {
     const { kiri, pengecoh } = atur.jodoh;
     if (isi.pasangan.kiri.length !== kiri) alasan.push(`Kolom kiri menjodohkan harus ${kiri} butir, bukan ${isi.pasangan.kiri.length}.`);

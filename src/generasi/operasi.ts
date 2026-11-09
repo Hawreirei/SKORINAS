@@ -22,8 +22,11 @@ async function ambilSoal(id: string): Promise<Soal> {
 /** Slot untuk mengganti atau membuat ulang soal; gaya diambil dari rencana paket bila paket memakai campuran gaya. */
 async function slotDari(s: Soal): Promise<Slot> {
   const kerja = await db.pekerjaan_generasi.where('paket_id').equals(s.paket_id).first();
-  const gaya = kerja?.slot.find((x) => x.id === s.slot_id)?.gaya;
-  return { id: s.slot_id, urutan: s.urutan, tp_index: 0, kesukaran: s.kesukaran_rancangan, level: s.level_kognitif, bentuk: s.bentuk, status: 'berjalan', percobaan: 0, pengganti: false, galat: null, soal_id: s.id, ...(gaya ? { gaya } : {}) };
+  const asal = kerja?.slot.find((x) => x.id === s.slot_id);
+  const gaya = asal?.gaya;
+  const variasi = asal?.variasi;
+  const kelompok = asal?.kelompok;
+  return { id: s.slot_id, urutan: s.urutan, tp_index: 0, kesukaran: s.kesukaran_rancangan, level: s.level_kognitif, bentuk: s.bentuk, status: 'berjalan', percobaan: 0, pengganti: false, galat: null, soal_id: s.id, ...(gaya ? { gaya } : {}), ...(variasi ? { variasi } : {}), ...(kelompok ? { kelompok } : {}) };
 }
 
 export interface Kandidat {
@@ -47,7 +50,7 @@ export async function buatKandidat(soalId: string, catatan: string | null, signa
   let biaya: number | null = 0;
   const hasil = await buatButir(
     kirim,
-    { param, slot: await slotDari(s), ...ctx, revisi: catatan !== null ? { lama: s.isi_json, catatan } : null, signal },
+    { param, slot: await slotDari(s), ...ctx, revisi: catatan !== null ? { lama: s.isi_json, catatan } : null, signal, bacaan: s.isi_json.stimulus ? { id: s.isi_json.stimulus.id, teks: s.isi_json.stimulus.teks } : null },
     async (p, lolos) => {
       const b = hitungBiaya(info, p.jawaban?.token_masuk ?? 0, p.jawaban?.token_keluar ?? 0);
       biaya = biaya === null || b === null ? null : biaya + b;
@@ -126,6 +129,14 @@ export async function simpanSuntingan(soalId: string, isi: IsiSoal): Promise<Has
   await db.soal.put(baru);
   await simpanGambar(baru, isi, h.svg ?? (isi.gambar ? bangkitkanGambar(isi.gambar).svg : null));
   await log(s.id, 'sunting', s.isi_json, isi);
+  // Bacaan bersama yang disunting berlaku untuk semua soal yang memakainya (F-40).
+  const st = isi.stimulus;
+  if (st && st.teks !== s.isi_json.stimulus?.teks) {
+    const saudara = (await db.soal.where('paket_id').equals(s.paket_id).toArray()).filter((x) => x.id !== s.id && x.isi_json.stimulus?.id === st.id);
+    for (const x of saudara) await db.soal.update(x.id, { isi_json: { ...x.isi_json, stimulus: { ...st } }, diubah_pada: sekarang() });
+    const kerja = await db.pekerjaan_generasi.where('paket_id').equals(s.paket_id).first();
+    if (kerja) await db.pekerjaan_generasi.update(kerja.id, { bacaan: { ...kerja.bacaan, [st.id]: st.teks } });
+  }
   return h;
 }
 

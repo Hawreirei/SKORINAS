@@ -4,8 +4,8 @@ Catatan ini melengkapi `docs/RANCANGAN.md` v0.4. Bagian "Keputusan saat membangu
 
 ## Perlu diputuskan (dari rancangan)
 
-- [ ] **Format ujian: cakupan materi.** Format TKA hanya menyebut nama elemen (mis. Bilangan, Aljabar, Geometri dan Pengukuran, Data dan Peluang) di aturan prompt, bukan sub-elemen dan butir cakupan kerangka asesmen, karena AGENTS.md butir 7 melarang membawa data kurikulum. Bila pemilik ingin daftar cakupan resmi ikut dibawa (mis. sebagai TP siap pakai), aturan butir 7 perlu diubah dulu.
-- [ ] **Bentuk "pilihan ganda kompleks kategori" (TKA).** Sementara dibuat sebagai soal benar-salah satu pernyataan; bentuk aslinya satu stimulus dengan beberapa pernyataan Benar/Salah dalam satu tabel dan satu nomor. Bentuk baru memerlukan skema, verifikasi per pernyataan, dan tata letak ekspor sendiri (usul fitur lanjutan).
+- [x] **Format ujian: cakupan materi.** Diputuskan pemilik (7 November 2026, F-39): soal TKA terasa seragam, jadi cakupan kerangka asesmen TKA dan ranah OSN dibawa di `src/ujian/cakupan.ts`. Cakupan ini bukan CP atau TP sekolah: hanya dipakai bila guru mengosongkan CP dan TP, dan TP guru selalu didahulukan. AGENTS.md butir 7 tetap berlaku untuk CP dan TP.
+- [x] **Bentuk "pilihan ganda kompleks kategori" (TKA).** Dibuat pada F-40 sebagai bentuk sendiri (`pilihan_ganda_kategori`): satu stimulus, 3–6 pernyataan, dua kategori, satu nomor dan satu tabel.
 
 - [ ] Urutan mata pelajaran yang dibuka setelah Matematika (usul: IPAS, Bahasa Indonesia, Bahasa Inggris).
 - [ ] Penyedia AI MVP. Kode sudah mendukung keenamnya; yang perlu diputuskan adalah mana yang diuji golden set dan ditampilkan lebih dulu.
@@ -281,7 +281,7 @@ Permintaan pemilik: format untuk membuat soal TKA, TKAD, dan OSN tingkat SD samp
 | Mapel pilihan TKA SMA | Mapel dikosongkan dan 19 mapel pilihan akademik muncul sebagai saran isian | Guru memilih mapel ujinya sendiri |
 | Rumpun | "Astronomi" dan "Kebumian" kini dikenali sebagai rumpun IPA | Mapel OSN SMA; sebelumnya tidak dikenali |
 | Uji | `tests/ujian.test.ts`: setiap format dapat langsung direncanakan untuk semua jumlah 5–50, angka kunci (TKA SD 19/5/6 dan 6/12/12, OSN-K SMP 25 PG skor 4), prompt TKA/TKAD/OSN, migrasi versi 4, dan cadangan. E2E memilih format TKAD di ponsel dan OSN-K SMP di laptop | AGENTS.md butir 5 |
-| E2E tidak stabil | `npm run e2e` di lingkungan pengembangan gagal tidak menentu di dua langkah lama: "Mulai cepat tidak mengisi layar Buat" (kadang `#kelas` belum ada) dan, di layar Unduh, penelusuran Tab tidak mencapai tombol Unduh sehingga Enter jatuh ke tautan kaki "Profil dan kop". Langkah Mulai cepat juga gagal pada kode sebelum F-35 (dua dari dua run); layar Unduh tidak diubah F-35. Langkah format ujian, lebar ponsel 390 px, dan axe (0 pelanggaran di 16 pemeriksaan) lolos di setiap run | Perlu ditelusuri terpisah |
+| E2E tidak stabil | `npm run e2e` di lingkungan pengembangan gagal tidak menentu di dua langkah lama: "Mulai cepat tidak mengisi layar Buat" (kadang `#kelas` belum ada) dan, di layar Unduh, penelusuran Tab tidak mencapai tombol Unduh sehingga Enter jatuh ke tautan kaki "Profil dan kop". Langkah Mulai cepat juga gagal pada kode sebelum F-35 (dua dari dua run); layar Unduh tidak diubah F-35. Langkah format ujian, lebar ponsel 390 px, dan axe (0 pelanggaran di 16 pemeriksaan) lolos di setiap run | Diselesaikan pada F-40 (penyebab di uji, lihat F-40) |
 
 ## Opsi lanjutan v2 (F-36, 7 November 2026)
 
@@ -301,7 +301,7 @@ Permintaan pemilik: opsi lanjutan ditulis ulang agar lebih umum dan rinci, dan h
 | Konteks dan aturan tambahan | Konteks satu baris; aturan tambahan satu per baris (maks. 40 aturan, 500 huruf per aturan dikirim). Format ujian kini menyalin aturannya ke sini (dapat disunting, ikut paket dan pengaturan tersimpan) sehingga paket lama tidak berubah bila katalog diperbaiki; prompt format ujian hanya menambah nama format, level TKA, dan kelokalan | Menjawab temuan: aturan format sebelumnya tersembunyi dan tidak tersalin ke paket |
 | Data | Dexie versi 5; semua isian baru null atau kosong berarti perilaku lama. Paket versi 4 bertanda format ujian mendapat salinan aturan formatnya saat migrasi; cadangan lama dilengkapi saat dipulihkan | AGENTS.md butir 2 |
 | Uji | `tests/opsi-lanjutan.test.ts` (susunan per baris, campuran gaya, prompt, pemeriksa dan golden, tiga opsi, isian ↔ parameter, ekspor waktu dan skor salah, migrasi versi 5). E2E membuka kartu baru, menyalakan susunan per baris, mengatur pasangan dan waktu, menulis aturan tambahan, dan memeriksa "Waktu: 60 menit" di pratinjau Unduh | AGENTS.md butir 4 dan 5 |
-| E2E | Seluruh alur dengan langkah baru lolos (axe 0 pelanggaran di 16 pemeriksaan, lebar ponsel 390 px); `npm run e2e` tetap gagal tidak menentu di langkah lama "Mulai cepat" (lihat F-35) | Masalah lama, ditelusuri terpisah |
+| E2E | Seluruh alur dengan langkah baru lolos (axe 0 pelanggaran di 16 pemeriksaan, lebar ponsel 390 px); `npm run e2e` tetap gagal tidak menentu di langkah lama "Mulai cepat" (lihat F-35) | Diselesaikan pada F-40 (penyebab di uji, lihat F-40) |
 
 ## Percepatan pembuatan soal (F-37, 7 November 2026)
 
@@ -345,4 +345,98 @@ Uji model pertama dengan kunci asli (`gemini-3.5-flash`; `gemini-3.8-flash` seda
 | Golden set | `data/golden/matematika-satuan.json`: 9 butir benar dan 9 butir salah dari pola uji model; empat butir benar ditolak pemeriksa sebelum perbaikan | AGENTS.md butir 4 |
 | uji-model | `--kelompok n`; mode kelompok memakai kesukaran yang sama dengan mode satu butir; varian salah-kunci isian bertanda perbandingan diganti tanda lain (sama dengan golden test); `RINCI=isi` mencetak soal yang ditolak dan varian salah-kunci yang lolos | Hasil sebelumnya tidak sebanding, dan satu "varian lolos" ternyata varian yang sama dengan aslinya |
 | Hasil | Setelah perbaikan: `gemini-3.5-flash`, 20 butir, 10 per permintaan: JSON sah 100%, lolos pemeriksa 100%, salah-kunci ditolak 100% (sebelumnya 60–65% lolos). `gemini-3.8-flash` **perlu diuji ulang** setelah Google tidak sibuk | Sampel kecil; jalankan lagi dengan `--butir 30 --kelompok 10` sebelum menandai model direkomendasikan |
+
+## Soal format ujian bervariasi dan berstimulus (F-39, 7 November 2026)
+
+Permintaan pemilik: soal TKA cenderung sama dan kurang variatif; riset cakupan materinya, pastikan ada stimulus cerita, dan buat format ujian menghasilkan soal yang sangat baik. Riset cakupan: `docs/referensi/format-ujian.md`, bagian 5.
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Penyebab seragam | Tanpa TP guru, semua butir paket dikirim dengan TP yang sama ("Materi Matematika kelas 6") dan tanpa arahan tema, tokoh, atau bentuk stimulus yang berbeda; model lalu mengulang topik dan pola cerita | Temuan dari prompt butir |
+| Cakupan sebagai TP | Bila CP dan TP kosong dan format punya cakupan, `keParameter` memilih butir cakupan per elemen sesuai porsi (sisa terbesar) dari titik mulai acak, lalu menyimpannya sebagai TP paket bersumber `ujian` dengan jumlah per TP. Rencana butir, kisi-kisi (kolom TP), dan label "Cakupan materi …" memakai mekanisme TP yang sudah ada. Buat paket serupa dan pengaturan tersimpan tidak mengembalikan TP `ujian` ke isian, sehingga paket berikutnya memilih campuran baru | Satu mekanisme; tidak ada isian baru di layar |
+| Porsi elemen | SMP Matematika 7/8/8/7 (contoh paket 30 soal); SD Matematika 5/3/2, SMA Matematika 4/7/5/3/6, bahasa 1:1 teks informasi dan fiksi, OSN rata: usulan, tidak ada angka resmi di sumber | Dapat dikoreksi di katalog tanpa mengubah data paket lama |
+| Stimulus wajib | Isian parameter `wajib_stimulus` (Dexie versi 6). Format TKA dan TKAD menyalakannya, OSN tidak; guru dapat mengubahnya di kartu Gaya, bahasa, dan konteks untuk paket apa pun. Prompt meminta stimulus asli berisi semua data untuk menjawab, pertanyaan di akhir, tanpa label "Stimulus:" | Ciri utama soal TKA: berbasis stimulus |
+| Pemeriksa stimulus | `periksaStimulus`: sedikitnya dua kalimat dan batas kata per jenjang (bukan bahasa SD 25, SMP 30, SMA 35; bahasa SD 50, SMP 100, SMA 130). Batas lebih rendah dari sasaran prompt (mis. bahasa SMP 180–250 kata) agar soal yang wajar tidak terus dibuat ulang. Menjodohkan dikecualikan. Golden set `data/golden/stimulus.json` (6 lolos, 6 ditolak) | Prinsip 2: soal tanpa stimulus tidak sampai ke layar |
+| Variasi per butir | Slot pekerjaan menyimpan `variasi` { tema, stimulus, tokoh } yang ditetapkan saat paket dibuat: tema bergiliran personal, sosial budaya, saintifik (34 tema), 48 nama tokoh dari berbagai daerah, dan bentuk stimulus bergiliran (cerita, daftar data, percakapan, brosur, jadwal, pengamatan); diacak per paket. Ganti dan buat ulang soal memakai variasi slotnya. Konteks dari guru didahulukan atas tema; TKAD memakai nama tokoh khas daerahnya | Variasi tidak bergantung pada urutan butir serentak (F-37) |
+| Kompetensi membaca | Format Bahasa Indonesia dan Inggris: Pengetahuan dan Pemahaman → pemahaman tekstual, Aplikasi → pemahaman inferensial, Penalaran → evaluasi dan apresiasi; jenis teks dari cakupan (TP), bukan dari kompetensi | Level dan kompetensi tidak pernah bertentangan |
+| Keterbacaan | Paket berstimulus wajib dianggap literasi oleh kaidah keterbacaan (batas kata per kalimat × 1,5; hanya catatan) | Cerita lebih panjang kalimatnya |
+| Belum | PG kompleks kategori TKA (satu stimulus, beberapa pernyataan dalam satu nomor) dan satu stimulus untuk beberapa soal masih belum ada; benar-salah berstimulus menulis stimulus lalu satu pernyataan | Bentuk baru, fitur terpisah |
+| E2E | Satu run lolos penuh; run lain gagal tidak menentu di langkah lama (penelusuran Tab di layar Unduh), lihat F-35 | Diselesaikan pada F-40 (penyebab di uji, lihat F-40) |
+
+## Pengaturan mendalam dan bentuk TKA lengkap (F-40, 7 November 2026)
+
+Permintaan pemilik: tambahkan yang belum tercakup (PG kompleks kategori, satu bacaan untuk beberapa soal, skor per soal yang berbeda) dan buat pengaturan lebih mendalam serta dapat diatur seluruhnya.
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| PG kompleks kategori | Bentuk `pilihan_ganda_kategori`: `pokok` berisi stimulus dan perintah, `pernyataan` 3–6 butir, `kategori` dua label (bawaan Benar/Salah), kunci baku "B-S-B" (B = kategori pertama, S = kedua; membaca juga label, Y/T, 1/2). Verifikasi `per_pernyataan` menghitung tiap pernyataan (benar = kategori pertama); kategori bukan benar/salah (mis. Fakta/Opini) memakai `tidak_ada` dan menjadi "kunci tidak dicek otomatis". Kaidah: pernyataan kembar ditolak, satu kategori saja hanya catatan. Berkas: tabel No, Pernyataan, dua kolom kategori (Word, PDF, LaTeX, cetak); kunci "1. Benar; 2. Salah; …". Golden `data/golden/kategori.json` (5 benar, 5 salah, ditambah setiap kunci dibalik satu per satu) | Bentuk resmi TKA; sebelumnya diganti benar-salah satu pernyataan |
+| Format TKA | Porsi bentuk 19 PG, 5 PG kompleks, 6 PG kompleks kategori; format Bahasa TKA dan TKAD memakai bacaan bersama 3 soal | Mendekati paket TKA |
+| Bacaan bersama | `soal_per_bacaan` (2–5). Saat paket dibuat, slot berurutan dalam satu bentuk dikelompokkan; sisa satu soal bergabung ke kelompok sebelumnya; benar-salah (satu tabel per bagian) dan menjodohkan tidak dikelompokkan. Anggota memakai TP dan variasi ketua. Bacaan dibuat sekali per kelompok dengan permintaan AI tersendiri (`src/generasi/bacaan.ts`, sedikitnya 1,5 × batas stimulus), dicegah ganda saat butir serentak, disimpan di `pekerjaan_generasi.bacaan`, lalu disalin ke `isi_json.stimulus` tiap anggota. Prompt anggota memuat bacaan dan meminta pokok berisi pertanyaan saja dengan aspek berbeda. Berkas mencetak bacaan sekali: "Bacalah teks berikut untuk menjawab soal nomor a–b." Menyunting bacaan di satu soal mengubah semua soal kelompoknya | Seperti TKA; hemat token karena bacaan tidak ditulis ulang tiap soal |
+| Skor per kesukaran | `skor_kesukaran` {mudah, sedang, sulit} × {benar, salah} menggantikan skor per bentuk. Skor tiap soal tercetak di akhir pokoknya ("(2 poin)"; tidak pada tabel benar-salah), petunjuk bagian menyebut "Skor tiap soal tertera di akhir soal.", pedoman penskoran per tingkat dengan catatan pengurangan, dan rubrik uraian mengikuti skor tingkatnya | OSN-K SMA Matematika: soal dasar 2, lanjut 4, salah −1 |
+| Cakupan materi | Kartu tampil bila format ujian dipakai tanpa CP dan TP: centang butir dan atur porsi elemen (`cakupan_pilih`); elemen tanpa butir atau berporsi 0 dilewati. Tanpa butir dicentang atau porsi nol semua: galat | Guru memilih materi ujian sendiri |
+| Variasi dan panjang | `variasi_sendiri` (tema, tokoh, bentuk stimulus; kosong = bawaan) dan `panjang_stimulus` (sasaran persis; pemeriksa 70% dari minimal) | Bawaan tetap ada; guru dapat menggantinya |
+| Lembar soal | `urutan_bentuk` (urutan rencana butir dan bagian berkas; bentuk yang tidak disebut menyusul), `petunjuk_bagian` per bentuk (kosong = bawaan), `gaya_pembahasan` (singkat, langkah demi langkah, Diketahui–Ditanya–Dijawab) | Pakem tetap sebagai bawaan |
+| Data | Dexie versi 7; semua isian baru null berarti perilaku lama | AGENTS.md butir 2 |
+| E2E tidak stabil | Penyebabnya di uji, bukan aplikasi: judul beranda ("Buat soal yang kuncinya sudah dicek") juga cocok dengan `h1:has-text("Buat soal")`, dan layar Buat serta Unduh dimuat belakangan, sehingga uji membaca isian atau menekan Tab sebelum layar tujuan tampil. Uji kini menunggu isian layar Buat terisi dan tombol Unduh tampil. Tiga run berturut-turut lolos penuh | Kriteria AGENTS.md butir 5 |
+| Belum | Bacaan bersama lintas bentuk (pakem mencetak per bagian bentuk); skor per butir yang diketik satu per satu | Perlu tata letak berkas per bacaan |
+
+## Audit format ujian (F-41, 8 November 2026)
+
+Laporan pemilik: paket TKA SD Matematika hanya berisi soal desimal dan pecahan; CP, TP, dan materi TKA resmi seolah tidak masuk. Diminta memeriksa semua format.
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Penyebab | (1) Cakupan materi, stimulus, dan variasi (F-39, F-40) belum digabung ke main, jadi aplikasi yang terpasang mengirim TP kosong. (2) Sejak F-38 paket dibuat lewat `susunPesanKelompok`, yang belum membawa fitur itu. (3) Empat dari lima contoh acuan Matematika bertopik pecahan, dan aturan pengecoh hanya menyebut kesalahan pecahan, sehingga model menganggap soal Matematika = soal pecahan | Temuan audit kode |
+| Prompt kelompok | Membawa TP tiap butir dengan perintah "setiap butir mengukur TP pada barisnya sendiri", aturan stimulus wajib sekali, tema/bentuk stimulus/tokoh per butir di daftar butir, bacaan bersama sekali per kelompok (Bacaan A, B, …) dengan butir "pokok hanya pertanyaan", kompetensi membaca per butir (format bahasa TKA/TKAD), skor uraian per kesukaran, dan gaya pembahasan | Kelompok dan satu butir kini setara |
+| Contoh acuan | Matematika: 13 contoh beragam topik (bilangan cacah, KPK, pecahan, luas gabungan, volume, waktu, rata-rata, data, uang) termasuk PG kompleks kategori dan uraian; dipilih bergiliran menurut nomor butir. Judul bagian menegaskan topik mengikuti TP. Uji memastikan setiap contoh yang dapat dihitung lolos pemeriksa | Contoh tidak lagi menarik semua soal ke satu topik |
+| Cakupan baru | TKA SMA mapel pilihan (18 nama mapel di daftar saran, dicocokkan dengan nama yang diisi guru), OSN-K SMA Fisika, Kimia, Biologi, Informatika, Astronomi, Kebumian, Ekonomi, Geografi; IPA dan IPS OSN-K SMP dipisah dari SD. TKA SD Matematika ditambah penaksiran, satuan volume, tabel frekuensi. Rincian dan tingkat kepastian: `docs/referensi/format-ujian.md` bagian 5 | Sebelumnya format itu tanpa cakupan, sehingga tanpa TP soal dibuat dari nama mapel saja |
+| Tampil di layar | Kartu CP dan TP menampilkan "Materi yang dipakai" per elemen dengan banyak soal dan butirnya bila CP dan TP kosong; mapel pilihan tanpa nama yang dikenal mendapat ajakan memilih dari daftar atau mengisi TP | Guru melihat bahwa materi ujian sudah masuk sebelum membuat paket |
+| Bacaan bersama | TP tiap kelompok bacaan bergiliran atas semua TP paket (TP dengan soal terbanyak lebih dulu), bukan TP soal pertama kelompok | Format bahasa SD sebelumnya hanya memakai 5 dari 9 jenis teks |
+| Tidak diubah | Cakupan tetap bukan CP/TP sekolah dan hanya dipakai bila CP dan TP kosong (AGENTS.md butir 7, keputusan F-39); porsi selain Matematika SMP tetap usulan | **Perlu dikonfirmasi** dengan Perkaban BSKAP 045 dan 047/H/AN/2025 bila dokumennya dapat dibuka |
+
+## Penyesuaian dengan dokumen resmi TKA (F-41, 9 November 2026)
+
+Pemilik mengunggah Permendikdasmen 9/2025 (TKA), Permendikdasmen 9/2026 (perubahan aturan AN), dan Kepmendikdasmen 56/2026 (Pedoman Penyelenggaraan TKA dan AN). Rangkuman per pasal: `docs/referensi/format-ujian.md` bagian 6.
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Durasi TKA SMA | Bahasa Indonesia 60, Matematika 70, Bahasa Inggris 50, mapel pilihan 50 menit (sebelumnya 75, 75, 75, 60) | Kepmen 56/2026 Bab VIII. SD/SMP tetap 75 menit (sama dengan pedoman) |
+| Jumlah soal | Tidak diubah (30/25/30/25 dari berita) | Pedoman tidak menyebut jumlah soal; **perlu dikonfirmasi** dengan kerangka asesmen |
+| Penilaian | SD/SMP 0–100, SMA 200–800, kategori Baik/Memadai/Kurang, predikat istimewa 95 dan 725 | Bab X |
+| Elemen Matematika SD | Aturan prompt SD kini Bilangan, Geometri dan Pengukuran, Data; sebelumnya SD memakai kalimat SMP (Aljabar, Data dan Peluang) | Kesalahan yang ditemukan saat mencocokkan dokumen; cakupan SD sudah benar sejak F-39 |
+| Numerasi dan literasi AN | Matematika (semua jenjang) memuat aturan soal numerasi AN; Bahasa Indonesia memuat aturan literasi membaca AN | Permendikdasmen 9/2026 Pasal 9A, Kepmen 56/2026 Bab IV D |
+| Rambu penulisan | Semua format TKA dan TKAD: bebas SARA dan bias, tanpa nama tokoh yang masih hidup, tanpa merek, produk komersial, atau instansi; fakta benar | Bab V (rambu penulis soal daerah); wajar untuk semua soal setara TKA |
+| Mapel pilihan | Nama resmi (Matematika Lanjutan, PPKn/Pendidikan Pancasila, Produk/Projek Kreatif dan Kewirausahaan, …) dan Teori Kompetensi Kejuruan (SMK) ditambahkan; yang terakhir tanpa cakupan, layar meminta TP sesuai program keahlian | Bab IV A |
+| TKAD | Keterangan diganti: soal daerah adalah bagian instrumen TKA SD/SMP, ditulis kabupaten/kota bersama provinsi dengan kisi-kisi pusat. Aturan kelokalan tetap ada (dari berita, tidak disebut pedoman) | Bab IV–V |
+
+## Rincian dari halaman TKA pusmendik (F-41, 9 November 2026)
+
+Pemilik meminta semua materi dari https://pusmendik.kemendikdasmen.go.id/tka/ masuk. Host itu ditolak jaringan sesi pengembangan (proxy menolak koneksi), jadi isi halaman diambil lewat mesin pencari yang dibatasi ke domain pusmendik. Yang terambil dan dipakai:
+
+| Topik | Keputusan | Sumber |
+| --- | --- | --- |
+| Panjang teks Bahasa Indonesia | SD 150–200 kata, SMP 200–250 kata (kecuali puisi); SMA tetap 250–300. Batas pemeriksa SD 90, SMP 120, SMA 140 kata. Golden S-04 (bacaan SD 83 kata) kini ditolak (T-07) | Halaman TKA SD dan SMP Bahasa Indonesia (kerangka 047/H/AN/2025) |
+| Subkompetensi membaca | Tekstual, inferensial, evaluasi dan apresiasi diperinci sesuai tabel halaman SMP | Halaman TKA SMP Bahasa Indonesia |
+| Geometri dan pengukuran SD | Bangun datar segitiga, segiempat, segi banyak; bangun ruang kubus, balok, gabungannya; visualisasi spasial; panjang, berat, volume, waktu dengan satuan baku | Halaman TKA SD Matematika |
+| Data SD | Tabel frekuensi dan diagram batang; piktogram tidak disebut halaman (tetap ada sebagai satu butir) | Halaman TKA SD Matematika |
+| Bahasa Inggris lanjutan | Exposition dan discussion bertopik teknologi dan isu faktual, 300–400 kata | Halaman mapel pilihan |
+| Produk/Projek Kreatif dan Kewirausahaan | Produksi, pemasaran, distribusi, pengelolaan usaha (desain produk, perencanaan produksi, proposal usaha, laporan keuangan, HaKI); di SMK pilihan pertama wajib mapel ini | Halaman mapel pilihan |
+| Biologi | Ditambah bakteri; konteks kesehatan, lingkungan, pertanian, sosial budaya | Halaman mapel pilihan Biologi |
+| Belum | Daftar lengkap butir per elemen untuk semua mapel ada di PDF kerangka asesmen (Perkaban BSKAP 045 dan 047/H/AN/2025) di situs pusmendik, yang belum dapat dibuka. **Perlu**: pemilik mengunggah PDF itu, atau host pusmendik diizinkan di lingkungan sesi | — |
+
+## Kerangka asesmen TKA resmi dari situs pusmendik (F-41, 9 November 2026)
+
+Pemilik meminta semua materi di https://pusmendik.kemendikdasmen.go.id/tka/ masuk. Host pusmendik (dan cacerts.digicert.com, karena server pusmendik tidak mengirim sertifikat perantara DigiCert) ditambahkan ke lingkungan sesi atas persetujuan pemilik. Semua 76 halaman kerangka diambil dan diurai (scripts/kerangka-tka/README.md).
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Data | `src/ujian/data/kerangka-tka.json` (matriks asesmen: elemen, sub-elemen, butir, kompetensi, batasan; 76 mapel) dan `kerangka-ringkas.json` (nama, definisi, muatan, kompetensi membaca). Yang pertama hanya dimuat layar Buat; yang kedua dipakai prompt | Isi resmi lengkap tanpa membebani semua layar |
+| Cakupan TKA/TKAD | Daftar buatan sendiri untuk Matematika, mapel pilihan, dan bahasa diganti matriks resmi: tiap butir sub-elemen menjadi satu butir cakupan, batasan resmi ikut di rumusan TP (dipotong di batas kata). Butir kembar dari tabel resmi dibuang | Permintaan pemilik: semua materi resmi masuk |
+| Porsi | Matematika tetap usulan (SD 5/3/2, SMP 7/8/8/7, SMA 4/7/5/3/6) karena halaman resmi tidak menyebut porsi; mapel lain sebanding banyak butir per elemen | Setiap butir resmi berpeluang sama |
+| Mapel pilihan | 19 mapel umum ditambah 50 program keahlian SMK ("SMK - Kuliner", dst., Teori Kompetensi Kejuruan) dari kerangka pusmendik; nama dicocokkan tanpa peka huruf besar, awalan "SMK - ", atau nama lama | Kepmen 56/2026 nomor 20 per program keahlian |
+| Bahasa | Cakupan = jenis teks atau topik dari bagian Muatan resmi (BI SD/SMP/SMA, BI dan BIng Tingkat Lanjut, BIng wajib, Arab, Jepang, Jerman, Korea, Mandarin, Prancis). Kompetensi membaca per butir: kompetensi ke-1/2/3 matriks resmi menurut level TKA, subkompetensi bergiliran menurut nomor butir | Semua subkompetensi resmi terpakai; level dan kompetensi tetap cocok |
+| Prompt | Definisi dan muatan resmi mapel ikut di bagian format ujian (TKA dan TKAD) | Model mendapat konteks resmi mapel, terutama mapel SMK |
+| Panjang teks | Bila guru tidak mengatur: BIng 200–350, BI Lanjut 300–350, BIng Lanjut 300–400 kata; Arab, Jepang, Jerman, Korea, Mandarin, Prancis 10–100 kata menurut muatan masing-masing | Teks bahasa asing TKA jauh lebih pendek dari bawaan jenjang SMA |
+| Tambalan | Halaman resmi Matematika SMA terpotong setelah "Aturan" (Peluang tidak tampil): ditambah "Aturan pencacahan" dan sub-elemen Peluang (kejadian tunggal, majemuk). Matematika Tingkat Lanjut: baris Limit berlabel Trigonometri diganti elemen Kalkulus (sesuai Muatan); turunan dan integral tidak ada di halaman. Kimia tanpa tabel matriks: elemen dari teks Muatan. Bahasa Inggris Tingkat Lanjut tanpa matriks kompetensi: memakai matriks Bahasa Inggris wajib | Baris tambalan bertanda `tambalan: true`; **perlu dikonfirmasi** bila halaman resmi diperbaiki |
+| OSN | Tidak berubah (bukan kerangka TKA) | — |
 

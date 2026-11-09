@@ -1,5 +1,5 @@
 import type { HurufOpsi, IsiSoal, Pernyataan } from '../db/tipe';
-import { HURUF_KANAN, hurufKunci, petaJodoh } from '../db/tipe';
+import { HURUF_KANAN, hurufKunci, petaJodoh, petaKategori } from '../db/tipe';
 import { angkaDariTeks, daftarAngkaDariTeks, evaluasi, normalisasiRelasi, samaNilai, ujiRelasi, type Lingkup, type Lokal } from './angka';
 
 export type HasilHitung = { hasil: 'lolos' | 'gagal' | 'tidak_dapat'; alasan: string };
@@ -100,6 +100,21 @@ function periksaJodoh(isi: IsiSoal, lingkup: Lingkup): HasilHitung {
   return lolos(`Setiap pasangan bernilai sama (${kiri.map(fmt).join(', ')}).`);
 }
 
+/** PG kompleks kategori: setiap pernyataan dihitung; benar = kategori pertama (B), salah = kategori kedua (S). */
+function periksaKategori(isi: IsiSoal, lingkup: Lingkup): HasilHitung {
+  const v = isi.verifikasi;
+  if (v.tipe !== 'per_pernyataan') return gagal('PG kompleks kategori yang dapat dihitung memerlukan verifikasi per_pernyataan.');
+  const n = isi.pernyataan?.length ?? 0;
+  if (v.pernyataan.length !== n) return gagal(`Banyak pernyataan verifikasi (${v.pernyataan.length}) tidak sama dengan banyak pernyataan soal (${n}).`);
+  const kunci = petaKategori(isi.kunci, n, isi.kategori);
+  const [a, b] = isi.kategori ?? ['Benar', 'Salah'];
+  for (let i = 0; i < n; i++) {
+    const benar = benarPernyataan(v.pernyataan[i], lingkup);
+    if ((kunci[i] === 0) !== benar) return gagal(`Pernyataan ${i + 1} menurut hitungan ${benar ? a : b}, tetapi kunci ${kunci[i] === 0 ? a : b}.`);
+  }
+  return lolos(`Setiap pernyataan dihitung ulang dan cocok dengan kunci.`);
+}
+
 /**
  * Pemeriksa rumpun Matematika: hitung ulang dengan mathjs lalu bandingkan dengan kunci.
  * Model hanya menulis instruksi pemeriksaan; hasilnya ditentukan kode ini.
@@ -110,12 +125,15 @@ export function periksaHitung(isi: IsiSoal, lokal: Lokal, lingkup: Lingkup = {})
     if (v.tipe === 'tidak_ada') return { hasil: 'tidak_dapat', alasan: v.alasan || 'Soal tidak dapat dihitung ulang otomatis.' };
     if (isi.bentuk === 'pilihan_ganda_kompleks') return periksaKompleks(isi, lokal, lingkup);
     if (isi.bentuk === 'menjodohkan') return periksaJodoh(isi, lingkup);
+    if (isi.bentuk === 'pilihan_ganda_kategori') return periksaKategori(isi, lingkup);
     switch (v.tipe) {
       case 'per_opsi':
         if (isi.bentuk === 'pilihan_ganda') return periksaPgPerOpsi(isi, lingkup);
         return gagal('Verifikasi per_opsi hanya untuk pilihan ganda dan pilihan ganda kompleks.');
       case 'pasangan':
         return gagal('Verifikasi pasangan hanya untuk menjodohkan.');
+      case 'per_pernyataan':
+        return gagal('Verifikasi per_pernyataan hanya untuk PG kompleks kategori.');
 
       case 'ekspresi': {
         const h = hitung(v.ekspresi, lingkup);

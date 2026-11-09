@@ -1,5 +1,5 @@
 import type { HurufOpsi, IsiSoal } from '../db/tipe';
-import { hurufKunci, petaJodoh, teksPembanding } from '../db/tipe';
+import { hurufKunci, petaJodoh, petaKategori, teksPembanding } from '../db/tipe';
 import { teksPolos } from '../matematika/teks';
 import { angkaDariTeks, samaNilai, type Lokal } from './angka';
 import { AMBANG_KEMIRIPAN, kemiripan } from './kemiripan';
@@ -82,6 +82,16 @@ export function periksaKaidah(isi: IsiSoal, k: KonteksKaidah): HasilKaidah {
       const polos = daftar.map((t) => teksPolos(t).toLowerCase().replace(/\s+/g, ' ').trim());
       if (new Set(polos).size !== polos.length) keras.push(`Ada butir kolom ${nama} yang sama.`);
     }
+  }
+
+  if (isi.bentuk === 'pilihan_ganda_kategori') {
+    const n = isi.pernyataan?.length ?? 0;
+    const peta = petaKategori(isi.kunci, n, isi.kategori);
+    if (n < 3 || n > 6) keras.push(`PG kompleks kategori harus berisi 3 sampai 6 pernyataan, bukan ${n}.`);
+    if (peta.some((j) => j < 0)) keras.push('Kunci harus menggolongkan setiap pernyataan ke salah satu kategori.');
+    const polos = (isi.pernyataan ?? []).map((t) => teksPolos(t).toLowerCase().replace(/\s+/g, ' ').trim());
+    if (new Set(polos).size !== polos.length) keras.push('Ada pernyataan yang sama.');
+    if (n >= 3 && peta.every((j) => j === peta[0])) lunak.push('Semua pernyataan berkategori sama; sebaiknya kedua kategori muncul.');
   }
 
   if (isi.bentuk === 'benar_salah' && /\?\s*$/.test(teksPolos(isi.pokok))) lunak.push('Soal benar-salah sebaiknya berupa pernyataan, bukan pertanyaan.');

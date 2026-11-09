@@ -139,4 +139,4 @@ export function levelDariPersen(n: number, persen: [number, number, number]): Re
 }
 
 /** Skor bawaan per soal saat guru menyalakan "Cantumkan skor". */
-export const SKOR_BAWAAN: Record<Bentuk, number> = { pilihan_ganda: 1, pilihan_ganda_kompleks: 2, benar_salah: 1, menjodohkan: 3, isian_singkat: 2, uraian: 5 };
+export const SKOR_BAWAAN: Record<Bentuk, number> = { pilihan_ganda: 1, pilihan_ganda_kompleks: 2, pilihan_ganda_kategori: 2, benar_salah: 1, menjodohkan: 3, isian_singkat: 2, uraian: 5 };

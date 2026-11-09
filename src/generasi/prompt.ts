@@ -2,7 +2,8 @@ import type { Bentuk, IsiSoal, JenisIsian, ParameterPaket, Slot } from '../db/ti
 import { BENTUK_LABEL } from '../db/tipe';
 import { TEMPLAT } from '../gambar';
 import { paketUntuk } from '../paket';
-import { bagianPromptUjian, levelTkaButir } from '../ujian';
+import { bagianPromptUjian, formatPaket, kompetensiBacaButir, levelTkaButir } from '../ujian';
+import { panjangStimulus } from './variasi';
 
 export const SISTEM = `Anda penulis butir soal asesmen untuk sekolah di Indonesia yang memakai Kurikulum Merdeka.
 Kontrak keluaran:
@@ -32,7 +33,8 @@ const SKEMA = `{
   "pokok": "teks soal; rumus sebaris di antara $...$",
   "opsi": {"A": "...", "B": "...", "C": "...", "D": "..."},   // hanya pilihan_ganda dan pilihan_ganda_kompleks
   "pasangan": {"kiri": ["...", "..."], "kanan": ["...", "..."]},   // hanya menjodohkan: kolom kiri bernomor 1, 2, ...; kolom kanan berhuruf A, B, ...
-  "kunci": "...",            // pilihan_ganda: huruf; pilihan_ganda_kompleks: semua huruf benar dipisah koma, mis. "A,C"; benar_salah: "B" atau "S"; menjodohkan: "1-B, 2-A, 3-C"; isian_singkat: jawaban singkat; uraian: jawaban model lengkap
+  "pernyataan": ["...", "..."],   // hanya pilihan_ganda_kategori: pernyataan yang digolongkan ke salah satu kategori
+  "kunci": "...",            // pilihan_ganda: huruf; pilihan_ganda_kompleks: semua huruf benar dipisah koma, mis. "A,C"; benar_salah: "B" atau "S"; menjodohkan: "1-B, 2-A, 3-C"; pilihan_ganda_kategori: satu huruf per pernyataan dipisah "-", B untuk kategori pertama dan S untuk kategori kedua, mis. "B-S-B-S"; isian_singkat: jawaban singkat; uraian: jawaban model lengkap
   "rubrik": ["kriteria (skor)", "..."],   // hanya uraian
   "jenis_uraian": "penjelasan" atau "hitungan",   // hanya uraian: penjelasan bila meminta alasan atau pernyataan, hitungan bila meminta perhitungan
   "pembahasan": ["langkah 1", "langkah 2"],
@@ -56,6 +58,7 @@ const ATURAN_VERIFIKASI = `Aturan verifikasi (pilih satu tipe). Ekspresi memakai
   pilihan_ganda: tepat satu pernyataan benar, yaitu milik opsi kunci. Pakai bila opsi berupa kalimat atau pernyataan perbandingan ("Tali Dayu lebih pendek dari tali Lani" → {"kiri":"3/4","relasi":"<","kanan":"5/6"}), atau bila opsi bilangan diuji syarat pada pokok ("pecahan yang lebih besar dari 3/5": A {"kiri":"1/2","relasi":">","kanan":"3/5"}, B {"kiri":"7/10","relasi":">","kanan":"3/5"}, ...).
   pilihan_ganda_kompleks juga boleh memakai tipe "ekspresi" bila setiap opsi berupa bilangan: opsi benar tepat yang bernilai sama dengan hasil.
 - {"tipe":"pasangan","kiri":["3 * 4","20 - 5","6 + 7"],"kanan":["13","12","15","14"]}  khusus menjodohkan: nilai tiap butir kolom kiri dan kanan berurutan; pasangan benar bernilai sama dan tunggal.
+- {"tipe":"per_pernyataan","pernyataan":[{"kiri":"3/4","relasi":">","kanan":"2/3"},{"kiri":"12 * 15","relasi":"=","kanan":"170"}]}  khusus pilihan_ganda_kategori: satu pernyataan hitung per pernyataan soal, berurutan; pernyataan yang benar berkategori pertama (B), yang salah berkategori kedua (S).
 - {"tipe":"tidak_ada","alasan":"..."} bila jawaban tidak dapat dihitung (konsep, sifat, penalaran), atau bila opsi bukan satu bilangan atau satu tanda (mis. opsi berisi dua pecahan sekaligus). Soal ini akan ditelaah guru.
 Opsi dan kunci bilangan boleh memakai satuan (mis. "112 cm²" atau "$112\\text{ cm}^2$"); satu opsi berisi satu bilangan.
 Bila memakai gambar, ekspresi boleh memakai variabel gambar (lihat daftar templat), mis. "pecahan" atau "nilai[2] - nilai[1]" (indeks mulai 1).`;
@@ -63,6 +66,8 @@ Bila memakai gambar, ekspresi boleh memakai variabel gambar (lihat daftar templa
 const PETUNJUK_BENTUK: Record<Bentuk, string> = {
   pilihan_ganda: 'Pilihan ganda dengan tepat satu jawaban benar.',
   pilihan_ganda_kompleks: 'Pilihan ganda kompleks: sedikitnya dua opsi benar dan sedikitnya satu opsi salah. Pokok meminta siswa memilih semua jawaban yang benar (mis. "Pilihlah semua pernyataan yang benar."). Kunci berisi semua huruf benar.',
+  pilihan_ganda_kategori:
+    'PG kompleks kategori (model TKA): pokok berisi stimulus lalu perintah "Tentukan <kategori pertama> atau <kategori kedua> untuk setiap pernyataan berikut!"; "pernyataan" berisi pernyataan tentang stimulus yang masing-masing tepat masuk satu kategori, dan kedua kategori sama-sama muncul. Jangan menulis pernyataan di dalam pokok. Kunci satu huruf per pernyataan (B kategori pertama, S kategori kedua).',
   menjodohkan: 'Menjodohkan (tarik garis): pokok berupa perintah singkat; "pasangan.kiri" berisi 3 sampai 5 pernyataan atau soal pendek (kecuali diatur lain di bawah), "pasangan.kanan" berisi jawabannya ditambah 1 pengecoh, diacak (urutan kanan tidak sejajar dengan kiri). Setiap butir kiri tepat satu pasangan.',
   isian_singkat: 'Isian singkat: jawaban satu bilangan, kata, atau tanda. Pokok diakhiri titik-titik "....".',
   benar_salah: 'Benar-salah: pokok berupa satu pernyataan (bukan pertanyaan). Kunci "B" atau "S".',
@@ -74,6 +79,12 @@ const GAYA: Record<ParameterPaket['gaya'], string> = {
   numerasi: 'Soal numerasi: konteks kehidupan sehari-hari, data atau situasi nyata yang menuntut penalaran bilangan.',
   literasi: 'Soal literasi: diawali stimulus bacaan singkat yang asli; jawaban ditemukan atau disimpulkan dari stimulus.',
   hots: 'Soal HOTS: menuntut analisis, evaluasi, atau kreasi; hindari soal hafalan.',
+};
+
+const GAYA_PEMBAHASAN: Record<NonNullable<ParameterPaket['gaya_pembahasan']>, string> = {
+  singkat: 'singkat, 1 sampai 3 langkah inti saja.',
+  langkah: 'langkah demi langkah dengan kalimat pendek untuk siswa yang belajar sendiri; satu langkah satu butir, tanpa melompati hitungan.',
+  dddj: 'berformat Diketahui–Ditanya–Dijawab: butir pertama diawali "Diketahui:", butir kedua "Ditanya:", lalu "Dijawab:" diikuti langkah penyelesaian, dan butir terakhir diawali "Jadi,".',
 };
 
 function teksBahasa(p: Pick<ParameterPaket, 'bahasa' | 'bahasa_lain'>): string {
@@ -106,7 +117,7 @@ const JENIS_ISIAN: Record<JenisIsian, string> = {
 };
 
 /** Rincian tambahan untuk bentuk butir ini dari pengaturan guru (opsi, jawaban benar, pasangan, jenis jawaban, skor). */
-export function rincianBentuk(p: ParameterPaket, bentuk: Bentuk): string[] {
+export function rincianBentuk(p: ParameterPaket, bentuk: Bentuk, kesukaran?: Slot['kesukaran']): string[] {
   const a = p.atur_bentuk;
   const r: string[] = [];
   if (bentuk === 'pilihan_ganda' || bentuk === 'pilihan_ganda_kompleks') {
@@ -117,11 +128,56 @@ export function rincianBentuk(p: ParameterPaket, bentuk: Bentuk): string[] {
     const { min, maks } = a.pgk_benar;
     r.push(min === maks ? `Tepat ${min} opsi benar.` : `Banyak opsi benar ${min} sampai ${maks}.`);
   }
+  if (bentuk === 'pilihan_ganda_kategori') {
+    const k = a?.kategori;
+    const [x, y] = k?.label ?? ['Benar', 'Salah'];
+    r.push(`Kategori pertama "${x}", kategori kedua "${y}"; tulis tepat ${k?.pernyataan ?? 4} pernyataan.`);
+  }
   if (bentuk === 'menjodohkan' && a?.jodoh) r.push(`Kolom kiri tepat ${a.jodoh.kiri} butir; kolom kanan ${a.jodoh.kiri + a.jodoh.pengecoh} butir (${a.jodoh.pengecoh ? `${a.jodoh.pengecoh} pengecoh` : 'tanpa pengecoh'}).`);
   if (bentuk === 'isian_singkat' && a?.isian && JENIS_ISIAN[a.isian]) r.push(JENIS_ISIAN[a.isian]);
   if (bentuk === 'uraian' && a?.uraian) r.push(a.uraian === 'hitungan' ? 'Soal meminta perhitungan: isi "jenis_uraian": "hitungan".' : 'Soal meminta alasan atau penjelasan, bukan hitungan: isi "jenis_uraian": "penjelasan".');
-  if (bentuk === 'uraian' && p.skor_bentuk?.uraian) r.push(`Skor soal ini ${p.skor_bentuk.uraian}: jumlah skor dalam kurung pada rubrik harus ${p.skor_bentuk.uraian}.`);
+  const skorUraian = p.skor_kesukaran && kesukaran ? p.skor_kesukaran[kesukaran]?.benar : p.skor_bentuk?.uraian;
+  if (bentuk === 'uraian' && skorUraian) r.push(`Skor soal ini ${skorUraian}: jumlah skor dalam kurung pada rubrik harus ${skorUraian}.`);
   return r;
+}
+
+/**
+ * Stimulus wajib dan variasi butir (F-39): setiap soal diawali cerita, teks, atau situasi yang dibutuhkan untuk
+ * menjawab, dengan tema, bentuk stimulus, dan tokoh yang ditetapkan per butir agar soal satu paket tidak seragam.
+ * Aturan umum stimulus wajib untuk bentuk-bentuk ini (tanpa variasi butir).
+ */
+function aturanStimulus(p: Pick<ParameterPaket, 'kelas' | 'rumpun' | 'materi'> & Partial<Pick<ParameterPaket, 'panjang_stimulus'>>, bentuk: Bentuk[]): string[] {
+  const bahasa = p.rumpun === 'bahasa';
+  const { sasaran } = panjangStimulus(p.kelas, bahasa, p.panjang_stimulus);
+  const aturan = [
+    bahasa
+      ? `Awali "pokok" dengan teks bacaan asli sekitar ${sasaran[0]}–${sasaran[1]} kata sesuai jenis teks pada tujuan pembelajaran, lalu tulis pertanyaan tentang teks itu di paragraf terakhir.`
+      : `Awali "pokok" dengan stimulus asli berupa cerita atau situasi nyata sekitar ${sasaran[0]}–${sasaran[1]} kata (sedikitnya dua kalimat) yang memuat semua data untuk menjawab, lalu tulis pertanyaan di kalimat terakhir.`,
+    'Jawaban hanya dapat diperoleh dengan mengolah informasi dalam stimulus; stimulus bukan hiasan, dan pertanyaan tidak boleh dapat dijawab tanpa membacanya.',
+    'Jangan membuka dengan "Perhatikan cerita berikut" tanpa cerita, dan jangan menulis judul atau label "Stimulus:".',
+    'Pisahkan stimulus dan pertanyaan dengan baris baru. Data berbentuk tabel ditulis sebagai daftar singkat di dalam teks; diagram memakai gambar terprogram bila tersedia.',
+  ];
+  if (bentuk.includes('benar_salah')) aturan.push('Untuk benar-salah: setelah stimulus, tulis satu pernyataan tentang isi stimulus yang dinilai Benar atau Salah.');
+  if (p.materi.trim()) aturan.push('Bila materi dari guru dipakai, stimulus boleh berupa kutipan atau ringkasannya.');
+  return aturan;
+}
+
+/** Tema, bentuk stimulus, dan tokoh butir ini. Konteks dari guru didahulukan atas tema rotasi; TKAD memakai nama tokoh khas daerahnya. */
+function teksVariasi(p: Pick<ParameterPaket, 'konteks' | 'ujian'>, v: NonNullable<Slot['variasi']>): string {
+  const konteksGuru = p.konteks?.trim();
+  const daerah = formatPaket(p)?.keluarga === 'TKAD';
+  return [
+    konteksGuru ? `tema di dalam konteks "${konteksGuru}" dengan sisi yang berbeda dari soal lain` : `tema "${v.tema}"`,
+    `bentuk stimulus: ${v.stimulus}`,
+    daerah ? 'tokoh bernama khas daerah soal, berbeda dari soal lain' : `tokoh utama bernama ${v.tokoh} (tokoh lain boleh ditambah dengan nama yang berbeda dari soal lain)`,
+  ].join('; ');
+}
+
+export function bagianStimulus(p: Pick<ParameterPaket, 'wajib_stimulus' | 'kelas' | 'rumpun' | 'materi' | 'konteks' | 'ujian'> & Partial<Pick<ParameterPaket, 'panjang_stimulus'>>, slot: Pick<Slot, 'bentuk' | 'variasi'>): string {
+  if (!p.wajib_stimulus || slot.bentuk === 'menjodohkan') return '';
+  const aturan = aturanStimulus(p, [slot.bentuk]);
+  if (slot.variasi) aturan.push(`Variasi butir ini (wajib, agar berbeda dari soal lain dalam paket): ${teksVariasi(p, slot.variasi)}.`);
+  return `## Stimulus (wajib)\n${aturan.map((a) => `- ${a}`).join('\n')}`;
 }
 
 export interface KonteksPrompt {
@@ -131,6 +187,8 @@ export interface KonteksPrompt {
   alasanGagal: string[];
   /** Untuk "Buat ulang": soal lama dan catatan guru. */
   revisi?: { lama: IsiSoal; catatan: string } | null;
+  /** Bacaan bersama kelompok butir ini (F-40); pokok hanya berisi pertanyaan. */
+  bacaan?: string | null;
 }
 
 export function susunPesan(k: KonteksPrompt): string {
@@ -146,14 +204,26 @@ export function susunPesan(k: KonteksPrompt): string {
 ${p.cp.trim() ? `- Capaian pembelajaran: ${p.cp.trim()}` : ''}
 - Tujuan pembelajaran: ${tp.rumusan}`);
 
-  const rincian = rincianBentuk(p, slot.bentuk);
+  const rincian = rincianBentuk(p, slot.bentuk, slot.kesukaran);
   bagian.push(`## Butir yang diminta
 - Bentuk: ${BENTUK_LABEL[slot.bentuk]} ("${slot.bentuk}"). ${PETUNJUK_BENTUK[slot.bentuk]}${rincian.length ? ` ${rincian.join(' ')}` : ''}
 - Kesukaran rancangan: ${slot.kesukaran}; level kognitif ${slot.level}.
 - Gaya: ${GAYA[slot.gaya ?? p.gaya]}
-- Bahasa: ${teksBahasa(p)}${p.konteks?.trim() ? `\n- Konteks atau tema yang diminta guru: ${p.konteks.trim()}` : ''}`);
+- Bahasa: ${teksBahasa(p)}${p.gaya_pembahasan ? `\n- Pembahasan: ${GAYA_PEMBAHASAN[p.gaya_pembahasan]}` : ''}${p.konteks?.trim() ? `\n- Konteks atau tema yang diminta guru: ${p.konteks.trim()}` : ''}`);
 
-  const ujian = bagianPromptUjian(p, slot.level);
+  if (k.bacaan) {
+    bagian.push(`## Bacaan bersama (sudah ditulis, dipakai beberapa soal)
+"""
+${k.bacaan}
+"""
+- Jangan menulis ulang bacaan di "pokok": "pokok" hanya berisi pertanyaan atau perintah tentang bacaan ini.
+- Jawaban harus diperoleh dari bacaan. Tanyakan bagian, data, atau aspek yang berbeda dari soal lain dengan bacaan yang sama (lihat daftar soal lain).`);
+  } else {
+    const stimulus = bagianStimulus(p, slot);
+    if (stimulus) bagian.push(stimulus);
+  }
+
+  const ujian = bagianPromptUjian(p, slot.level, slot.urutan);
   if (ujian) bagian.push(ujian);
 
   const tambahan = (p.aturan_tambahan ?? []).map((a) => a.trim()).filter(Boolean);
@@ -175,9 +245,8 @@ ${p.cp.trim() ? `- Capaian pembelajaran: ${p.cp.trim()}` : ''}
   bagian.push(`## Skema JSON\n${SKEMA.replace('<bentuk>', slot.bentuk)}\n\n${ATURAN_VERIFIKASI}`);
 
   if (paket?.contohAcuan.length) {
-    const contoh = paket.contohAcuan.filter((c) => c.bentuk === slot.bentuk).slice(0, 1);
-    const pakai = contoh.length ? contoh : paket.contohAcuan.slice(0, 1);
-    bagian.push(`## Contoh acuan (gaya, bukan untuk disalin)\n${pakai.map((c) => JSON.stringify(c)).join('\n')}`);
+    const contoh = contohAcuan(paket.contohAcuan, slot.bentuk, slot.urutan);
+    bagian.push(`## Contoh acuan (gaya, bukan untuk disalin; topik soal mengikuti TP di atas)\n${JSON.stringify(contoh)}`);
   }
 
   if (p.materi.trim()) bagian.push(`## Materi dari guru (boleh dipakai sebagai stimulus)\n"""\n${p.materi.trim().slice(0, 24000)}\n"""`);
@@ -209,6 +278,8 @@ export interface ButirDiminta {
   slot: Slot;
   /** Alasan penolakan percobaan sebelumnya untuk butir ini; kosong bila percobaan pertama. */
   alasanGagal: string[];
+  /** Bacaan bersama kelompok slot ini (F-40), sudah dibuat sebelum permintaan. */
+  bacaan?: { id: string; teks: string } | null;
 }
 
 export interface KonteksKelompok {
@@ -230,7 +301,8 @@ export function susunPesanKelompok(k: KonteksKelompok): string {
   bagian.push(`## Konteks pembelajaran (diisi guru)
 - Kelas ${p.kelas}, fase ${p.fase}
 - Mata pelajaran: ${p.mapel}${paket ? ` (rumpun ${paket.nama})` : ''}
-${p.cp.trim() ? `- Capaian pembelajaran: ${p.cp.trim()}\n` : ''}${indeksTp.map((i) => `- TP ${i + 1}: ${p.tp[i].rumusan}`).join('\n')}`);
+${p.cp.trim() ? `- Capaian pembelajaran: ${p.cp.trim()}\n` : ''}${indeksTp.map((i) => `- TP ${i + 1}: ${p.tp[i].rumusan}`).join('\n')}
+- Setiap butir mengukur TP yang disebut pada barisnya sendiri; materi dan konteks butir mengikuti TP itu, bukan TP butir lain.`);
 
   const bentuk = [...new Set(butir.map((b) => b.slot.bentuk))];
   bagian.push(`## Bentuk soal
@@ -240,7 +312,26 @@ ${bentuk
     return `- ${BENTUK_LABEL[b]} ("${b}"): ${PETUNJUK_BENTUK[b]}${rincian.length ? ` ${rincian.join(' ')}` : ''}`;
   })
   .join('\n')}
-- Bahasa: ${teksBahasa(p)}${p.konteks?.trim() ? `\n- Konteks atau tema yang diminta guru: ${p.konteks.trim()}` : ''}`);
+- Bahasa: ${teksBahasa(p)}${p.gaya_pembahasan ? `\n- Pembahasan: ${GAYA_PEMBAHASAN[p.gaya_pembahasan]}` : ''}${p.konteks?.trim() ? `\n- Konteks atau tema yang diminta guru: ${p.konteks.trim()}` : ''}`);
+
+  // Bacaan bersama (F-40): tiap bacaan ditulis sekali; butir yang memakainya hanya berisi pertanyaan.
+  const bacaan = new Map<string, { label: string; teks: string }>();
+  for (const b of butir) if (b.bacaan?.teks && !bacaan.has(b.bacaan.id)) bacaan.set(b.bacaan.id, { label: `Bacaan ${String.fromCharCode(65 + bacaan.size)}`, teks: b.bacaan.teks });
+  if (bacaan.size) {
+    bagian.push(`## Bacaan bersama (sudah ditulis, dipakai beberapa butir)
+${[...bacaan.values()].map((x) => `### ${x.label}\n"""\n${x.teks}\n"""`).join('\n\n')}
+- Butir yang memakai bacaan: jangan menulis ulang bacaan di "pokok"; "pokok" hanya berisi pertanyaan atau perintah tentang bacaan itu.
+- Jawaban harus diperoleh dari bacaan. Butir dengan bacaan yang sama menanyakan bagian, data, atau aspek yang berbeda.`);
+  }
+
+  // Stimulus wajib (F-39) untuk butir yang tidak memakai bacaan bersama; variasi tiap butir disebut di daftar.
+  const perluStimulus = (b: ButirDiminta) => p.wajib_stimulus && b.slot.bentuk !== 'menjodohkan' && !b.bacaan?.teks;
+  const berstimulus = butir.filter(perluStimulus);
+  if (berstimulus.length) {
+    const aturan = aturanStimulus(p, [...new Set(berstimulus.map((b) => b.slot.bentuk))]);
+    aturan.push('Setiap butir menulis stimulusnya sendiri dengan tema, bentuk stimulus, dan tokoh yang disebut pada barisnya di daftar butir; jangan memakai cerita, tokoh, atau angka yang sama antarbutir.');
+    bagian.push(`## Stimulus (wajib${bacaan.size ? ' untuk butir tanpa bacaan bersama' : ''})\n${aturan.map((a) => `- ${a}`).join('\n')}`);
+  }
 
   const ujian = bagianPromptUjian(p, null);
   if (ujian) bagian.push(ujian);
@@ -255,9 +346,9 @@ ${bentuk
   bagian.push(`## Skema JSON satu butir\n${SKEMA.replace('{\n', '{\n  "nomor": <nomor butir dari daftar>,\n').replace('<bentuk>', 'bentuk butir itu')}\n\n${ATURAN_VERIFIKASI}`);
 
   if (paket?.contohAcuan.length) {
-    const contoh = bentuk.map((b) => paket.contohAcuan.find((c) => c.bentuk === b)).filter((c) => c !== undefined);
-    const pakai = (contoh.length ? contoh : paket.contohAcuan.slice(0, 1)).slice(0, 3);
-    bagian.push(`## Contoh acuan (gaya, bukan untuk disalin)\n${pakai.map((c) => JSON.stringify(c)).join('\n')}`);
+    const putar = butir[0]?.slot.urutan ?? 0;
+    const pakai = bentuk.map((b, i) => contohAcuan(paket.contohAcuan, b, putar + i)).slice(0, 3);
+    bagian.push(`## Contoh acuan (gaya, bukan untuk disalin; topik soal mengikuti TP masing-masing butir)\n${pakai.map((c) => JSON.stringify(c)).join('\n')}`);
   }
 
   if (p.materi.trim()) bagian.push(`## Materi dari guru (boleh dipakai sebagai stimulus)\n"""\n${p.materi.trim().slice(0, 24000)}\n"""`);
@@ -267,7 +358,15 @@ ${bentuk
   const daftar = butir.map((b, i) => {
     const s = b.slot;
     const tka = levelTkaButir(p, s.level);
-    const baris = `${i + 1}. Bentuk "${s.bentuk}"; kesukaran ${s.kesukaran}; level ${s.level}${tka ? ` (level TKA "${tka}")` : ''}; gaya: ${GAYA[s.gaya ?? p.gaya]} TP ${s.tp_index + 1}.`;
+    const baca = kompetensiBacaButir(p, s.level, s.urutan);
+    const umum = new Set(rincianBentuk(p, s.bentuk));
+    const khusus = rincianBentuk(p, s.bentuk, s.kesukaran).filter((r) => !umum.has(r));
+    const tambahan: string[] = [];
+    if (b.bacaan?.teks) tambahan.push(`Memakai ${bacaan.get(b.bacaan.id)?.label}; "pokok" hanya pertanyaan.`);
+    else if (perluStimulus(b) && s.variasi) tambahan.push(`Stimulus: ${teksVariasi(p, s.variasi)}.`);
+    if (baca) tambahan.push(`Kompetensi membaca: ${baca}`);
+    tambahan.push(...khusus);
+    const baris = `${i + 1}. Bentuk "${s.bentuk}"; kesukaran ${s.kesukaran}; level ${s.level}${tka ? ` (level TKA "${tka}")` : ''}; gaya: ${GAYA[s.gaya ?? p.gaya]} TP ${s.tp_index + 1}.${tambahan.length ? ` ${tambahan.join(' ')}` : ''}`;
     return b.alasanGagal.length ? `${baris}\n   Percobaan sebelumnya ditolak pemeriksa: ${b.alasanGagal.join(' ')} Perbaiki masalah tersebut dan pastikan kunci benar menurut hitungan.` : baris;
   });
   bagian.push(`## Daftar butir yang diminta (${butir.length} butir)\n${daftar.join('\n')}`);
@@ -276,4 +375,14 @@ ${bentuk
     `Keluarkan {"butir": [...]} dengan tepat ${butir.length} objek, satu untuk setiap nomor di daftar. Isi "nomor" sesuai daftar, meta.tp dengan rumusan TP butir itu, serta meta.level dan meta.kesukaran sesuai butirnya. Keluarkan JSON saja.`,
   );
   return bagian.join('\n\n');
+}
+
+/**
+ * Contoh acuan bergiliran: contoh berbentuk sama dipilih menurut nomor butir agar semua soal tidak meniru satu
+ * contoh (penyebab paket Matematika yang hanya berisi pecahan).
+ */
+export function contohAcuan<T extends { bentuk?: Bentuk }>(daftar: T[], bentuk: Bentuk, putar: number): T {
+  const sama = daftar.filter((c) => c.bentuk === bentuk);
+  const pilih = sama.length ? sama : daftar;
+  return pilih[((putar % pilih.length) + pilih.length) % pilih.length];
 }

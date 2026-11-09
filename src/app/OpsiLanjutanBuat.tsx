@@ -1,11 +1,12 @@
 import { useState, type ReactNode } from 'react';
-import type { BarisRincian, Bentuk, GayaSoal, JenisIsian, JenisUraian, Level, ModeGambar, BahasaSoal } from '../db/tipe';
+import type { BahasaSoal, BarisRincian, Bentuk, GayaPembahasan, GayaSoal, JenisIsian, JenisUraian, Level, ModeGambar } from '../db/tipe';
 import { BENTUK_LABEL, GAYA, GAYA_LABEL, LEVEL } from '../db/tipe';
 import { bagiKomposisi } from '../generasi/komposisi';
-import { URUTAN_BENTUK } from '../generasi/rencana';
+import { URUTAN_BENTUK, urutanBentuk } from '../generasi/rencana';
 import { IsianAngka, IsianPanjang, IsianTeks, KartuLipat, OpsiLanjutan, Pemberitahuan, Pilihan, PilihanBanyak, PilihanDaftar, Sakelar } from '../komponen/Formulir';
 import { Tombol } from '../komponen/Tombol';
 import type { FormatUjian } from '../ujian';
+import { rumusanCakupan, type Cakupan } from '../ujian/cakupan';
 import { aturanDariTeks, barisTp, bentukIsian, rincianDariIsian, type galatKartu, type Isian } from './isian-buat';
 import { bagiRata, levelDariPersen, MAKS_SOAL, MIN_SOAL, SKOR_BAWAAN } from './rencana-buat';
 
@@ -33,6 +34,16 @@ const JENIS_ISIAN: { nilai: JenisIsian; label: string }[] = [
 ];
 
 const jumlah = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
+
+/** Pasangan kategori siap pakai untuk PG kompleks kategori; guru juga dapat menulis sendiri. */
+const LABEL_KATEGORI: [string, string][] = [
+  ['Benar', 'Salah'],
+  ['Sesuai', 'Tidak sesuai'],
+  ['Fakta', 'Opini'],
+  ['Ya', 'Tidak'],
+  ['Setuju', 'Tidak setuju'],
+  ['Mungkin', 'Tidak mungkin'],
+];
 
 export function TandaPerbaiki() {
   return <span className="inline-flex min-h-7 items-center rounded-full bg-buruk-latar px-2.5 text-base font-bold text-buruk">Perlu diperbaiki</span>;
@@ -164,6 +175,63 @@ function TabelRincian({ f, ubah, daftarTp, samakan }: { f: Isian; ubah: (u: Part
   );
 }
 
+/** Contoh kalimat petunjuk bagian (placeholder); kalimat bawaan sebenarnya disusun saat berkas dibuat. */
+const PETUNJUK_CONTOH: Record<Bentuk, string> = {
+  pilihan_ganda: 'Pilihlah satu jawaban yang paling tepat dengan memberi tanda silang (X) pada huruf A, B, C, atau D.',
+  pilihan_ganda_kompleks: 'Pilihlah semua jawaban yang benar (lebih dari satu) dengan memberi tanda silang (X).',
+  pilihan_ganda_kategori: 'Tentukan Benar atau Salah untuk setiap pernyataan dengan memberi tanda centang (✓).',
+  benar_salah: 'Berilah tanda centang (✓) pada kolom Benar atau Salah untuk setiap pernyataan.',
+  menjodohkan: 'Pasangkan setiap butir di kolom kiri dengan jawaban yang tepat di kolom kanan dengan menarik garis.',
+  isian_singkat: 'Tuliskan jawabanmu pada titik-titik yang tersedia.',
+  uraian: 'Jawablah dengan jelas pada tempat yang tersedia.',
+};
+
+/** Cakupan materi format ujian (F-40): centang butir yang dipakai dan atur porsi tiap elemen. */
+function KartuCakupan({ cakupan, f, ubah }: { cakupan: Cakupan; f: Isian; ubah: (u: Partial<Isian>) => void }) {
+  const pilih = f.cakupanPilih;
+  const semua = cakupan.butir.map(rumusanCakupan);
+  const dipilih = pilih?.butir ?? semua;
+  const porsi = { ...cakupan.porsi, ...pilih?.porsi };
+  const elemen = Object.keys(cakupan.porsi);
+  const atur = (u: Partial<NonNullable<Isian['cakupanPilih']>>) => ubah({ cakupanPilih: { butir: pilih?.butir ?? null, porsi: pilih?.porsi ?? null, ...u } });
+  const total = elemen.reduce((a, e) => a + (dipilih.some((r) => r.startsWith(`${e} ›`)) ? porsi[e] : 0), 0);
+  return (
+    <KartuLipat judul="Cakupan materi" ket={`${dipilih.length} dari ${semua.length} butir cakupan · dipakai karena CP dan TP kosong`} ingat="buat-kartu-cakupan" tanda={!dipilih.length ? <TandaPerbaiki /> : null}>
+      <p className="text-base text-redup">Soal disebar ke butir yang dicentang. Porsi menentukan perbandingan banyak soal antarelemen; butir di tiap elemen dipakai bergiliran dari titik acak.</p>
+      {elemen.map((e) => {
+        const butir = cakupan.butir.filter((b) => b.elemen === e);
+        const aktif = butir.filter((b) => dipilih.includes(rumusanCakupan(b))).length;
+        return (
+          <div key={e} className="rounded-lg border border-garis p-3">
+            <BarisJumlah id={`porsi-${e}`} label={e} ket={aktif ? `porsi ${total ? Math.round(((porsi[e] ?? 0) / total) * 100) : 0}% · ${aktif} butir` : 'tidak ada butir dicentang'} nilai={porsi[e] ?? 0} min={0} maks={50} ubah={(n) => atur({ porsi: { ...pilih?.porsi, [e]: n } })} />
+            <ul className="mt-2 space-y-1">
+              {butir.map((b) => {
+                const r = rumusanCakupan(b);
+                return (
+                  <li key={r}>
+                    <label className="flex min-h-11 items-start gap-3 text-base">
+                      <input type="checkbox" className="mt-1 size-5 shrink-0 accent-[var(--gs-main-fill)]" checked={dipilih.includes(r)} onChange={(ev) => atur({ butir: ev.target.checked ? semua.filter((x) => x === r || dipilih.includes(x)) : dipilih.filter((x) => x !== r) })} />
+                      <span>
+                        <span className="text-redup">{b.sub}:</span> {b.butir}
+                      </span>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })}
+      {pilih ? (
+        <button type="button" className="min-h-10 text-base font-bold text-utama hover:underline" onClick={() => ubah({ cakupanPilih: null })}>
+          Pakai semua butir dan porsi bawaan
+        </button>
+      ) : null}
+      {!dipilih.length ? <p className="text-base font-bold text-buruk">Centang sedikitnya satu butir cakupan.</p> : null}
+    </KartuLipat>
+  );
+}
+
 export interface PropsOpsiLanjutan {
   f: Isian;
   ubah: (u: Partial<Isian>) => void;
@@ -175,6 +243,8 @@ export interface PropsOpsiLanjutan {
   perBentuk: Partial<Record<Bentuk, number>> | null;
   skorMaks: number | null;
   ujianKini: FormatUjian | null;
+  /** Cakupan materi format ujian yang berlaku (CP dan TP kosong); null bila tidak ada. */
+  cakupan: Cakupan | null;
   kataMateri: number;
   maksKataMateri: number;
   judul: string;
@@ -205,8 +275,16 @@ export default function OpsiLanjutanBuat(p: PropsOpsiLanjutan) {
   const aturanFormat = p.ujianKini ? p.ujianKini.aturan.join('\n') : null;
   const kataMateriLebih = p.kataMateri > p.maksKataMateri;
   const ab = f.aturBentuk;
+  const labelKategori: [string, string] = ab.kategori?.label ?? ['Benar', 'Salah'];
+  const banyakPernyataan = ab.kategori?.pernyataan ?? 4;
   const ubahAb = (u: Partial<Isian['aturBentuk']>) => ubah({ aturBentuk: { ...ab, ...u } });
   const totalGaya = f.jumlahGaya ? jumlah(GAYA.map((g) => f.jumlahGaya![g] ?? 0)) : 0;
+  const urutanTampil = urutanBentuk({ urutan_bentuk: f.urutanBentuk }).filter((b) => dipakai.includes(b));
+  const geserBentuk = (i: number, arah: -1 | 1) => {
+    const u = [...urutanTampil];
+    [u[i], u[i + arah]] = [u[i + arah], u[i]];
+    ubah({ urutanBentuk: [...u, ...urutanBentuk({ urutan_bentuk: f.urutanBentuk }).filter((b) => !u.includes(b))] });
+  };
 
   return (
     <OpsiLanjutan ingat="buat-lanjutan" paksaBuka={p.paksaBuka} ringkasan="susunan, kesukaran, rincian bentuk, skor dan waktu, gaya dan bahasa, aturan AI, gambar, materi, simpan">
@@ -397,6 +475,43 @@ export default function OpsiLanjutanBuat(p: PropsOpsiLanjutan) {
             />
           </div>
         ) : null}
+        {dipakai.includes('pilihan_ganda_kategori') ? (
+          <div>
+            <SubJudul>PG kompleks kategori</SubJudul>
+            <p className="mt-1 text-base text-redup">Satu cerita atau bacaan, lalu beberapa pernyataan yang masing-masing digolongkan ke salah satu dari dua kategori.</p>
+            <PilihanDaftar
+              id="kategori-label"
+              className="mt-3 sm:max-w-sm"
+              label="Pasangan kategori"
+              value={LABEL_KATEGORI.find((l) => l.join('|') === labelKategori.join('|'))?.join('|') ?? 'sendiri'}
+              onChange={(e) => ubahAb({ kategori: { label: e.target.value === 'sendiri' ? ['', ''] : (e.target.value.split('|') as [string, string]), pernyataan: banyakPernyataan } })}
+            >
+              {LABEL_KATEGORI.map((l) => (
+                <option key={l.join('|')} value={l.join('|')}>
+                  {l[0]} / {l[1]}
+                </option>
+              ))}
+              <option value="sendiri">Tulis sendiri…</option>
+            </PilihanDaftar>
+            {!LABEL_KATEGORI.some((l) => l.join('|') === labelKategori.join('|')) ? (
+              <div className="mt-3 grid gap-3 sm:max-w-md sm:grid-cols-2">
+                {[0, 1].map((i) => (
+                  <IsianTeks
+                    key={i}
+                    id={`kategori-${i}`}
+                    label={i === 0 ? 'Kategori pertama' : 'Kategori kedua'}
+                    value={labelKategori[i]}
+                    galat={dicoba && !labelKategori[i].trim() ? 'Isi nama kategori.' : undefined}
+                    onChange={(e) => ubahAb({ kategori: { label: (i === 0 ? [e.target.value, labelKategori[1]] : [labelKategori[0], e.target.value]) as [string, string], pernyataan: banyakPernyataan } })}
+                  />
+                ))}
+              </div>
+            ) : null}
+            <div className="mt-2 sm:max-w-md">
+              <BarisJumlah id="kategori-pernyataan" label="Pernyataan per soal" nilai={banyakPernyataan} min={3} maks={6} ubah={(n) => ubahAb({ kategori: { label: labelKategori, pernyataan: n } })} />
+            </div>
+          </div>
+        ) : null}
         {dipakai.includes('menjodohkan') ? (
           <div>
             <SubJudul>Menjodohkan</SubJudul>
@@ -454,10 +569,39 @@ export default function OpsiLanjutanBuat(p: PropsOpsiLanjutan) {
         <div>
           <Sakelar
             label="Cantumkan skor per soal"
-            petunjuk={f.skorBentuk ? 'Skor tercetak di petunjuk tiap bagian, dan pedoman penskoran ikut berkas kunci jawaban.' : 'Skor tercetak di lembar soal dan pedoman penskoran di kunci jawaban.'}
-            checked={!!f.skorBentuk}
-            ubah={(nyala) => ubah({ skorBentuk: nyala ? Object.fromEntries(URUTAN_BENTUK.map((b) => [b, SKOR_BAWAAN[b]])) : null })}
+            petunjuk={f.skorBentuk || f.skorKesukaran ? 'Skor tercetak di lembar soal, dan pedoman penskoran ikut berkas kunci jawaban.' : 'Skor tercetak di lembar soal dan pedoman penskoran di kunci jawaban.'}
+            checked={!!(f.skorBentuk || f.skorKesukaran)}
+            ubah={(nyala) => ubah({ skorBentuk: nyala ? Object.fromEntries(URUTAN_BENTUK.map((b) => [b, SKOR_BAWAAN[b]])) : null, skorKesukaran: null, skorSalah: null })}
           />
+          {f.skorBentuk || f.skorKesukaran ? (
+            <Pilihan
+              className="mt-3 sm:max-w-xl sm:pl-8"
+              label="Skor ditentukan per"
+              nilai={f.skorKesukaran ? 'kesukaran' : 'bentuk'}
+              ubah={(v) =>
+                ubah(
+                  v === 'kesukaran'
+                    ? { skorKesukaran: { mudah: { benar: 1, salah: 0 }, sedang: { benar: 2, salah: 0 }, sulit: { benar: 3, salah: 0 } }, skorBentuk: null, skorSalah: null }
+                    : { skorBentuk: Object.fromEntries(URUTAN_BENTUK.map((b) => [b, SKOR_BAWAAN[b]])), skorKesukaran: null },
+                )
+              }
+              opsi={[
+                { nilai: 'bentuk', label: 'Bentuk soal', keterangan: 'Sama dalam satu bagian' },
+                { nilai: 'kesukaran', label: 'Tingkat kesukaran', keterangan: 'Mis. OSN: dasar 2, lanjut 4' },
+              ]}
+            />
+          ) : null}
+          {f.skorKesukaran ? (
+            <div className="mt-2 pl-8">
+              {(['mudah', 'sedang', 'sulit'] as const).map((k) => (
+                <div key={k} className="border-b border-garis py-1 last:border-b-0">
+                  <BarisJumlah id={`skor-${k}`} label={`Soal ${k}`} ket="skor bila benar" nilai={f.skorKesukaran![k].benar} min={0} maks={100} ubah={(n) => ubah({ skorKesukaran: { ...f.skorKesukaran!, [k]: { ...f.skorKesukaran![k], benar: n } } })} />
+                  <BarisJumlah id={`salah-${k}`} label={`Soal ${k}`} ket="dikurangi bila salah (kosong tetap 0)" nilai={f.skorKesukaran![k].salah} min={0} maks={100} ubah={(n) => ubah({ skorKesukaran: { ...f.skorKesukaran!, [k]: { ...f.skorKesukaran![k], salah: n } } })} />
+                </div>
+              ))}
+              {p.skorMaks !== null ? <p className="mt-2 text-base font-bold text-tinta tabular-nums">Skor maksimal {p.skorMaks}. Skor tiap soal tercetak di akhir soal.</p> : null}
+            </div>
+          ) : null}
           {f.skorBentuk && dipakai.length ? (
             <div className="mt-2 pl-8">
               {dipakai.map((b) => (
@@ -552,6 +696,109 @@ export default function OpsiLanjutanBuat(p: PropsOpsiLanjutan) {
               {g}
             </p>
           ))}
+      </KartuLipat>
+
+      <KartuLipat judul="Stimulus, bacaan, dan variasi" ket="Cerita di setiap soal, satu bacaan untuk beberapa soal, panjang stimulus, tema, tokoh, dan bentuk stimulus" ingat="buat-kartu-stimulus">
+        <Sakelar
+          label="Setiap soal diawali cerita atau bacaan (stimulus)"
+          petunjuk={
+            f.wajibStimulus
+              ? 'Soal tanpa stimulus yang cukup panjang dibuat ulang otomatis. Tema, bentuk stimulus, dan nama tokoh dibuat berbeda di tiap soal.'
+              : 'Nyalakan agar setiap soal berbasis cerita, teks, atau situasi nyata seperti soal TKA.'
+          }
+          checked={f.wajibStimulus}
+          ubah={(wajibStimulus) => ubah({ wajibStimulus })}
+        />
+        <div>
+          <Sakelar
+            label="Satu bacaan untuk beberapa soal"
+            petunjuk={f.soalPerBacaan ? 'Bacaan dibuat sekali lalu dipakai beberapa soal berurutan dalam satu bentuk; dicetak sekali dengan keterangan nomor soal. Benar-salah dan menjodohkan tidak dikelompokkan.' : 'Seperti TKA: satu teks atau cerita untuk dua sampai lima soal.'}
+            checked={!!f.soalPerBacaan}
+            ubah={(nyala) => ubah({ soalPerBacaan: nyala ? 3 : null })}
+          />
+          {f.soalPerBacaan ? (
+            <div className="mt-2 pl-8 sm:max-w-md">
+              <BarisJumlah id="soal-per-bacaan" label="Soal per bacaan" nilai={f.soalPerBacaan} min={2} maks={5} ubah={(n) => ubah({ soalPerBacaan: n })} />
+            </div>
+          ) : null}
+        </div>
+        <div>
+          <Sakelar
+            label="Atur panjang stimulus sendiri"
+            petunjuk={f.panjangStimulus ? 'Soal yang stimulusnya kurang dari 70% panjang minimal dibuat ulang.' : 'Bila mati, panjang mengikuti jenjang (mis. bacaan SMP 200–250 kata, cerita hitungan SD 35–80 kata).'}
+            checked={!!f.panjangStimulus}
+            ubah={(nyala) => ubah({ panjangStimulus: nyala ? { min: 50, maks: 120 } : null })}
+          />
+          {f.panjangStimulus ? (
+            <div className="mt-2 pl-8 sm:max-w-md">
+              <BarisJumlah id="stimulus-min" label="Paling sedikit (kata)" nilai={f.panjangStimulus.min} min={10} maks={500} ubah={(n) => ubah({ panjangStimulus: { ...f.panjangStimulus!, min: n, maks: Math.max(n, f.panjangStimulus!.maks) } })} />
+              <BarisJumlah id="stimulus-maks" label="Paling banyak (kata)" nilai={f.panjangStimulus.maks} min={10} maks={600} ubah={(n) => ubah({ panjangStimulus: { ...f.panjangStimulus!, maks: Math.max(n, f.panjangStimulus!.min) } })} />
+            </div>
+          ) : null}
+        </div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <IsianPanjang id="variasi-tema" label="Tema sendiri (boleh kosong)" rows={4} value={f.temaTeks} onChange={(e) => ubah({ temaTeks: e.target.value })} placeholder={'Satu tema per baris, mis.\npanen kopi\nlomba perahu naga\npameran sains'} petunjuk="Kosong: 34 tema bawaan." />
+          <IsianPanjang id="variasi-tokoh" label="Nama tokoh sendiri (boleh kosong)" rows={4} value={f.tokohTeks} onChange={(e) => ubah({ tokohTeks: e.target.value })} placeholder={'Satu nama per baris, mis.\nLa Ode\nNi Luh\nUmbu'} petunjuk="Kosong: 48 nama dari berbagai daerah." />
+          <IsianPanjang id="variasi-stimulus" label="Bentuk stimulus sendiri (boleh kosong)" rows={4} value={f.stimulusTeks} onChange={(e) => ubah({ stimulusTeks: e.target.value })} placeholder={'Satu bentuk per baris, mis.\nberita koran sekolah\nresep masakan\njadwal kereta'} petunjuk="Kosong: cerita, daftar data, percakapan, dan lainnya." />
+        </div>
+        {!f.wajibStimulus && (f.temaTeks.trim() || f.tokohTeks.trim() || f.stimulusTeks.trim()) ? <p className="text-base text-redup">Tema, tokoh, dan bentuk stimulus dipakai bila stimulus di setiap soal dinyalakan.</p> : null}
+      </KartuLipat>
+
+      {p.cakupan ? <KartuCakupan cakupan={p.cakupan} f={f} ubah={ubah} /> : null}
+
+      <KartuLipat judul="Lembar soal dan pembahasan" ket="Urutan bagian, kalimat petunjuk tiap bagian, dan gaya pembahasan" ingat="buat-kartu-lembar">
+        <div>
+          <SubJudul>Urutan bagian di lembar soal</SubJudul>
+          <ol className="mt-2 space-y-2">
+            {urutanTampil.map((b, i) => (
+              <li key={b} className="flex items-center justify-between gap-3 rounded-lg border border-garis px-3 py-2">
+                <span className="text-base font-bold text-tinta">
+                  {i + 1}. {BENTUK_LABEL[b]}
+                </span>
+                <span className="flex gap-2">
+                  <Tombol varian="garis" ukuran="kecil" aria-label={`Naikkan ${BENTUK_LABEL[b]}`} disabled={i === 0} onClick={() => geserBentuk(i, -1)}>
+                    ↑
+                  </Tombol>
+                  <Tombol varian="garis" ukuran="kecil" aria-label={`Turunkan ${BENTUK_LABEL[b]}`} disabled={i === urutanTampil.length - 1} onClick={() => geserBentuk(i, 1)}>
+                    ↓
+                  </Tombol>
+                </span>
+              </li>
+            ))}
+          </ol>
+          {f.urutanBentuk ? (
+            <button type="button" className="mt-2 min-h-10 text-base font-bold text-utama hover:underline" onClick={() => ubah({ urutanBentuk: null })}>
+              Kembalikan urutan bawaan
+            </button>
+          ) : null}
+        </div>
+        <div className="space-y-4">
+          <SubJudul>Petunjuk tiap bagian (boleh kosong)</SubJudul>
+          {dipakai.map((b) => (
+            <IsianPanjang
+              key={b}
+              id={`petunjuk-${b}`}
+              label={BENTUK_LABEL[b]}
+              rows={2}
+              value={f.petunjukBagian?.[b] ?? ''}
+              onChange={(e) => ubah({ petunjukBagian: { ...f.petunjukBagian, [b]: e.target.value } })}
+              placeholder={PETUNJUK_CONTOH[b]}
+            />
+          ))}
+          <p className="text-base text-redup">Kosong: kalimat petunjuk bawaan sesuai bentuk soal.</p>
+        </div>
+        <Pilihan
+          className="sm:max-w-2xl"
+          label="Gaya pembahasan"
+          nilai={f.gayaPembahasan ?? 'bawaan'}
+          ubah={(v) => ubah({ gayaPembahasan: v === 'bawaan' ? null : (v as GayaPembahasan) })}
+          opsi={[
+            { nilai: 'bawaan', label: 'Bawaan' },
+            { nilai: 'singkat', label: 'Singkat', keterangan: '1–3 langkah' },
+            { nilai: 'langkah', label: 'Langkah demi langkah' },
+            { nilai: 'dddj', label: 'Diketahui–Ditanya–Dijawab' },
+          ]}
+        />
       </KartuLipat>
 
       <KartuLipat judul="Aturan tambahan untuk AI" ket={p.ujianKini ? `Diisi dari format ${p.ujianKini.nama}; boleh diubah` : 'Permintaan khusus, satu aturan per baris'} ingat="buat-kartu-aturan">

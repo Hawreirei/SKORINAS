@@ -148,7 +148,7 @@ describe('isian layar Buat ↔ parameter', () => {
     expect(p.bentuk).toEqual(['pilihan_ganda', 'isian_singkat']);
     expect(p.jumlah_bentuk).toBeNull();
     // Hanya rincian untuk bentuk yang dipakai yang disimpan.
-    expect(p.atur_bentuk).toEqual({ pgk_benar: null, jodoh: null, isian: 'bilangan', uraian: null });
+    expect(p.atur_bentuk).toEqual({ pgk_benar: null, jodoh: null, isian: 'bilangan', uraian: null, kategori: null });
     expect(p.skor_salah).toEqual({ pilihan_ganda: 0, isian_singkat: 1 });
     expect(p).toMatchObject({ opsi_pg: 3, durasi_menit: 45, jumlah_gaya: { numerasi: 4, hots: 2 }, gaya: 'numerasi', bahasa_lain: 'Sunda', konteks: 'kebun teh', aturan_tambahan: ['Pakai satuan rupiah.', 'Tanpa gambar orang.'] });
     const balik = isianDariParameter(p);

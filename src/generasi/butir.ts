@@ -5,6 +5,7 @@ import { bacaIsiSoal, ekstrakJson, GalatSkema } from '../verifikasi/skema';
 import { periksaSoal, type HasilPeriksa } from '../verifikasi';
 import { seimbangkanKunci } from '../verifikasi/acak';
 import { periksaPengaturan, terapkanPengaturan } from '../verifikasi/pengaturan';
+import { periksaStimulus } from '../verifikasi/stimulus';
 import { susunPesan, susunPesanKelompok, SISTEM, SISTEM_KELOMPOK, type ButirDiminta } from './prompt';
 import { teksPembanding } from '../db/tipe';
 import { teksPolos } from '../matematika/teks';
@@ -39,6 +40,11 @@ export interface MasukanButir {
   konteks?: () => Promise<{ pokokLain: string[]; kunciTerpakai: Partial<Record<HurufOpsi, number>> }>;
   maksPercobaan?: number;
   signal?: AbortSignal;
+  /**
+   * Bacaan bersama kelompok slot ini (F-40). `teks` bila sudah ada; bila belum, `ambil` membuatnya sekali untuk
+   * seluruh kelompok (pengatur mencegah pembuatan ganda saat butir dikerjakan serentak).
+   */
+  bacaan?: { id: string; teks: string | null; ambil?: (kirim: Pengirim, signal?: AbortSignal, catat?: PencatatPercobaan) => Promise<string> } | null;
 }
 
 export type Pengirim = (sistem: string, pesan: string, signal?: AbortSignal, opsi?: { maksKeluar?: number }) => Promise<JawabanAi>;
@@ -58,13 +64,27 @@ export async function buatButir(kirim: Pengirim, m: MasukanButir, catat?: Pencat
   let alasan: string[] = [];
   const maks = m.maksPercobaan ?? MAKS_PERCOBAAN;
   const tp = m.param.tp[m.slot.tp_index];
+  let teksBacaan = m.bacaan?.teks ?? null;
   for (let i = 0; i < maks; i++) {
     if (m.signal?.aborted) return { ok: false, isi: null, periksa: null, percobaan, henti: new GalatAi('dibatalkan', 'Dibatalkan.') };
     // Jatah harian yang dipesan pembatas laju dilepas setelah percobaan ini tercatat (atau tidak akan tercatat).
     let lepas: (() => void) | undefined;
     try {
+      if (m.bacaan && !teksBacaan) {
+        if (!m.bacaan.ambil) throw new Error('Bacaan bersama belum ada.');
+        try {
+          teksBacaan = await m.bacaan.ambil(kirim, m.signal, catat);
+        } catch (e) {
+          const g = e instanceof GalatAi ? e : new GalatAi('lain', (e as Error).message);
+          lepas = g.lepas;
+          percobaan.push({ jawaban: null, alasan: [g.message], isi: null });
+          if (harusBerhenti(g)) return { ok: false, isi: null, periksa: null, percobaan, henti: g };
+          alasan = [g.message];
+          continue;
+        }
+      }
       const ctx = m.konteks ? await m.konteks() : { pokokLain: m.pokokLain, kunciTerpakai: m.kunciTerpakai };
-      const pesan = susunPesan({ param: m.param, slot: m.slot, pokokLain: ctx.pokokLain, alasanGagal: alasan, revisi: m.revisi });
+      const pesan = susunPesan({ param: m.param, slot: m.slot, pokokLain: ctx.pokokLain, alasanGagal: alasan, revisi: m.revisi, bacaan: teksBacaan });
       let jawaban: JawabanAi;
       try {
         jawaban = await kirim(SISTEM, pesan, m.signal);
@@ -81,7 +101,7 @@ export async function buatButir(kirim: Pengirim, m: MasukanButir, catat?: Pencat
       }
       let isi: IsiSoal;
       try {
-        isi = bacaIsiSoal(ekstrakJson(jawaban.teks), { bentuk: m.slot.bentuk, level: m.slot.level, kesukaran: m.slot.kesukaran, tp: tp.rumusan });
+        isi = bacaIsiSoal(ekstrakJson(jawaban.teks), { bentuk: m.slot.bentuk, level: m.slot.level, kesukaran: m.slot.kesukaran, tp: tp.rumusan, kategori: m.param.atur_bentuk?.kategori?.label });
       } catch (e) {
         alasan = e instanceof GalatSkema ? e.daftar : [(e as Error).message];
         const p = { jawaban, alasan, isi: null };
@@ -90,19 +110,24 @@ export async function buatButir(kirim: Pengirim, m: MasukanButir, catat?: Pencat
         continue;
       }
       isi = terapkanPengaturan(isi, m.param.atur_bentuk);
+      if (m.bacaan && teksBacaan) isi = { ...isi, stimulus: { id: m.bacaan.id, teks: teksBacaan } };
       const terbaru = m.konteks ? await m.konteks() : ctx;
       const periksa = periksaSoal(isi, {
         rumpun: m.param.rumpun,
         kelas: m.param.kelas,
         fase: m.param.fase,
         lokal: m.param.bahasa === 'en' ? 'en' : 'id',
-        literasi: (m.slot.gaya ?? m.param.gaya) === 'literasi',
+        literasi: (m.slot.gaya ?? m.param.gaya) === 'literasi' || m.param.wajib_stimulus,
         pokokLain: terbaru.pokokLain,
         gambarDiizinkan: m.param.gambar !== 'mati',
         opsiPg: m.param.opsi_pg ? { jumlah: m.param.opsi_pg, wajib: true } : null,
       });
       // Rincian tiap bentuk dari guru (jumlah jawaban benar, pasangan, jenis jawaban isian) juga wajib dipenuhi.
-      const langgar = periksaPengaturan(isi, m.param.atur_bentuk, m.param.bahasa === 'en' ? 'en' : 'id');
+      const langgar = [
+        ...periksaPengaturan(isi, m.param.atur_bentuk, m.param.bahasa === 'en' ? 'en' : 'id'),
+        // Paket berstimulus wajib (mis. TKA): soal tanpa cerita atau bacaan yang cukup dibuat ulang.
+        ...(m.param.wajib_stimulus && !isi.stimulus ? periksaStimulus(isi, { kelas: m.param.kelas, bahasa: m.param.rumpun === 'bahasa', panjang: m.param.panjang_stimulus }) : []),
+      ];
       const lolos = periksa.lolos && !langgar.length;
       const p: Percobaan = { jawaban, alasan: [...periksa.alasan, ...langgar], isi };
       percobaan.push(p);
@@ -217,24 +242,31 @@ export async function buatKelompok(kirim: Pengirim, m: MasukanKelompok, catat?: 
       const { nomor: _nomor, ...data } = x as Record<string, unknown>;
       let isi: IsiSoal;
       try {
-        isi = bacaIsiSoal(data, { bentuk: slot.bentuk, level: slot.level, kesukaran: slot.kesukaran, tp: tp.rumusan });
+        isi = bacaIsiSoal(data, { bentuk: slot.bentuk, level: slot.level, kesukaran: slot.kesukaran, tp: tp.rumusan, kategori: m.param.atur_bentuk?.kategori?.label });
       } catch (e) {
         hasil.push({ ok: false, isi: null, periksa: null, alasan: e instanceof GalatSkema ? e.daftar : [(e as Error).message] });
         continue;
       }
       isi = terapkanPengaturan(isi, m.param.atur_bentuk);
+      // Bacaan bersama (F-40): disalin ke soal agar dicetak sekali untuk kelompoknya.
+      const bacaan = m.butir[i].bacaan;
+      if (bacaan) isi = { ...isi, stimulus: { id: bacaan.id, teks: bacaan.teks } };
       // Butir lain yang sudah lolos dalam permintaan yang sama ikut dibandingkan kemiripannya.
       const periksa = periksaSoal(isi, {
         rumpun: m.param.rumpun,
         kelas: m.param.kelas,
         fase: m.param.fase,
         lokal: m.param.bahasa === 'en' ? 'en' : 'id',
-        literasi: (slot.gaya ?? m.param.gaya) === 'literasi',
+        literasi: (slot.gaya ?? m.param.gaya) === 'literasi' || m.param.wajib_stimulus,
         pokokLain: pokok,
         gambarDiizinkan: m.param.gambar !== 'mati',
         opsiPg: m.param.opsi_pg ? { jumlah: m.param.opsi_pg, wajib: true } : null,
       });
-      const langgar = periksaPengaturan(isi, m.param.atur_bentuk, m.param.bahasa === 'en' ? 'en' : 'id');
+      const langgar = [
+        ...periksaPengaturan(isi, m.param.atur_bentuk, m.param.bahasa === 'en' ? 'en' : 'id'),
+        // Paket berstimulus wajib (mis. TKA): soal tanpa cerita atau bacaan yang cukup dibuat ulang (F-39).
+        ...(m.param.wajib_stimulus && !isi.stimulus ? periksaStimulus(isi, { kelas: m.param.kelas, bahasa: m.param.rumpun === 'bahasa', panjang: m.param.panjang_stimulus }) : []),
+      ];
       const lolos = periksa.lolos && !langgar.length;
       if (lolos) pokok.push(teksPolos(teksPembanding(isi)));
       hasil.push({ ok: lolos, isi, periksa: lolos ? periksa : null, alasan: [...periksa.alasan, ...langgar] });

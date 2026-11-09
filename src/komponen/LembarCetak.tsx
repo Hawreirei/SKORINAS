@@ -1,6 +1,6 @@
 import type { HurufOpsi } from '../db/tipe';
-import { HURUF_KANAN } from '../db/tipe';
-import { kolomOpsi, teksPenskoran, type BagianDok, type ButirDok, type DokumenSoal } from '../ekspor/model';
+import { HURUF_KANAN, KATEGORI_BAWAAN } from '../db/tipe';
+import { kolomOpsi, pengantarBacaan, teksPenskoran, type BagianDok, type ButirDok, type DokumenSoal } from '../ekspor/model';
 import { GambarSvg, TeksSoal } from './TeksSoal';
 
 function TempatJawab({ b, d }: { b: ButirDok; d: DokumenSoal }) {
@@ -71,15 +71,59 @@ function KolomJodoh({ b }: { b: ButirDok }) {
   );
 }
 
+/** PG kompleks kategori: tabel No | Pernyataan | dua kategori, kolom kategori dikosongkan. */
+function TabelKategori({ b, d }: { b: ButirDok; d: DokumenSoal }) {
+  const isi = b.soal.isi_json;
+  if (!isi.pernyataan?.length) return null;
+  const [ka, kb] = isi.kategori ?? KATEGORI_BAWAAN;
+  const sel = 'border border-black px-[0.4em] py-[0.25em]';
+  return (
+    <table className="mt-[0.3em] w-full border-collapse">
+      <thead>
+        <tr className="bg-[#f2f2f2]">
+          <th className={`${sel} w-[2.5em]`}>No</th>
+          <th className={sel}>{d.inggris ? 'Statement' : 'Pernyataan'}</th>
+          <th className={`${sel} w-[5em]`}>{ka}</th>
+          <th className={`${sel} w-[5em]`}>{kb}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {isi.pernyataan.map((x, i) => (
+          <tr key={i}>
+            <td className={`${sel} text-center`}>{i + 1}</td>
+            <td className={sel}>
+              <TeksSoal teks={x} />
+            </td>
+            <td className={sel} />
+            <td className={sel} />
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
 function Butir({ b, d }: { b: ButirDok; d: DokumenSoal }) {
   const isi = b.soal.isi_json;
   const huruf = Object.keys(isi.opsi ?? {}).sort() as HurufOpsi[];
   return (
     <div className="break-inside-avoid py-[0.4em]">
+      {b.bacaan ? (
+        <div className="mb-[0.4em]">
+          <div className="font-bold italic">{pengantarBacaan(b.bacaan, d.inggris)}</div>
+          {b.bacaan.teks
+            .split(/\n+/)
+            .filter((x) => x.trim())
+            .map((x, i) => (
+              <TeksSoal key={i} as="p" teks={x.trim()} className="mt-[0.2em] text-justify indent-[1.5em]" />
+            ))}
+        </div>
+      ) : null}
       <div className="flex">
         <span className="w-[1.8em] shrink-0">{b.nomor}.</span>
         <div className="min-w-0 flex-1">
           <TeksSoal as="div" teks={isi.pokok} />
+          {b.skorButir ? <div className="text-right font-bold">({b.skorButir} {d.inggris ? 'points' : 'poin'})</div> : null}
           {isi.terjemahan?.pokok ? <TeksSoal as="div" teks={isi.terjemahan.pokok} className="italic text-[#4b5563]" /> : null}
           {b.svg ? <GambarSvg svg={b.svg} className="my-[0.4em] !p-0" maks={b.gambar && b.gambar.lebar < 300 ? 180 : 360} /> : null}
           {huruf.length ? (
@@ -93,6 +137,7 @@ function Butir({ b, d }: { b: ButirDok; d: DokumenSoal }) {
             </div>
           ) : null}
           <KolomJodoh b={b} />
+          <TabelKategori b={b} d={d} />
           <TempatJawab b={b} d={d} />
         </div>
       </div>
@@ -148,7 +193,7 @@ function TabelBenarSalah({ bg, d }: { bg: BagianDok; d: DokumenSoal }) {
 
 /** Pedoman penskoran di berkas kunci jawaban: skor per bentuk soal, skor maksimal, dan rumus nilai. */
 function TabelPenskoran({ d }: { d: DokumenSoal }) {
-  const t = teksPenskoran(d.inggris);
+  const t = teksPenskoran(d.inggris, !!d.penskoran?.perKesukaran);
   const sel = 'border border-black p-[0.3em]';
   return (
     <div className="mt-[1.2em] break-inside-avoid">

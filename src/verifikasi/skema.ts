@@ -1,5 +1,5 @@
 import type { Bentuk, GambarSoal, HurufOpsi, IsiSoal, JenisUraian, Kesukaran, Level, Pernyataan, Verifikasi } from '../db/tipe';
-import { HURUF_KANAN, hurufKunci, petaJodoh, teksJodoh } from '../db/tipe';
+import { HURUF_KANAN, KATEGORI_BAWAAN, hurufKunci, petaJodoh, petaKategori, teksJodoh, teksKategori } from '../db/tipe';
 
 export class GalatSkema extends Error {
   constructor(public readonly daftar: string[]) {
@@ -92,10 +92,21 @@ function bacaVerifikasi(v: unknown, galat: string[]): Verifikasi {
       if (!kiri.length || !kanan.length || [...kiri, ...kanan].some((x) => !x)) galat.push('verifikasi pasangan memerlukan nilai untuk setiap butir kolom kiri dan kanan.');
       return { tipe: 'pasangan', kiri, kanan };
     }
+    case 'per_pernyataan': {
+      const mentah = Array.isArray(o.pernyataan) ? o.pernyataan : [];
+      const pernyataan: Pernyataan[] = [];
+      for (const [i, x] of mentah.entries()) {
+        const p = (x ?? {}) as Record<string, unknown>;
+        if (!s(p.kiri) || !s(p.kanan)) galat.push(`verifikasi per_pernyataan nomor ${i + 1} memerlukan kiri, relasi, dan kanan.`);
+        pernyataan.push({ kiri: s(p.kiri), relasi: s(p.relasi) || '=', kanan: s(p.kanan) });
+      }
+      if (!pernyataan.length) galat.push('verifikasi per_pernyataan memerlukan satu pernyataan hitung untuk setiap pernyataan soal.');
+      return { tipe: 'per_pernyataan', pernyataan };
+    }
     case 'tidak_ada':
       return { tipe: 'tidak_ada', alasan: s(o.alasan) };
     default:
-      galat.push('verifikasi.tipe harus ekspresi, perbandingan, urutan, per_opsi, pasangan, atau tidak_ada.');
+      galat.push('verifikasi.tipe harus ekspresi, perbandingan, urutan, per_opsi, per_pernyataan, pasangan, atau tidak_ada.');
       return { tipe: 'tidak_ada' };
   }
 }
@@ -168,6 +179,8 @@ export interface HarapanSkema {
   level: Level;
   kesukaran: Kesukaran;
   tp: string;
+  /** PG kompleks kategori: label kategori paket (bawaan Benar/Salah). */
+  kategori?: [string, string];
 }
 
 /** Validasi keluaran model terhadap skema isi_json. Melempar GalatSkema berisi semua masalah. */
@@ -179,6 +192,8 @@ export function bacaIsiSoal(mentah: unknown, harapan: HarapanSkema): IsiSoal {
   const pokok = teksWajib(o.pokok, 'pokok', galat);
   let opsi: IsiSoal['opsi'];
   let pasangan: IsiSoal['pasangan'];
+  let pernyataan: string[] | undefined;
+  let kategori: [string, string] | undefined;
   let kunci = '';
   let rubrik: string[] | undefined;
   let jenis_uraian: JenisUraian | undefined;
@@ -209,6 +224,15 @@ export function bacaIsiSoal(mentah: unknown, harapan: HarapanSkema): IsiSoal {
       if (peta.some((j) => j < 0 || j >= kanan.length)) galat.push('kunci harus memasangkan setiap butir kolom kiri dengan satu huruf kolom kanan, mis. "1-B, 2-A".');
       else if (new Set(peta).size !== peta.length) galat.push('Setiap butir kolom kanan hanya boleh dipasangkan sekali.');
       kunci = teksJodoh(peta);
+      break;
+    }
+    case 'pilihan_ganda_kategori': {
+      kategori = harapan.kategori ?? KATEGORI_BAWAAN;
+      pernyataan = daftarTeks(o.pernyataan, 'pernyataan', galat);
+      if (pernyataan.length < 3 || pernyataan.length > 6) galat.push(`PG kompleks kategori harus berisi 3 sampai 6 pernyataan, bukan ${pernyataan.length}.`);
+      const peta = petaKategori(Array.isArray(o.kunci) ? o.kunci.map(String) : String(o.kunci ?? ''), pernyataan.length, kategori);
+      if (peta.some((j) => j < 0)) galat.push(`kunci harus satu kategori untuk setiap pernyataan, mis. "B-S-B" (B = ${kategori[0]}, S = ${kategori[1]}).`);
+      kunci = teksKategori(peta);
       break;
     }
     case 'benar_salah': {
@@ -253,6 +277,7 @@ export function bacaIsiSoal(mentah: unknown, harapan: HarapanSkema): IsiSoal {
     pokok,
     ...(opsi ? { opsi } : {}),
     ...(pasangan ? { pasangan } : {}),
+    ...(pernyataan ? { pernyataan, kategori } : {}),
     kunci,
     ...(rubrik ? { rubrik } : {}),
     ...(jenis_uraian ? { jenis_uraian } : {}),

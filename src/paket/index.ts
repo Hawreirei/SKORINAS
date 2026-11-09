@@ -45,7 +45,7 @@ const POLA_RUMPUN: [Rumpun, RegExp][] = [
   ['ipa', /\bipas?\b|fisika|kimia|biologi|sains|science|ilmu pengetahuan alam|astronomi|kebumian/i],
   ['pancasila_agama', /pancasila|\bppkn\b|\bpkn\b|agama|budi pekerti|kewarganegaraan|akidah|fikih|fiqih|quran|hadis|hadits|sejarah kebudayaan islam/i],
   ['ips', /\bips\b|sejarah|geografi|ekonomi|sosiologi|antropologi|ilmu pengetahuan sosial/i],
-  ['bahasa', /bahasa|english|inggris|arab|jawa|sunda|mandarin|literasi/i],
+  ['bahasa', /bahasa|english|inggris|arab|jawa|sunda|mandarin|jepang|jerman|korea|prancis|perancis|literasi/i],
   ['seni_pjok_informatika', /seni|musik|tari|rupa|teater|\bpjok\b|jasmani|olahraga|informatika|prakarya|\btik\b|koding/i],
 ];
 

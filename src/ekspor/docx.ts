@@ -24,9 +24,9 @@ import {
   type XmlComponent,
 } from 'docx';
 import type { HurufOpsi } from '../db/tipe';
-import { HURUF_KANAN } from '../db/tipe';
+import { HURUF_KANAN, KATEGORI_BAWAAN } from '../db/tipe';
 import { uraiTeks, type Simpul } from '../matematika/teks';
-import { FONT_DOKUMEN, UKURAN_DOKUMEN, kolomOpsi, teksPenskoran, type BagianDok, type ButirDok, type DokumenSoal } from './model';
+import { FONT_DOKUMEN, UKURAN_DOKUMEN, kolomOpsi, pengantarBacaan, teksPenskoran, type BagianDok, type ButirDok, type DokumenSoal } from './model';
 
 /** Ubah SVG ke PNG (Word memerlukan gambar raster). Disuntikkan agar modul ini dapat diuji tanpa kanvas. */
 export type UbahPng = (svg: string, lebarPx: number, tinggiPx: number) => Promise<Uint8Array>;
@@ -157,8 +157,12 @@ async function butirKeParagraf(b: ButirDok, d: DokumenSoal, ubahPng: UbahPng): P
   const isi = b.soal.isi_json;
   const hasil: (Paragraph | Table)[] = [];
   const t = b.tempat;
-  const adaSesudah = !!isi.opsi || !!isi.pasangan || t.jenis !== 'tidak_ada' || !!b.gambar;
-  hasil.push(p([tr(`${b.nomor}.\t`), ...teksKeRun(isi.pokok)], { indent: { left: INDEN, hanging: INDEN }, tabStops: [{ type: TabStopType.LEFT, position: INDEN }], spacing: { before: 160, after: 60 }, keepNext: true, keepLines: true }));
+  const adaSesudah = !!isi.opsi || !!isi.pasangan || !!isi.pernyataan || t.jenis !== 'tidak_ada' || !!b.gambar;
+  if (b.bacaan) {
+    hasil.push(p([tr(pengantarBacaan(b.bacaan, d.inggris), { tebal: true, miring: true })], { spacing: { before: 200, after: 60 }, keepNext: true }));
+    for (const par of b.bacaan.teks.split(/\n+/).filter((x) => x.trim())) hasil.push(p(teksKeRun(par.trim()), { alignment: AlignmentType.JUSTIFIED, indent: { firstLine: 360 }, spacing: { after: 60 }, keepNext: true }));
+  }
+  hasil.push(p([tr(`${b.nomor}.\t`), ...teksKeRun(isi.pokok), ...(b.skorButir ? [tr(` (${b.skorButir} ${d.inggris ? 'points' : 'poin'})`, { tebal: true })] : [])], { indent: { left: INDEN, hanging: INDEN }, tabStops: [{ type: TabStopType.LEFT, position: INDEN }], spacing: { before: 160, after: 60 }, keepNext: true, keepLines: true }));
   if (isi.terjemahan?.pokok) hasil.push(p(teksKeRun(isi.terjemahan.pokok, { miring: true }), { indent: { left: INDEN }, keepNext: adaSesudah }));
   const g = await gambarButir(b, ubahPng);
   if (g) hasil.push(g);
@@ -177,6 +181,7 @@ async function butirKeParagraf(b: ButirDok, d: DokumenSoal, ubahPng: UbahPng): P
     }
   }
   if (isi.pasangan) hasil.push(tabelJodoh(isi.pasangan));
+  if (isi.pernyataan?.length) hasil.push(tabelKategori(isi.pernyataan, isi.kategori ?? KATEGORI_BAWAAN));
   if (t.jenis === 'titik') hasil.push(p([tr(d.inggris ? 'Answer : ' : 'Jawaban : '), tr('.'.repeat(60))], { indent: { left: INDEN }, spacing: { before: 80, after: 60 } }));
   if (t.jenis === 'kotak') hasil.push(labelDanKotak(d.inggris ? 'Answer :' : 'Jawaban :', 3400, false));
   if (t.jenis === 'garis') {
@@ -225,9 +230,30 @@ function tabelJodoh(pasangan: { kiri: string[]; kanan: string[] }): Table {
   });
 }
 
+/** PG kompleks kategori: tabel No | Pernyataan | kategori pertama | kategori kedua, kolom kategori dikosongkan. */
+function tabelKategori(pernyataan: string[], label: [string, string]): Table {
+  const lebar = [600, LEBAR_ISI - INDEN - 600 - 2400, 1200, 1200];
+  return new Table({
+    width: { size: LEBAR_ISI - INDEN, type: WidthType.DXA },
+    columnWidths: lebar,
+    indent: { size: INDEN, type: WidthType.DXA },
+    borders: { top: GARIS, bottom: GARIS, left: GARIS, right: GARIS, insideHorizontal: GARIS, insideVertical: GARIS },
+    rows: [
+      new TableRow({ tableHeader: true, cantSplit: true, children: ['No', 'Pernyataan', label[0], label[1]].map((k, i) => selTabel([tr(k, { tebal: true })], lebar[i], { tengah: true, abu: true, keepNext: true })) }),
+      ...pernyataan.map(
+        (x, i) =>
+          new TableRow({
+            cantSplit: true,
+            children: [selTabel([tr(String(i + 1))], lebar[0], { tengah: true, keepNext: i < pernyataan.length - 1 }), selTabel(teksKeRun(x), lebar[1], { keepNext: i < pernyataan.length - 1 }), selTabel([], lebar[2]), selTabel([], lebar[3])],
+          }),
+      ),
+    ],
+  });
+}
+
 /** Pedoman penskoran di berkas kunci jawaban. */
 function tabelPenskoran(d: DokumenSoal): (Paragraph | Table)[] {
-  const t = teksPenskoran(d.inggris);
+  const t = teksPenskoran(d.inggris, !!d.penskoran?.perKesukaran);
   const lebar = [40, 20, 20, 20];
   const selTeks = (teks: string, i: number, tebal = false) =>
     new TableCell({

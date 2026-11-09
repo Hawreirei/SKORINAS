@@ -1,0 +1,743 @@
+{
+"sd_wajib_bahasa-indonesia": {
+"nama": "Bahasa Indonesia",
+"jenjang": "SD",
+"jenis": "wajib",
+"definisi": "TKA Bahasa Indonesia SD/MI/sederajat difokuskan pada salah satu keterampilan berbahasa, yakni membaca. Membaca dipilih sebagai fokus karena merupakan keterampilan yang menjadi fondasi untuk terus belajar dan bekerja pada era teknologi yang berubah dan berkembang sangat cepat",
+"muatan": "Keterampilan membaca diujikan pada dua jenis teks, yaitu teks informasi dan teks fiksi. Teks informasi merupakan teks yang berisi fakta sederhana dari berbagai bidang atau topik serta berskala lokal dan nasional. Teks fiksi merupakan cerita rekaan yang dapat berupa fantasi atau faktual (sejarah/biografi) dengan latar cerita konkret, tokoh berkarakter datar, konflik tunggal dengan penyelesaian tertutup, alur maju, dan sudut pandang orang pertama. Teks yang digunakan TKA memiliki karakteristik kosakata, kalimat, dan wacana sebagai berikut. Karakteristik kosakata: kata dasar, kata berimbuhan, kata konkret, dominan makna denotatif, makna konotatif konteks terbatas. Karakteristik kalimat: jumlah kata 3–7 per kalimat, pola kalimat dasar SPOK, struktur bahasa tulis bercampur bahasa lisan terbatas. Karakteristik wacana: kohesi pengacuan/referensi, konjungsi antarparagraf penambahan/penjelasan; p",
+"baca": {
+"Pemahaman Tekstual": [
+"Mengidentifikasi penggunaan kosakata umum dan khusus dalam berbagai bidang",
+"Mengidentifikasi objek berdasarkan kosakata yang digunakan dalam teks fiksi atau nonfiksi",
+"Menyusun kembali informasi dari teks dalam bentuk ikhtisar/bagan",
+"Mengidentifikasi informasi tersurat dalam teks"
+],
+"Pemahaman Inferensial": [
+"Menyimpulkan ide pokok, gagasan pendukung, amanat, tokoh, peristiwa, dan/atau nilai-nilai dalam teks",
+"Menyimpulkan perubahan sederhana pada objek, karakter, dan/atau latar dalam teks fiksi atau nonfiksi",
+"Menjelaskan makna ungkapan yang digunakan dalam teks"
+],
+"Evaluasi dan Apresiasi": [
+"Menilai relevansi peristiwa dalam teks dengan kehidupan sehari-hari berdasarkan pengalaman atau pengetahuan pribadi",
+"Menilai kesesuaian antarunsur dan/atau antarinformasi dalam teks",
+"Menyimpulkan respons emosional terhadap unsur teks fiksi"
+]
+}
+},
+"sd_wajib_matematika": {
+"nama": "Matematika",
+"jenjang": "SD",
+"jenis": "wajib",
+"definisi": "TKA Matematika SD/MI/sederajat mengukur kemampuan murid dalam memahami fakta, konsep, prinsip, dan prosedur matematika, serta kemampuan mereka dalam menerapkan pengetahuan matematika untuk menyelesaikan masalah (problem solving)",
+"muatan": "Muatan TKA Matematika SD/MI/sederajat merujuk pada elemen kurikulum atau materi matematika yang dipelajari murid yang ada pada Kurikulum 2013 dan Kurikulum Merdeka. Elemen ini meliputi: Bilangan Geometri dan Pengukuran Data"
+},
+"sma_pilihan_agribisnis-perikanan-smk-mak": {
+"nama": "SMK - Agribisnis Perikanan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Agribisnis Perikanan mengukur kemampuan murid dalam Menjelaskan, Mengidentifikasi, Menerapkan, Menentukan, Melakukan, Menganalisis, dan Mengevaluasi komoditas, teknologi budidaya, dan analisis usaha perikanan secara berkelanjutan dengan memperhatikan standar K3 serta isu ekologi global",
+"muatan": "Muatan TKA Agribisnis Perikanan merujuk pada kurikulum atau materi Fase E yang dipelajari murid yang ada pada keputusan kepala badan standar, kurikulum, dan asesmen pendidikan kementerian pendidikan dasar dan menengah nomor 046/H/KR/2025. Elemen ini meliputi: Wawasan dunia kerja bidang perikanan: Jenis jenis produk perikanan, Jenis usaha dan profesi perikanan, dan Peluang pasar perikanan Komoditas perikanan dalam ekosistem perairan: Ekosistem Perairan, Morfologi Ikan, Anatomi Ikan, Jenis-jenis budidaya perikanan, Tahapan Proses Produksi, Budidaya Berkelanjutan, Inovasi teknologi pada budidaya, dan Ketahanan Pangan Global. Kecakapan kerja dasar, k3, dan budaya kerja: Keselamatan, Kesehatan Kerja, dan Lingkungan Hidup (K3LH) di bidang agribisnis perikanan, Penggunaan APD, dan Penanganan P3K"
+},
+"sma_pilihan_agribisnis-tanaman-smk-mak": {
+"nama": "SMK - Agribisnis Tanaman",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Agribisnis Tanaman bertujuan untuk mengukur ketercapaian kompetensi murid yang mencakup aspek pengetahuan, keterampilan, sikap kerja di bidang agribisnis tanaman, serta menggambarkan kesiapan murid sebagai lulusan yang kompeten, adaptif, dan memiliki jiwa kewirausahaan yang selaras dengan kebutuhan dunia kerja dan industri pertanian",
+"muatan": "Muatan TKA Agribisnis Tanaman merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 46 Tahun 2025. Muatan tersebut terdiri dari dua elemen, yaitu: Wawasan dunia kerja bidang agribisnis tanaman: wawasan dunia kerja, aktivitas manajemen produksi, peluang usaha, agripreneur, kebekerjaan di bidang agribisnis tanaman, pelestarian kearifan lokal terkait produk unggulan lokal, Perkembangan teknologi pada proses produksi dan pertanian berkelanjutan. Kecakapan kerja, penerapan K3 dan budaya kerja bidang agribisnis tanaman: kemampuan dalam menerapkan prosedur K3, teknik pra tanam, teknik proses produksi tanaman, teknik perkembangbiakan tanaman, dan sikap kerja (soft skill) lingkungan kerja"
+},
+"sma_pilihan_agribisnis-ternak-smk-mak": {
+"nama": "SMK - Agribisnis Ternak",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kompetensi Akademik (TKA) Agribisnis Ternak mengukur kemampuan murid dalam memahami wawasan dunia kerja di bidang agribisnis ternak, termasuk penerapan teknologi peternakan, dampak perubahan iklim terhadap keberlanjutan usaha, prinsip-prinsip peternakan berkelanjutan, penguasaan dasar-dasar pemeliharaan ternak, dan penerapan K3LH",
+"muatan": "Muatan TKA Agribisnis Ternak merujuk pada elemen kurikulum yang ada pada capaian pembelajaran berdasarkan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025, elemen dan sub elemennya meliputi: Wawasan dunia kerja bidang agribisnis ternak, sub elemen peluang bisnis peternakan dan profil agripreneur. Kecakapan kerja dasar (basic job skills), K3LH, dan budaya kerja sub elemen teknologi peternakan, dampak perubahan iklim terhadap agribisnis peternakan berkelanjutan, dasar pemeliharaan ternak dengan menerapkan K3LH, penanganan komoditas peternakan dan keamanan produk peternakan"
+},
+"sma_pilihan_agriteknologi-pengolahan-hasil-pertanian-smk-mak": {
+"nama": "SMK - Agriteknologi Pengolahan Hasil Pertanian",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) Agriteknologi Pengolahan Hasil Pertanian merupakan instrumen penilaian yang menggambarkan secara utuh kompetensi mata pelajaran sesuai dengan Capaian Pembelajaran (CP) pada program keahlian Agriteknologi Pengolahan Hasil Pertanian. TKA ini mencakup penguasaan wawasan dunia kerja agroindustri serta kemampuan teknis dalam penanganan, pengolahan, dan pengujian mutu hasil pertanian, termasuk penerapan proses termal, konversi bahan, proses kimia dan biokimia (fermentasi dan enzimatis), serta praktik laboratorium sesuai standar (GMP, GLP, dan K3LH). Selain itu, TKA menilai kemampuan berpikir kritis, analitis, dan problem solving dalam menghadapi permasalahan kontekstua",
+"muatan": "Muatan ini merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen capaian pembelajaran mengintegrasikan logika program keahlian dengan permasalahan kontekstual, yang meliputi: Wawasan Dunia Kerja Bidang APHP: Mєliputi konsep, klasifikasi, dan lingkup industri pєngolahan hasil pertanian, perencanaan, proses produksi, pemasaran dan pengelolaan sumberdaya, teknologi dan informasi serta wirausaha pengolahan hasil pertanian dan lapangan kerja,. Muatan ini juga mengeksplorasi penggunaan teknologi modern seperti bioteknologi, nanoteknologi, otomatisasi, digitalisasi, Internet of Things (IoT), kecerdasan artifisial (AI), pemanasan global, perubahan iklim, ketersediaan pangan dan pertanian berkelanjutan. Teknik Da"
+},
+"sma_pilihan_antropologi": {
+"nama": "Antropologi",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Antropologi diharapkan dapat memberikan gambaran holistik mengenai kemampuan murid dalam memahami, menganalisis dan mengaplikasikan antropologi sebagai disiplin keilmuan. Melalui tes ini, murid tidak hanya diuji dalam aspek konseptual, tetapi juga aspek praktis yakni dalam menerapkan metode serta cara berpikir antropologis dalam menganalisis berbagai problematika sosial dan budaya. Pada jenjang pendidikan menengah atas, pembelajaran antropologi lebih berorientasi pada pengembangan kemampuan murid dalam mengidentifikasi, menelusuri, dan mengungkap makna di balik fenomena sosial budaya yang berkembang di masyarakat. Dalam konteks masyarakat digital dan multikultural, pendekatan antropologi",
+"muatan": "Materi TKA Antropologi merupakan irisan Kurikulum 2013 dan Kurikulum Merdeka. Materi ini meliputi: Pengantar dan Ruang Lingkup Antropologi. Etnografi. Masyarakat Multikultural Perubahan Sosial Budaya Antropologi Sosial dan Antropologi Budaya Kearifan lokal dan tradisi lisan"
+},
+"sma_pilihan_bahasa-arab": {
+"nama": "Bahasa Arab",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Bahasa Arab bertujuan untuk mengukur kemampuan murid dalam berbahasa Arab, mencakup pemahaman teks yang tersurat (disampaikan secara eksplisit) maupun yang tersirat (tersamar atau implisit), serta penguasaan kaidah dasar bahasa Arab dalam berbagai aktivitas komunikasi. TKA Bahasa Arab berfokus pada salah satu keterampilan berbahasa, yaitu membaca (al-Qirā’ah). Keterampilan membaca merupakan salah satu aspek utama dan sangat penting dalam memperoleh serta mengolah informasi, terutama di era teknologi yang berkembang pesat dan menuntut kemampuan literasi yang baik",
+"muatan": "Teks yang digunakan dalam TKA Bahasa Arab memiliki karakteristik sebagai berikut: Mencakup topik-topik yang berkaitan dengan kehidupan sehari- hari (al-ḥayāt al-yaumiyyah) mencakup kehidupan sekolah, kehidupan keluarga, hobi, pekerjaan, pelayanan umum, lingkungan sekitar (al-bi’ah), serta dialog yang memuat ungkapan persetujuan (muwāfaqah), perintah (al-amr), dan larangan (an-nahyu). Memenuhi kaidah kebahasaan yang benar dan sesuai, baik dari segi pemilihan kata, struktur kalimat, penggunaan ungkapan, maupun aspek kebahasaan lainnya. Kompleksitas teks yang digunakan dalam TKA Bahasa Arab dipengaruhi oleh beberapa faktor, seperti jumlah kata, kompleksitas kosakata, frekuensi penggunaan kosakata, serta struktur kalimat yang digunakan. Teks yang digunakan dalam TKA Bahasa Arab memiliki kompleksitas sebagai berikut: Kosakata yang digunakan merupakan bahasa Arab baku (fusha). Satu paragraf te",
+"baca": {
+"Pemahaman Literal": [
+"Mengidentifikasi dan menjelaskan informasi tersurat dalam teks",
+"Menentukan sinonim atau antonim kata dalam suatu kalimat",
+"MenentukaN arti kosakata (mufradat) dalam konteks kalimat tertentu"
+],
+"Reorganisasi": [
+"Menyusun kosakata acak menjadi kalimat yang tepat sesuai konteks dialog atau teks sederhana",
+"Mengurutkan kalimat acak menjadi teks sederhana"
+],
+"Pemahaman Inferensial": [
+"Menyimpulkan informasi atau makna tersirat dalam teks",
+"Menjelaskan topik atau ide pokok pada teks sederhana",
+"Menyimpulkan makna teks berdasarkan gramatika bahasa Arab (nahwu dan sharf)"
+]
+}
+},
+"sma_pilihan_bahasa-indonesia-tingkat-lanjut": {
+"nama": "Bahasa Indonesia Tingkat Lanjut",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Sebagaimana TKA Bahasa Indonesia wajib, TKA Bahasa Indonesia Tingkat Lanjut juga difokuskan pada keterampilan membaca",
+"muatan": "Keterampilan membaca diujikan pada teks informasi tunggal maupun jamak, serta teks fiksi. Teks informasi tunggal maupun jamak berisi fakta, konsep, prosedur, dan metakognisi dari berbagai bidang atau topik, berbagai genre, berbagai konteks, dalam skala lokal, nasional, dan global. Teks fiksi realisme atau absurd dengan latar cerita konkret, metaforis, atau abstrak, tokoh dengan karakter bulat, konflik tunggal atau jamak dengan penyelesaian terbuka, alur campuran, dan sudut pandang campuran. Teks yang digunakan dalam TKA Bahasa Indonesia Tingkat Lanjut memiliki tingkat kompleksitas dengan karakteristik sebagai berikut: Kosakata: kata khusus dan kata umum, kata berimbuhan kompleks, kata abstrak, makna denotatif, istilah teknis, konotatif konteks luas, nuansa makna; Kalimat: kalimat kompleks berbagai pola, kalimat efektif, kalimat logis; dan Wacana: wacana yang kohesif dan koheren, konjungs",
+"baca": {
+"Pemahaman Tekstual": [
+"Mengidentifikasi informasi dalam teks akademik",
+"Mengidentifikasi kalimat yang tepat untuk menyampaikan tanggapan, respons, dan kritik sesuai norma sosial dan budaya",
+"Mengidentifikasi kalimat yang tepat dalam pengajuan usulan, perumusan masalah, dan pemecahan masalah pada teks dalam bidang akademik dan/atau dunia kerja",
+"Mengidentifikasi karakter, peristiwa, latar pada sastra Indonesia atau terjemahan"
+],
+"Pemahaman Inferensial": [
+"Membandingkan nilai-nilai (budaya, sosial, moral, religius, dan/atau pendidikan) dalam karya sastra Indonesia dan/atau terjemahan",
+"Mengungkapkan kembali isi sastra Melayu Klasik",
+"Mengubah informasi dari tabel/grafik menjadi uraian atau uraian menjadi tabel/grafik dalam bidang akademik dan/atau dunia kerja",
+"Menjelaskan ketepatan penggunaan bahasa, kiasan, dan atau citraan dalam teks",
+"Menjelaskan ketepatan penggunaan afiks, konstruksi frasa, konstruksi klausa, dan/atau kalimat dalam teks",
+"Menjelaskan kohesi dan koherensi dalam teks ilmiah"
+],
+"Evaluasi dan Apresiasi": [
+"Menilai gagasan dan pandangan dalam berbagai teks (digital atau cetak) berdasarkan kaidah logika berpikir",
+"Menilai ketepatan dan kesesuaian isi antarteks (digital atau cetak) dalam bidang sosial, akademik, dan dunia kerja",
+"Menilai gagasan atau tindakan tokoh berdasarkan norma atau nilai individu dan sosial",
+"Mengalihwahanakan puisi (Indonesia dan/atau terjemahan) dalam bentuk prosa",
+"Menyimpulkan respons emosional terhadap unsur puisi, prosa, dan drama Indonesia atau terjemahan"
+]
+}
+},
+"sma_pilihan_bahasa-inggris-tingkat-lanjut": {
+"nama": "Bahasa Inggris Tingkat Lanjut",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Sebagaimana TKA Bahasa Inggris wajib, TKA Bahasa Inggris Tingkat Lanjut berfokus pada keterampilan membaca teks berbahasa Inggris dalam berbagai situasi komunikasi sehari-hari, vokasional, dan akademik",
+"muatan": "TKA Bahasa Inggris Tingkat Lanjut menggunakan teks yang menjadi irisan antara Kurikulum 2013 dan Kurikulum Merdeka. Dari segi jenis teks, TKA Bahasa Inggris Tingkat Lanjut menggunakan teks exposition dan teks discussion. Dari segi konteks komunikasi, TKA Bahasa Inggris Tingkat Lanjut konteks sehari-hari, vokasi, dan akademik. Dari segi topik, TKA Bahasa Inggris Tingkat Lanjut menggunakan teks tentang teknologi dan isu-isu faktual. Dari segi tingkat kompleksitas teks, TKA Bahasa Inggris Tingkat Lanjut juga memperhatikan irisan antara Kurikulum 2013 dan Kurikulum Merdeka. Kedua kurikulum menargetkan level kemahiran upper-intermediate atau B2 pada Common European Framework of Reference for Languages (CEFR). Karena itu TKA menggunakan teks tingkat B2 yang memiliki karakteristik sebagai berikut: panjang sekitar 300–400 kata, menggunakan kosakata berfrekuensi tinggi (hingga 4000 kata), menggun",
+"baca": {
+"Pemahaman Tekstual": [
+"Menemukan/mengidentifikasi Informasi: mampu menemukan atau mengidentifikasi informasi penting yang disebutkan secara eksplisit dalam teks",
+"Mengklasifikasi: mampu mengelompokkan orang, benda, tempat, atau peristiwa dalam teks berdasarkan kategori tertentu",
+"Membuat kerangka: mampu menyusun poin-poin utama dari teks dalam bentuk kerangka atau daftar",
+"Meringkas: mampu menyajikan kembali isi teks secara ringkas dengan mengutip bagian penting",
+"Mensintesis: mampu menggabungkan informasi dari sumber lain untuk mendapatkan pemahaman yang lebih komprehensif tentang suatu isu atau topik"
+],
+"Pemahaman Inferensial": [
+"Menyimpulkan detail pendukung: mampu menentukan fakta tambahan yang membuat teks lebih informatif, menarik, atau persuasif",
+"Menyimpulkan topik, ide pokok/gagasan utama, makna, target pembaca, tujuan penulisan teks, atau pesan moral yang tidak secara eksplisit dinyatakan dalam teks",
+"Menyimpulkan urutan kejadian: mampu memperkirakan isi selanjutnya dari teks"
+],
+"Evaluasi dan Apresiasi": [
+"Menilai realitas atau fantasi: mampu menganalisis peristiwa dalam teks dapat terjadi dalam kehidupan nyata berdasarkan pengalaman dan pengetahuan pribadi",
+"Menilai fakta atau opini: mampu menilai fakta/opini yang diberikan penulis untuk mendukung pendapatnya berdasarkan bukti atau sekadar berusaha mempengaruhi pembaca",
+"Menilai kecukupan dan validitas informasi: Menilai kesesuaian, kelengkapan, keakuratan informasi dalam teks (dengan membandingkannya dengan sumber lain)",
+"Menilai kesesuaian: mampu menentukan bagian teks yang paling sesuai untuk menggambarkan karakter utama atau aspek lain dari bacaan",
+"Menanggapi isi teks: mampu mengungkapkan perasaan/kesan/pendapat terhadap bacaan, seperti ketertarikan, kebosanan, kegembiraan, ketakutan, kebencian, atau kesenangan"
+]
+}
+},
+"sma_pilihan_bahasa-jepang": {
+"nama": "Bahasa Jepang",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Bahasa Jepang mengukur kemampuan murid dalam berbahasa Jepang pada level A1 JF Standard dan bernalar kritis-kreatif pada aktivitas komunikasi. TKA Bahasa Jepang difokuskan pada salah satu keterampilan berbahasa, yakni membaca. Membaca merupakan salah satu keterampilan di dalam memahami ungkapan-ungkapan komunikatif sehari-hari, hal-hal konkret, dan rutin dalam kehidupan sehari-hari dan lingkungan sekitar yang bersumber dari berbagai macam kalimat dan teks sederhana",
+"muatan": "Teks yang digunakan dalam TKA Bahasa Jepang memiliki karakteristik sebagai berikut: Jenis teks sederhana yang digunakan dalam TKA Bahasa Jepang adalah teks pendek yang meliputi teks interpersonal/transaksional, pengumuman, pesan singkat, deskripsi orang dan tempat. Topik atau wacana yang digunakan merupakan tema situasi sehari-hari dan lingkup sekolah. Topik yang digunakan meliputi: aisatsu (persalaman), jikoshoukai (perkenalan diri), jikan (waktu), kazoku (keluarga), dekirukoto (kemampuan), gakkou no seikatsu (kehidupan sekolah), uchi (rumah), mainichi no seikatsu (kehidupan sehari-hari), shumi (hobi), dan himana toki (waktu senggang). Selain itu, teks yang digunakan dalam TKA Bahasa Jepang memiliki kompleksitas sebagai berikut: Teks sederhana yang digunakan dalam TKA Bahasa Jepang dapat berupa ilustrasi gambar, kata, atau kalimat sederhana yang terdiri dari 5 – 7 kata dan teks pendek s",
+"baca": {
+"Pemahaman Literal": [
+"Menemukan informasi tersurat dari gambar atau teks sederhana",
+"Melengkapi teks dengan kosakata dan ungkapan komunikatif sesuai topik dari isi teks sederhana"
+],
+"Reorganisasi": [
+"Menyusun kata-kata menjadi kalimat utuh sesuai struktur Bahasa Jepang"
+],
+"Pemahaman Inferensial": [
+"Menyimpulkan informasi tersirat dari teks sederhana",
+"Mengaplikasikan Pengunaan tata bahasa bentuk negasi lampau, atau akan datang pada teks sederhana"
+]
+}
+},
+"sma_pilihan_bahasa-jerman": {
+"nama": "Bahasa Jerman",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Bahasa Jerman dirancang untuk mengukur kemampuan murid dalam berbahasa Jerman pada level A1 Plus hingga A2.1 sesuai standar Gemeinsamer Europäischen Referenzrahmen für Sprache (GER) atau Common European Framework of Reference for Languages (CEFR). GER lebih menekankan pada kemampuan komunikasi praktis daripada hanya menguasai teori atau aturan bahasa. Ini berarti murid diajarkan untuk bisa berkomunikasi dengan lancar dalam situasi sehari-hari, sehingga sangat relevan untuk pembelajaran Bahasa Jerman yang berfokus pada penggunaan bahasa dalam konteks nyata, seperti berbicara dengan penutur asli, menulis email atau surat, dan memahami teks atau media dalam bahasa target. TKA Bahasa Jerman ",
+"muatan": "Teks yang digunakan dalam TKA Bahasa Jerman memiliki karakteristik sebagai berikut: Teks-teks yang digunakan dalam TKA Bahasa Jerman adalah teks-teks tulis sederhana berbentuk naratif, deskripsi, dialog, dan teks fungsional seperti formulir, kartu identitas, jadwal pelajaran (Stundenplan), e-mail, pemberitahuan (Zettel/Informationsschilder) dan iklan singkat (kurze Anzeigen), papan petunjuk (Hinweisschilder/Aushänge), agenda kegiatan/buku harian (Terminkalender/Tagebuch), tiket perjalanan (Fahrkarte), jadwal perjalanan (Fahrplan), resep makanan (Kochrezepte), brosur (Broschüre), statistik sederhana, dan rencana perjalanan (Reiseprogramm) yang biasa ditemukan dalam kehidupan sehari- hari dan lingkungan sekitar dengan konteks situasi di Jerman. Topik-topik yang digunakan dalam TKA Bahasa Jerman adalah Identität, Schulleben, Familien, Wohnen, Freizeitaktivitäten, Berufe, Essen und Trinken, ",
+"baca": {
+"Pemahaman Literal": [
+"Menentukan informasi spesifik (selektiv) yang tersurat dalam teks tulis sederhana berbentuk naratif, deskripsi, transaksional atau teks fungsional",
+"Menentukan informasi detail (detailliert) yang tersurat dalam teks tulis sederhana berbentuk naratif, deskripsi, transaksional atau teks fungsional",
+"Menggunakan kosakata dan ungkapan komunikatif yang tepat sesuai konteks secara literal dalam teks tulis rumpang sederhana berbentuk naratif, deskripsi, transaksional atau teks fungsional"
+],
+"Reorganisasi": [
+"Menyusun sebuah teks berdasarkan pemahaman terhadap sebuah teks tulis sederhana berbentuk naratif, deskripsi, transaksional atau teks fungsional"
+],
+"Pemahaman Inferensial": [
+"Menentukan informasi umum (global) yang tersirat dalam teks tulis sederhana berbentuk naratif, deskripsi, transaksional atau teks fungsional",
+"Menentukan informasi spesifik (selektiv) yang tersirat dalam teks tulis sederhana berbentuk naratif, deskripsi, transaksional atau teks fungsional",
+"Menentukan informasi detail (detailliert) yang tersirat dalam teks tulis sederhana berbentuk naratif, deskripsi, transaksional atau teks fungsional",
+"Menggunakan kosakata dan ungkapan komunikatif yang tepat sesuai konteks secara inferensial dalam teks tulis rumpang sederhana berbentuk naratif, deskripsi, transaksional atau teks fungsional"
+]
+}
+},
+"sma_pilihan_bahasa-korea": {
+"nama": "Bahasa Korea",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Bahasa Korea mengukur kemampuan membaca dalam memahami berbagai jenis teks sederhana Bahasa Korea untuk mengembangkan pengetahuan dan potensi agar murid dapat memahami informasi dari teks pendek maupun ungkapan-ungkapan komunikatif tentang kehidupan sehari-hari, serta hal-hal yang sering ditemui di lingkungan sekitar. TKA Bahasa Korea mengukur keterampilan membaca pada berbagai tingkat pemahaman, yaitu pemahaman literal, reorganisasi, dan pemahaman inferensial yang setara dengan Common European Framework of Reference for Languages (CEFR) Level A1 atau Test of Proficiency in Korean (TOPIK) I Level 1",
+"muatan": "Teks yang digunakan dalam TKA Bahasa Korea memiliki karakteristik sebagai berikut: Mengacu pada TOPIK I Level 1, kurikulum dan capaian pembelajaran yang meliputi berbagai topik seperti: perkenalan diri (자기 소개), salam (인사), belanja (쇼핑), hobi (취미), transportasi (교통), cuaca (날씨), kehidupan sehari-hari (일상생활), kehidupan keluarga (가족생활), wisata (여행), dan kehidupan sekolah (학교활동). Kalimat atau teks disajikan dalam berbagai format seperti teks pendek, ilustrasi gambar, dialog, pengumuman, memo, pesan teks, dan berbagai jenis teks sederhana lainnya. Selain itu, teks yang digunakan dalam TKA Bahasa Korea memiliki kompleksitas sebagai berikut: Mengacu pada penguasaan TOPIK I Level 1 yang termasuk pada 800 kosakata dasar dan gramatika sederhana Bahasa Korea. Panjang teks sederhana dapat terdiri dari kosakata dengan hingga maksimal 200 karakter Hangeul. Teks sederhana yang digunakan dapat terdiri d",
+"baca": {
+"Pemahaman Literal": [
+"Memahami huruf Hangeul dan tata bahasa dasar pada kata, frasa, atau kalimat sederhana",
+"Memahami fakta/informasi tersurat pada kalimat atau teks sederhana"
+],
+"Reorganisasi": [
+"Menyusun urutan kata atau kalimat pada kalimat atau teks sederhana",
+"Mengkategorikan fakta/informasi dari kalimat atau teks sederhana"
+],
+"Pemahaman Inferensial": [
+"Menyimpulkan fakta/informasi tersirat pada kalimat atau teks sederhana",
+"Menyimpulkan hubungan sebab akibat atau perbandingan pada kalimat atau teks sederhana",
+"Mengaplikasikan penggunaan tata bahasa bentuk negasi, kala kini, kala lampau, atau kala yang akan datang pada teks sederhana"
+]
+}
+},
+"sma_pilihan_bahasa-mandarin": {
+"nama": "Bahasa Mandarin",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Bahasa Mandarin menguji kemampuan murid dalam memahami bahasa Mandarin dasar pada level HSK (Hànyǔ Shuǐpíng Kǎoshì) 1, yang setara dengan level A1 dalam CEFR (Common European Framework of Reference for Languages). HSK merupakan ujian standar kemampuan bahasa Mandarin bagi penutur asing yang diselenggarakan oleh Hanban/Center for Language Education and Cooperation. Sementara itu, CEFR adalah kerangka acuan internasional yang digunakan untuk mengukur kemampuan berbahasa asing berdasarkan tingkat kefasihan. Tes ini berfokus pada keterampilan membaca murid SMA/MA/SMK/MAK kelas XII, dengan tujuan mengembangkan pengetahuan dan potensi mereka agar mampu memahami informasi dari teks pendek maupu",
+"muatan": "Teks yang digunakan dalam TKA Bahasa Mandarin memiliki karakteristik sebagai berikut: Mengacu pada standar HSK 1 dengan topik-topik yang familiar, seperti identitas diri, kehidupan sekolah, kehidupan keluarga, kehidupan sehari-hari, serta kegiatan di waktu senggang/hobi. Ditulis dalam Aksara Han/Hanzi sederhana (简体字) dengan disertai Hanyu Pinyin, serta jarang menggunakan idiom atau konsep yang bersifat abstrak. Mengutamakan struktur kalimat tanya yang sederhana, menggunakan kata tanya umum seperti 什么 (apa), 谁 (siapa), 哪里 (di mana), dan 吗 (partikel tanya ya/tidak), sehingga sesuai untuk pembelajar pemula. Berdasarkan buku Standard Course HSK 1, batasan radikal aksara Han/Hanzi yang digunakan dalam TKA ini adalah sebagai berikut: “ 亻” 字旁；“口” 字旁；“女” 字旁；“ 讠”字旁；“ 宀“ 宝盖头； ”氵 “ 三点水；” 心/忄”字旁；” 扌” 提手旁； “辶”走字旁；“门” 门子框；“囗” 国字框；“礻“ 示字旁；“⻏”耳刀旁；“亻”单人旁；“女”女字旁；“饣”食字旁；“日”日字旁；“目”目字旁；“月”肉月旁；“扌”提手旁；“艹” 草字头；",
+"baca": {
+"Pemahaman Literal": [
+"Mengidentifikasi Hanyu Pinyin, kosakata, guratan, serta makna kata dalam kalimat sederhana",
+"Menemukan dan memahami informasi penting yang disajikan secara eksplisit dalam teks tingkat dasar",
+"Melengkapi kalimat atau teks rumpang untuk menerapkan kosakata dari teks sederhana"
+],
+"Reorganisasi": [
+"Menyusun kosakata menjadi kalimat sederhana yang tepat",
+"Mengurutkan kalimat acak menjadi teks sederhana yang runtut dan logis"
+],
+"Pemahaman Inferensial": [
+"Menyimpulkan informasi implisit dari teks atau gambar sederhana",
+"Menganalisis penggunaan tata bahasa dalam kalimat"
+]
+}
+},
+"sma_pilihan_bahasa-prancis": {
+"nama": "Bahasa Prancis",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Bahasa Prancis mengukur kemampuan murid dalam berbahasa Prancis yang sederhana setara level A2-2 Standar CECRL. TKA Bahasa Prancis difokuskan pada kemampuan membaca murid SMA kelas XII dengan tujuan dan kepentingannya untuk mengembangkan pengetahuan dan potensi agar ia dapat berpartisipasi dengan masyarakat dan memahami informasi yang terkait dengan ungkapan ungkapan komunikatif sehari-hari, hal-hal konkret, dan rutin dalam kehidupan sehari-hari dan lingkungan sekitar yang bersumber dari berbagai macam teks pendek",
+"muatan": "Teks yang digunakan dalam TKA Bahasa Prancis memiliki karakteristik sebagai berikut: Jenis teks adalah teks pendek seperti pengumuman, pesan singkat, deskripsi orang dan tempat, serta instruksi tanda dan rambu. Tujuan teks yakni memberikan informasi, mendeskripsikan sesuatu, atau menyampaikan pesan tertentu. Struktur teks sederhana dengan kalimat pendek dan jelas. Selain itu, teks yang digunakan dalam TKA Bahasa Prancis memiliki kompleksitas sebagai berikut: Jumlah kosa kata antara 60–80 kosa kata mengenai perkenalan diri dan seseorang, aktivitas sehari-hari, dan lingkungan sekitar. Kompleksitas kata: kata-kata umum dengan sedikit istilah teknis tentang perkenalan diri dan seseorang, aktivitas sehari-hari dan lingkungan sekitar. Frekuensi penggunaan kata seputar kosakata sehari-hari yang sering muncul dalam interaksi sosial dasar. Kompleksitas kalimat: kalimat sederhana (subjek + kata ke",
+"baca": {
+"Pemahaman Literal": [
+"Menemukan informasi tersurat dari gambar atau teks pendek interpersonal/transaksional, pengumuman, pesan singkat, deskripsi orang dan tempat, serta instruksi tanda dan rambu",
+"Melengkapi teks yang dirumpangkan untuk menerapkan kosakata dan ungkapan komunikatif sesuai topik dari isi teks pendek: interpersonal/transaksional, pengumuman, pesan singkat, deskripsi orang dan tempat, serta instruksi tanda dan rambu"
+],
+"Reorganisasi": [
+"Mengorganisir kalimat-kalimat pernyataan menjadi paragraf padu"
+],
+"Pemahaman inferensial": [
+"Menemukan informasi tersirat dari gambar atau teks pendek interpersonal/transaksional, pengumuman, pesan singkat, deskripsi orang dan tempat, serta instruksi tanda dan rambu",
+"Menyimpulkan gambar atau isi teks pendek interpersonal/transaksional/pengumuman, pesan singkat, deskripsi orang dan tempat, serta instruksi tanda dan rambu"
+]
+}
+},
+"sma_pilihan_biologi": {
+"nama": "Biologi",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Biologi mengukur kemampuan berpikir terkait konsep-konsep biologi dan keterampilan proses/inkuiri. Karena kemampuan berpikir dan keterampilan proses yang dimaksud menuntut penguasaan konsep-konsep biologi, maka penguasaan konsep biologi menjadi prasyarat untuk dapat melakukan proses berpikir dan keterampilan proses. Seseorang yang mengalami miskonsepsi tentang suatu konsep biologi tidak akan mampu melakukan proses berpikir (misalnya menganalisis) dan melakukan inkuiri",
+"muatan": "Konsep-konsep biologi yang akan diukur mencakup keanekaragaman hayati, sel, dan proses-proses pada makhluk hidup.  Keanekaragaman hayati  klasifikasi dan keanekaragaman makhluk hidup  bakteri  ekosistem  Sel: metabolisme  Proses-proses pada makhluk hidup  transport dan pertukaran zat pada manusia (sistem sirkulasi, respirasi, ekskresi)  sistem imun  sistem koordinasi  sistem reproduksi  Keterampilan proses  mempertanyakan dan memprediksi,  merencanakan dan melakukan penyelidikan,  memproses, menganalisis data dan informasi Pemahaman tentang konsep biologi disajikan dalam konteks kehidupan sehari-hari murid, seperti topik kesehatan, lingkungan, pertanian, maupun sosiokultural. Pendekatan ini membantu murid menghubungkan konsep biologi dengan pengalaman nyata mereka, memudahkan pemahaman terhadap peran biologi dalam kemajuan ilmu dan teknologi, serta meningkatkan keterampilan berpikir krit"
+},
+"sma_pilihan_ekonomi": {
+"nama": "Ekonomi",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Ekonomi bertujuan untuk menilai pemahaman konseptual dan keterampilan analitis murid dalam bidang ekonomi. Selain menguji pemahaman konsep, TKA Ekonomi juga dirancang untuk mengukur keterampilan berpikir kritis dalam menganalisis isu ekonomi dan keuangan berdasarkan fenomena aktual yang terjadi di masyarakat, baik dalam lingkup nasional maupun global",
+"muatan": "Muatan TKA Ekonomi mencakup 4 elemen, yaitu: Konsep Dasar Ilmu Ekonomi Ekonomi Mikro dan Makro Ekonomi Internasional Akuntansi Keuangan Dasar. Keempat elemen muatan tersebut disajikan secara konseptual maupun dalam berbagai konteks yang mencerminkan permasalahan ekonomi di dunia nyata"
+},
+"sma_pilihan_fisika": {
+"nama": "Fisika",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Fisika mengukur pemahaman konseptual, kemampuan berpikir kritis, dan penerapan prinsip-prinsip fisika dalam berbagai konteks kehidupan sehari-hari. Tes ini tidak hanya menilai kemampuan murid dalam memahami teori, tetapi juga dalam menerapkan konsep konsep fisika untuk menyelesaikan persoalan nyata, serta menganalisis dan mengevaluasi fenomena berdasarkan prinsip ilmiah. Selain itu, tes ini juga dirancang untuk mengukur keterampilan proses sains secara terpadu dengan area konsep fisika tertentu",
+"muatan": "TKA Fisika mencakup muatan sebagai berikut: Kinematika: fenomena tentang gerak benda tanpa mempertimbangkan penyebabnya. Fokus pada analisis besaran fisika seperti posisi, kecepatan, percepatan, serta hubungan antar variabel dalam gerak lurus, gerak parabola, dan gerak melingkar beraturan. Dinamika: hubungan antara gaya dan gerak berdasarkan hukum Newton serta konsep momentum dan impuls. Fluida: sifat dan perilaku fluida dalam kondisi statis maupun dinamis. Mencakup konsep tekanan, hukum Pascal, hukum Archimedes, serta hukum kontinuitas dan Bernoulli dalam berbagai aplikasi kehidupan sehari-hari. Gelombang: karakteristik dan sifat gelombang, baik mekanik maupun elektromagnetik. Meliputi konsep dasar gelombang, bunyi, dan cahaya serta aplikasinya dalam fenomena alam dan teknologi. Kalor dan Termodinamika: pengaruh kalor terhadap perubahan suhu dan wujud zat, proses perpindahan kalor, sert"
+},
+"sma_pilihan_geografi": {
+"nama": "Geografi",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) Geografi yang bertujuan mengukur kemampuan murid jenjang SMA dalam memahami, menerapkan, dan menganalisis pengetahuan faktual, konseptual, serta prosedural yang berkaitan dengan fenomena geosfer",
+"muatan": "Muatan TKA Geografi mencakup elemen sebagai berikut: Wilayah tempat tinggal dan lingkungan sekitar (karakteristik, keunikan, persamaan–perbedaan wilayah). Proses-proses yang mempengaruhi lingkungan fisik dan sosial. Interaksi antar faktor/gejala fisik alam dan manusia yang berdampak bagi kehidupan. Cara mitigasi dan adaptasi terhadap bencana alam di lingkungan tempat tinggal dan negaranya. Fenomena geografi dalam kehidupan sehari-hari dan menarik manfaatnya"
+},
+"sma_pilihan_kehutanan-smk-mak": {
+"nama": "SMK - Kehutanan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Kehutanan dirancang untuk mengukur penguasaan konsep ilmu kehutanan dan kemampuan berpikir tingkat tinggi peserta didik pada bidang keahlian kehutanan. Asesmen ini difokuskan pada standarisasi kompetensi yang mencakup pemahaman isu-isu global yang terkait dengan bidang kehutanan, teknik pengelolaan hutan, pemanfaatan teknologi digital dalam industri kehutanan modern, hingga wirausaha dalam bidang kehutanan",
+"muatan": "Muatan TKA Kehutanan merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025 Kecakapan Kerja Dasar di Bidang Kehutanan meliputi pengenalan hutan, isu-isu global di bidang kehutanan, dasar-dasar pembinaan hutan, pengukuran hutan sederhana, dasar-dasar penggunaan GPS bidang kehutanan, dasar-dasar pengukuran pohon, dasar-dasar identifikasi pengenalan pohon (dendrologi), dasar-dasar perlindungan hutan, Komunikasi Efektif, Penerapan Teknologi dan Prinsip K3LH Bidang Kehutanan Wawasan Dunia Kerja dan Wirausaha Bidang Kehutanan meliputi Profesi, Peluang Kerja, dan Peluang Usaha Bidang Kehutanan, Alur Operasional Usaha Bidang Kehutanan"
+},
+"sma_pilihan_kimia-analisis-smk-mak": {
+"nama": "SMK - Kimia Analisis",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) Kimia Analisis mengukur kemampuan murid dalam memahami dasar-dasar kimia analisis, teknik pengambilan sampel, analisis titrimetri, analisis gravimetri, analisis bahan organik, analisis bahan anorganik, analisis kimia instrumen, analisis mikrobiologi",
+"muatan": "TKA kimia analisis disusun berdasarkan elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Kecakapan kerja dasar, K3, budaya kerja, dan pengelolaan laboratorium kimia; Teknik dasar proses kerja di bidang kimia analisis dan pengelolaan laboratorium kimia Larutan Pereaksi, Larutan Standar, Analisis kualitatif dan kuantitatif sederhana: Pembuatan larutan pereaksi, larutan standar, dan indikator, Prosedur analisis kuantitatif secara gravimetri Analisis titrimetri dan gravimetri; Analisis Titrimetri, Analisis gravimetri Analisis bahan organik; Analisis kualitatif senyawa organik, Analisis kadar air Analisis bahan anorganik; Analisis kualitatif unsur-unsur anorganik, Analisis kuantitatif parameter air Anali"
+},
+"sma_pilihan_kimia": {
+"nama": "Kimia",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Kimia mengukur kemampuan murid dalam penguasaan konsep kimia, menerapkan konsep kimia dalam penyelesaian permasalahan kimia, serta melakukan analisis pada permasalahan kimia yang terkait dengan materi kimia dalam kehidupan sehari-hari",
+"muatan": "TKA Kimia disusun berdasarkan materi kimia esensial pada Kurikulum 2013 dan Kurikulum Merdeka. Muatan tersebut terdiri dari empat elemen kimia, yaitu: Kimia Dasar: struktur atom, teori model atom, sistem dan sifat periodik unsur, ikatan kimia, geometri molekul, interaksi antar molekul, hukum dasar kimia, stoikiometri dan persamaan reaksi kimia; Kimia Analitik: larutan, kesetimbangan larutan, asam-basa, pH, dan koloid; Kimia Fisik: energetika dan dinamika reaksi; dan Kimia Organik: struktur dan kereaktifan senyawa karbon. Kerangka TKA Kimia dirancang untuk mengukur pemahaman murid terhadap konsep-konsep dasar kimia dan kemampuan mereka dalam mengaplikasikan pengetahuan tersebut dalam berbagai konteks. Konteks-konteks ini dipilih untuk mencerminkan relevansi kimia dalam kehidupan sehari-hari, perkembangan ilmu pengetahuan, isu lingkungan, dan dunia industri. Berikut adalah rincian untuk se"
+},
+"sma_pilihan_layanan-kesehatan-smk-mak": {
+"nama": "SMK - Layanan Kesehatan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA pada Program Keahlian Layanan Kesehatan mengukur kemampuan murid dalam mengidentifikasi, mengimplementasikan dan menganalisis pada praktik layanan kesehatan dalam melakukan pelayanan prima dan esensial terhadap individu, keluarga, dan masyarakat yang sehat maupun yang sakit dengan menekankan pada kemampuan berpikir kritis, keterhubungan konsep, refleksi, dan aplikasi dunia nyata. Berfokus pada kompetensi bersifat dasar yang harus dimiliki oleh tenaga penunjang keperawatan dan tenaga caregiving (caregiver) juga tenaga penunjang dental care serta jabatan lain sesuai dengan perkembangan dunia kerja",
+"muatan": "Muatan Tes Kemampuan Akademik (TKA) Layanan Kesehatan merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Wawasan Dunia Kerja Bidang Layanan Kesehatan: Aktivitas kerja, pengelolaan fasilitas, serta peluang kerja dan usaha di bidang layanan kesehatan. Anatomi Fisiologi dan Pertumbuhan Perkembangan Manusia: Anatomi dan fisiologi sesuai sistem tubuh manusia beserta gangguannya, serta tumbuh kembang manusia dan gangguan siklus hidup. Kecakapan Kerja Dasar (Basic Job Skills), Teknik Dasar Layanan Kesehatan Dengan Layanan Prima, K3, dan Budaya Kerja: Alat Pelindung Diri (APD), Kesehatan dan Keselamatan Kerja (K3), Pemeriksaan Tanda-Tanda Vital (TTV), Etika dan etiket dalam komunikasi efektif de"
+},
+"sma_pilihan_matematika-tingkat-lanjut": {
+"nama": "Matematika Tingkat Lanjut",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Sebagaimana TKA Matematika wajib, TKA Matematika Tingkat Lanjut juga mengukur kemampuan murid dalam memahami fakta, konsep, prinsip, dan prosedur matematika, serta kemampuan mereka dalam menerapkan pengetahuan matematika untuk menyelesaikan masalah (problem solving)",
+"muatan": "TKA Matematika Tingkat Lanjut merujuk pada elemen atau materi kurikulum yang ada pada Kurikulum 2013 dan Kurikulum Merdeka. Elemen ini meliputi: aljabar, geometri dan pengukuran, kalkulus. Adapun penggunaan logika matematika diintegrasikan langsung dengan elemen matematika yang tertera dalam kurikulum. Penguasaan materi matematika tersebut diukur melalui berbagai permasalahan dalam konteks matematika maupun permasalahan dalam konteks keseharian yang dapat meliputi kejadian atau situasi di lingkup personal, keluarga, atau lingkungan sekitar baik lokal maupun global"
+},
+"sma_pilihan_nautika-kapal-niaga-smk-mak": {
+"nama": "SMK - Nautika Kapal Niaga",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) pada Program Keahlian Nautika Kapal Niaga bertujuan mengukur tingkat penguasaan pengetahuan, pemahaman, dan kemampuan murid dalam menerapkan konsep, prinsip, dan prosedur dasar nautika kapal niaga, yang meliputi aspek keselamatan pelayaran, peraturan nasional dan internasional, prosedur darurat, kepedulian lingkungan, serta pemahaman konstruksi dan stabilitas kapal",
+"muatan": "Muatan TKA Nautika Kapal Niaga merujuk pada Salinan perkaban NOMOR 046/H/KR/2025 Elemen ini meliputi: Wawasan Dunia Kerja Bidang Nautika Kapal Niaga Prosedur Darurat dan SAR (Emergency Procedure and SAR) Undang-undang Pelayaran dan Konvensi Internasional Kepedulian Lingkungan dan Pencegahan Polusi Budaya Keselamatan,Keamanan dan Pelayanan Konstruksi dan Stabilitas (Ship Construction and Stability) Penguasaan kompetensi Nautika Kapal Niaga diukur melalui permasalahan yang disajikan dalam konteks pelayaran, baik yang bersifat teoritis maupun aplikatif. Permasalahan tersebut mencakup situasi yang berkaitan dengan keselamatan pelayaran, prosedur darurat, kepatuhan terhadap peraturan nasional dan internasional, kepedulian lingkungan, serta pemahaman konstruksi dan stabilitas kapal. Konteks soal dapat meliputi kondisi yang terjadi di atas kapal maupun di lingkungan kerja pelayaran secara umum,"
+},
+"sma_pilihan_nautika-kapal-penangkap-ikan-smk-mak": {
+"nama": "SMK - Nautika Kapal Penangkap Ikan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Nautika Kapal Penangkap Ikan bertujuan untuk mengukur tingkat pemahaman, kemampuan berpikir dan menerapkan keterampilan yang berisi kompetensi-kompetensi yang mendasari penguasaan keahlian Nautika Kapal Penangkap Ikan meliputi wawasan dunia kerja di bidang Nautika Kapal Penangkap Ikan, konstruksi dan stabilitas kapal penangkap ikan, pengoperasian berbagai alat tangkap, hukum maritim dan peraturan perikanan",
+"muatan": "Materi yang diujikan pada Tes Kemampuan Akademik (TKA) Nautika Kapal Penangkap Ikan mencakup pengetahuan konseptual, prosedural, dan aplikatif yang berkaitan dengan wawasan dunia kerja di bidang nautika kapal penangkap ikan, prosedur darurat dana SAR, konstruksi dan stabilitas kapal penangkap ikan, permesinan kapal penangkap ikan, teknik penangkapan, penanganan dan penyimpanan ikan hasil tangkapan, serta tatalaksana perikanan yang bertanggung jawab. Ruang lingkup materi ini merujuk pada Capaian Pembelajaran sebagaimana tertuang dalam Keputusan Kepala Badan Standar, Kurikulum, dan Asesmen Pendidikan Kementerian Pendidikan Dasar dan Menengah Nomor 046/H/KR/2025 tentang Capaian Pembelajaran pada Pendidikan Anak Usia Dini, Jenjang Pendidikan Dasar, dan Jenjang Pendidikan Menengah.. Muatan soal meliputi: Wawasan dunia kerja di bidang nautika kapal penangkap ikan Meliputi aktivitas pekerjaan p"
+},
+"sma_pilihan_pekerjaan-sosial-smk-mak": {
+"nama": "SMK - Pekerjaan Sosial",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kompetensi akademik (TKA) Dasar-Dasar Program Keahlian Pekerjaan Sosial bertujuan untuk mengukur pemahaman murid tentang konsep pekerjaan sosial, masalah sosial, teori, prinsip, nilai dan etika pekerjaan sosial, serta kemampuan dalam melakukan analisis masalah sosial, asesmen kebutuhan klien, komunikasi pelayanan sosial, pendampingan, intervensi dan penerapan praktek layanan pekerjaan sosial pada individu, keluarga, kelompok dan masyarakat",
+"muatan": "Merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran dalam Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025 muatan TKA Pekerjaan Sosial di dunia kerja menuntut pemahaman tentang konsep dasar pekerjaan sosial, jenis layanan sosial, kebutuhan dan permasalahan sosial, keterampilan dasar pelayanan, etika profesi, keselamatan kerja, perkembangan teknologi, serta kesiapan menghadapi perubahan dunia kerja dan isu keberlanjutan sosial. Elemen dalam Dasar – Dasar Pekerjaan sosial Wawasan Dunia Kerja Bidang Pekerjaan Sosial: Meliputi pemahaman tentang aktivitas pekerjaan pada bidang pekerjaan sosial, penerimaan klien, identifikasi kebutuhan klien, perencanaan pemberian layanan, pelaksanaan pemberian layanan, evaluasi pemberian layanan, peluang usaha dan peluang kerja/profesi di bidang lay"
+},
+"sma_pilihan_pendidikan-pancasila-dan-kewarganegaraan-pendidikan-pancasila": {
+"nama": "Pendidikan Pancasila dan Kewarganegaraan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Pendidikan Pancasila dan Kewarganegaraan/Pendidikan Pancasila berisi muatan Pendidikan Pancasila dan Pendidikan Kewarganegaraan yang bertujuan untuk mengukur kemampuan murid dalam menjelaskan, menerapkan dan menganalisis Pancasila, Undang-Undang Dasar Negara Republik Indonesia Tahun 1945, Bhinneka Tunggal Ika, dan komitmen terhadap Negara Kesatuan Republik Indonesia sebagai warga negara yang cerdas, demokratis dan bertanggung jawab",
+"muatan": "Muatan TKA Pendidikan Pancasila dan Kewarganegaraan/Pendidikan Pancasila disusun berdasarkan elemen atau materi Pendidikan Pancasila dan Kewarganegaraan pada Kurikulum 2013 dengan Pendidikan Pancasila pada Kurikulum Merdeka. Muatan tersebut terdiri dari pengetahuan tentang: Pancasila yang meliputi Pancasila sebagai dasar negara, ideologi negara, identitas nasional, hak asasi manusia dan demokrasi Pancasila Undang-Undang Dasar Negara Republik Indonesia Tahun 1945 yang meliputi penegakan hukum, perlindungan HAM, ketentuan UUD NRI Tahun 1945, demokrasi, hubungan pemerintah pusat dan daerah Bhinneka Tunggal Ika yang meliputi integrasi nasional, mengelola kebinekaan sebagai modal sosial, harmoni dalam keberagaman, dan ancaman terhadap kebinekaan, dan Komitmen terhadap Negara Kesatuan Republik Indonesia yang meliputi Perilaku warga negara yang baik, menjaga keutuhan NKRI, sistem pertahanan Ind"
+},
+"sma_pilihan_pengembangan-perangkat-lunak-dan-gim-smk-mak": {
+"nama": "SMK - Pengembangan Perangkat Lunak dan Gim",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) pada Program Keahlian Pengembangan Perangkat Lunak dan Gim (PPLG) bertujuan mengukur penguasaan konsep, penalaran, dan penerapan pengetahuan dasar kejuruan dalam bidang pengembangan perangkat lunak dan gim. Ruang lingkup asesmen mencakup proses bisnis pengembangan perangkat lunak dan gim, perkembangan teknologi dan dunia kerja, profesi serta Kewirausahaan bidang PPLG, K3LH dan budaya kerja industri, penggunaan perangkat dan tools pengembangan, dasar basis data, pengelolaan aset dan antarmuka pengguna, algoritma, pemrograman terstruktur, serta pemrograman berorientasi objek pada konteks proyek perangkat lunak dan gim",
+"muatan": "Muatan TKA PPLG disusun dengan merujuk pada elemen dan materi esensial dalam Capaian Pembelajaran Program Keahlian Pengembangan Perangkat Lunak dan Gim Fase E sebagaimana tercantum dalam Salinan Keputusan Kepala BSKAP Nomor 046/H/KR/2025. Wawasan dunia kerja bidang pengembangan perangkat lunak dan gim: pemahaman terhadap proses bisnis pengembangan perangkat lunak dan gim, perkembangan teknologi, peluang usaha, manajemen proyek, HAKI, serta budaya industri. Kecakapan kerja dasar (basic job skills), K3, dan budaya kerja: penerapan terhadap keselamatan kerja, penggunaan perangkat kerja, pengelolaan aset fisik dan digital, etika kerja, budaya kerja profesional, serta prosedur kerja di lingkungan pengembangan perangkat lunak dan gim. Teknologi Jaringan Komputer: pemahaman konsep dasar jaringan komputer dalam konteks pengembangan perangkat lunak dan gim, meliputi konfigurasi dasar lingkungan p"
+},
+"sma_pilihan_produk-atau-projek-kreatif-dan-kewirausahaan-smk-dan-mak": {
+"nama": "SMK - Produk atau Projek Kreatif dan Kewirausahaan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Produk/Projek Kreatif dan Kewirausahaan bertujuan untuk menilai pemahaman konseptual dan keterampilan analitis murid dalam hal Produk/Projek Kreatif dan Kewirausahaan. TKA Produk/Projek Kreatif dan Kewirausahaan mengukur pemahaman terkait kegiatan produksi, distribusi, pemasaran, dan pengelolaan usaha. Selain itu, tes ini juga mengukur keterampilan analitis terkait peluang usaha, proposal usaha, biaya produksi, laporan keuangan, dan kasus-kasus yang berhubungan dengan Hak atas Kekayaan Intelektual (HaKI)",
+"muatan": "TKA Produk/Projek Kreatif dan Kewirausahaan mencakup muatan sebagai berikut: Kegiatan produksi, pemasaran, dan distribusi: mencakup seluruh aspek yang berkaitan dengan pengembangan dan pemasaran produk berupa barang/jasa. Materi yang diujikan meliputi kegiatan produksi, pemasaran, dan distribusi, yaitu desain produk barang/jasa, desain kemasan produk, prototipe produk barang/jasa, perencanaan produksi, produksi, pengendalian mutu, pemasaran produk, dan distribusi produk. Pengelolaan usaha: mencakup berbagai hal yang berhubungan dengan perencanaan, penyelenggaraan, dan evaluasi usaha. Materi yang diujikan meliputi pengelolaan usaha, meliputi analisis peluang usaha, proposal usaha, pelaporan keuangan, dan HaKI"
+},
+"sma_pilihan_sejarah": {
+"nama": "Sejarah",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Sejarah bertujuan untuk mengukur kemampuan murid dalam memahami dan mengkaji peristiwa sejarah dalam konteks ruang dan waktu, serta mengembangkan kemampuan berpikir historis. Tes ini tidak hanya mengukur pengetahuan tentang data dan fakta sejarah, tetapi juga kemampuan menganalisis, mengkritisi, menghubungkan, menginterpretasi, serta merefleksikan peristiwa sejarah dengan konteks sosial, ekonomi, politik, dan budaya, serta jiwa zaman. TKA Sejarah difokuskan pada kemampuan memahami perubahan dan keberlanjutan sejarah, serta mengidentifikasi sebab-akibat dari berbagai peristiwa penting dalam sejarah Indonesia mulai dari periode Hindu-Budha hingga Reformasi",
+"muatan": "Muatan TKA Sejarah meliputi: Pengantar ilmu Sejarah Periode Kerajaan Hindu-Buddha dan Islam Perlawanan terhadap bangsa Eropa Pergerakan nasional sampai proklamasi kemerdekaan Revolusi kemerdekaan Indonesia sampai demokrasi terpimpin Orde baru sampai reformasi TKA Sejarah tidak hanya mengukur pengetahuan data dan fakta sejarah, tetapi juga keterampilan berpikir historis. Oleh karenanya, TKA Sejarah akan menggunakan bacaan/ilustrasi berdasar sumber sejarah, baik primer maupun sekunder, tentang kronologi, sebab akibat, serta kesinambungan dan perubahan dalam sejarah Indonesia sejak periode Hindu-Budha hingga Reformasi. Bacaan/ilustrasi tersebut disertai kutipan dokumen, peta, tabel, foto, yang membantu murid melakukan analisis. Kejelasan konteks historis sangat penting agar murid dapat menginterpretasi informasi dan sumber sejarah, dengan penyajian bacaan/ilustrasi yang memperhatikan beraga"
+},
+"sma_pilihan_smk-akuntansi-dan-keuangan-lembaga": {
+"nama": "SMK - Akuntansi dan Keuangan Lembaga",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Program Keahlian Akuntansi dan Keuangan Lembaga bertujuan untuk mengukur pemahaman konseptual serta keterampilan analitis murid dalam bidang Akuntansi dan Keuangan Lembaga. Penilaian ini mencakup pemahaman mengenai jenis dan bentuk usaha, konsep dasar akuntansi, siklus akuntansi, pencatatan jurnal, penyusunan buku besar, penyusunan laporan keuangan, dasar-dasar ekonomi, dasar-dasar perbankan, etika profesi, K3 (Keselamatan dan Kesehatan Kerja) dan 5R (Ringkas, Rapi, Resik, Rawat dan Rajin), serta aplikasi pengolah angka",
+"muatan": "Muatan TKA Program Keahlian Akuntansi dan Keuangan Lembaga merujuk pada elemen atau materi yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Wawasan Dunia Kerja Bidang Akuntansi dan Keuangan Lembaga: Jenis dan bentuk usaha, Konsep dasar akuntansi, Siklus akuntansi, Jurnal, Buku Besar, Laporan Keuangan, Etika Profesi Akuntansi, dan Dasar-dasar Ekonomi. Kecakapan Kerja Dasar, K3 dan Budaya Kerja: K3 dan 5R, Dasar-dasar Perbankan, dan Aplikasi Pengolah Angka"
+},
+"sma_pilihan_smk-animasi": {
+"nama": "SMK - Animasi",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Animasi di SMK mengukur kemampuan murid dalam memahami, mengaplikasi dan menganalisis dalam teknologi animasi, konsep, visual, produksi, dan editorial yang dibutuhkan pada industri animasi. Kemampuan ini dipilih sebagai fokus karena merupakan keterampilan dasar yang dibutuhkan untuk belajar dan bekerja pada industri kreatif berbasis teknologi yang berkembang pesat",
+"muatan": "Muatan TKA Animasi merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen ini meliputi: Wawasan dunia kerja di Bidang Animasi Kecakapan kerja dasar (Basic Job Skills), K3, dan Budaya Kerja Aspek legal pada Produksi Animasi Quality Control pada Produksi Animasi Unsur visual untuk diterapkan dan diaplikasikan ke dalam Karya Desain Dasar pergerakan buatan untuk diterapkan berdasarkan instruksi kerja Cerita secara visual Adapun penggunaan teknologi dalam animasi, seperti pemanfaatan perangkat lunak, perangkat keras, dan kecerdasan buatan (AI), diintegrasikan langsung dengan elemen-elemen animasi yang terdapat dalam kurikulum. Penguasaan materi animasi dapat diukur melalui pemecahan masalah dalam konteks produksi animasi mau"
+},
+"sma_pilihan_smk-broadcasting-dan-perfilman": {
+"nama": "SMK - Broadcasting dan Perfilman",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Broadcasting dan Perfilman mengukur kemampuan murid dalam memahami dan menganalisis konsep di bidang broadcasting dan perfilman, mengembangkan kreativitas, kepekaan teknis dan estetis, memahami dunia industri dan menerapkan budaya kerja industri Broadcasting dan Perfilman serta mendistribusikan konten sesuai perkembangan teknologi media digital. Kemampuan ini dipilih sebagai fokus karena merupakan keterampilan dasar baik soft skill maupun hard skill yang dibutuhkan untuk belajar dan bekerja pada industri kreatif broadcasting dan perfilman berbasis teknologi yang berkembang sangat cepat",
+"muatan": "Muatan TKA Broadcasting dan Perfilman merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Pengenalan profesi, pemecahan masalah dalam produksi film, dan manajemen konflik pada produksi film Perkembangan sistem analog menuju digital, serta regulasi dan hukum Penyiaran/Perfilman di Indonesia. Dasar fotografi dan videografi, tata kamera, tata artistik, tata suara dan editing Perencanaan dan alur produksi, serta karakteristik produksi media baru (New Media) dan konten kreatif"
+},
+"sma_pilihan_smk-busana": {
+"nama": "SMK - Busana",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Program Keahlian Busana bertujuan untuk menilai pemahaman konseptual dan keterampilan analitis murid dalam bidang busana. TKA bidang keahlian busana mengukur kemampuan murid dalam memahami pengetahuan baik secara konseptual, faktual, dan prosedural sehingga mampu menerapkan dan menganalisis dalam penyelesaian permasalahan bidang busana",
+"muatan": "Muatan TKA Busana merujuk pada irisan elemen kurikulum 2013 dan Kurikulum Merdeka yang mengacu pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025, dengan mencakup elemen: Wawasan Dunia Kerja bidang industri Busana (Fesyen): Proses produksi busana Custom Made, Proses produksi busana massal, Perawatan Peralatan, Produk Life Cycle, Teknologi Digital, Sustainable fashion. Kecakapan Kerja Dasar (Basic Job skills), K3, dan Budaya Kerja: Dasar-dasar ilustrasi anatomi tubuh, Pengetahuan Warna, Unsur dan prinsip desain, Style dan look (six basic style), Eksplorasi gaya dan selera sesuai perkembangan mode dan tren, Sumber Ide, Kolase dan desain busana sesuai tema, Konstruksi Busana (pengukuran tubuh, pembuatan pola dasar dan pengembangannya), Prosedur pemotongan bahan, Dasar menjahit, Pengoperasian dan perbai"
+},
+"sma_pilihan_smk-desain-dan-produksi-kriya": {
+"nama": "SMK - Desain dan Produksi Kriya",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Pengetahuan Desain dan Produksi Kriya mengukur kemampuan murid dalam memahami konsep dasar seni, desain, dan kriya; mengidentifikasi kebutuhan klien dan konsumen; membaca tren pasar dan visual kontemporer; serta merencanakan proses produksi sederhana yang mencakup pemilihan bahan, alat, teknik, waktu, dan biaya. Selain itu, pengukuran juga mencakup kemampuan memahami penyusunan brief, pengembangan ide melalui sketsa dan moodboard, penerapan prinsip fungsi dan estetika, serta dasar pengarsipan dan presentasi karya",
+"muatan": "Muatan TKA Desain dan Produksi Kriya merujuk pada elemen kurikulum atau materi pembelajaran Desain dan Produksi Kriya yang dipelajari murid yang ada pada Kurikulum 13 dan Kurikulum Merdeka. Elemen yang diukur ini meliputi: Wawasan Dunia Kerja BIdang Desain dan Produksi Kriya Kecakapan Kerja Dasar (Basic Job) Skills, K3 dan Budaya Kerja Wawasan Seni, Desain dan Kriya Gambar desain dan produksi Kriya Dasar dasar Desain dan produksi Kriya Portofolio Desain dan Produksi Kriya"
+},
+"sma_pilihan_smk-desain-komunikasi-visual": {
+"nama": "SMK - Desain Komunikasi Visual",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Program Keahlian Desain Komunikasi Visual bertujuan mengukur kemampuan murid dalam pemahaman konseptual serta keterampilan dasar murid dalam bidang Desain Komunikasi Visual sesuai capaian pembelajaran pada mata pelajaran Dasar-Dasar Desain Komunikasi Visual. Penilaian ini mencakup pemahaman mengenai wawasan dunia kerja bidang desain komunikasi visual dan grafika, penerapan kecakapan kerja dasar (basic job skills), K3 (Keselamatan dan Kesehatan Kerja), budaya kerja industri kreatif, penerapan tipografi, sketsa dan ilustrasi, dasar-dasar fotografi, serta penggunaan komputer grafis dalam proses perancangan media visual. Selain itu, penilaian diarahkan untuk mengukur kemampuan murid dalam be",
+"muatan": "Muatan TKA Program Keahlian Desain Komunikasi Visual memiliki Elemen dan sub elemen yang meliputi: Tipografi, sketsa dan ilustrasi: Anatomi tipografi, Teknik dalam menggambar sketsa dan ilustrasi manual, Analisis karya ilustrasi, Hirarki tipografi Fotografi: Dasar fotografi, Peralatan fotografi, Analisis prinsip exposure, Komposisi fotografi, Pengolahan dan penyimpanan foto. Komputer grafis: Gambar berbasis bitmap dan vektor, Mode warna dalam komputer grafis, Perangkat lunak berbasis vektor dan bitmap"
+},
+"sma_pilihan_smk-desain-pemodelan-dan-informasi-bangunan": {
+"nama": "SMK - Desain Pemodelan dan Informasi Bangunan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Desain Pemodelan dan Informasi Bangunan (DPIB) bertujuan mengukur kemampuan murid dalam memahami, menganalisis, dan menerapkan prinsip-prinsip dasar yang berkaitan dengan perencanaan, pemodelan, dan konstruksi bangunan",
+"muatan": "Muatan TKA DPIB merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025.. Adapun Elemen dan Sub elemen tersebut meliputi: Wawasan dunia kerja bidang desain pemodelan dan informasi bangunan: Sistem informasi bangunan dan Perkembangan Teknologi Kecakapan kerja dasar (basic job skills), K3LH dan Budaya kerja: Pengoperasian dan perawatan alat ukur serta penerapan dan budaya mutu dan K3LH Gambar Teknik dan Building Information Modeling (BIM): Standar gambar teknik dan Fungsi dan contoh teknologi BIM Perhitungan Statika Bangunan: Keseimbangan gaya dan Perhitungan Gaya Batang Dasar Konstruksi Bangunan: Jenis pekerjaan konstruksi dan isu-isu global terkait green building dan sustainable building"
+},
+"sma_pilihan_smk-kecantikan-dan-spa": {
+"nama": "SMK - Kecantikan dan Spa",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Kecantikan dan SPA mengukur kemampuan murid dalam penguasaan keahlian kecantikan kulit, rambut, dan SPA sebagai landasan murid untuk mendalami industri kecantikan dan SPA, industri kreatif pada wirausaha bidang kecantikan, perkembangan penerapan teknologi dan isu-isu global terkait dunia kecantikan dan SPA",
+"muatan": "Muatan TKA Kecantikan dan SPA merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Wawasan Dunia Kerja Bidang Kecantikan dan SPA: wawasan profil dan karakteristik industri kecantikan dan SPA, perkembangan penerapan teknologi dan isu-isu global terkait dunia kecantikan dan SPA, serta penerapan wirausaha bidang kecantikan dan SPA yang profesional Menerapkan Kecakapan Kerja Dasar (Basic Job Skills), K3, dan Budaya: dasar penerapan pelayanan prima (excellent service) pada industri kecantikan dan SPA, Sanitasi hygiene, kesehatan, keselamatan kerja, dan budaya mutu, dasar konsep SPA, serta praktik dasar kecantikan kulit dan rambut Anatomi dan Fisiologi Kecantikan: anatomi dan fisiologi kecantika"
+},
+"sma_pilihan_smk-konstruksi-dan-perawatan-bangunan-sipil": {
+"nama": "SMK - Konstruksi dan Perawatan Bangunan Sipil",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Konstruksi dan Perawatan Bangunan Sipil mengukur tingkat pemahaman, penerapan dan penalaran murid tentang konsep dasar konstruksi dan perawatan bangunan sipil melalui penguasaan pengetahuan, keterampilan, dan sikap profesional yang relevan dengan dunia kerja",
+"muatan": "Muatan TKA Konstruksi dan Perawatan Bangunan Sipil merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025 (Fase E hal 371 dan Fase F hal 591). Cakupan elemen dan sub elemen ini meliputi: Wawasan Dunia Kerja Pada Bidang Jasa Konstruksi dan Perawatan Bangunan Sipil; aktivitas bisnis dan perkembangan dunia kerja praktisi jasa konstruksi (Konsultan perencana, kontraktor pelaksana, konsultan pengawas) serta perawatan bangunan sipil. Statika Bangunan: analisis statika bangunan sebagai dasar perhitungan pekerjaan konstruksi pada struktur bangunan sipil. Dasar Konstruksi Bangunan: analisis spesifikasi dan karakteristik bahan bangunan, serta jenis pekerjaan konstruksi dan perawatan bangunan sipil sesuai dengan kaidah K3LH. Ukur Tanah: k"
+},
+"sma_pilihan_smk-kuliner": {
+"nama": "SMK - Kuliner",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kompetensi Akademik (TKA) Kuliner mengukur kemampuan pengetahuan, penerapan, dan penalaran murid mengenai dasar-dasar kuliner serta etika kerja pada proses persiapan, pengolahan, penyajian, dan pelayanan makanan serta minuman sesuai standar industri kuliner",
+"muatan": "TKA Kuliner disusun berdasarkan elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Wawasan Dunia Kerja Bidang Kuliner: proses bisnis kuliner, Perkembangan dan Pemanfaatan teknologi di bidang kuliner, Profesi dan Peluang usaha dibidang kuliner. Kecakapan kerja dasar (basic job skills), K3, dan budaya kerja bidang kuliner: keamanan pangan dan k3, pengetahuan peralatan, bahan makanan dan kandungan gizi, menu knowledge, mise en place, basic cooking method, pengetahuan dasar berbagai masakan di dunia serta pelayanan prima"
+},
+"sma_pilihan_smk-manajemen-perkantoran-dan-layanan-bisnis": {
+"nama": "SMK - Manajemen Perkantoran dan Layanan Bisnis",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Manajemen Perkantoran bertujuan untuk mengukur dan menilai pemahaman murid terhadap konsep, prinsip, praktik serta kemampuan penalaran kritis dalam bidang manajemen perkantoran secara luas guna mendukung pelaksanaan pekerjaan administrasi yang sesuai dengan kebutuhan dunia kerja dan perkembangan teknologi",
+"muatan": "Muatan TKA Program Keahlian Manajemen Perkantoran dan Layanan Bisnis merujuk pada elemen atau materi yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen meliputi: Wawasan Dunia Kerja Bidang Manajemen Perkantoran dan Layanan Bisnis: Aktivitas pekerjaan pada bidang manajemen perkantoran dan layanan bisnis, fungsi manajemen, pengenalan rantai pasok (supply chain), perkembangan manajemen perkantoran modern, otomatisasi perkantoran, profil pekerjaan/profesi (job-profile) di masa sekarang dan di masa mendatang, peluang usaha di bidang manajemen perkantoran dan layanan bisnis, dasar ilmu ekonomi, dasar-dasar pemasaran, dan e-commerce. Kecakapan Kerja Dasar (Basic Job Skills), K3, dan Budaya Kerja: Layanan pelanggan (customer service), prosedur dan in"
+},
+"sma_pilihan_smk-pemasaran": {
+"nama": "SMK - Pemasaran",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Program Keahlian Pemasaran SMK bertujuan mengukur pemahaman konseptual dan keterampilan analitis murid dalam bidang pemasaran, yang mencakup pemahaman terkait konsep dasar bisnis dan pemasaran, perkembangan dan transformasi pemasaran (konvensional–digital–modern), dasar K3, budaya kerja, konsep ekonomi, manajemen, dan administrasi serta keterampilan analitis terkait riset pasar, perilaku konsumen dalam keputusan pembelian, dan strategi pemasaran",
+"muatan": "Muatan TKA Program Keahlian Pemasaran merujuk pada elemen atau materi yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, dan Asesmen Pendidikan Kementerian Pendidikan Dasar dan Menengah Nomor 046/H/KR/2025. TKA Program Keahlian Pemasaran mencakup 2 elemen sebagai berikut: Wawasan dunia kerja bidang pemasaran di berbagai industri: mencakup proses bisnis dalam bidang pemasaran secara menyeluruh pada berbagai jenis industri dan usaha, perkembangan pemasaran mulai dari konvensional sampai dengan penerapan teknologi modern, industri 4.0, Internet of Things (IoT), teknologi digital dalam pemasaran, isu-isu perkembangan yang muncul dan hilang ke depan terkait dengan dunia pemasaran, seperti digital marketing, e-commerce, marketplace, media sosial, dan sejenisnya, profil pekerjaan/ profesi (job profile) dalam bidang pemasaran di masa sekarang dan di masa m"
+},
+"sma_pilihan_smk-perhotelan": {
+"nama": "SMK - Perhotelan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Dasar-dasar Perhotelan mengukur pemahaman murid tentang konsep dasar industri perhotelan yang terstandar, meliputi profil hospitality, layanan prima (excellent service), perkembangan teknologi hotel, serta operasional dasar untuk menyiapkan peserta didik berkarier atau melanjutkan ke pendidikan tinggi di bidang pariwisata",
+"muatan": "Industri perhotelan modern menuntut lebih dari sekadar keterampilan teknis, dibutuhkan perpaduan antara ketajaman teknologi, standar layanan yang tulus, dan pemahaman mendalam tentang operasional global. Melalui TKA, kompetensi murid akan diuji mulai dari pemahaman jati diri seorang insan hotelier, hingga kemampuan beradaptasi dengan tren digitalisasi dan isu keberlanjutan yang tengah menjadi wajah baru pariwisata dunia yang menjadi pilar dalam pengukuran TKA. Elemen dalam Dasar perhotelan meliputi: Wawasan Dunia Kerja Bidang Perhotelan Meliputi konsep pengembangan pengetahuan industri perhotelan, pembaruan pengetahuan lokal, pelaksanaan tugas perlindungan anak yang relevan dengan industri pariwisata, penyampaian informasi produk, layanan dan fasilitas hotel Kecakapan Kerja Dasar (Basic Job Skills), K3, dan Budaya Kerja Meliputi konsep dan penerapan prosedur kesehatan, keselamatan dan ke"
+},
+"sma_pilihan_smk-seni-pertunjukan": {
+"nama": "SMK - Seni Pertunjukan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Seni Pertunjukan mengukur pengetahuan dan keterampilan murid tentang konsep dasar dan produksi seni pertunjukan, menanamkan sikap profesional, serta membangun rencana (passion) terhadap dunia seni pertunjukan",
+"muatan": "Muatan TKA Seni Pertunjukan merujuk pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025 tentang Capaian Pembelajaran pada pendidikan usia dini, jenjang pendidikan dasar, dan jenjang pendidikan menengah. Capaian Pembelajaran bidang Seni Pertunjukan berfokus pada kompetensi dasar yang harus dimiliki oleh seniman dalam bidang seni pertunjukan sesuai dengan situasi, kondisi, dan perkembangan dunia kerja. Selain itu, murid diberikan pemahaman tentang proses bisnis, perkembangan penerapan teknologi, dan isu-isu global, profil entrepreneur, job profile, peluang usaha, dan pekerjaan/profesi. Elemen dan Sub-elemen mata pelajaran Seni Pertunjukan adalah sebagai berikut: Wawasan budaya kerja bidang seni pertunjukan: Profil entrepreneur/ peluang usaha dan pekerjaan/ profesi di bidang seni pertunjukan, Perkembang"
+},
+"sma_pilihan_smk-seni-rupa": {
+"nama": "SMK - Seni Rupa",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Program Keahlian Seni Rupa mengukur pemahaman komprehensif murid yang mencakup pengetahuan, keterampilan, sikap, dan rejana (passion) melalui penerapan teori, prinsip, kemampuan pemecahan masalah dan kemampuan analisis dasar dalam bidang Seni Rupa",
+"muatan": "Muatan TKA Seni Rupa merujuk pada elemen kurikulum Capaian Pembelajaran Dasar-Dasar Seni Rupa dengan mengacu pada Salinan Keputusan Kepala Badan Standar, Kurikulum dan Asesmen Pendidikan (BSKAP) Kemendikdasmen Nomor 046/H/KR/2025 meliputi elemen: Wawasan dunia kerja bidang seni rupa Kecakapan Kerja Dasar (basic jobskills), K3, dan Budaya Kerja Bidang Seni Rupa Desain Dasar Dua Dimensi Desain Dasar Tiga Dimensi Menggambar Sketsa Pemahaman dan Pengetahuan seni rupa diukur melalui pemecahan masalah dalam konteks berkarya seni rupa, baik skala lokal, nasional maupun global"
+},
+"sma_pilihan_smk-teknik-furnitur": {
+"nama": "SMK - Teknik Furnitur",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) pada Program Keahlian Teknik Furnitur bertujuan untuk mengukur kemampuan peserta didik dalam memahami, menganalisis dan menerapkan, serta menalar konsep dasar yang berkaitan dengan Teknik Furnitur dan praktik kerja di bidang furnitur secara kontekstual sesuai tuntutan industri. Asesmen ini bertujuan menilai pemahaman, aplikasi, dan penalaran murid dalam konteks yang relevan dengan kehidupan sehari-hari dan kejuruan",
+"muatan": "Muatan Tes Kemampuan Akademik (TKA) pada Program Keahlian Teknik Furnitur mencakup elemen pengetahuan dan keterampilan yang merepresentasikan kebutuhan kompetensi dasar hingga lanjutan di bidang desain, produksi, dan manajemen furnitur, dengan konteks pembelajaran yang terkait dengan dunia kerja dan industri, dengan merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan Sub Elemen Program Keahlian Teknik Furnitur mencakup: Wawasan Dunia Kerja Bidang Furnitur: Menganalisis profesi dan kewirausahaan (job-profile dan technopreneurship) serta peluang usaha pada bidang furnitur dan aktivitas pekerjaan industri furnitur. Kecakapan Kerja Dasar (Basic Job Skills), K3LH, dan Budaya Kerja: Menerapkan kegiatan praktik yang ter"
+},
+"sma_pilihan_smk-teknik-konstruksi-dan-perumahan": {
+"nama": "SMK - Teknik Konstruksi dan Perumahan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Teknik Konstruksi dan Perumahan mengukur kemampuan murid dalam memahami, menganalisis, dan menerapkan pengetahuan serta keterampilan dasar di bidang teknik konstruksi dan perumahan sesuai dengan perkembangan teknologi, standar kerja industri, dan prinsip keselamatan kerja sebagai bekal kesiapan melanjutkan pendidikan maupun memasuki dunia kerja",
+"muatan": "Muatan Tes Kemampuan Akademik (TKA) Teknik Konstruksi dan Perumahan merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, dDan Asesmen Pendidikan Kementerian Pendidikan Dasar dDan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen meliputi: Wawasan dunia kerja bidang konstruksi dan perumahan; berbagai jenis peluang kerja, pekerjaan dan perkembangan teknologi pada bidang konstruksi dan perumahan serta isu-isu global terkait green building dan sustainable building. Kecakapan dasar kerja (basic job skill), K3LH, dan budaya kerja; praktik dasar secara menyeluruh pada penggunaan peralatan dan teknologi, memahami spesifikasi dan karakteristik bahan bangunan, jenis pekerjaan konstruksi perumahan, serta menerapkan K3LH dan budaya kerja. Perhitungan statika bangunan; elemen-elemen struktur bangunan, dan perhitungan ga"
+},
+"sma_pilihan_smk-teknik-mesin": {
+"nama": "SMK - Teknik Mesin",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) Teknik Mesin bertujuan mengukur pemahaman konseptual dan penerapan dalam aspek pengetahuan teknis, sikap kerja, dan budaya industri, serta keterampilan teknis pada proses produksi manufaktur sesuai kebutuhan dunia kerja industri",
+"muatan": "TKA Teknik Mesin merujuk pada elemen kurikulum atau materi dalam program keahlian teknik mesin yang dipelajari murid yang ada pada Salinan Keputusan Kepala Badan Standar, Kurikulum, dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025 Elemen dan sub elemen meliputi: Kecakapan Kerja Dasar (Basic Job Skills), K3, dan Budaya Kerja Teknik Dasar Proses Produksi Pada Bidang Manufaktur Mesin.meliputi teknologi cutting non cutting, alat ukur, alat perkakas tangan, pemesinan dasar dan pengelasan dasar. Pengetahuan Bahan (material science), meliputi jenis jenis bahan, sifat sifat bahan dan fungsi bahan dalam proses manufaktur Dasar Sistem Mekanik, meliputi jenis jenis sambungan, jenis jenis tumpuan dan transmisi mesin Gambar Teknik, meliputi membaca gambar teknik dan menggambar teknik dengan CADD"
+},
+"sma_pilihan_smk-teknik-otomotif": {
+"nama": "SMK - Teknik Otomotif",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kompetensi Akademik (TKA) Teknik Otomotif mengukur pengetahuan, keterampilan, dan sikap profesional murid dalam memahami konsep dasar serta menerapkan analisis pemecahan masalah teknis pada kendaraan roda dua, roda empat, maupun alat berat sesuai standar yang berlaku di bidang otomotif",
+"muatan": "Muatan TKA Teknik Otomotif merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Wawasan dunia Otomotif, Menjelaskan wawasan dunia industri dan kerja otomotif, perkembangan teknologi komponen & produk, serta isu global seperti perubahan iklim dan penggunaan AI pada berbagai jenis kendaraan Kecakapan Kerja Dasar (Basic Job Skills), K3, dan Budaya Kerja, Menerapkan prosedur perawatan & perbaikan otomotif, keselamatan kerja serta budaya kerja di bidang otomotif. Gambar Teknik Otomotif, Menerapkan dan membaca gambar teknik sesuai standar, serta menentukan posisi komponen otomotif berdasarkan manual servis. Peralatan dan Perlengkapan Tempat kerja, Menerapkan pemilihan, penggunaan, dan perawatan "
+},
+"sma_pilihan_smk-usaha-layanan-pariwisata": {
+"nama": "SMK - Usaha Layanan Pariwisata",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Usaha Layanan Pariwisata betujuan untuk mengukur kemampuan murid dalam melaksanakan tugas pelayanan pariwisata sesuai prosedur kerja dan standar industri, dengan menggunakan peralatan dan informasi yang relevan",
+"muatan": "Muatan TKA Usaha Layanan Pariwisata merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Wawasan Dunia Kerja Bidang Usaha Layanan Pariwisata: ruang lingkup industri pariwisata sebagai bisnis, program pengembangan pariwisata digital, serta profesi dan kewirausahaan bidang pariwisata. Kecakapan Kerja Dasar (Basic Job Skills), K3 (keselamatan dan keamanan), dan Budaya kerja: menerapkan komunikasi di tempat kerja, serta menerapkan prosedur kesehatan, keselamatan dan keamanan di tempat kerja, Perencanaan dan Pengelolaan Perjalanan Wisata: menyusun itinerary perjalanan wisata, merancang paket perjalanan wisata, serta menghitung biaya dan penyusunan anggaran paket perjalanan wisata. Pemanduan Wis"
+},
+"sma_pilihan_sosiologi": {
+"nama": "Sosiologi",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Sosiologi dirancang untuk mengukur pemahaman murid terhadap konsep-konsep sosiologi serta kemampuan analisis terhadap fenomena sosial yang terjadi di masyarakat. Murid diharapkan mampu mengembangkan pemahaman yang lebih mendalam tentang masyarakat, memiliki kesadaran sosial yang tinggi, serta mampu berkontribusi dalam upaya menciptakan masyarakat yang setara dan inklusif berlandaskan perbedaan serta menuntut keterampilan berpikir analitis dan kemampuan beradaptasi dalam lingkungan sosial yang dinamis",
+"muatan": "TKA Mata Pelajaran Sosiologi merujuk pada irisan materi Sosiologi pada Kurikulum 2013 dengan Kurikulum Merdeka. Materi inti yang beririsan pada kedua kurikulum tersebut meliputi: Sosiologi sebagai Ilmu: hakikat, konsep, sejarah, perspektif, dan ruang lingkup sosiologi sebagai landasan untuk memahami berbagai fenomena sosial secara sistematis dan komprehensif dari kacamata sosiologi. Hubungan dan Gejala Sosial: ragam hubungan dan gejala sosial yang mempengaruhi kehidupan bermasyarakat berupa faktor faktor yang mempengaruhi interaksi, pembentukan identitas, bentuk hubungan sosial dan analisis dampak hubungan serta ragam gejala sosial tidak hanya sebagai potensi masalah sosial tetapi juga unsur positif di masyarakat. Penelitian Sosial: konsep dasar penelitian sosial, prosedur, teknik pengumpulan data, dan berbagai jenis metode yang digunakan dalam penelitian sosial. Kelompok Sosial, Kesetar"
+},
+"sma_pilihan_teknik-elektronika-smk-mak": {
+"nama": "SMK - Teknik Elektronika",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) Teknik Elektronika mengukur kemampuan murid dalam memahami dan menganalisis konsep dunia kerja bidang elektronika, K3LH dan budaya kerja, keterampilan menggunakan perkakas tangan, menerapkan prosedur gambar teknik elektronika, menggunakan alat ukur listrik dan elektronika dan instrumentasi, mengenal konsep dasar kelistrikan dan elektronika, komponen aktif dan pasif, mengenal dasar teknik digital untuk menyelesaikan permasalahan ke dunia kerja atau pendidikan lanjutan",
+"muatan": "Muatan TKA Teknik Elektronika merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran dalam Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen dalam Teknik Elektronika meliputi: Wawasan Dunia Kerja Bidang Elektronika; Waste control Kecakapan Kerja Dasar (Basic Job Skills), K3LH, dan Budaya Kerja; Prinsip dasar keselamatan dan kesehatan kerja serta lingkungan hidup (K3LH), Makna rambu-rambu keselamatan dan kesehatan kerja, Prosedur penanganan limbah B3, Budaya kerja 5R (ringkas, rapi, resik, rawat, rajin), Penggunaan Perkakas Tangan; Teknik penggunaan perkakas tangan dan Pembuatan PCB Gambar Teknik;Simbol komponen, rangkaian listrik dan pembuatan gambar skema rangkaian Konsep Dasar Kelistrikan dan Elektronika; Besaran dan karakteristik listrik dasar (tegangan, a"
+},
+"sma_pilihan_teknik-energi-terbarukan-smk-mak": {
+"nama": "SMK - Teknik Energi Terbarukan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Teknik Energi Terbarukan mengukur penguasaan konsep dan lingkup kerja di bidang teknik energi terbarukan, yang mencakup pemahaman dunia kerja, kecakapan kerja dasar (basic job skills), K3LH dan budaya kerja, kemampuan membaca dan memahami gambar teknik, konsep konversi energi (surya, hidro, angin dan biomassa), serta penggunaan alat ukur dan alat uji sesuai dengan prosedur kerja di bidang energi terbarukan",
+"muatan": "Muatan TKA Teknik Energi Terbarukan merujuk pada elemen dan kurikulum yang ada pada Capaian Pembelajaran pada Salinan keputusan Kepala Badan Standar, Kurikulum, dan Asesmen Pendidikan Kementerian Pendidikan Dasar dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Wawasan Dunia Kerja di Bidang Teknik Energi Terbarukan: Aktivitas produksi, Isu-isu dan perkembangan teknologi serta Profesi dan peluang usaha dalam bidang energi terbarukan Kecakapan Kerja Dasar (Basic Job Skills) Teknik Energi Terbarukan: Pekerjaan dasar pada energi terbarukan, pengenalan teknologi yang diaplikasikan untuk pembangkit listrik tenaga air, tenaga bayu, tenaga surya, biomassa; dan menerapkan K3LH dan budaya kerja di industri dalam bidang teknologi energi terbarukan Gambar Teknik: macam-macam peralatan gambar, standarisasi dalam pembuatan gambar, serta praktik menggambar dan membaca gambar Konsep"
+},
+"sma_pilihan_teknik-geologi-pertambangan-smk-mak": {
+"nama": "SMK - Teknik Geologi Pertambangan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Teknik Geologi Pertambangan mengukur kemampuan murid dalam penguasaan konsep kerja di bidang geologi pertambangan, menganalisis dasar-dasar ilmu geologi, pembuatan gambar teknik dasar, dan menerapkan kecakapan kerja dasar, budaya kerja dan K3LH, serta teknik dasar penambangan untuk menyelesaikan masalah (problem solving)",
+"muatan": "Muatan TKA Teknik Geologi Pertambangan merujuk pada elemen Capaian Pembelajaran Teknik Geologi Pertambangan pada Salinan Keputusan Kepala Badan Standar, Kurikulum, dan Asesmen Pendidikan Kementerian Pendidikan Dasar dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Wawasan Dunia Kerja Bidang Geologi Pertambangan: Mencakup pengenalan jenis profesi/jabatan pekerjaan di bidang pertambangan, perkembangan teknologi, isu-isu global, Kecakapan Kerja Dasar (Basic Job Skills), K3LH, dan Budaya Kerja: Meliputi penguasaan teknik dasar, standar, dan peraturan yang berlaku dalam geologi pertambangan. Elemen ini juga menekankan penerapan budaya kerja dan K3LH (Keselamatan, Kesehatan Kerja, dan Lingkungan Hidup), termasuk praktik kerja aman, penanganan kondisi darurat, prinsip 5R, serta etika kerja. Gambar Teknik: Meliputi teknik dasar menggambar dalam lingkup geologi pertambangan, "
+},
+"sma_pilihan_teknik-geospasial-smk-mak": {
+"nama": "SMK - Teknik Geospasial",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Teknik Geospasial bertujuan untuk mengukur kemampuan murid dalam menguasai kemampuan dasar geospasial mengenai aspek pengetahuan tentang keruangan dan penentuan posisi dalam lingkup geospasial, aturan keamanan dan keselamatan kerja serta budaya kerja pada industri di bidang geospasial",
+"muatan": "Muatan TKA Teknik Geospasial merujuk pada elemen Capaian Pembelajaran Teknik Geospasial pada Salinan Keputusan Kepala Badan Standar, Kurikulum, dan Asesmen Pendidikan Kementerian Pendidikan Dasar dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Wawasan Dunia Kerja Bidang Teknik Geospasial: Meliputi profesi kerja, peluang usaha, serta isu-isu global terkait bidang geospasial. Kecakapan Kerja Dasar, K3LH dan Budaya Kerja Bidang Teknik Geospasial: Meliputi penalaran geospasial, aturan dan keamanan kerja yang digunakan dalam budaya kerja profesional bidang Teknik Geospasial"
+},
+"sma_pilihan_teknik-jaringan-komputer-dan-telekomunikasi-smk-mak": {
+"nama": "SMK - Teknik Jaringan Komputer dan Telekomunikasi",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kompetensi akademik (TKA) Dasar-Dasar Program Keahlian Teknik Jaringan Komputer dan Telekomunikasi disusun untuk mengukur kemampuan murid dengan pengetahuan, keterampilan, dan sikap profesional dalam memahami dunia kerja bidang teknik jaringan komputer dan telekomunikasi, menerapkan kecakapan kerja dasar (Basic Job Skills), K3LH, dan budaya kerja, memahami media dan jaringan telekomunikasi dan menerapkan prinsip dasar pengukuran dalam teknik jaringan komputer dan telekomunikasi. Kemampuan ini dipilih sebagai fokus karena merupakan kemampuan dasar baik soft skill dan hard skill. Soft Skill menjadi pondasi dalam pengembangan hard skill yang sangat dibutuhkan untuk belajar dan bekerja pada ",
+"muatan": "Muatan TKA Teknik Jaringan Komputer dan Telekomunikasi merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Wawasan Dunia Kerja bidang Teknik Jaringan Komputer dan Telekomunikasi Meliputi aktivitas pekerjaan pada bidang teknik jaringan komputer dan telekomunikasi seperti pengenalan tentang jenis-jenis profesi dan kewirausahaan (job-profile dan technopreneur), peluang usaha,proses bisnis, pelayanan pelanggan, serta perkembangan teknologi terkait jaringan komputer dan telekomunikasi diantaranya 3G/4G/5G, VSAT, Microwave Link, Fiber Optik, IPV6, Data Center, Layanan IoT, Cloud Computing dan Keamanan Jaringan Komputer maupun Telekomunikasi. 2. Kecakapan Kerja Dasar (Basic Job Skills), K3, dan "
+},
+"sma_pilihan_teknik-ketenagalistrikan-smk-mak": {
+"nama": "SMK - Teknik Ketenagalistrikan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Teknik Ketenagalistrikan mengukur kemampuan murid dalam Pemahaman dan Penerapan dunia kerja bidang ketenagalistrikan, kecakapan kerja dasar (basic job skills), budaya kerja dan K3 yang berwawasan lingkungan, teori dasar listrik dan dan elektronika, alat tangan dan alat kerja listrik, pengukuran dan pengujian dengan menggunakan alat yang sesuai, dan software gambar teknik listrik",
+"muatan": "Muatan TKA Teknik Ketenagalistrikan merujuk pada elemen kurikulum atau materi ketenagalistrikan yang dipelajari murid pada program keahlian Teknik Ketenagalistrikan SMK. Elemen Kurikulum yang dimaksud adalah elemen pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen ini meliputi: wawasan dunia kerja bidang ketenagalistrikan, kecakapan kerja dasar (basic job skills), K3, dan budaya kerja, teori dasar listrik dan elektronika, alat tangan dan alat kerja kelistrikan, alat ukur dan alat uji kelistrikan, dan perangkat lunak gambar teknik listrik. Pengetahuan ketenagalistrikan diukur melalui permasalahan dalam konteks teknis ketenagalistrikan dan permasalahan dalam konteks keseharian yang dapat meliputi situasi di lingkup personal, lingkungan kerja, maupun industri kelistrikan baik skala lokal maupu"
+},
+"sma_pilihan_teknik-kimia-industri-smk-mak": {
+"nama": "SMK - Teknik Kimia Industri",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) Teknik Kimia Industri merupakan instrumen penilaian untuk mengukur penguasaan keilmuan dasar murid dalam memahami menerapkan dan menganalisis konsep dasar Teknik Kimia Industri, meliputi wawawasan kerja bidang Teknik Kimia Industri, proses produksi pada industri kimia, kesehatan, keselamatan kerja dan lingkungan hidup (K3LH), serta penguasaan Ilmu kimia dan mikrobiologi",
+"muatan": "Muatan TKA Teknik Kimia Industri merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Muatan tersebut terdiri dari elemen dan sub elemen meliputi: Wawasan Kerja Bidang Teknik Kimia Industri: Proses Bisnis Industri Kimia, Perkembangan Teknologi dan Isu-Isu Global di Dunia Industri Kimia, Profesi, Kewirausahaan, dan Peluang Usaha di bidang Kimia Industri Kecakapan Kerja Dasar (basic job skill), K3, Budaya Kerja: Teknik Dasar Pekerjaan Laboratorium Kimia, K3LH dan Budaya Kerja Industri, Dasar Kimia: Kimia Organik Dasar, Kimia Anorganik Dasar, Dasar Mikrobiologi: Prinsip Mikrobiologi, Teknik Sterilisasi Teknik Dasar Pekerjaan Laboratorium: Penggunaan Peralatan dan Analisis Dasar Laboratorium"
+},
+"sma_pilihan_teknik-konstruksi-kapal-smk-mak": {
+"nama": "SMK - Teknik Konstruksi Kapal",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) Teknik Konstruksi Kapal bertujuan untuk mengukur kemampuan murid dalam memahami, menerapkan, dan menalar konsep dasar pada bidang Teknik Konstruksi Kapal. Ruang lingkup materi yang diujikan mencakup wawasan dunia kerja di bidang perkapalan, kecakapan kerja dasar (basic job skills), penerapan Kesehatan, Keselamatan Kerja, dan Lingkungan Hidup (K3LH), serta kompetensi dalam gambar teknik dan pemanfaatan perangkat lunak Computer Aided Design (CAD) untuk pembuatan basic design",
+"muatan": "Muatan TKA Teknik Konstruksi Kapal merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Wawasan dunia kerja bidang perkapalan: perencanaan konstruksi kapal, teknologi pembangunan kapal, dan profesi di bidang perkapalan. Kecakapan kerja (basic job skills), K3LH dan budaya kerja: dasar-dasar perkapalan, Pekerjaan dasar perkapalan, serta penerapan K3LH dan budaya kerja industri. Gambar teknik: gambar proyeksi dan potongan. Gambar basic design dengan CAD: dasar penggunaan perangkat lunak CAD"
+},
+"sma_pilihan_teknik-laboratorium-medik-smk-mak": {
+"nama": "SMK - Teknik Laboratorium Medik",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA pada program keahlian Teknik Laboratorium Medik mengukur kemampuan peserta didik dalam berpikir kritis, menganalisis dan memecahkan masalah tentang konsep dasar dalam lingkup proses bisnis laboratorium, perkembangan teknologi medik, serta dasar-dasar layanan laboratorium medik guna menyiapkan tenaga penunjang kesehatan yang profesional, teliti dan sesuai standar kesehatan, keselamatan kerja, dan lingkungan hidup (K3LH)",
+"muatan": "Muatan TKA program keahlian Teknik Laboratorium Medik merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025 yang relevan dengan kebutuhan kompetensi dasar murid SMK pada fase E. Muatan TKA bertujuan untuk mengukur penguasaan, pengetahuan, keterampilan berpikir, serta kemampuan penerapan konsep dalam konteks layanan laboratorium medik secara sederhana, kontekstual dan sesuai standar kerja. Elemen muatan dalam TKA Teknik Laboratorium Medik meliputi: Wawasan dunia kerja dan pengenalan teknologi terkini bidang layanan laboratorium medik meliputi jenis-jenis layanan/ pemeriksaan laboratorium medik dan etika Kecakapan kerja dasar (Basic Job Skills), K3, dan budaya kerja Peralatan laboratorium medik Bahan kerja di laboratorium medik "
+},
+"sma_pilihan_teknik-logistik-smk-mak": {
+"nama": "SMK - Teknik Logistik",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) Program Keahlian Teknik Logistik SMK/MAK bertujuan untuk mengukur kemampuan murid dalam memahami konsep, prinsip, prosedur kerja, dan penerapan teknologi pada bidang logistik melalui penguasaan kompetensi dasar teknik logistik, meliputi aktivitas administratif logistik, operasional pergudangan, distribusi barang, pengelolaan dokumen, pelayanan pelanggan, penerapan K3LH, budaya kerja industri, serta penggunaan sistem informasi logistik. Pengukuran kemampuan dilakukan melalui aspek pengetahuan, penerapan prosedur kerja, dan penalaran dalam menyelesaikan permasalahan kontekstual yang relevan dengan operasional industri logistik serta selaras dengan kebutuhan kompete",
+"muatan": "TKA Program Keahlian Teknik Logistik merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen tersebut meliputi: Wawasan Dunia Kerja Bidang Teknik Logistik; Aktivitas kerja bidang logistik dan supply chain, perkembangan industri logistik dan teknologi logistik, profesi, job profile, dan technopreneurship bidang logistik, peluang usaha dan kewirausahaan logistik. Kecakapan Kerja Dasar (Basic Job Skills), K3, dan Budaya Kerja; Keselamatan dan kesehatan kerja lingkungan hidup (K3LH), budaya kerja industri, komunikasi kerja, sikap kerja profesional dan disiplin kerja, 5R dan etika kerja. Kegiatan Administrasi Dokumen dan Operasional Pengadaan; Administrasi dokumen logistik, dokumen pengadaan barang, pencatatan dan transaksi l"
+},
+"sma_pilihan_teknik-pengelasan-dan-fabrikasi-logam-smk-mak": {
+"nama": "SMK - Teknik Pengelasan dan Fabrikasi Logam",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Teknik Pengelasan dan Fabrikasi Logam mengukur kemampuan murid dalam memahami penyambungan (welding) dan pembentukan (fabrikasi) material logam, serta kemampuan untuk menumbuhkembangkan profesionalisme dalam bidang pengelasan dan fabrikasi logam",
+"muatan": "Muatan TKA Teknik Pengelasan dan Fabrikasi Logam merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen ini meliputi: Wawasan Dunia Kerja Bidang Pengelasan dan Fabrikasi Logam: Menganalisis perkembangan teknologi pada bidang pengelasan dan fabrikasi logam di berbagai bidang aktivitas pekerjaan industri konstruksi dan manufaktur; serta memahami profesi dan kewirausahaan (job-profile dan technopreneurship) di bidang pengelasan dan fabrikasi logam. Kecakapan Kerja Dasar (Basic Job Skill), K3LH, dan Budaya Kerja: Menerapkan K3LH dan budaya kerja industri pada proses pengelasan dan fabrikasi logam yang diaplikasikan dalam industri konstruksi dan manufaktur; menggunakan perkakas tangan, perkakas bertenaga, gambar teknik, peng"
+},
+"sma_pilihan_teknik-perawatan-gedung-smk-mak": {
+"nama": "SMK - Teknik Perawatan Gedung",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA pada program keahlian Teknik Perawatan Gedung mengukur kemampuan dasar pada murid dalam bidang perawatan gedung sesuai dengan perkembangan dunia kerja. Kerangka Asesmen Tes Kemampuan Akademik (TKA) Teknik Perawatan Gedung, adalah panduan standar nasional yang digunakan untuk mengukur capaian akademik murid pada mata pelajaran tertentu. Asesmen ini bertujuan.menilai pemahaman, menganalisis, dan penalaran murid pada bidang Teknik Perawatan Gedung sebagai bekal kesiapan melanjutkan pendidikan, memasuki dunia kerja maupun berwirausaha",
+"muatan": "Muatan TKA Teknik Perawatan Gedung merujuk pada Keputusan Kepala Badan Standar, Kurikulum dan Asesmen Pendidikan Kementerian Pendidikan Dasar dan Menengah Nomor 046/H/KR/2025 Tentang Capaian Pembelajaran Pada Pendidikan Anak Usia Dini, Jenjang Pendidikan Dasar, dan Jenjang Pendidikan Menengah Fase E. Elemen dalam Teknik Perawatan Gedung meliputi: Wawasan dunia kerja bidang perawatan Gedung: Proses Bisnis Kecakapan kerja dasar (basic įob skills), K3LH dan budaya kerja bidang perawatan Gedung: Budaya Kerja, Keselamatan, Kesehatan Kerja dan Lingkungan Hidup (K3LH) Statika bangunan: Jenis Gaya pada Struktur, Keseimbangan dan Gaya Struktur Dasar konstruksi bangunan: Bahan Bangunan, Jenis Bahan Bangunan Gambar teknik: Standar Gambar, Membaca Gambar"
+},
+"sma_pilihan_teknik-perminyakan-smk-mak": {
+"nama": "SMK - Teknik Perminyakan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Teknik Perminyakan bertujuan mengukur kemampuan murid dalam penguasaan pengetahuan dan pemahaman konseptual meliputi prinsip dasar industri minyak dan gas bumi, keselamatan dan kesehatan kerja (K3/HSE), geologi perminyakan, proses pemboran, produksi, pengolahan awal migas, serta peralatan dan instrumentasi pendukungnya, yang dirancang selaras dengan capaian pembelajaran SMK dan dunia kerja",
+"muatan": "TKA Program Keahlian Teknik Perminyakan merujuk pada elemen kurikulum atau materi dalam program keahlian Teknik Perminyakan yang dipelajari murid pada kurikulum merdeka sebagaimana tercantum dalam Salinan Keputusan Kepala Badan Standar, Kurikulum, dan Asesmen Pendidikan Kementerian Pendidikan Dasar dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Wawasan Dunia Kerja Bidang Teknik Perminyakan: Aktivitas pekerjaan, Jenis-jenis profesi, kewirausahaan dan Peluang usaha di bidang industri perminyakan; Perkembangan teknologi proses produksi industri minyak untuk menghasilkan energi yang lebih bersih dan Program pengembangan untuk menjaga ketersediaan minyak dan gas bumi Kecakapan Kerja Dasar (Basic Job Skills), K3, dan Budaya Kerja Bidang Teknik Perminyakan: Proses terbentuknya minyak bumi, Geologi dasar, Petroleum System, Tahapan pencarian sumber minyak dan gas bumi di da"
+},
+"sma_pilihan_teknik-pesawat-udara-smk-mak": {
+"nama": "SMK - Teknik Pesawat Udara",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kompetensi Akademik (TKA) Teknik Pesawat Udara merupakan instrumen penilaian untuk mengukur kemampuan murid dalam memahami, menerapkan dan menganalisis konsep hukum fisika penerbangan, human factors, serta teknis maintenance, repair, and overhaul (MRO), dan proses kerja perawatan komponen, airframe, sistem elektrikal, serta engine pesawat sesuai dengan sesuai standar keselamatan penerbangan. Pengukuran ini mencakup aspek pengetahuan, keterampilan, dan sikap kerja yang relevan dengan standar industri, sebagai dasar pembentukan kompetensi dan kesiapan kerja lulusan di bidang Aircraft Maintenance",
+"muatan": "Muatan TKA Teknik Pesawat Udara merujuk pada elemen kurikulum atau materi dasar-dasar teknik pesawat udara yang dipelajari murid pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini meliputi: Wawasan Dunia Kerja Bidang Penerbangan; Kecakapan Dasar (Basic Skill), Kesehatan dan Keselamatan Kerja (K3), dan Budaya Kerja; CASR Teknik Dasar Proses Perawatan Pesawat Udara; Gambar Teknik Pesawat Udara Theory of Flight; Aircraft Structure; Tenaga Pendorong/Power Plant Aircraft Material; Aircraft Hardware dan Tools Equipment Aircraft System: Basic Electronic System, Basic Electrical system, Basic flight control system, Basic Pneumatic and hydraulic System"
+},
+"sma_pilihan_teknik-tekstil-smk-mak": {
+"nama": "SMK - Teknik Tekstil",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) Teknik Tekstil merupakan instrumen penilaian untuk mengukur kemampuan murid dalam memahami, menerapkan dan menganalisis konsep dasar teknologi tekstil, meliputi bahan tekstil, proses produksi, serta wawasan industri tekstil. Pengukuran ini mencakup aspek pengetahuan, keterampilan, dan sikap kerja yang relevan dengan standar industri, sebagai dasar pembentukan kompetensi dan kesiapan kerja lulusan di bidang industri tekstil",
+"muatan": "Muatan TKA Teknik Tekstil merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025. Elemen dan sub elemen ini ini meliputi: Wawasan dunia kerja bidang industri tekstil: Proses bisnis industri tekstil, Jenis profesi dan budaya kerja di industri tekstil Sejarah dan perkembangan industri tekstil: Sejarah tekstil, Perkembangan teknologi tekstil Pengetahuan teknologi tekstil: Dasar proses pemintalan serat (serat buatan dan serat stapel), Dasar proses pembuatan kain (tenun dan rajut), Dasar proses penyempurnaan tekstil Identifikasi serat tekstil: Jenis-jenis serat tekstil, Metode identifikasi serat (mikroskop, bakar, pelarutan) Identifikasi benang: Jenis-jenis benang, Metode identifikasi serat (mikroskop, bakar, pelarutan) Identifikasi"
+},
+"sma_pilihan_teknika-kapal-niaga-smk-mak": {
+"nama": "SMK - Teknika Kapal Niaga",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) Keahlian Teknika Kapal Niaga mengukur tingkat pemahaman, kemampuan berpikir dan keterampilan murid dalam menerapkan konsep, prinsip, dan sikap profesional yang relevan dengan dunia kerja Teknika Kapal Niaga meliputi, mulai dari penguasaan operasional teknis dan stabilitas kapal, ketangkasan dalam prosedur darurat dan SAR, hingga kepatuhan terhadap hukum maritim internasional serta penerapan budaya keselamatan dan perlindungan lingkungan laut secara berkelanjutan",
+"muatan": "Tes Kemampuan Akademik (TKA) Keahlian Teknika Kapal Niaga merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada salinan Keputusan Kepala Badan Standar, Kurikulum, dan Asesmen Pendidikan Kementerian Pendidikan Dasar dan Menengah Nomor 046/H/KR/2025. Elemen ini meliputi: Wawasan dunia kerja di bidang teknika kapal niagam: Lembaga yang terkait dengan pelayaran kapal niaga dan isu-isu teknologi di bidang teknika kapal niaga. Prosedur darurat dan SAR: Prosedur keselamatan dan keadaan darurat Undang-undang pelayaran dan konvensi Internasional: Undang-undang Pelayaran (Nasional dan Internasional). Kepedulian lingkungan dan pencegahan polusi (environment awareness and pollution of prevention) pencemaran lingkungan laut: Tindakan yang akan diambil untuk mencegah pencemaran lingkungan laut, persyaratan dan prosedur pengoperasian peralatan anti-polusi serta tindakan proa"
+},
+"sma_pilihan_teknika-kapal-penangkap-ikan-smk-mak": {
+"nama": "SMK - Teknika Kapal Penangkap Ikan",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "TKA Teknika Kapal Penangkap Ikan mengukur kemampuan murid dalam memahami, menganalisis, dan menerapkan prinsip teknika kapal penangkap ikan di bidang mengoperasikan serta merawat mesin kapal penangkap ikan secara keseluruhan. Murid tidak hanya diuji dalam aspek konseptual permesinan, tetapi juga aspek praktis operasional, keselamatan maritim, dan tata laksana perikanan yang bertanggung jawab sesuai standar internasional",
+"muatan": "Pembahasan mengenai elemen-elemen dalam bidang Teknika Kapal Penangkap Ikan merupakan upaya untuk memetakan penguasaan materi yang komprehensif, mulai dari tingkat dasar hingga keahlian spesifik. Setiap elemen kurikulum dirancang untuk mengukur berbagai jenjang dimensi proses kognitif murid sesuai dengan Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum dan Asesmen Pendidikan Kementerian Pendidikan Dasar dan Menengah No. 46H/KR/25. Elemen dan Sub-elemen Teknika Kapal Penangkap Ikan sebagai berikut: Wawasan Dunia Kerja Bidang Teknika Kapal Penangkap Ikan, Bisnis, Keselamatan Kerja, Organisasi dan Manajemen Awak Kapal Penangkap ikan Prosedur Darurat di atas kapal, Penanganan keadaan darurat pada awak kapal ikan, Penanganan keadaan darurat pada kapal ikan Tata Laksana Perikanan Yang Bertanggung Jawab Atau Code Of Conduct For Responsible Fisheries (CCRF), Hukum Mari"
+},
+"sma_pilihan_teknologi-farmasi-smk-mak": {
+"nama": "SMK - Teknologi Farmasi",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) Teknologi Farmasi mengukur kemampuan murid dalam memahami konsep serta prosedur di bidang kefarmasian yang mencakup wawasan dunia kerja, perkembangan teknologi farmasi, K3LH, praktik laboratorium, klasifikasi dan regulasi obat, serta tanaman obat dan simplisia, sekaligus menilai kemampuan pemecahan masalah dan kesiapan kerja sesuai profil lulusan SMK",
+"muatan": "Merujuk pada elemen atau materi kurikulum yang ada pada Capaian Pembelajaran pada Salinan Keputusan Kepala Badan Standar, Kurikulum, Dan Asesmen Pendidikan Kementerian Pendidikan Dasar Dan Menengah Nomor 046/H/KR/2025 muatan TKA Dasar-dasar Teknologi Farmasi mencakup dua elemen utama: Wawasan dunia kerja bidang teknologi farmasi meliputi profesi, perkembangan teknologi farmasi, sistem informasi manajemen dan kesehatan, isu global, kewirausahaan, dan prospek kerja. 2. Kecakapan Kerja Dasar (Basic Job Skills), K3, dan Budaya Kerja meliputi K3LH, budaya kerja, praktik dasar pembuatan obat, klasifikasi obat, CPOB/CDOB/CPOTB, serta jenis tanaman obat Indonesia dan simplisia"
+},
+"sma_pilihan_usaha-pertanian-terpadu-smk-mak": {
+"nama": "SMK - Usaha Pertanian Terpadu",
+"jenjang": "SMA",
+"jenis": "pilihan",
+"definisi": "Tes Kemampuan Akademik (TKA) Usaha Pertanian Terpadu bertujuan untuk mengukur kemampuan murid dalam memahami bidang usaha pertanian yang melibatkan integrasi berbagai komponen pertanian, termasuk tanaman, hewan ternak, dan sumber daya alam, dalam suatu sistem yang saling mendukung dan berkelanjutan, sebagai upaya menciptakan ketahanan pangan, peningkatan pendapatan petani, dan perlindungan lingkungan",
+"muatan": "Muatan TKA Usaha Pertanian Terpadu merujuk pada elemen atau capaian pembelajaran jenjang pendidikan menengah tahun 2025. Elemen ini meliputi: Wawasan Dunia Kerja Bidang Usaha Pertanian Terpadu mencakup pemahaman tentang proses bisnis, peluang kerja, serta penerapan teknologi dalam usaha pertanian terpadu. Kecakapan Kerja Dasar (basic job skill), K3LH, dan Budaya Kerja mencakup kemampuan dasar yang harus dimiliki dalam melaksanakan pekerjaan di bidang usaha pertanian terpadu, penerapan prinsip Keselamatan dan Kesehatan Kerja serta Lingkungan Hidup (K3LH), dan pembentukan budaya kerja profesional. Produksi Pangan (food/makanan) mencakup kemampuan dalam mengolah hasil pertanian, peternakan, dan perikanan menjadi produk pangan yang memiliki nilai tambah melalui proses pengolahan (processing) Produksi Pakan (feed/pakan) mencakup kemampuan dalam merencanakan, membuat, dan mengelola pakan terna"
+},
+"sma_wajib_bahasa-indonesia": {
+"nama": "Bahasa Indonesia",
+"jenjang": "SMA",
+"jenis": "wajib",
+"definisi": "TKA Bahasa Indonesia difokuskan pada salah satu keterampilan berbahasa, yakni membaca. Membaca dipilih sebagai fokus karena merupakan keterampilan utama yang menjadi fondasi untuk terus belajar dan bekerja pada era teknologi yang berubah dan berkembang sangat cepat",
+"muatan": "Keterampilan membaca diujikan pada dua jenis teks, yaitu teks informasi tunggal maupun jamak, serta teks fiksi. Teks informasi dapat berbentuk tunggal maupun jamak, dan merupakan teks yang berisi fakta, konsep, prosedur, dan metakognisi dari berbagai bidang atau topik, genre, dan konteks pada skala lokal, nasional, dan global. Teks fiksi dapat berupa realisme atau absurd, dengan latar cerita konkret atau abstrak, tokoh dengan karakter bulat, konflik tunggal atau jamak dengan penyelesaian terbuka, alur campuran, dan sudut pandang campuran. Teks yang digunakan TKA memiliki karakteristik kosakata, kalimat, dan wacana tertentu. Karakteristik kosakata: kata khusus dan kata umum, kata berimbuhan kompleks, kata abstrak, makna denotatif, istilah teknis, konotatif konteks luas; Karakteristik kalimat: 8-12 kata kata per kalimat, dengan kalimat kompleks berbagai pola dan kalimat inversi; Karakteris",
+"baca": {
+"Pemahaman Tekstual": [
+"Mengidentifikasi penggunaan kata serapan dari bahasa daerah/asing dalam berbagai bidang",
+"Mengidentifikasi latar, karakter, dan/atau fenomena berdasarkan kosakata yang digunakan dalam teks fiksi atau nonfiksi",
+"Menyusun kerangka atau bagan berdasarkan bagian-bagian penting dalam teks"
+],
+"Pemahaman Inferensial": [
+"Menyimpulkan ide pokok, gagasan pendukung, tokoh, peristiwa, latar, konflik, atau nilai-nilai dalam teks",
+"Menjelaskan hubungan makna antarkalimat dan/atau antarparagraf dalam teks",
+"Memprediksi lanjutan atau akhir uraian/cerita berdasarkan bagian tertentu dalam teks"
+],
+"Evaluasi dan Apresiasi": [
+"Menilai relevansi peristiwa dalam teks dengan kehidupan sehari-hari",
+"Menilai keakuratan, kesesuaian, kecukupan, atau ketepatan informasi dalam teks",
+"Menilai ketepatan dan kesesuaian penggunaan bahasa dalam teks",
+"Menilai ketepatan bagian teks untuk menggambarkan karakter, peristiwa, atau latar dalam teks fiksi",
+"Menyimpulkan respons emosional terhadap unsur puisi, prosa, dan drama"
+]
+}
+},
+"sma_wajib_bahasa-inggris": {
+"nama": "Bahasa Inggris",
+"jenjang": "SMA",
+"jenis": "wajib",
+"definisi": "TKA Bahasa Inggris mengukur keterampilan membaca beragam jenis teks berbahasa Inggris dalam berbagai situasi komunikasi sehari- hari, vokasional, dan akademik",
+"muatan": "Muatan TKA Bahasa Inggris merupakan irisan jenis teks, konteks komunikasi, topik, dan kompleksitas teks pada Kurikulum 2013 dan Kurikulum Merdeka. Terkait jenis teks, TKA menggunakan teks descriptive, recount, narrative, procedure, dan analytical exposition. Terkait konteks komunikasi, TKA menggunakan teks yang menggambarkan komunikasi sehari-hari, di tempat kerja, dan akademik secara proporsional. Terkait topik, TKA menggunakan teks dengan topik yang merupakan gabungan topik-topik pada kedua kurikulum, namun menghindari kosakata teknis yang terlampau jarang digunakan dalam komunikasi. Kompleksitas teks dalam TKA Bahasa Inggris disesuaikan dengan tingkat kemahiran yang ingin dicapai dalam Kurikulum 2013 dan Kurikulum Merdeka. Kedua kurikulum menginginkan murid memiliki kemahiran pada tingkat intermediate atau B1 dalam Common European Framework of Reference for Languages (CEFR). Karena it",
+"baca": {
+"Pemahaman Tekstual": [
+"Menemukan/mengidentifikasi Informasi: mampu menemukan atau mengidentifikasi informasi penting yang disebutkan secara eksplisit dalam teks",
+"Mengklasifikasi: mampu mengelompokkan orang, benda, tempat, atau peristiwa dalam teks berdasarkan kategori tertentu",
+"Membuat kerangka: mampu menyusun poin-poin utama dari teks dalam bentuk kerangka atau daftar",
+"Meringkas: mampu menyajikan kembali isi teks secara ringkas dengan mengutip bagian penting",
+"Mensintesis: mampu menggabungkan informasi dari sumber lain untuk mendapatkan pemahaman yang lebih komprehensif tentang suatu isu atau topik"
+],
+"Pemahaman Inferensial": [
+"Menyimpulkan detail pendukung: mampu menentukan fakta tambahan yang membuat teks lebih informatif, menarik, atau persuasif",
+"Menyimpulkan topik, ide pokok/gagasan utama, makna, target pembaca, tujuan penulisan teks, atau pesan moral yang tidak secara eksplisit dinyatakan dalam teks",
+"Menyimpulkan urutan kejadian: mampu memperkirakan isi selanjutnya dari teks"
+],
+"Evaluasi dan Apresiasi": [
+"Menilai realitas atau fantasi: mampu menganalisis peristiwa dalam teks dapat terjadi dalam kehidupan nyata berdasarkan pengalaman dan pengetahuan pribadi",
+"Menilai fakta atau opini: mampu menilai fakta/opini yang diberikan penulis untuk mendukung pendapatnya berdasarkan bukti atau sekadar berusaha mempengaruhi pembaca",
+"Menilai kecukupan dan validitas informasi: Menilai kesesuaian, kelengkapan, keakuratan informasi dalam teks (dengan membandingkannya dengan sumber lain)",
+"Menilai kesesuaian: mampu menentukan bagian teks yang paling sesuai untuk menggambarkan karakter utama atau aspek lain dari bacaan",
+"Menanggapi isi teks: mampu mengungkapkan perasaan/kesan/pendapat terhadap bacaan, seperti ketertarikan, kebosanan, kegembiraan, ketakutan, kebencian, atau kesenangan"
+]
+}
+},
+"sma_wajib_matematika": {
+"nama": "Matematika",
+"jenjang": "SMA",
+"jenis": "wajib",
+"definisi": "TKA Matematika mengukur kemampuan murid dalam memahami fakta, konsep, prinsip, dan prosedur matematika, serta kemampuan mereka dalam menerapkan pengetahuan matematika untuk menyelesaikan masalah (problem solving)",
+"muatan": "Muatan TKA Matematika merujuk pada elemen kurikulum atau materi matematika yang dipelajari murid yang ada pada Kurikulum 2013 dan Kurikulum Merdeka. Elemen ini meliputi: bilangan aljabar, geometri dan pengukuran, data dan peluang, dan trigonometri. Penggunaan logika matematika diintegrasikan langsung dengan elemen matematika yang tertera dalam kurikulum. Pengetahuan matematika diukur melalui permasalahan dalam konteks matematika dan permasalahan dalam konteks keseharian yang dapat meliputi kejadian atau situasi di lingkungan personal, keluarga, atau lingkungan sekitar baik lokal maupun global"
+},
+"smp_wajib_bahasa-indonesia": {
+"nama": "Bahasa Indonesia",
+"jenjang": "SMP",
+"jenis": "wajib",
+"definisi": "Sebagaimana TKA Bahasa Indonesia SD/MI/sederajat, TKA Bahasa Indonesia SMP/MTs/sederajat juga difokuskan pada keterampilan membaca",
+"muatan": "Keterampilan membaca diujikan pada dua jenis teks, yaitu teks informasi dan teks fiksi.  Teks informasi merupakan teks yang berisi fakta, konsep, atau prosedur dari berbagai bidang atau topik yang berskala lokal, nasional, atau global. Teks informasi dapat berupa teks tunggal maupun teks jamak.  Teks fiksi merupakan cerita rekaan yang dapat bersifat faktual (sejarah/biografi) atau realisme dengan latar cerita konkret atau abstrak, tokoh berkarakter bulat, konflik tunggal atau jamak dengan penyelesaian tertutup, alur campuran, dan sudut pandang orang ketiga. Teks yang digunakan TKA memiliki karakteristik kosakata, kalimat, dan wacana sebagai berikut.  Karakteristik kosakata: kata umum, kata berimbuhan/konfiks, kata abstrak, makna denotatif, istilah teknis, makna konotatif konteks tertentu.  Karakteristik kalimat: jumlah kata per kalimat 5–9 kata, kalimat tunggal berbagai pola, kalimat maj",
+"baca": {
+"Pemahaman Tekstual": [
+"Mengidentifikasi penggunaan istilah dalam berbagai bidang",
+"Mengidentifikasi objek dan/atau latar berdasarkan kosakata yang digunakan dalam teks fiksi atau nonfiksi",
+"Mengidentifikasi informasi penting yang tersurat dalam teks",
+"Menyusun kerangka atau bagan berdasarkan bagian-bagian penting dalam teks"
+],
+"Pemahaman Inferensial": [
+"Menyimpulkan ide pokok, gagasan pendukung, tokoh, peristiwa, latar, dan/atau nilai-nilai dalam dan/atau antarteks",
+"Menjelaskan kelogisan hubungan antarperistiwa, antargagasan, dan/atau antarinformasi dalam dan/atau antarteks",
+"Memprediksi peristiwa dalam teks",
+"Menjelaskan bahasa kias dan citraan yang digunakan dalam teks fiksi"
+],
+"Evaluasi dan Apresiasi": [
+"Menilai relevansi peristiwa dalam teks dengan kehidupan sehari-hari",
+"Menilai kesesuaian dan/atau keakuratan unsur, kebahasaan, atau isi berdasarkan perbandingan informasi dalam dan/atau antarteks",
+"Menyimpulkan respons emosional terhadap unsur teks fiksi"
+]
+}
+},
+"smp_wajib_matematika": {
+"nama": "Matematika",
+"jenjang": "SMP",
+"jenis": "wajib",
+"definisi": "Sebagaimana TKA Matematika SD/MI/sederajat, TKA Matematika SMP/MTs/sederajat juga mengukur kemampuan murid dalam memahami fakta, konsep, prinsip, dan prosedur matematika, serta kemampuan mereka dalam menerapkan pengetahuan matematika untuk menyelesaikan masalah (problem solving)",
+"muatan": "Muatan TKA Matematika SMP/MTs/sederajat merujuk pada elemen kurikulum atau materi matematika yang dipelajari murid yang ada pada Kurikulum 2013 dan Kurikulum Merdeka. Elemen ini meliputi: bilangan, aljabar, geometri dan pengukuran, serta data dan peluang. Penggunaan logika matematika diintegrasikan langsung dengan elemen matematika yang tertera dalam kurikulum. Pengetahuan matematika diukur melalui permasalahan dalam konteks matematika dan permasalahan dalam konteks keseharian yang dapat meliputi kejadian atau situasi di lingkup personal, keluarga, atau lingkungan sekitar yang bersifat lokal"
+}
+}

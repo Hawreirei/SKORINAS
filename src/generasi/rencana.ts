@@ -9,9 +9,15 @@ const LEVEL_KATEGORI: Record<Kesukaran, [Level, Level]> = {
   sulit: ['C5', 'C6'],
 };
 
-export const URUTAN_BENTUK: Bentuk[] = ['pilihan_ganda', 'pilihan_ganda_kompleks', 'benar_salah', 'menjodohkan', 'isian_singkat', 'uraian'];
+export const URUTAN_BENTUK: Bentuk[] = ['pilihan_ganda', 'pilihan_ganda_kompleks', 'pilihan_ganda_kategori', 'benar_salah', 'menjodohkan', 'isian_singkat', 'uraian'];
 
-export type MasukanRencana = Pick<ParameterPaket, 'n' | 'persen' | 'bentuk' | 'tp'> & Partial<Pick<ParameterPaket, 'jumlah_bentuk' | 'sebaran_level' | 'jumlah_tp' | 'rincian' | 'jumlah_gaya'>>;
+/** Urutan bentuk paket (F-40): urutan guru bila diatur, bentuk yang tidak disebut menyusul dalam urutan bawaan. */
+export function urutanBentuk(p: { urutan_bentuk?: Bentuk[] | null }): Bentuk[] {
+  const u = (p.urutan_bentuk ?? []).filter((b, i, a) => URUTAN_BENTUK.includes(b) && a.indexOf(b) === i);
+  return [...u, ...URUTAN_BENTUK.filter((b) => !u.includes(b))];
+}
+
+export type MasukanRencana = Pick<ParameterPaket, 'n' | 'persen' | 'bentuk' | 'tp'> & Partial<Pick<ParameterPaket, 'jumlah_bentuk' | 'sebaran_level' | 'jumlah_tp' | 'rincian' | 'jumlah_gaya' | 'urutan_bentuk'>>;
 
 const jumlah = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
 
@@ -112,7 +118,8 @@ function slotDariRincian(p: MasukanRencana): Omit<Slot, 'urutan'>[] {
 /** Urutkan butir per bentuk lalu dari mudah ke sulit, beri nomor, lalu sebar campuran gaya bila diatur. */
 function beriGaya(mentah: Omit<Slot, 'urutan'>[], p: MasukanRencana): Slot[] {
   const urutK = (k: Kesukaran) => KATEGORI.indexOf(k);
-  const urut = [...mentah].sort((a, b) => URUTAN_BENTUK.indexOf(a.bentuk) - URUTAN_BENTUK.indexOf(b.bentuk) || urutK(a.kesukaran) - urutK(b.kesukaran));
+  const ub = urutanBentuk(p);
+  const urut = [...mentah].sort((a, b) => ub.indexOf(a.bentuk) - ub.indexOf(b.bentuk) || urutK(a.kesukaran) - urutK(b.kesukaran));
   const gaya: GayaSoal[] | null = p.jumlah_gaya
     ? (() => {
         const dipakai = GAYA.filter((g) => (p.jumlah_gaya![g] ?? 0) > 0);

@@ -167,8 +167,13 @@ function butirPalsu(bentuk) {
   await foto('01b-beranda-mulai-cepat', { fullPage: false });
   await cepat.getByRole('button', { name: /Lanjut isi CP dan TP/ }).click();
   await page.waitForURL(/\/soal\/baru$/);
-  await page.waitForSelector('h1:has-text("Buat soal")');
-  const isiCepat = await page.evaluate(() => ['#kelas', '#mapel', '#jumlah'].map((q) => document.querySelector(q).value));
+  // Judul beranda juga memuat "Buat soal", dan layar Buat dimuat belakangan serta menerapkan draf setelah tampil:
+  // tunggu isian layar Buat terisi (paling lama 10 detik) sebelum membacanya.
+  const isianBuat = async () => {
+    await page.waitForFunction(() => document.querySelector('#kelas')?.value === '4', null, { timeout: 10000 }).catch(() => {});
+    return page.evaluate(() => ['#kelas', '#mapel', '#jumlah'].map((q) => document.querySelector(q)?.value ?? '(tidak ada)'));
+  };
+  const isiCepat = await isianBuat();
   if (isiCepat.join('|') !== '4|Matematika|12') galat.push(`Mulai cepat tidak mengisi layar Buat: ${isiCepat.join('|')}`);
   await page.fill('#tp', 'Peserta didik dapat menjumlahkan dua pecahan berpenyebut sama.\nPeserta didik dapat membandingkan dua pecahan berpenyebut berbeda dengan menyamakan penyebutnya.');
   // Panel Rencana menghitung permintaan sebelum tombol ditekan; isian tersimpan sebagai draf.
@@ -179,13 +184,12 @@ function butirPalsu(bentuk) {
   });
   if (!(await page.locator('aside[aria-label="Rencana"]').getByText(/sekitar \d+ paket seperti ini/).isVisible())) galat.push('panel Rencana tidak menyebut berapa paket yang cukup');
   await page.reload();
-  await page.waitForSelector('h1:has-text("Buat soal")');
-  const draf = await page.evaluate(() => ['#kelas', '#mapel', '#jumlah'].map((q) => document.querySelector(q).value));
+  const draf = await isianBuat();
   if (draf.join('|') !== '4|Matematika|12') galat.push(`draf layar Buat tidak pulih setelah muat ulang: ${draf.join('|')}`);
   // Opsi lanjutan: satu tombol lebar lalu kartu lipat per kelompok, semuanya tertutup di awal.
   await page.getByRole('button', { name: 'Tampilkan opsi lanjutan' }).click();
   const kartu = (judul) => page.getByRole('button', { name: new RegExp(`^${judul}`) });
-  if ((await page.locator('section[aria-label="Opsi lanjutan"] h3 button[aria-expanded="false"]').count()) !== 9) galat.push('opsi lanjutan tidak berisi sembilan kartu tertutup');
+  if ((await page.locator('section[aria-label="Opsi lanjutan"] h3 button[aria-expanded="false"]').count()) !== 11) galat.push('opsi lanjutan tidak berisi sebelas kartu tertutup');
   await kartu('Susunan soal').click();
   for (const b of ['Pilihan ganda kompleks', 'Benar-salah', 'Menjodohkan', 'Isian singkat', 'Uraian']) await page.getByRole('button', { name: b, exact: true }).click();
   // Pengaturan lanjutan rinci: jumlah per bentuk, banyak opsi, dan skor.
@@ -408,7 +412,22 @@ function butirPalsu(bentuk) {
   const isiUjian = await hp.evaluate(() => ['#kelas', '#mapel', '#jumlah'].map((q) => document.querySelector(q).value));
   if (isiUjian.join('|') !== '6|Matematika|30') galat.push(`format ujian tidak mengisi layar Buat: ${isiUjian.join('|')}`);
   await hp.getByText('Ujian aslinya 30 soal dalam 75 menit.').waitFor();
+  // Cakupan materi dan stimulus wajib (F-39): tanpa CP dan TP, soal disebar ke cakupan ujian dan diawali cerita.
+  await hp.getByText(/disebar ke \d+ butir cakupan materi ujian ini/).waitFor();
+  await hp.getByText('Tanpa CP dan TP: soal disebar ke cakupan materi TKAD SD · Matematika').waitFor();
+  // Audit format (8 November 2026): materi yang dipakai tampil di kartu CP dan TP beserta banyak soal per elemen.
+  await hp.getByText('Materi yang dipakai: TKAD SD · Matematika').waitFor();
+  for (const t of ['Bilangan · 15 soal', 'Geometri dan Pengukuran · 9 soal', 'Data · 6 soal']) await hp.getByText(t, { exact: true }).waitFor();
+  await hp.locator('#judul-cakupan-tp').scrollIntoViewIfNeeded();
   await hp.screenshot({ path: path.join(KELUAR, '09d-buat-format-ujian-ponsel.png'), fullPage: true });
+  // Mapel pilihan TKA SMA: cakupan menurut mapel yang dipilih guru.
+  await hp.selectOption('#ujian', 'tka-sma-pilihan');
+  await hp.getByText('Pilih mapel pilihan dari daftar agar cakupan materinya terpakai, atau isi TP sendiri.').waitFor();
+  await hp.fill('#mapel', 'Fisika');
+  await hp.getByText('Materi yang dipakai: TKA SMA · Fisika').waitFor();
+  await hp.getByText(/^Kinematika · \d+ soal$/).waitFor();
+  lebar = Math.max(lebar, await hp.evaluate(() => document.documentElement.scrollWidth));
+  await hp.locator('section[aria-labelledby="judul-cakupan-tp"]').screenshot({ path: path.join(KELUAR, '09e-cakupan-mapel-pilihan-ponsel.png') });
   lebar = Math.max(lebar, await hp.evaluate(() => document.documentElement.scrollWidth));
   await page.goto(DASAR + '/soal/baru');
   await page.waitForSelector('#ujian');
@@ -509,14 +528,15 @@ function butirPalsu(bentuk) {
     return dilihat.size;
   };
   await page.goto(DASAR + '/soal/baru');
-  await page.waitForSelector('h1');
+  await page.waitForSelector('#kelas');
   const nBuat = await telusuriTab(page, 'buat (papan ketik)', /^Buat \d+ soal/);
   await page.goto(urlPeriksa);
   await page.waitForSelector('h1');
   const nPaket = await telusuriTab(page, 'paket (papan ketik)', /^Unduh/);
   await page.keyboard.press('Enter');
   await page.waitForURL(/\/ekspor$/);
-  await page.waitForSelector('h1');
+  // Layar Unduh dimuat belakangan; judul halaman paket masih ada sesaat, jadi tunggu tombol unduhnya.
+  await page.getByRole('button', { name: /^Unduh \d+ berkas/ }).waitFor();
   const nUnduh = await telusuriTab(page, 'unduh (papan ketik)', /^Unduh/);
   const unduhan = [];
   const catat = (d) => unduhan.push(d.suggestedFilename());

@@ -1,8 +1,8 @@
 import { jsPDF } from 'jspdf';
 import type { HurufOpsi } from '../db/tipe';
-import { HURUF_KANAN } from '../db/tipe';
+import { HURUF_KANAN, KATEGORI_BAWAAN } from '../db/tipe';
 import { FONT_PDF, gambarParagraf, lebarTeks, tataParagraf, tinggiParagraf, type Baris, type GayaTeks } from './pdf-tata';
-import { UKURAN_DOKUMEN, kolomOpsi, teksPenskoran, type BagianDok, type ButirDok, type DokumenSoal } from './model';
+import { UKURAN_DOKUMEN, kolomOpsi, pengantarBacaan, teksPenskoran, type BagianDok, type ButirDok, type DokumenSoal } from './model';
 
 /** Gambar SVG vektor ke PDF. Di peramban memakai svg2pdf.js; disuntikkan agar dapat diuji. */
 export type GambarSvg = (doc: jsPDF, svg: string, x: number, y: number, w: number, h: number) => Promise<void>;
@@ -99,7 +99,20 @@ async function butir(p: Penulis, b: ButirDok, d: DokumenSoal, x: number, y: numb
   const lebarIsi = LEBAR - INDEN;
   const xi = x + INDEN;
   let cy = y;
-  const pokok = tataParagraf(doc, isi.pokok, lebarIsi, gaya);
+  if (b.bacaan) {
+    // Bacaan bersama: pengantar bernomor lalu teks selebar halaman, sekali sebelum soal pertama kelompoknya.
+    const gp = g({ tebal: true, miring: true });
+    const pengantar = tataParagraf(doc, pengantarBacaan(b.bacaan, d.inggris), LEBAR, gp);
+    if (gambar) gambarParagraf(doc, pengantar, x, cy, gp);
+    cy += tinggiParagraf(pengantar, gp) + 3;
+    for (const par of b.bacaan.teks.split(/\n+/).filter((t) => t.trim())) {
+      const t = tataParagraf(doc, par.trim(), LEBAR, gaya);
+      if (gambar) gambarParagraf(doc, t, x, cy, gaya);
+      cy += tinggiParagraf(t, gaya) + 3;
+    }
+    cy += 6;
+  }
+  const pokok = tataParagraf(doc, b.skorButir ? `${isi.pokok} (${b.skorButir} ${d.inggris ? 'points' : 'poin'})` : isi.pokok, lebarIsi, gaya);
   if (gambar) {
     labelSejajar(doc, `${b.nomor}.`, x, cy, INDEN, gaya, pokok);
     gambarParagraf(doc, pokok, xi, cy, gaya);
@@ -166,6 +179,34 @@ async function butir(p: Penulis, b: ButirDok, d: DokumenSoal, x: number, y: numb
       }
       cy += tinggi + 8;
     }
+  }
+  if (isi.pernyataan?.length) {
+    // PG kompleks kategori: tabel No | Pernyataan | kategori pertama | kategori kedua.
+    const [ka, kb] = isi.kategori ?? KATEGORI_BAWAAN;
+    const lebar = [26, lebarIsi - 26 - 130, 65, 65];
+    const pad = 4;
+    cy += 6;
+    const barisTabel = (sel: string[], gy: GayaTeks, latar: boolean) => {
+      const tata = sel.map((s, i) => tataParagraf(doc, s, lebar[i] - pad * 2, gy));
+      const tinggi = Math.max(...tata.map((t) => tinggiParagraf(t, gy))) + pad * 2;
+      if (gambar) {
+        let sx = xi;
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        tata.forEach((t, i) => {
+          if (latar) {
+            doc.setFillColor(242, 242, 242);
+            doc.rect(sx, cy, lebar[i], tinggi, 'FD');
+          } else doc.rect(sx, cy, lebar[i], tinggi);
+          gambarParagraf(doc, t, sx + pad, cy + pad, gy, i === 1 ? 'kiri' : 'tengah', lebar[i] - pad * 2);
+          sx += lebar[i];
+        });
+      }
+      cy += tinggi;
+    };
+    barisTabel(['No', d.inggris ? 'Statement' : 'Pernyataan', ka, kb], g({ tebal: true }), true);
+    isi.pernyataan.forEach((x, i) => barisTabel([String(i + 1), x, '', ''], gaya, false));
+    cy += 4;
   }
   const t = b.tempat;
   const jawab = d.inggris ? 'Answer :' : 'Jawaban :';
@@ -316,7 +357,7 @@ function tabelKisi(p: Penulis, d: DokumenSoal) {
 /** Pedoman penskoran: Bentuk soal | Jumlah soal | Skor per soal | Skor maksimal, baris jumlah, lalu rumus nilai. */
 function tabelPenskoran(p: Penulis, d: DokumenSoal) {
   const doc = p.doc;
-  const t = teksPenskoran(d.inggris);
+  const t = teksPenskoran(d.inggris, !!d.penskoran?.perKesukaran);
   const lebar = [0.4, 0.2, 0.2, 0.2].map((w) => w * LEBAR);
   const pad = 4;
   const baris = [...d.penskoran!.baris.map((b) => [b.bentuk, String(b.jumlah), String(b.skor), String(b.maks)]), [t.total, '', '', String(d.penskoran!.total)]];

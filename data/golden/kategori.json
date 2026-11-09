@@ -1,0 +1,446 @@
+{
+ "keterangan": "Golden set PG kompleks kategori (F-39): butir benar harus lolos hitung ulang per pernyataan; butir salah (kunci keliru atau verifikasi tidak lengkap) harus ditolak.",
+ "benar": [
+  {
+   "id": "KT-01",
+   "kelas": 5,
+   "isi": {
+    "bentuk": "pilihan_ganda_kategori",
+    "pokok": "Bu Ratna mencatat penjualan kue di kantin sekolah selama satu minggu. Ia ingin memeriksa beberapa pernyataan tentang hasil hitungannya.\nTentukan Benar atau Salah untuk setiap pernyataan berikut!",
+    "pernyataan": [
+     "$12 \\times 15 = 180$",
+     "$\\frac{3}{4} > \\frac{2}{3}$",
+     "$250 : 5 = 45$",
+     "$0,5 + 0,25 = 0,75$"
+    ],
+    "kategori": [
+     "Benar",
+     "Salah"
+    ],
+    "kunci": "B-B-S-B",
+    "pembahasan": [
+     "Hitung setiap pernyataan."
+    ],
+    "verifikasi": {
+     "tipe": "per_pernyataan",
+     "pernyataan": [
+      {
+       "kiri": "12*15",
+       "relasi": "=",
+       "kanan": "180"
+      },
+      {
+       "kiri": "3/4",
+       "relasi": ">",
+       "kanan": "2/3"
+      },
+      {
+       "kiri": "250/5",
+       "relasi": "=",
+       "kanan": "45"
+      },
+      {
+       "kiri": "0.5+0.25",
+       "relasi": "=",
+       "kanan": "0.75"
+      }
+     ]
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "KT-02",
+   "kelas": 6,
+   "isi": {
+    "bentuk": "pilihan_ganda_kategori",
+    "pokok": "Bu Ratna mencatat penjualan kue di kantin sekolah selama satu minggu. Ia ingin memeriksa beberapa pernyataan tentang hasil hitungannya.\nTentukan Benar atau Salah untuk setiap pernyataan berikut!",
+    "pernyataan": [
+     "KPK dari 4 dan 6 adalah 12",
+     "FPB dari 18 dan 24 adalah 8",
+     "$25\\%$ dari 80 adalah 20"
+    ],
+    "kategori": [
+     "Benar",
+     "Salah"
+    ],
+    "kunci": "B-S-B",
+    "pembahasan": [
+     "Hitung setiap pernyataan."
+    ],
+    "verifikasi": {
+     "tipe": "per_pernyataan",
+     "pernyataan": [
+      {
+       "kiri": "lcm(4, 6)",
+       "relasi": "=",
+       "kanan": "12"
+      },
+      {
+       "kiri": "gcd(18, 24)",
+       "relasi": "=",
+       "kanan": "8"
+      },
+      {
+       "kiri": "25% * 80",
+       "relasi": "=",
+       "kanan": "20"
+      }
+     ]
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "KT-03",
+   "kelas": 8,
+   "isi": {
+    "bentuk": "pilihan_ganda_kategori",
+    "pokok": "Bu Ratna mencatat penjualan kue di kantin sekolah selama satu minggu. Ia ingin memeriksa beberapa pernyataan tentang hasil hitungannya.\nTentukan Benar atau Salah untuk setiap pernyataan berikut!",
+    "pernyataan": [
+     "Nilai $x$ yang memenuhi $2x + 3 = 11$ adalah 4",
+     "$3^4 = 64$",
+     "$\\sqrt{144} = 12$",
+     "$-7 + 10 = -3$"
+    ],
+    "kategori": [
+     "Benar",
+     "Salah"
+    ],
+    "kunci": "B-S-B-S",
+    "pembahasan": [
+     "Hitung setiap pernyataan."
+    ],
+    "verifikasi": {
+     "tipe": "per_pernyataan",
+     "pernyataan": [
+      {
+       "kiri": "(11-3)/2",
+       "relasi": "=",
+       "kanan": "4"
+      },
+      {
+       "kiri": "3^4",
+       "relasi": "=",
+       "kanan": "64"
+      },
+      {
+       "kiri": "sqrt(144)",
+       "relasi": "=",
+       "kanan": "12"
+      },
+      {
+       "kiri": "-7+10",
+       "relasi": "=",
+       "kanan": "-3"
+      }
+     ]
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "KT-04",
+   "kelas": 9,
+   "isi": {
+    "bentuk": "pilihan_ganda_kategori",
+    "pokok": "Bu Ratna mencatat penjualan kue di kantin sekolah selama satu minggu. Ia ingin memeriksa beberapa pernyataan tentang hasil hitungannya.\nTentukan Benar atau Salah untuk setiap pernyataan berikut!",
+    "pernyataan": [
+     "Rata-rata dari 4, 6, 8 adalah 6",
+     "Jangkauan data 3, 9, 5, 12 adalah 9",
+     "Median dari 2, 7, 4 adalah 7"
+    ],
+    "kategori": [
+     "Benar",
+     "Salah"
+    ],
+    "kunci": "B-B-S",
+    "pembahasan": [
+     "Hitung setiap pernyataan."
+    ],
+    "verifikasi": {
+     "tipe": "per_pernyataan",
+     "pernyataan": [
+      {
+       "kiri": "(4+6+8)/3",
+       "relasi": "=",
+       "kanan": "6"
+      },
+      {
+       "kiri": "12-3",
+       "relasi": "=",
+       "kanan": "9"
+      },
+      {
+       "kiri": "4",
+       "relasi": "=",
+       "kanan": "7"
+      }
+     ]
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "KT-05",
+   "kelas": 7,
+   "isi": {
+    "bentuk": "pilihan_ganda_kategori",
+    "pokok": "Bu Ratna mencatat penjualan kue di kantin sekolah selama satu minggu. Ia ingin memeriksa beberapa pernyataan tentang hasil hitungannya.\nTentukan Benar atau Salah untuk setiap pernyataan berikut!",
+    "pernyataan": [
+     "$1.200 \\times 3 = 3.600$",
+     "$\\frac{5}{8} < \\frac{1}{2}$",
+     "$4,5 \\times 2 = 9$",
+     "$100 - 37 = 63$",
+     "$96 : 8 = 12$"
+    ],
+    "kategori": [
+     "Benar",
+     "Salah"
+    ],
+    "kunci": "B-S-B-B-B",
+    "pembahasan": [
+     "Hitung setiap pernyataan."
+    ],
+    "verifikasi": {
+     "tipe": "per_pernyataan",
+     "pernyataan": [
+      {
+       "kiri": "1200*3",
+       "relasi": "=",
+       "kanan": "3600"
+      },
+      {
+       "kiri": "5/8",
+       "relasi": "<",
+       "kanan": "1/2"
+      },
+      {
+       "kiri": "4.5*2",
+       "relasi": "=",
+       "kanan": "9"
+      },
+      {
+       "kiri": "100-37",
+       "relasi": "=",
+       "kanan": "63"
+      },
+      {
+       "kiri": "96/8",
+       "relasi": "=",
+       "kanan": "12"
+      }
+     ]
+    },
+    "gambar": null
+   }
+  }
+ ],
+ "salah": [
+  {
+   "id": "KS-01",
+   "kelas": 5,
+   "isi": {
+    "bentuk": "pilihan_ganda_kategori",
+    "pokok": "Bu Ratna mencatat penjualan kue di kantin sekolah selama satu minggu. Ia ingin memeriksa beberapa pernyataan tentang hasil hitungannya.\nTentukan Benar atau Salah untuk setiap pernyataan berikut!",
+    "pernyataan": [
+     "$12 \\times 15 = 180$",
+     "$\\frac{3}{4} > \\frac{2}{3}$",
+     "$250 : 5 = 45$"
+    ],
+    "kategori": [
+     "Benar",
+     "Salah"
+    ],
+    "kunci": "B-B-B",
+    "pembahasan": [
+     "Hitung setiap pernyataan."
+    ],
+    "verifikasi": {
+     "tipe": "per_pernyataan",
+     "pernyataan": [
+      {
+       "kiri": "12*15",
+       "relasi": "=",
+       "kanan": "180"
+      },
+      {
+       "kiri": "3/4",
+       "relasi": ">",
+       "kanan": "2/3"
+      },
+      {
+       "kiri": "250/5",
+       "relasi": "=",
+       "kanan": "45"
+      }
+     ]
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "KS-02",
+   "kelas": 6,
+   "isi": {
+    "bentuk": "pilihan_ganda_kategori",
+    "pokok": "Bu Ratna mencatat penjualan kue di kantin sekolah selama satu minggu. Ia ingin memeriksa beberapa pernyataan tentang hasil hitungannya.\nTentukan Benar atau Salah untuk setiap pernyataan berikut!",
+    "pernyataan": [
+     "KPK dari 4 dan 6 adalah 12",
+     "FPB dari 18 dan 24 adalah 8",
+     "$25\\%$ dari 80 adalah 20"
+    ],
+    "kategori": [
+     "Benar",
+     "Salah"
+    ],
+    "kunci": "S-S-B",
+    "pembahasan": [
+     "Hitung setiap pernyataan."
+    ],
+    "verifikasi": {
+     "tipe": "per_pernyataan",
+     "pernyataan": [
+      {
+       "kiri": "lcm(4, 6)",
+       "relasi": "=",
+       "kanan": "12"
+      },
+      {
+       "kiri": "gcd(18, 24)",
+       "relasi": "=",
+       "kanan": "8"
+      },
+      {
+       "kiri": "25% * 80",
+       "relasi": "=",
+       "kanan": "20"
+      }
+     ]
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "KS-03",
+   "kelas": 8,
+   "isi": {
+    "bentuk": "pilihan_ganda_kategori",
+    "pokok": "Bu Ratna mencatat penjualan kue di kantin sekolah selama satu minggu. Ia ingin memeriksa beberapa pernyataan tentang hasil hitungannya.\nTentukan Benar atau Salah untuk setiap pernyataan berikut!",
+    "pernyataan": [
+     "$3^4 = 81$",
+     "$\\sqrt{144} = 12$",
+     "$-7 + 10 = 3$"
+    ],
+    "kategori": [
+     "Benar",
+     "Salah"
+    ],
+    "kunci": "B-B-S",
+    "pembahasan": [
+     "Hitung setiap pernyataan."
+    ],
+    "verifikasi": {
+     "tipe": "per_pernyataan",
+     "pernyataan": [
+      {
+       "kiri": "3^4",
+       "relasi": "=",
+       "kanan": "81"
+      },
+      {
+       "kiri": "sqrt(144)",
+       "relasi": "=",
+       "kanan": "12"
+      },
+      {
+       "kiri": "-7+10",
+       "relasi": "=",
+       "kanan": "3"
+      }
+     ]
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "KS-04",
+   "kelas": 9,
+   "isi": {
+    "bentuk": "pilihan_ganda_kategori",
+    "pokok": "Bu Ratna mencatat penjualan kue di kantin sekolah selama satu minggu. Ia ingin memeriksa beberapa pernyataan tentang hasil hitungannya.\nTentukan Benar atau Salah untuk setiap pernyataan berikut!",
+    "pernyataan": [
+     "Rata-rata dari 4, 6, 8 adalah 6",
+     "Jangkauan 3, 9, 5, 12 adalah 9",
+     "Median 2, 7, 4 adalah 7"
+    ],
+    "kategori": [
+     "Benar",
+     "Salah"
+    ],
+    "kunci": "B-B-S",
+    "pembahasan": [
+     "Hitung setiap pernyataan."
+    ],
+    "verifikasi": {
+     "tipe": "per_pernyataan",
+     "pernyataan": [
+      {
+       "kiri": "(4+6+8)/3",
+       "relasi": "=",
+       "kanan": "6"
+      },
+      {
+       "kiri": "12-3",
+       "relasi": "=",
+       "kanan": "9"
+      }
+     ]
+    },
+    "gambar": null
+   }
+  },
+  {
+   "id": "KS-05",
+   "kelas": 7,
+   "isi": {
+    "bentuk": "pilihan_ganda_kategori",
+    "pokok": "Bu Ratna mencatat penjualan kue di kantin sekolah selama satu minggu. Ia ingin memeriksa beberapa pernyataan tentang hasil hitungannya.\nTentukan Benar atau Salah untuk setiap pernyataan berikut!",
+    "pernyataan": [
+     "$96 : 8 = 12$",
+     "$100 - 37 = 63$",
+     "$4,5 \\times 2 = 9$"
+    ],
+    "kategori": [
+     "Benar",
+     "Salah"
+    ],
+    "kunci": "S-B-B",
+    "pembahasan": [
+     "Hitung setiap pernyataan."
+    ],
+    "verifikasi": {
+     "tipe": "per_pernyataan",
+     "pernyataan": [
+      {
+       "kiri": "96/8",
+       "relasi": "=",
+       "kanan": "12"
+      },
+      {
+       "kiri": "100-37",
+       "relasi": "=",
+       "kanan": "63"
+      },
+      {
+       "kiri": "4.5*2",
+       "relasi": "=",
+       "kanan": "9"
+      }
+     ]
+    },
+    "gambar": null
+   }
+  }
+ ]
+}
