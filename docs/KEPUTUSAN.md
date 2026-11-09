@@ -441,3 +441,15 @@ Pemilik meminta semua materi di https://pusmendik.kemendikdasmen.go.id/tka/ masu
 | Tambalan | Halaman resmi Matematika SMA terpotong setelah "Aturan" (Peluang tidak tampil): ditambah "Aturan pencacahan" dan sub-elemen Peluang (kejadian tunggal, majemuk). Matematika Tingkat Lanjut: baris Limit berlabel Trigonometri diganti elemen Kalkulus (sesuai Muatan); turunan dan integral tidak ada di halaman. Kimia tanpa tabel matriks: elemen dari teks Muatan. Bahasa Inggris Tingkat Lanjut tanpa matriks kompetensi: memakai matriks Bahasa Inggris wajib | Baris tambalan bertanda `tambalan: true`; **perlu dikonfirmasi** bila halaman resmi diperbaiki |
 | OSN | Tidak berubah (bukan kerangka TKA) | — |
 
+
+## Pembaruan aplikasi otomatis (9 November 2026, permintaan guru)
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Masalah | Dengan `registerType: 'prompt'`, versi lama dari cache terus tampil sampai guru menekan "Muat ulang"; guru yang menutup pemberitahuan tetap melihat versi lama setelah pembaruan terpasang di GitHub Pages | Laporan guru: "masih sama tampilannya seperti sebelumnya" |
+| Pemeriksaan | Versi baru diperiksa setiap 30 menit selama aplikasi terbuka dan setiap kali tab kembali dilihat (`registration.update()`), selain pemeriksaan bawaan peramban saat halaman dibuka | Aplikasi sering dibiarkan terbuka lama |
+| Kapan dipasang | Otomatis bila tidak ada soal yang sedang dibuat di tab ini, dan: versi baru ditemukan dalam 20 detik setelah aplikasi dibuka, guru pindah layar, atau tab sedang tidak dilihat (`src/app/pembaruan.ts`). Isian layar Buat aman karena tersimpan sebagai draf | Tidak memuat ulang di tengah pekerjaan guru di satu layar |
+| Saat soal dibuat | `registerType` tetap `prompt` agar plugin tidak memuat ulang sendiri. Bila versi baru dipasang dari tab lain, tab yang sedang membuat soal menunda muat ulang (`onNeedReload`) sampai pembuatan selesai dan guru pindah layar atau tab tidak dilihat | Pembuatan soal berjalan di tab dan tidak boleh terputus |
+| Pemberitahuan | "Versi baru GenSoal dipasang otomatis saat Anda pindah layar." dengan tombol Muat ulang (disembunyikan saat soal dibuat: "…dipasang setelah pembuatan soal selesai."). Tutup hanya menyembunyikan pemberitahuan; versi baru tetap dipasang otomatis | Guru tetap bisa memasang sekarang |
+| Peralihan | Perangkat yang masih menjalankan versi sebelum perubahan ini perlu satu kali menekan "Muat ulang" (atau menutup semua tab GenSoal lalu membukanya lagi); pembaruan berikutnya otomatis | Kode lama di perangkat belum punya pembaruan otomatis |
+| Uji | `tests/pembaruan.test.ts` (aturan kapan dipasang) dan `tests/e2e/pembaruan.cjs` (dua hasil build: dibuka lagi dan pindah layar), dijalankan manual karena butuh dua build | |
