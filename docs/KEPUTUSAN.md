@@ -424,3 +424,19 @@ Pemilik meminta semua materi dari https://pusmendik.kemendikdasmen.go.id/tka/ ma
 | Biologi | Ditambah bakteri; konteks kesehatan, lingkungan, pertanian, sosial budaya | Halaman mapel pilihan Biologi |
 | Belum | Daftar lengkap butir per elemen untuk semua mapel ada di PDF kerangka asesmen (Perkaban BSKAP 045 dan 047/H/AN/2025) di situs pusmendik, yang belum dapat dibuka. **Perlu**: pemilik mengunggah PDF itu, atau host pusmendik diizinkan di lingkungan sesi | — |
 
+## Kerangka asesmen TKA resmi dari situs pusmendik (F-41, 9 November 2026)
+
+Pemilik meminta semua materi di https://pusmendik.kemendikdasmen.go.id/tka/ masuk. Host pusmendik (dan cacerts.digicert.com, karena server pusmendik tidak mengirim sertifikat perantara DigiCert) ditambahkan ke lingkungan sesi atas persetujuan pemilik. Semua 76 halaman kerangka diambil dan diurai (scripts/kerangka-tka/README.md).
+
+| Topik | Keputusan | Alasan |
+| --- | --- | --- |
+| Data | `src/ujian/data/kerangka-tka.json` (matriks asesmen: elemen, sub-elemen, butir, kompetensi, batasan; 76 mapel) dan `kerangka-ringkas.json` (nama, definisi, muatan, kompetensi membaca). Yang pertama hanya dimuat layar Buat; yang kedua dipakai prompt | Isi resmi lengkap tanpa membebani semua layar |
+| Cakupan TKA/TKAD | Daftar buatan sendiri untuk Matematika, mapel pilihan, dan bahasa diganti matriks resmi: tiap butir sub-elemen menjadi satu butir cakupan, batasan resmi ikut di rumusan TP (dipotong di batas kata). Butir kembar dari tabel resmi dibuang | Permintaan pemilik: semua materi resmi masuk |
+| Porsi | Matematika tetap usulan (SD 5/3/2, SMP 7/8/8/7, SMA 4/7/5/3/6) karena halaman resmi tidak menyebut porsi; mapel lain sebanding banyak butir per elemen | Setiap butir resmi berpeluang sama |
+| Mapel pilihan | 19 mapel umum ditambah 50 program keahlian SMK ("SMK - Kuliner", dst., Teori Kompetensi Kejuruan) dari kerangka pusmendik; nama dicocokkan tanpa peka huruf besar, awalan "SMK - ", atau nama lama | Kepmen 56/2026 nomor 20 per program keahlian |
+| Bahasa | Cakupan = jenis teks atau topik dari bagian Muatan resmi (BI SD/SMP/SMA, BI dan BIng Tingkat Lanjut, BIng wajib, Arab, Jepang, Jerman, Korea, Mandarin, Prancis). Kompetensi membaca per butir: kompetensi ke-1/2/3 matriks resmi menurut level TKA, subkompetensi bergiliran menurut nomor butir | Semua subkompetensi resmi terpakai; level dan kompetensi tetap cocok |
+| Prompt | Definisi dan muatan resmi mapel ikut di bagian format ujian (TKA dan TKAD) | Model mendapat konteks resmi mapel, terutama mapel SMK |
+| Panjang teks | Bila guru tidak mengatur: BIng 200–350, BI Lanjut 300–350, BIng Lanjut 300–400 kata; Arab, Jepang, Jerman, Korea, Mandarin, Prancis 10–100 kata menurut muatan masing-masing | Teks bahasa asing TKA jauh lebih pendek dari bawaan jenjang SMA |
+| Tambalan | Halaman resmi Matematika SMA terpotong setelah "Aturan" (Peluang tidak tampil): ditambah "Aturan pencacahan" dan sub-elemen Peluang (kejadian tunggal, majemuk). Matematika Tingkat Lanjut: baris Limit berlabel Trigonometri diganti elemen Kalkulus (sesuai Muatan); turunan dan integral tidak ada di halaman. Kimia tanpa tabel matriks: elemen dari teks Muatan. Bahasa Inggris Tingkat Lanjut tanpa matriks kompetensi: memakai matriks Bahasa Inggris wajib | Baris tambalan bertanda `tambalan: true`; **perlu dikonfirmasi** bila halaman resmi diperbaiki |
+| OSN | Tidak berubah (bukan kerangka TKA) | — |
+

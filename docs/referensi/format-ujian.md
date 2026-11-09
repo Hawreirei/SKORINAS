@@ -135,6 +135,10 @@ Dipakai di `src/ujian/cakupan.ts` bila guru mengosongkan CP dan TP. Dokumen resm
 
 Porsi elemen selain SMP Matematika adalah usulan (lihat `docs/KEPUTUSAN.md`, F-39 dan F-41). Mapel pilihan TKA SMA dicocokkan dengan nama mapel yang diisi guru (tidak peka huruf besar).
 
+## 5a. Kerangka resmi dari situs pusmendik (9 November 2026)
+
+Sejak F-41 cakupan TKA dan TKAD tidak lagi dari tabel di atas, melainkan dari matriks asesmen resmi di https://pusmendik.kemendikdasmen.go.id/tka/kerangka/ (76 mapel: wajib SD, SMP, SMA; 19 mapel pilihan umum; 50 program keahlian SMK). Data: `src/ujian/data/`; cara mengambil ulang: `scripts/kerangka-tka/README.md`; tambalan untuk bagian halaman yang terpotong: `docs/KEPUTUSAN.md`. Tabel di atas tetap sebagai catatan riset awal dan untuk OSN.
+
 ## 6. Dokumen resmi yang diunggah pemilik (9 November 2026)
 
 Tiga dokumen: Permendikdasmen 9/2025 tentang TKA, Permendikdasmen 9/2026 tentang perubahan Permendikbudristek 17/2021 tentang Asesmen Nasional, dan Kepmendikdasmen 56/2026 tentang Pedoman Penyelenggaraan TKA dan AN (menggantikan Kepmendikdasmen 95/M/2025). Kerangka asesmen (Perkaban BSKAP 045 dan 047/H/AN/2025) tidak termasuk, jadi rincian cakupan materi tetap dari sumber sekunder.

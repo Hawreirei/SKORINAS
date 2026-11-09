@@ -1,11 +1,16 @@
+import kerangka from './data/kerangka-tka.json';
+import { kunciKerangka } from './kerangka';
+
 /**
- * Cakupan materi format ujian (F-39): elemen → sub-elemen → butir, dengan porsi per elemen.
+ * Cakupan materi format ujian (F-39, F-41): elemen → sub-elemen → butir, dengan porsi per elemen.
  *
  * Keputusan pemilik (7 November 2026): cakupan kerangka asesmen TKA dan ranah OSN boleh dibawa aplikasi agar soal
  * format ujian tersebar ke seluruh materi, bukan berulang di satu topik. Ini bukan CP atau TP sekolah: cakupan
  * hanya dipakai bila guru mengosongkan CP dan TP, dan TP guru selalu didahulukan (docs/KEPUTUSAN.md).
  *
- * Sumber dan tingkat kepastian per daftar: docs/referensi/format-ujian.md, bagian "Cakupan materi".
+ * TKA dan TKAD: matriks asesmen resmi dari situs pusmendik (./data/kerangka-tka.json, 76 mapel termasuk program
+ * keahlian SMK; scripts/kerangka-tka/README.md). Mapel bahasa: jenis teks dari bagian Muatan halaman resmi; kompetensi
+ * membaca dipilih per butir dari matriks (ujian/index.ts). OSN: ranah lomba (docs/referensi/format-ujian.md).
  */
 
 export interface ButirCakupan {
@@ -24,152 +29,148 @@ function daftar(elemen: string, sub: string, butir: string[]): ButirCakupan[] {
   return butir.map((b) => ({ elemen, sub, butir: b }));
 }
 
-/** Matematika SD/MI: Bilangan, Geometri dan Pengukuran, Data. Porsi usulan 50/30/20. */
-const MAT_SD: Cakupan = {
-  porsi: { Bilangan: 5, 'Geometri dan Pengukuran': 3, Data: 2 },
-  butir: [
-    ...daftar('Bilangan', 'Bilangan cacah', [
-      'Nilai tempat, membandingkan, dan mengurutkan bilangan cacah',
-      'Operasi hitung campuran bilangan cacah dalam soal cerita',
-      'Pola bilangan sederhana',
-      'Penaksiran (estimasi) dan pembulatan hasil hitung',
-    ]),
-    ...daftar('Bilangan', 'Faktor dan kelipatan', ['Kelipatan persekutuan terkecil (KPK) dalam masalah sehari-hari', 'Faktor persekutuan terbesar (FPB) dalam masalah sehari-hari']),
-    ...daftar('Bilangan', 'Bilangan rasional', [
-      'Pecahan senilai dengan gambar dan simbol matematika',
-      'Membandingkan dan mengurutkan pecahan',
-      'Hubungan pecahan sederhana, desimal, dan persen',
-      'Operasi hitung pecahan dan desimal dalam soal cerita',
-      'Persen dalam konteks diskon, bagian, atau peningkatan',
-      'Perbandingan dan rasio sederhana',
-    ]),
-    // Sub-elemen dari kerangka asesmen (halaman TKA pusmendik): bentuk bangun datar (segitiga, segiempat, segi banyak);
-    // konstruksi bangun ruang (kubus, balok, gabungannya) dan visualisasi spasial; panjang, volume, berat, waktu dengan satuan baku.
-    ...daftar('Geometri dan Pengukuran', 'Geometri', [
-      'Bentuk bangun datar (segitiga, segiempat, dan segi banyak): sifat dan unsurnya',
-      'Konstruksi bangun ruang (kubus, balok, dan gabungannya) serta jaring-jaringnya',
-      'Visualisasi spasial: bangun ruang dilihat dari depan, atas, dan samping',
-      'Jenis dan besar sudut',
-    ]),
-    ...daftar('Geometri dan Pengukuran', 'Pengukuran', [
-      'Panjang benda dengan satuan baku dan hubungan antarsatuan',
-      'Berat benda dengan satuan baku dan hubungan antarsatuan',
-      'Volume benda dengan satuan baku (liter, mililiter, cm³) dan penaksiran ukuran',
-      'Waktu: membaca jam, durasi, dan hubungan antarsatuan waktu',
-      'Keliling dan luas bangun datar serta gabungannya',
-      'Volume kubus, balok, dan gabungannya',
-    ]),
-    ...daftar('Data', 'Penyajian dan interpretasi data', ['Menyajikan dan menafsirkan data dalam tabel frekuensi', 'Menyajikan dan menafsirkan data dalam diagram batang', 'Membaca data dari gambar atau piktogram', 'Rata-rata (mean) dan nilai terbanyak dari data sederhana']),
-  ],
-};
+// ---- TKA dan TKAD dari matriks asesmen resmi ----
 
-/** Matematika SMP/MTs: butir cakupan kerangka asesmen (Perkaban BSKAP 047/H/AN/2025). Porsi 7/8/8/7 per 30 soal. */
-const MAT_SMP: Cakupan = {
-  porsi: { Bilangan: 7, Aljabar: 8, 'Geometri dan Pengukuran': 8, 'Data dan Peluang': 7 },
-  butir: [
-    ...daftar('Bilangan', 'Bilangan Real', [
-      'Perbandingan dan sifat-sifat bilangan (bulat, rasional, berpangkat, akar, notasi ilmiah)',
-      'Operasi aritmetika pada bilangan',
-      'Estimasi atau perkiraan hasil perhitungan',
-      'Faktorisasi prima bilangan asli',
-      'Rasio (skala, proporsi, dan laju perubahan)',
-      'Perbandingan senilai dan berbalik nilai',
-    ]),
-    ...daftar('Aljabar', 'Persamaan dan Pertidaksamaan Linear', ['Persamaan linear satu variabel', 'Pertidaksamaan linear satu variabel', 'Sistem persamaan linear dua variabel']),
-    ...daftar('Aljabar', 'Bentuk Aljabar', ['Bentuk aljabar dan sifat-sifat operasinya (komutatif, asosiatif, dan distributif)']),
-    ...daftar('Aljabar', 'Fungsi', ['Relasi dan fungsi (domain, kodomain, range) serta penyajiannya']),
-    ...daftar('Aljabar', 'Barisan dan Deret', ['Barisan berhingga bilangan', 'Deret berhingga bilangan']),
-    ...daftar('Geometri dan Pengukuran', 'Objek Geometri', [
-      'Hubungan antarsudut pada dua garis berpotongan dan dua garis sejajar yang dipotong garis transversal, termasuk sudut dalam segitiga',
-      'Teorema Pythagoras',
-      'Kekongruenan dan kesebangunan bangun datar',
-      'Jaring-jaring bangun ruang (prisma, tabung, limas, dan kerucut)',
-    ]),
-    ...daftar('Geometri dan Pengukuran', 'Transformasi Geometri', ['Transformasi tunggal (refleksi, translasi, rotasi, dan dilatasi) titik, garis, dan bangun datar']),
-    ...daftar('Geometri dan Pengukuran', 'Pengukuran', ['Keliling dan luas bangun datar (segi banyak, lingkaran, dan gabungannya)', 'Volume bangun ruang (prisma, limas, dan bola)']),
-    ...daftar('Data dan Peluang', 'Data', [
-      'Perumusan pertanyaan, penyajian, dan penginterpretasian data (tabel, diagram batang, garis, lingkaran)',
-      'Rerata, median, modus, dan jangkauan data',
-      'Perbandingan ukuran pemusatan dan penyebaran beberapa kelompok data',
-    ]),
-    ...daftar('Data dan Peluang', 'Peluang', ['Peluang dan frekuensi relatif kejadian tunggal']),
-  ],
-};
+interface BarisKerangka {
+  elemen: string;
+  sub?: string;
+  kompetensi?: string;
+  butir?: string[];
+  batasan?: string;
+}
 
-/** Matematika SMA/MA (wajib): lima elemen kerangka asesmen (Perkaban BSKAP 045/H/AN/2025). Porsi usulan 4/7/5/3/6 per 25 soal. */
-const MAT_SMA: Cakupan = {
-  porsi: { Bilangan: 4, Aljabar: 7, 'Geometri dan Pengukuran': 5, Trigonometri: 3, 'Data dan Peluang': 6 },
-  butir: [
-    ...daftar('Bilangan', 'Bilangan Real', ['Bilangan berpangkat dan bentuk akar', 'Logaritma dan penerapannya', 'Bunga, pertumbuhan, dan peluruhan']),
-    ...daftar('Aljabar', 'Persamaan dan Pertidaksamaan', ['Sistem persamaan linear tiga variabel', 'Sistem pertidaksamaan linear dua variabel dan program linear', 'Persamaan dan fungsi kuadrat']),
-    ...daftar('Aljabar', 'Fungsi', ['Fungsi, komposisi fungsi, dan fungsi invers', 'Fungsi eksponensial dalam pemodelan']),
-    ...daftar('Aljabar', 'Barisan dan Deret', ['Barisan dan deret aritmetika', 'Barisan dan deret geometri']),
-    ...daftar('Geometri dan Pengukuran', 'Objek Geometri', ['Hubungan sudut dan unsur lingkaran', 'Kesebangunan dan teorema Pythagoras pada bangun datar dan ruang']),
-    ...daftar('Geometri dan Pengukuran', 'Transformasi Geometri', ['Translasi, refleksi, rotasi, dan dilatasi pada bidang koordinat']),
-    ...daftar('Geometri dan Pengukuran', 'Pengukuran', ['Luas permukaan dan volume bangun ruang']),
-    ...daftar('Trigonometri', 'Perbandingan Trigonometri', ['Perbandingan trigonometri pada segitiga siku-siku', 'Penerapan trigonometri (sudut elevasi, depresi, jarak, dan tinggi)', 'Aturan sinus dan kosinus']),
-    ...daftar('Data dan Peluang', 'Data', ['Penyajian dan interpretasi data', 'Ukuran pemusatan, letak, dan penyebaran data']),
-    ...daftar('Data dan Peluang', 'Peluang', ['Kaidah pencacahan (aturan perkalian, permutasi, kombinasi)', 'Peluang kejadian dan frekuensi harapan']),
-  ],
-};
+const KERANGKA = kerangka as unknown as Record<string, { nama: string; baris: BarisKerangka[] }>;
+
+/** Batasan panjang dipotong di batas kata agar rumusan TP tetap terbaca di kisi-kisi. */
+function potong(s: string, maks: number): string {
+  if (s.length <= maks) return s;
+  const t = s.slice(0, maks);
+  return `${t.slice(0, Math.max(t.lastIndexOf(' '), maks - 20))}…`;
+}
 
 /**
- * Bahasa Indonesia: teks informasi dan teks fiksi berporsi seimbang. Kompetensi (tekstual, inferensial, evaluasi dan
- * apresiasi) tidak ada di sini: dipilih dari level TKA butir di prompt, agar level dan kompetensi selalu cocok.
+ * Porsi elemen Matematika (usulan, tidak ada di halaman resmi; SMP mengikuti contoh paket 30 soal). Mapel lain:
+ * porsi sebanding banyak butir per elemen, sehingga setiap butir matriks berpeluang sama.
  */
+const PORSI_MATEMATIKA: Record<string, Record<string, number>> = {
+  sd_wajib_matematika: { Bilangan: 5, 'Geometri dan Pengukuran': 3, Data: 2 },
+  smp_wajib_matematika: { Bilangan: 7, Aljabar: 8, 'Geometri dan Pengukuran': 8, 'Data dan Peluang': 7 },
+  sma_wajib_matematika: { Bilangan: 4, Aljabar: 7, 'Geometri dan Pengukuran': 5, Trigonometri: 3, 'Data dan Peluang': 6 },
+};
+
+/** Cakupan dari matriks asesmen: tiap butir sub-elemen menjadi satu butir cakupan; baris tanpa daftar butir memakai kompetensi dan batasannya. */
+export function cakupanKerangka(kunci: string): Cakupan | null {
+  const k = KERANGKA[kunci];
+  if (!k?.baris.length) return null;
+  const butir: ButirCakupan[] = [];
+  for (const b of k.baris) {
+    const sub = b.sub || b.elemen;
+    if (b.butir?.length) {
+      const batas = b.batasan ? ` (batasan: ${potong(b.batasan, 220)})` : '';
+      for (const x of b.butir) butir.push({ elemen: b.elemen, sub, butir: `${x}${batas}` });
+    } else {
+      const isi = b.kompetensi || sub;
+      butir.push({ elemen: b.elemen, sub, butir: b.batasan ? `${isi}. Materi: ${potong(b.batasan, 320)}` : isi });
+    }
+  }
+  // Beberapa tabel resmi mengulang baris yang sama; butir kembar dibuang.
+  const lihat = new Set<string>();
+  const unik = butir.filter((b) => {
+    const r = rumusanCakupan(b);
+    return lihat.has(r) ? false : (lihat.add(r), true);
+  });
+  butir.length = 0;
+  butir.push(...unik);
+  const porsi: Record<string, number> = PORSI_MATEMATIKA[kunci] ? { ...PORSI_MATEMATIKA[kunci] } : {};
+  if (!PORSI_MATEMATIKA[kunci]) for (const b of butir) porsi[b.elemen] = (porsi[b.elemen] ?? 0) + 1;
+  return { porsi, butir };
+}
+
+// ---- Mapel bahasa: jenis teks dari bagian Muatan halaman resmi ----
+
 const BINDO_SD: Cakupan = {
   porsi: { 'Teks informasi': 1, 'Teks fiksi': 1 },
   butir: [
-    ...daftar('Teks informasi', 'Teks informasi tunggal', [
+    // Muatan resmi: teks informasi berisi fakta sederhana dari berbagai bidang atau topik, berskala lokal dan nasional.
+    ...daftar('Teks informasi', 'Fakta sederhana berskala lokal atau nasional', [
       'Teks deskripsi tentang hewan, tumbuhan, atau tempat',
       'Teks laporan sederhana tentang kegiatan atau pengamatan',
       'Teks petunjuk atau langkah membuat sesuatu',
       'Berita sederhana tentang peristiwa di lingkungan sekitar',
-      'Pengumuman, poster, atau surat undangan',
+      'Teks informasi tentang budaya, kesehatan, atau lingkungan',
     ]),
-    ...daftar('Teks fiksi', 'Cerita', [
-      'Dongeng atau cerita fantasi dengan alur maju',
-      'Fabel dengan pesan moral',
-      'Cerita rakyat Nusantara',
-      'Cerita pengalaman sehari-hari dengan sudut pandang orang pertama',
-    ]),
+    // Muatan resmi: cerita rekaan berupa fantasi atau faktual (sejarah/biografi), latar konkret, tokoh datar, konflik tunggal, alur maju, sudut pandang orang pertama.
+    ...daftar('Teks fiksi', 'Cerita fantasi atau faktual', ['Cerita fantasi (dongeng atau fabel)', 'Cerita faktual: kisah sejarah', 'Cerita faktual: biografi tokoh', 'Puisi anak']),
   ],
 };
 
 const BINDO_SMP: Cakupan = {
   porsi: { 'Teks informasi': 1, 'Teks fiksi': 1 },
   butir: [
-    ...daftar('Teks informasi', 'Teks informasi tunggal', [
-      'Teks eksplanasi tentang gejala alam atau sosial',
-      'Teks laporan hasil observasi',
-      'Teks berita',
-      'Teks prosedur',
-      'Teks iklan atau infografis berisi data',
-    ]),
-    ...daftar('Teks informasi', 'Teks informasi jamak', ['Dua teks informasi bertopik sama dengan sudut pandang berbeda']),
-    ...daftar('Teks fiksi', 'Prosa', ['Cerpen dengan tokoh berkarakter bulat dan alur campuran', 'Cerita fantasi', 'Cerita rakyat atau legenda']),
-    ...daftar('Teks fiksi', 'Puisi', ['Puisi bertema alam, keluarga, atau sosial']),
+    // Muatan resmi: fakta, konsep, atau prosedur dari berbagai bidang, berskala lokal, nasional, atau global; tunggal maupun jamak.
+    ...daftar('Teks informasi', 'Teks informasi tunggal', ['Teks berisi fakta dari bidang sains atau lingkungan', 'Teks berisi konsep dari bidang sosial atau budaya', 'Teks prosedur', 'Teks berita atau laporan dengan data']),
+    ...daftar('Teks informasi', 'Teks informasi jamak', ['Dua teks informasi bertopik sama dengan sudut pandang atau data berbeda']),
+    // Muatan resmi: faktual (sejarah/biografi) atau realisme, tokoh bulat, konflik tunggal atau jamak, alur campuran, sudut pandang orang ketiga.
+    ...daftar('Teks fiksi', 'Prosa dan puisi', ['Cerpen realisme dengan alur campuran', 'Cerita faktual: sejarah atau biografi', 'Puisi']),
   ],
 };
 
 const BINDO_SMA: Cakupan = {
   porsi: { 'Teks informasi': 1, 'Teks fiksi': 1 },
   butir: [
-    ...daftar('Teks informasi', 'Teks informasi tunggal', ['Teks eksposisi', 'Artikel opini atau editorial', 'Artikel ilmiah populer', 'Teks berita dengan data', 'Infografis atau tabel data dengan teks pengantar']),
+    // Muatan resmi: fakta, konsep, prosedur, dan metakognisi dari berbagai bidang, genre, dan konteks; lokal, nasional, global; tunggal maupun jamak.
+    ...daftar('Teks informasi', 'Teks informasi tunggal', ['Teks eksposisi atau artikel ilmiah populer', 'Artikel opini atau editorial', 'Teks prosedur atau panduan', 'Teks berita atau infografis dengan data']),
     ...daftar('Teks informasi', 'Teks informasi jamak', ['Dua teks informasi yang saling melengkapi atau bertentangan']),
-    ...daftar('Teks fiksi', 'Prosa dan drama', ['Cerpen', 'Kutipan novel', 'Kutipan drama', 'Hikayat atau cerita rakyat']),
-    ...daftar('Teks fiksi', 'Puisi', ['Puisi modern']),
+    // Muatan resmi: realisme atau absurd, tokoh bulat, konflik tunggal atau jamak, penyelesaian terbuka, alur dan sudut pandang campuran; puisi, prosa, drama.
+    ...daftar('Teks fiksi', 'Puisi, prosa, dan drama', ['Cerpen atau kutipan novel realisme', 'Prosa absurd', 'Kutipan drama', 'Puisi']),
   ],
 };
 
+/** Muatan resmi Bahasa Inggris: descriptive, recount, narrative, procedure, analytical exposition; konteks sehari-hari, tempat kerja, akademik. */
 const BING_SMA: Cakupan = {
-  porsi: { 'Informational text': 3, 'Literary text': 2 },
+  porsi: { 'Descriptive text': 1, 'Recount text': 1, 'Narrative text': 1, 'Procedure text': 1, 'Analytical exposition text': 1 },
+  butir: ['Descriptive text', 'Recount text', 'Narrative text', 'Procedure text', 'Analytical exposition text'].flatMap((j) =>
+    daftar(j, 'Communication context', ['Everyday life context', 'Workplace context', 'Academic context']),
+  ),
+};
+
+/** Bahasa Indonesia Tingkat Lanjut: teks informasi tunggal atau jamak (akademik, dunia kerja) dan fiksi realisme atau absurd, termasuk sastra Melayu Klasik dan terjemahan; 300–350 kata. */
+const BINDO_LANJUT: Cakupan = {
+  porsi: { 'Teks informasi': 1, 'Teks fiksi': 1 },
   butir: [
-    ...daftar('Informational text', 'Factual text', ['Descriptive text', 'Recount text', 'Procedure text', 'Report text']),
-    ...daftar('Informational text', 'Argumentative text', ['Analytical exposition', 'Short opinion article or letter to the editor']),
-    ...daftar('Informational text', 'Functional text', ['Announcement, notice, or advertisement', 'Email or short message']),
-    ...daftar('Literary text', 'Narrative', ['Narrative text (short story)', 'Folktale or legend', 'Short poem or song lyric']),
+    ...daftar('Teks informasi', 'Teks informasi tunggal atau jamak', ['Teks akademik atau ilmiah', 'Teks dunia kerja (usulan, laporan, atau surat resmi)', 'Teks berisi tabel atau grafik dengan uraian', 'Dua teks dengan gagasan yang dibandingkan']),
+    ...daftar('Teks fiksi', 'Sastra Indonesia dan terjemahan', ['Cerpen atau kutipan novel realisme', 'Prosa absurd atau metaforis', 'Sastra Melayu Klasik (hikayat, syair, atau gurindam)', 'Puisi Indonesia atau terjemahan', 'Kutipan drama']),
   ],
+};
+
+/** Bahasa Inggris Tingkat Lanjut: exposition dan discussion bertopik teknologi dan isu faktual; B2 (300–400 kata) dan B1. */
+const BING_LANJUT: Cakupan = {
+  porsi: { 'Exposition text': 1, 'Discussion text': 1 },
+  butir: ['Exposition text', 'Discussion text'].flatMap((j) => daftar(j, 'Topic', ['Technology', 'Factual issues in society', 'Factual issues in the environment or health', 'Vocational or academic context'])),
+};
+
+/** Bahasa asing: topik dari bagian Muatan halaman resmi tiap bahasa. */
+function bahasaAsing(topik: string[], teks: string): Cakupan {
+  return { porsi: { Topik: 1 }, butir: daftar('Topik', teks, topik) };
+}
+const BAHASA_ASING: Record<string, Cakupan> = {
+  'sma_pilihan_bahasa-arab': bahasaAsing(['Kehidupan sekolah', 'Kehidupan keluarga', 'Hobi', 'Pekerjaan', 'Pelayanan umum', 'Lingkungan sekitar (al-bi’ah)', 'Dialog ungkapan persetujuan (muwāfaqah)', 'Dialog perintah (al-amr) dan larangan (an-nahyu)'], 'Teks naratif atau dialog berbahasa Arab fusha'),
+  'sma_pilihan_bahasa-jepang': bahasaAsing(['Aisatsu (salam)', 'Jikoshoukai (perkenalan diri)', 'Jikan (waktu)', 'Kazoku (keluarga)', 'Dekirukoto (kemampuan)', 'Gakkou no seikatsu (kehidupan sekolah)', 'Uchi (rumah)', 'Mainichi no seikatsu (kehidupan sehari-hari)', 'Shumi (hobi)', 'Himana toki (waktu senggang)'], 'Teks pendek sederhana (A1)'),
+  'sma_pilihan_bahasa-jerman': bahasaAsing(['Identität', 'Schulleben', 'Familien', 'Wohnen', 'Freizeitaktivitäten', 'Berufe', 'Essen und Trinken', 'Einkaufen', 'Reisen'], 'Teks naratif, deskripsi, dialog, atau fungsional (A1–A2.1)'),
+  'sma_pilihan_bahasa-korea': bahasaAsing(['Perkenalan diri (자기 소개)', 'Salam (인사)', 'Belanja (쇼핑)', 'Hobi (취미)', 'Transportasi (교통)', 'Cuaca (날씨)', 'Kehidupan sehari-hari (일상생활)', 'Kehidupan keluarga (가족생활)', 'Wisata (여행)', 'Kehidupan sekolah (학교활동)'], 'Teks sederhana TOPIK I Level 1'),
+  'sma_pilihan_bahasa-mandarin': bahasaAsing(['Identitas diri', 'Kehidupan sekolah', 'Kehidupan keluarga', 'Kehidupan sehari-hari', 'Waktu senggang dan hobi'], 'Teks sederhana HSK 1 (Hanzi dan Pinyin)'),
+  'sma_pilihan_bahasa-prancis': bahasaAsing(['Salam dan berpamitan', 'Ucapan selamat dan harapan', 'Menyatakan opini', 'Angka, jam, dan tanggal', 'Pesan singkat dan pengumuman', 'Perkenalan diri dan aktivitas sehari-hari', 'Keberadaan orang dan benda', 'Tanda dan rambu', 'Karakter seseorang', 'Benda dan bangunan publik'], 'Teks pendek (présent)'),
+};
+
+/** Kerangka bahasa (tanpa matriks elemen) → cakupan jenis teks atau topik. */
+const BAHASA: Record<string, Cakupan> = {
+  'sd_wajib_bahasa-indonesia': BINDO_SD,
+  'smp_wajib_bahasa-indonesia': BINDO_SMP,
+  'sma_wajib_bahasa-indonesia': BINDO_SMA,
+  'sma_wajib_bahasa-inggris': BING_SMA,
+  'sma_pilihan_bahasa-indonesia-tingkat-lanjut': BINDO_LANJUT,
+  'sma_pilihan_bahasa-inggris-tingkat-lanjut': BING_LANJUT,
+  ...BAHASA_ASING,
 };
 
 // ---- OSN: ranah lomba (lihat aturan format di src/ujian/index.ts) ----
@@ -319,200 +320,8 @@ const OSN_GEOGRAFI: Cakupan = {
   ],
 };
 
-// ---- TKA SMA mapel pilihan (Perkaban BSKAP 045/H/AN/2025). Rincian dari ringkasan sekunder kerangka asesmen;
-// porsi rata (usulan). Lihat docs/referensi/format-ujian.md bagian 5. ----
-
-const TKA_MAT_LANJUT: Cakupan = {
-  porsi: { Aljabar: 1, 'Geometri dan Pengukuran': 1, Kalkulus: 1 },
-  butir: [
-    ...daftar('Aljabar', 'Aljabar lanjut', ['Matriks dan determinan', 'Polinomial dan teorema sisa', 'Fungsi (komposisi, invers, eksponensial, logaritma)', 'Bilangan kompleks']),
-    ...daftar('Geometri dan Pengukuran', 'Geometri lanjut', ['Vektor di bidang dan ruang', 'Persamaan lingkaran', 'Transformasi geometri dengan matriks', 'Trigonometri lanjut (identitas dan persamaan)']),
-    ...daftar('Kalkulus', 'Limit, turunan, integral', ['Limit fungsi', 'Turunan dan penerapannya (gradien, nilai ekstrem)', 'Integral tentu dan tak tentu serta luas daerah']),
-  ],
-};
-
-const TKA_BINDO_LANJUT: Cakupan = {
-  porsi: { 'Teks informasi': 1, 'Teks sastra': 1 },
-  butir: [
-    ...daftar('Teks informasi', 'Teks argumentasi', ['Artikel opini dengan kalimat kompleks', 'Teks diskusi atau editorial', 'Dua teks dengan pandangan berbeda']),
-    ...daftar('Teks sastra', 'Prosa, puisi, dan drama', ['Cerpen atau kutipan novel realisme', 'Prosa absurd atau eksperimental', 'Puisi modern', 'Kutipan naskah drama', 'Karya sastra terjemahan']),
-  ],
-};
-
-const TKA_BING_LANJUT: Cakupan = {
-  porsi: { 'Argumentative text': 3, 'Literary text': 1 },
-  butir: [
-    // Halaman TKA pusmendik: teks exposition dan discussion bertopik teknologi dan isu faktual, sekitar 300–400 kata.
-    ...daftar('Argumentative text', 'B2 text (300–400 words) on technology and factual issues', ['Analytical exposition', 'Hortatory exposition', 'Discussion text (pros and cons)', 'Opinion article or review']),
-    ...daftar('Literary text', 'Narrative', ['Short story excerpt', 'Biography or memoir excerpt']),
-  ],
-};
-
-const TKA_FISIKA: Cakupan = {
-  porsi: { Kinematika: 1, Dinamika: 1, Fluida: 1, Gelombang: 1, 'Kalor dan Termodinamika': 1, Kelistrikan: 1 },
-  butir: [
-    ...daftar('Kinematika', 'Gerak', ['Gerak lurus beraturan dan berubah beraturan beserta grafiknya', 'Gerak parabola', 'Gerak melingkar']),
-    ...daftar('Dinamika', 'Gaya dan energi', ['Hukum Newton dan gaya gesek', 'Usaha, energi, dan daya', 'Momentum, impuls, dan tumbukan', 'Dinamika rotasi dan kesetimbangan']),
-    ...daftar('Fluida', 'Fluida', ['Tekanan hidrostatis, hukum Pascal, dan hukum Archimedes', 'Fluida dinamis dan hukum Bernoulli']),
-    ...daftar('Gelombang', 'Gelombang', ['Gelombang mekanik dan bunyi', 'Gelombang elektromagnetik dan cahaya']),
-    ...daftar('Kalor dan Termodinamika', 'Kalor', ['Kalor, pemuaian, dan perpindahan kalor', 'Teori kinetik gas dan hukum termodinamika']),
-    ...daftar('Kelistrikan', 'Listrik dan magnet', ['Rangkaian listrik arus searah', 'Listrik statis dan kapasitor', 'Medan magnet dan induksi elektromagnetik']),
-  ],
-};
-
-const TKA_KIMIA: Cakupan = {
-  porsi: { 'Kimia dasar': 1, 'Kimia analitik': 1, 'Kimia fisik': 1, 'Kimia organik': 1 },
-  butir: [
-    ...daftar('Kimia dasar', 'Atom dan reaksi', ['Struktur atom dan sistem periodik', 'Ikatan kimia dan bentuk molekul', 'Stoikiometri dan hukum dasar kimia']),
-    ...daftar('Kimia analitik', 'Larutan', ['Asam-basa dan pH', 'Larutan penyangga dan hidrolisis', 'Kelarutan dan Ksp', 'Sistem koloid']),
-    ...daftar('Kimia fisik', 'Energetika dan laju', ['Termokimia', 'Laju reaksi', 'Kesetimbangan kimia', 'Redoks dan elektrokimia']),
-    ...daftar('Kimia organik', 'Senyawa karbon', ['Hidrokarbon dan minyak bumi', 'Gugus fungsi senyawa karbon', 'Polimer dan makromolekul']),
-  ],
-};
-
-const TKA_BIOLOGI: Cakupan = {
-  porsi: { 'Keanekaragaman hayati': 1, 'Sel dan metabolisme': 1, 'Sistem organ': 2, 'Genetika dan evolusi': 1, 'Keterampilan proses': 1 },
-  butir: [
-    // Halaman TKA pusmendik: klasifikasi makhluk hidup, bakteri, ekosistem, metabolisme sel; konteks kesehatan, lingkungan, pertanian, sosial budaya.
-    ...daftar('Keanekaragaman hayati', 'Keanekaragaman', ['Keanekaragaman hayati dan klasifikasi makhluk hidup', 'Bakteri dan perannya bagi kehidupan', 'Ekosistem dan perubahan lingkungan']),
-    ...daftar('Sel dan metabolisme', 'Sel', ['Struktur dan fungsi sel serta transpor membran', 'Enzim dan metabolisme (respirasi, fotosintesis)']),
-    ...daftar('Sistem organ', 'Fisiologi manusia', ['Sistem sirkulasi', 'Sistem respirasi', 'Sistem ekskresi', 'Sistem imun', 'Sistem koordinasi (saraf dan hormon)', 'Sistem reproduksi']),
-    ...daftar('Genetika dan evolusi', 'Pewarisan', ['Pewarisan sifat dan hukum Mendel', 'Evolusi dan bioteknologi']),
-    ...daftar('Keterampilan proses', 'Kerja ilmiah', ['Merancang percobaan dan menafsirkan data hasil percobaan']),
-  ],
-};
-
-const TKA_EKONOMI: Cakupan = {
-  porsi: { 'Konsep dasar ekonomi': 1, 'Ekonomi mikro': 1, 'Ekonomi makro': 1, 'Ekonomi internasional': 1, 'Akuntansi keuangan dasar': 1 },
-  butir: [
-    ...daftar('Konsep dasar ekonomi', 'Konsep dasar', ['Kelangkaan, biaya peluang, dan sistem ekonomi', 'Pelaku ekonomi dan diagram aliran']),
-    ...daftar('Ekonomi mikro', 'Pasar', ['Permintaan, penawaran, dan harga keseimbangan', 'Elastisitas dan bentuk pasar']),
-    ...daftar('Ekonomi makro', 'Perekonomian nasional', ['Pendapatan nasional dan pertumbuhan ekonomi', 'Inflasi, uang, perbankan, dan kebijakan moneter', 'APBN dan kebijakan fiskal', 'Ketenagakerjaan dan pengangguran']),
-    ...daftar('Ekonomi internasional', 'Perdagangan', ['Perdagangan internasional, kurs, dan neraca pembayaran']),
-    ...daftar('Akuntansi keuangan dasar', 'Akuntansi', ['Persamaan dasar akuntansi dan siklus akuntansi', 'Laporan keuangan perusahaan jasa dan dagang']),
-  ],
-};
-
-const TKA_SOSIOLOGI: Cakupan = {
-  porsi: { 'Sosiologi sebagai ilmu': 1, 'Hubungan dan gejala sosial': 1, 'Penelitian sosial': 1, 'Kelompok sosial, kesetaraan, dan konflik': 1, 'Perubahan sosial dan globalisasi': 1 },
-  butir: [
-    ...daftar('Sosiologi sebagai ilmu', 'Dasar sosiologi', ['Objek, ciri, dan fungsi sosiologi', 'Nilai dan norma sosial']),
-    ...daftar('Hubungan dan gejala sosial', 'Interaksi', ['Interaksi sosial dan sosialisasi', 'Penyimpangan sosial dan pengendalian sosial']),
-    ...daftar('Penelitian sosial', 'Metode', ['Langkah penelitian sosial dan teknik pengumpulan data']),
-    ...daftar('Kelompok sosial, kesetaraan, dan konflik', 'Kelompok', ['Kelompok sosial dan dinamikanya', 'Diferensiasi, stratifikasi, dan kesetaraan sosial', 'Konflik, kekerasan, dan integrasi sosial']),
-    ...daftar('Perubahan sosial dan globalisasi', 'Perubahan', ['Perubahan sosial dan dampaknya', 'Globalisasi dan pemberdayaan komunitas']),
-  ],
-};
-
-const TKA_GEOGRAFI: Cakupan = {
-  porsi: { 'Wilayah dan lingkungan': 1, 'Lingkungan fisik': 1, 'Lingkungan sosial': 1, 'Interaksi fisik dan manusia': 1, 'Mitigasi dan adaptasi bencana': 1 },
-  butir: [
-    ...daftar('Wilayah dan lingkungan', 'Ruang', ['Peta, penginderaan jauh, dan SIG', 'Wilayah, tata ruang, dan pusat pertumbuhan']),
-    ...daftar('Lingkungan fisik', 'Fenomena fisik', ['Litosfer dan dinamika permukaan bumi', 'Atmosfer, hidrosfer, dan biosfer']),
-    ...daftar('Lingkungan sosial', 'Penduduk', ['Dinamika kependudukan', 'Desa dan kota serta interaksinya']),
-    ...daftar('Interaksi fisik dan manusia', 'Sumber daya', ['Sumber daya alam dan pembangunan berkelanjutan', 'Ketahanan pangan, industri, dan energi']),
-    ...daftar('Mitigasi dan adaptasi bencana', 'Bencana', ['Jenis, persebaran, dan mitigasi bencana alam']),
-  ],
-};
-
-const TKA_SEJARAH: Cakupan = {
-  porsi: { 'Pengantar ilmu sejarah': 1, 'Hindu-Buddha dan Islam': 1, 'Kolonialisme dan perlawanan': 1, 'Pergerakan nasional': 1, 'Revolusi hingga Demokrasi Terpimpin': 1, 'Orde Baru hingga Reformasi': 1 },
-  butir: [
-    ...daftar('Pengantar ilmu sejarah', 'Konsep', ['Konsep dasar sejarah, sumber, dan penelitian sejarah', 'Masa praaksara dan asal-usul nenek moyang']),
-    ...daftar('Hindu-Buddha dan Islam', 'Kerajaan Nusantara', ['Kerajaan Hindu-Buddha dan peninggalannya', 'Kerajaan Islam dan jaringan perdagangan']),
-    ...daftar('Kolonialisme dan perlawanan', 'Penjajahan', ['Kedatangan bangsa Eropa dan kolonialisme', 'Perlawanan rakyat terhadap penjajahan']),
-    ...daftar('Pergerakan nasional', 'Kebangkitan', ['Organisasi pergerakan dan Sumpah Pemuda', 'Pendudukan Jepang dan persiapan kemerdekaan']),
-    ...daftar('Revolusi hingga Demokrasi Terpimpin', 'Mempertahankan kemerdekaan', ['Proklamasi dan revolusi kemerdekaan', 'Demokrasi Liberal dan Demokrasi Terpimpin']),
-    ...daftar('Orde Baru hingga Reformasi', 'Indonesia modern', ['Pemerintahan Orde Baru', 'Reformasi dan perkembangan demokrasi']),
-  ],
-};
-
-const TKA_ANTROPOLOGI: Cakupan = {
-  porsi: { 'Konsep dasar antropologi': 1, Etnografi: 1, 'Masyarakat multikultural': 1, 'Perubahan sosial budaya': 1, 'Kearifan lokal dan tradisi lisan': 1 },
-  butir: [
-    ...daftar('Konsep dasar antropologi', 'Dasar', ['Kebudayaan, unsur, dan wujudnya', 'Cabang dan metode antropologi']),
-    ...daftar('Etnografi', 'Penelitian', ['Penelitian etnografi dan teknik pengumpulan data']),
-    ...daftar('Masyarakat multikultural', 'Keragaman', ['Keragaman suku, agama, dan budaya Indonesia', 'Integrasi dan konflik dalam masyarakat multikultural']),
-    ...daftar('Perubahan sosial budaya', 'Dinamika', ['Akulturasi, asimilasi, dan difusi budaya', 'Dampak globalisasi terhadap budaya lokal']),
-    ...daftar('Kearifan lokal dan tradisi lisan', 'Tradisi', ['Kearifan lokal dalam pengelolaan lingkungan', 'Tradisi lisan dan pelestariannya']),
-  ],
-};
-
-const TKA_PPKN: Cakupan = {
-  porsi: { Pancasila: 1, 'UUD 1945': 1, 'Bhinneka Tunggal Ika': 1, NKRI: 1 },
-  butir: [
-    ...daftar('Pancasila', 'Dasar negara', ['Pancasila sebagai dasar negara dan ideologi', 'Penerapan nilai Pancasila dalam kehidupan']),
-    ...daftar('UUD 1945', 'Konstitusi', ['Hak dan kewajiban warga negara', 'Sistem pemerintahan dan lembaga negara', 'Kasus pelanggaran hak dan pengingkaran kewajiban']),
-    ...daftar('Bhinneka Tunggal Ika', 'Keberagaman', ['Keberagaman dan persatuan bangsa', 'Harmoni dalam masyarakat majemuk']),
-    ...daftar('NKRI', 'Wawasan kebangsaan', ['Wawasan Nusantara dan ancaman terhadap NKRI', 'Indonesia dalam hubungan internasional']),
-  ],
-};
-
-const TKA_BAHASA_ASING: Cakupan = {
-  porsi: { 'Teks informasi': 2, 'Teks interpersonal dan fungsional': 1, 'Teks sastra': 1 },
-  butir: [
-    ...daftar('Teks informasi', 'Teks tulis', ['Teks deskripsi tentang tempat atau budaya', 'Teks narasi pengalaman sehari-hari', 'Artikel singkat tentang topik umum']),
-    ...daftar('Teks interpersonal dan fungsional', 'Komunikasi', ['Percakapan sehari-hari', 'Surat, pesan, pengumuman, atau iklan']),
-    ...daftar('Teks sastra', 'Sastra', ['Cerita pendek atau dongeng sederhana']),
-  ],
-};
-
-/** Halaman TKA pusmendik: produksi, pemasaran, distribusi, dan pengelolaan usaha (desain produk, perencanaan produksi, proposal usaha, laporan keuangan, HaKI). */
-const TKA_PKK: Cakupan = {
-  porsi: { Produksi: 1, 'Pemasaran dan distribusi': 1, 'Pengelolaan usaha': 1 },
-  butir: [
-    ...daftar('Produksi', 'Produk kreatif', ['Desain produk atau jasa', 'Perencanaan dan proses produksi serta pengendalian mutu']),
-    ...daftar('Pemasaran dan distribusi', 'Pasar', ['Analisis peluang dan kebutuhan pasar', 'Strategi pemasaran dan promosi', 'Saluran distribusi produk']),
-    ...daftar('Pengelolaan usaha', 'Usaha', ['Proposal usaha', 'Perhitungan biaya, harga jual, dan laporan keuangan', 'Hak kekayaan intelektual (HaKI)']),
-  ],
-};
-
-/**
- * Mapel pilihan TKA SMA menurut nama mapel (huruf kecil, tanpa spasi ganda); nama resmi Kepmendikdasmen 56/2026 dan
- * nama lama. Teori Kompetensi Kejuruan (SMK) sengaja tidak ada: materinya mengikuti program keahlian, jadi guru mengisi TP.
- */
-const PILIHAN_SMA: Record<string, Cakupan> = {
-  'matematika lanjutan': TKA_MAT_LANJUT,
-  'matematika tingkat lanjut': TKA_MAT_LANJUT,
-  'bahasa indonesia lanjutan': TKA_BINDO_LANJUT,
-  'bahasa indonesia tingkat lanjut': TKA_BINDO_LANJUT,
-  'bahasa inggris lanjutan': TKA_BING_LANJUT,
-  'bahasa inggris tingkat lanjut': TKA_BING_LANJUT,
-  fisika: TKA_FISIKA,
-  kimia: TKA_KIMIA,
-  biologi: TKA_BIOLOGI,
-  ekonomi: TKA_EKONOMI,
-  sosiologi: TKA_SOSIOLOGI,
-  geografi: TKA_GEOGRAFI,
-  sejarah: TKA_SEJARAH,
-  antropologi: TKA_ANTROPOLOGI,
-  'ppkn/pendidikan pancasila': TKA_PPKN,
-  'pendidikan pancasila dan kewarganegaraan': TKA_PPKN,
-  'pendidikan pancasila': TKA_PPKN,
-  ppkn: TKA_PPKN,
-  'bahasa arab': TKA_BAHASA_ASING,
-  'bahasa jerman': TKA_BAHASA_ASING,
-  'bahasa prancis': TKA_BAHASA_ASING,
-  'bahasa jepang': TKA_BAHASA_ASING,
-  'bahasa korea': TKA_BAHASA_ASING,
-  'bahasa mandarin': TKA_BAHASA_ASING,
-  'produk/projek kreatif dan kewirausahaan': TKA_PKK,
-  'projek kreatif dan kewirausahaan': TKA_PKK,
-  'produk kreatif dan kewirausahaan': TKA_PKK,
-};
-
+/** OSN: ranah lomba per format (bukan kerangka resmi TKA). */
 const PETA: Record<string, Cakupan> = {
-  'tka-sd-matematika': MAT_SD,
-  'tkad-sd-matematika': MAT_SD,
-  'tka-smp-matematika': MAT_SMP,
-  'tkad-smp-matematika': MAT_SMP,
-  'tka-sma-matematika': MAT_SMA,
-  'tka-sd-bindo': BINDO_SD,
-  'tkad-sd-bindo': BINDO_SD,
-  'tka-smp-bindo': BINDO_SMP,
-  'tkad-smp-bindo': BINDO_SMP,
-  'tka-sma-bindo': BINDO_SMA,
-  'tka-sma-binggris': BING_SMA,
   'osnk-sd-matematika': OSN_MAT_SD,
   'osnp-sd-matematika': OSN_MAT_SD,
   'osnk-smp-matematika': OSN_MAT_LANJUT,
@@ -535,7 +344,8 @@ const PETA: Record<string, Cakupan> = {
 
 /** Cakupan format ujian; mapel pilihan TKA SMA menurut nama mapel yang diisi guru. */
 export function cakupanFormat(id: string | null | undefined, mapel = ''): Cakupan | null {
-  if (id === 'tka-sma-pilihan') return PILIHAN_SMA[mapel.trim().toLowerCase().replace(/\s+/g, ' ')] ?? null;
+  const kunci = kunciKerangka(id, mapel);
+  if (kunci) return BAHASA[kunci] ?? cakupanKerangka(kunci);
   return (id && PETA[id]) || null;
 }
 

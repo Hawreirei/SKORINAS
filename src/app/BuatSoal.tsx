@@ -21,6 +21,12 @@ import { butirPerPermintaan, modelDari } from '../ai/registri';
 import { bacaDraf, bagiRata, hapusDraf, hitungRencana, MAKS_SOAL, MIN_SOAL, simpanDraf, SKOR_BAWAAN } from './rencana-buat';
 import { formatBiaya } from './ringkas';
 import { cakupanFormat, kuotaElemen } from '../ujian/cakupan';
+
+/** Butir cakupan untuk layar: tanpa batasan dan rincian materi, paling banyak 90 huruf. */
+function ringkasButir(b: string): string {
+  const t = b.replace(/ \(batasan: .*$/, '').replace(/\. Materi: .*$/, '');
+  return t.length > 90 ? `${t.slice(0, t.lastIndexOf(' ', 88))}…` : t;
+}
 import { FORMAT_UJIAN, formatUjian, KELUARGA_LABEL, ringkasUjian, type KeluargaUjian } from '../ujian';
 import { barisTp, bentukIsian, cakupanIsian, galatKartu, terapkanPilihanCakupan, isianDariParameter, isianDariUjian, isianKosong, keParameter, kuotaKesukaran, masukanRencana, ubahJumlah, type Isian } from './isian-buat';
 import OpsiLanjutanBuat from './OpsiLanjutanBuat';
@@ -558,7 +564,7 @@ export default function BuatSoal() {
                         <span className="font-bold text-isi">
                           {e.elemen} · {e.soal} soal
                         </span>
-                        <span className="block text-redup">{e.butir.join('; ')}</span>
+                        <span className="block text-redup">{e.butir.map(ringkasButir).join('; ')}</span>
                       </li>
                     ))}
                   </ul>

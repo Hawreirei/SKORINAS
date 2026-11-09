@@ -223,7 +223,7 @@ ${k.bacaan}
     if (stimulus) bagian.push(stimulus);
   }
 
-  const ujian = bagianPromptUjian(p, slot.level);
+  const ujian = bagianPromptUjian(p, slot.level, slot.urutan);
   if (ujian) bagian.push(ujian);
 
   const tambahan = (p.aturan_tambahan ?? []).map((a) => a.trim()).filter(Boolean);
@@ -358,7 +358,7 @@ ${[...bacaan.values()].map((x) => `### ${x.label}\n"""\n${x.teks}\n"""`).join('\
   const daftar = butir.map((b, i) => {
     const s = b.slot;
     const tka = levelTkaButir(p, s.level);
-    const baca = kompetensiBacaButir(p, s.level);
+    const baca = kompetensiBacaButir(p, s.level, s.urutan);
     const umum = new Set(rincianBentuk(p, s.bentuk));
     const khusus = rincianBentuk(p, s.bentuk, s.kesukaran).filter((r) => !umum.has(r));
     const tambahan: string[] = [];

@@ -136,11 +136,12 @@ describe('prompt stimulus', () => {
     expect(bagianStimulus(param({ wajib_stimulus: false }), slot({ variasi }))).toBe('');
   });
 
-  it('format Bahasa Indonesia TKA: kompetensi membaca mengikuti level butir', () => {
+  it('format Bahasa Indonesia TKA: kompetensi membaca mengikuti level butir, subkompetensi dari matriks resmi bergiliran', () => {
     const p = { ujian: { id: 'tka-smp-bindo', daerah: '' } };
-    expect(bagianPromptUjian(p, 'C1')).toContain('pemahaman tekstual');
-    expect(bagianPromptUjian(p, 'C3')).toContain('pemahaman inferensial');
-    expect(bagianPromptUjian(p, 'C6')).toContain('evaluasi dan apresiasi');
+    expect(bagianPromptUjian(p, 'C1')).toContain('Kompetensi membaca butir ini: Pemahaman Tekstual: Mengidentifikasi penggunaan istilah dalam berbagai bidang.');
+    expect(bagianPromptUjian(p, 'C1', 1)).toContain('Pemahaman Tekstual: Mengidentifikasi objek dan/atau latar');
+    expect(bagianPromptUjian(p, 'C3')).toContain('Pemahaman Inferensial: ');
+    expect(bagianPromptUjian(p, 'C6')).toContain('Evaluasi dan Apresiasi: ');
     expect(bagianPromptUjian({ ujian: { id: 'tka-smp-matematika', daerah: '' } }, 'C3')).not.toContain('Kompetensi membaca');
   });
 });

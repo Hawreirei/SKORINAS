@@ -20,7 +20,7 @@
 | `src/generasi/` | Komposisi, rencana butir, prompt, pengatur generasi, operasi per butir |
 | `src/verifikasi/` | Skema isi_json, pemeriksa hitung (mathjs), kaidah butir, kemiripan, sebaran kunci |
 | `src/paket/` | Paket mata pelajaran (aturan penulisan, contoh, templat, pemeriksa) |
-| `src/ujian/` | Format ujian TKA, TKAD, OSN (F-35): atribut ujian, aturan prompt, dan cakupan materi (F-39, `cakupan.ts`); riset di `docs/referensi/format-ujian.md` |
+| `src/ujian/` | Format ujian TKA, TKAD, OSN (F-35): atribut ujian, aturan prompt, dan cakupan materi (F-39, `cakupan.ts`), kerangka asesmen TKA resmi pusmendik (F-41, `kerangka.ts`, `data/`); riset di `docs/referensi/format-ujian.md` |
 | `src/gambar/` | Primitif, SVG, TikZ, sepuluh templat Matematika SD |
 | `src/matematika/` | Pengurai teks bercampur LaTeX dan serialisasi LaTeX |
 | `src/ekspor/` | Model dokumen dan pakem penulisan soal, Word (docx), PDF (jsPDF + svg2pdf, Liberation Serif), LaTeX |

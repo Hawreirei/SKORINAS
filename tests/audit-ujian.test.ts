@@ -9,6 +9,7 @@ import { rencanakanSlot } from '../src/generasi/rencana';
 import { beriVariasi } from '../src/generasi/variasi';
 import { FORMAT_UJIAN, formatUjian } from '../src/ujian';
 import { cakupanFormat, kuotaElemen, rumusanCakupan } from '../src/ujian/cakupan';
+import { RINGKAS_KERANGKA } from '../src/ujian/kerangka';
 import { periksaSoal } from '../src/verifikasi';
 
 // Audit semua format ujian (permintaan pemilik, 8 November 2026): tanpa CP dan TP guru, setiap format harus
@@ -29,6 +30,16 @@ function isianFormat(): { id: string; mapel: string }[] {
 }
 
 describe('audit format ujian: cakupan materi', () => {
+  it('kerangka resmi pusmendik: 76 mapel, TKA SD Matematika memuat semua butir matriks resmi', () => {
+    expect(Object.keys(RINGKAS_KERANGKA)).toHaveLength(76);
+    const sd = cakupanFormat('tka-sd-matematika')!.butir.map((b) => b.butir.replace(/ \(batasan:.*$/, ''));
+    for (const b of ['Pecahan senilai menggunakan gambar dan simbol matematika', 'Kelipatan, faktor, KPK, dan FPB bilangan asli', 'Laju perubahan (kecepatan)', 'Penaksiran ukuran', 'Penyajian data (gambar, piktogram, diagram batang, dan tabel frekuensi)'])
+      expect(sd).toContain(b);
+    // Butir dari baris tambalan (halaman resmi terpotong) tetap ada.
+    expect(cakupanFormat('tka-sma-matematika')!.butir.some((b) => b.sub === 'Peluang')).toBe(true);
+    expect(Object.keys(cakupanFormat('tka-sma-pilihan', 'Kimia')!.porsi)).toEqual(['Kimia Dasar', 'Kimia Analitik', 'Kimia Fisik', 'Kimia Organik']);
+  });
+
   it('setiap format (termasuk tiap mapel pilihan TKA SMA dan tiap bidang OSN) punya cakupan materi', () => {
     const tanpa = isianFormat().filter((x) => !cakupanFormat(x.id, x.mapel));
     expect(tanpa).toEqual([]);
@@ -43,15 +54,18 @@ describe('audit format ujian: cakupan materi', () => {
     }
   });
 
-  it('daftar mapel pilihan sama dengan Kepmendikdasmen 56/2026 (19 untuk SMA, ditambah Teori Kompetensi Kejuruan untuk SMK)', () => {
+  it('daftar mapel pilihan: 19 mapel Kepmendikdasmen 56/2026 ditambah 50 program keahlian SMK (Teori Kompetensi Kejuruan) dari kerangka pusmendik', () => {
     const saran = formatUjian('tka-sma-pilihan')!.saranMapel!;
-    expect(saran).toHaveLength(20);
+    expect(saran).toHaveLength(69);
+    expect(saran.filter((m) => m.startsWith('SMK - '))).toHaveLength(50);
+    expect(saran).toContain('SMK - Kuliner');
+    expect(cakupanFormat('tka-sma-pilihan', 'Kuliner')).toEqual(cakupanFormat('tka-sma-pilihan', 'SMK - Kuliner'));
     expect(saran).toContain('Matematika Lanjutan');
     expect(saran).toContain('PPKn/Pendidikan Pancasila');
     expect(saran).toContain('Produk/Projek Kreatif dan Kewirausahaan');
     expect(cakupanFormat('tka-sma-pilihan', 'Teori Kompetensi Kejuruan')).toBeNull();
     // Nama lama tetap dikenali.
-    expect(cakupanFormat('tka-sma-pilihan', 'Matematika Tingkat Lanjut')).toBe(cakupanFormat('tka-sma-pilihan', 'Matematika Lanjutan'));
+    expect(cakupanFormat('tka-sma-pilihan', 'Matematika Tingkat Lanjut')).toEqual(cakupanFormat('tka-sma-pilihan', 'Matematika Lanjutan'));
   });
 
   it('atribut resmi Kepmendikdasmen 56/2026: durasi, skala nilai, numerasi dan literasi AN, rambu penulisan', () => {
@@ -69,7 +83,7 @@ describe('audit format ujian: cakupan materi', () => {
   });
 
   it('nama mapel pilihan tidak peka huruf besar dan spasi', () => {
-    expect(cakupanFormat('tka-sma-pilihan', '  fisika ')).toBe(cakupanFormat('tka-sma-pilihan', 'Fisika'));
+    expect(cakupanFormat('tka-sma-pilihan', '  fisika ')).toEqual(cakupanFormat('tka-sma-pilihan', 'Fisika'));
     expect(cakupanFormat('tka-sma-pilihan', 'Mapel tak dikenal')).toBeNull();
   });
 
@@ -142,7 +156,7 @@ describe('audit format ujian: dari isian sampai prompt', () => {
     const kel = susunPesanKelompok({ param: p, butir: slot.map((s) => ({ slot: s, alasanGagal: [], bacaan: { id: s.kelompok!, teks: 'Teks bacaan uji tentang kebun teh.' } })), pokokLain: [] });
     expect(kel.split('Teks bacaan uji tentang kebun teh.')).toHaveLength(2);
     expect(kel).toContain('Memakai Bacaan A; "pokok" hanya pertanyaan.');
-    expect(kel).toMatch(/Kompetensi membaca: pemahaman (tekstual|inferensial)|Kompetensi membaca: evaluasi/);
+    expect(kel).toMatch(/Kompetensi membaca: (Pemahaman Tekstual|Pemahaman Inferensial|Evaluasi dan Apresiasi): /);
     expect(kel).not.toContain('## Stimulus (wajib');
   });
 });

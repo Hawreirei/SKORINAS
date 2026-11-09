@@ -6,6 +6,7 @@ import { faseDariKelas } from '../kurikulum/fase';
 import { rumpunDariMapel } from '../paket';
 import { bagiPorsi, formatUjian, isianUjian } from '../ujian';
 import { cakupanFormat, pilihCakupan, rumusanCakupan, type Cakupan } from '../ujian/cakupan';
+import { kunciKerangka, PANJANG_TEKS } from '../ujian/kerangka';
 import { SKOR_BAWAAN } from './rencana-buat';
 
 /**
@@ -262,7 +263,8 @@ export function keParameter(f: Isian, acak: () => number = Math.random): Paramet
       const v = { tema: aturanDariTeks(f.temaTeks), tokoh: aturanDariTeks(f.tokohTeks), stimulus: aturanDariTeks(f.stimulusTeks) };
       return v.tema.length || v.tokoh.length || v.stimulus.length ? v : null;
     })(),
-    panjang_stimulus: f.panjangStimulus,
+    // Panjang teks kerangka resmi untuk mapel bahasa tertentu (mis. Bahasa Jepang paling banyak 50 kata) bila guru tidak mengatur.
+    panjang_stimulus: f.panjangStimulus ?? PANJANG_TEKS[kunciKerangka(f.ujian?.id, f.mapel) ?? ''] ?? null,
     petunjuk_bagian: f.petunjukBagian && Object.values(f.petunjukBagian).some((x) => x?.trim()) ? Object.fromEntries(Object.entries(f.petunjukBagian).filter(([, x]) => x?.trim()).map(([b, x]) => [b, x!.trim()])) : null,
     urutan_bentuk: f.urutanBentuk,
     gaya_pembahasan: f.gayaPembahasan,
