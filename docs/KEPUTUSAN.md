@@ -409,3 +409,18 @@ Pemilik mengunggah Permendikdasmen 9/2025 (TKA), Permendikdasmen 9/2026 (perubah
 | Mapel pilihan | Nama resmi (Matematika Lanjutan, PPKn/Pendidikan Pancasila, Produk/Projek Kreatif dan Kewirausahaan, …) dan Teori Kompetensi Kejuruan (SMK) ditambahkan; yang terakhir tanpa cakupan, layar meminta TP sesuai program keahlian | Bab IV A |
 | TKAD | Keterangan diganti: soal daerah adalah bagian instrumen TKA SD/SMP, ditulis kabupaten/kota bersama provinsi dengan kisi-kisi pusat. Aturan kelokalan tetap ada (dari berita, tidak disebut pedoman) | Bab IV–V |
 
+## Rincian dari halaman TKA pusmendik (F-41, 9 November 2026)
+
+Pemilik meminta semua materi dari https://pusmendik.kemendikdasmen.go.id/tka/ masuk. Host itu ditolak jaringan sesi pengembangan (proxy menolak koneksi), jadi isi halaman diambil lewat mesin pencari yang dibatasi ke domain pusmendik. Yang terambil dan dipakai:
+
+| Topik | Keputusan | Sumber |
+| --- | --- | --- |
+| Panjang teks Bahasa Indonesia | SD 150–200 kata, SMP 200–250 kata (kecuali puisi); SMA tetap 250–300. Batas pemeriksa SD 90, SMP 120, SMA 140 kata. Golden S-04 (bacaan SD 83 kata) kini ditolak (T-07) | Halaman TKA SD dan SMP Bahasa Indonesia (kerangka 047/H/AN/2025) |
+| Subkompetensi membaca | Tekstual, inferensial, evaluasi dan apresiasi diperinci sesuai tabel halaman SMP | Halaman TKA SMP Bahasa Indonesia |
+| Geometri dan pengukuran SD | Bangun datar segitiga, segiempat, segi banyak; bangun ruang kubus, balok, gabungannya; visualisasi spasial; panjang, berat, volume, waktu dengan satuan baku | Halaman TKA SD Matematika |
+| Data SD | Tabel frekuensi dan diagram batang; piktogram tidak disebut halaman (tetap ada sebagai satu butir) | Halaman TKA SD Matematika |
+| Bahasa Inggris lanjutan | Exposition dan discussion bertopik teknologi dan isu faktual, 300–400 kata | Halaman mapel pilihan |
+| Produk/Projek Kreatif dan Kewirausahaan | Produksi, pemasaran, distribusi, pengelolaan usaha (desain produk, perencanaan produksi, proposal usaha, laporan keuangan, HaKI); di SMK pilihan pertama wajib mapel ini | Halaman mapel pilihan |
+| Biologi | Ditambah bakteri; konteks kesehatan, lingkungan, pertanian, sosial budaya | Halaman mapel pilihan Biologi |
+| Belum | Daftar lengkap butir per elemen untuk semua mapel ada di PDF kerangka asesmen (Perkaban BSKAP 045 dan 047/H/AN/2025) di situs pusmendik, yang belum dapat dibuka. **Perlu**: pemilik mengunggah PDF itu, atau host pusmendik diizinkan di lingkungan sesi | — |
+

@@ -124,6 +124,7 @@ export function panjangStimulus(kelas: number, bahasa: boolean, sendiri?: { min:
   // Panjang dari guru: sasaran persis seperti diatur, batas pemeriksa 70% dari minimalnya.
   if (sendiri && sendiri.min > 0 && sendiri.maks >= sendiri.min) return { min: Math.max(10, Math.floor(sendiri.min * 0.7)), sasaran: [sendiri.min, sendiri.maks] };
   const j = jenjangDariKelas(kelas);
-  if (bahasa) return j === 'SD' ? { min: 50, sasaran: [80, 150] } : j === 'SMP' ? { min: 100, sasaran: [180, 250] } : { min: 130, sasaran: [230, 300] };
+  // Kerangka asesmen TKA (Perkaban BSKAP 047/H/AN/2025, dikutip halaman TKA pusmendik): teks SD 150–200 kata, SMP 200–250 kata (kecuali puisi).
+  if (bahasa) return j === 'SD' ? { min: 90, sasaran: [150, 200] } : j === 'SMP' ? { min: 120, sasaran: [200, 250] } : { min: 140, sasaran: [250, 300] };
   return j === 'SD' ? { min: 25, sasaran: [35, 80] } : j === 'SMP' ? { min: 30, sasaran: [45, 100] } : { min: 35, sasaran: [50, 120] };
 }

@@ -123,7 +123,7 @@ describe('prompt stimulus', () => {
   });
 
   it('bahasa: teks bacaan sepanjang kerangka TKA; benar-salah: stimulus lalu pernyataan', () => {
-    expect(bagianStimulus(param({ wajib_stimulus: true, kelas: 9, rumpun: 'bahasa' }), slot())).toContain('teks bacaan asli sekitar 180–250 kata');
+    expect(bagianStimulus(param({ wajib_stimulus: true, kelas: 9, rumpun: 'bahasa' }), slot())).toContain('teks bacaan asli sekitar 200–250 kata');
     expect(bagianStimulus(param({ wajib_stimulus: true }), slot({ bentuk: 'benar_salah' }))).toContain('satu pernyataan tentang isi stimulus');
   });
 

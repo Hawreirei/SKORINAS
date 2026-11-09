@@ -46,9 +46,10 @@ export interface FormatUjian {
 
 /** Kompetensi membaca TKA (Bahasa Indonesia dan Inggris) per level. */
 const KOMPETENSI_BACA: Record<string, string> = {
-  'Pengetahuan dan Pemahaman': 'pemahaman tekstual, yaitu menemukan informasi yang tersurat dalam teks (siapa, apa, kapan, di mana, berapa, urutan kejadian).',
-  Aplikasi: 'pemahaman inferensial, yaitu menyimpulkan informasi tersirat: gagasan utama, makna kata dalam konteks, hubungan sebab-akibat, watak tokoh, atau tujuan penulis.',
-  Penalaran: 'evaluasi dan apresiasi, yaitu menilai isi, keakuratan, atau kesesuaian informasi, membandingkan dua bagian atau dua teks, menilai sikap tokoh, atau menilai penggunaan bahasa.',
+  // Subkompetensi dari kerangka asesmen TKA (halaman TKA pusmendik, Bahasa Indonesia SMP).
+  'Pengetahuan dan Pemahaman': 'pemahaman tekstual, yaitu mengidentifikasi informasi penting yang tersurat, penggunaan istilah dalam berbagai bidang, objek atau latar dari kosakata, atau menyusun kerangka atau bagan dari bagian penting teks.',
+  Aplikasi: 'pemahaman inferensial, yaitu menyimpulkan ide pokok, gagasan pendukung, tokoh, peristiwa, latar, atau nilai; menjelaskan kelogisan hubungan antarperistiwa atau antarinformasi; memprediksi peristiwa; atau menjelaskan bahasa kias dan citraan dalam teks fiksi.',
+  Penalaran: 'evaluasi dan apresiasi, yaitu menilai isi, keakuratan, atau kesesuaian informasi, menilai relevansi peristiwa dalam teks dengan kehidupan sehari-hari, membandingkan dua bagian atau dua teks, menilai sikap tokoh, atau menilai penggunaan bahasa.',
 };
 
 /** Level kognitif TKA (kerangka asesmen BSKAP 2025) dipetakan ke C1–C6 GenSoal. */
@@ -106,9 +107,9 @@ const ATURAN_BINDO_TKA = [
   'Jawaban harus dapat ditemukan atau disimpulkan dari teks, bukan dari pengetahuan di luar teks.',
 ];
 
-const SD_TEKS = 'Teks untuk SD sekitar 80–150 kata dengan kalimat sederhana (pola dasar SPOK) dan kosakata sehari-hari; cerita beralur maju dengan tokoh berkarakter datar.';
-const SMP_TEKS = 'Teks untuk SMP sekitar 180–250 kata (puisi boleh lebih pendek) dengan kalimat yang lebih beragam; cerita boleh beralur campuran dengan tokoh berkarakter bulat.';
-const SMA_TEKS = 'Teks untuk SMA sekitar 230–300 kata, boleh berupa teks tunggal atau dua teks yang saling berkaitan.';
+const SD_TEKS = 'Teks untuk SD 150–200 kata (kecuali puisi) dengan kalimat sederhana (pola dasar SPOK) dan kosakata sehari-hari; teks informasi berisi fakta sederhana dari berbagai bidang berskala lokal atau nasional; cerita beralur maju dengan tokoh berkarakter datar.';
+const SMP_TEKS = 'Teks untuk SMP 200–250 kata (kecuali puisi) dengan kalimat yang lebih beragam; teks informasi berisi fakta, konsep, atau prosedur dari berbagai bidang berskala lokal, nasional, atau global; cerita boleh beralur campuran dengan tokoh berkarakter bulat.';
+const SMA_TEKS = 'Teks untuk SMA sekitar 250–300 kata, boleh berupa teks tunggal atau dua teks yang saling berkaitan.';
 
 const ATURAN_OSN = [
   'Soal setara Olimpiade Sains Nasional (OSN): pemecahan masalah tidak rutin yang menuntut penalaran mendalam, melampaui soal latihan kelas. Jangan menyalin soal OSN atau olimpiade lain; tulis soal baru yang setara.',

@@ -1,5 +1,5 @@
 {
- "keterangan": "Golden set pemeriksa stimulus (src/verifikasi/stimulus.ts, F-38): 'lolos' harus tanpa alasan, 'ditolak' harus ditolak. kelas dan bahasa menentukan batas panjang.",
+ "keterangan": "Golden set pemeriksa stimulus (src/verifikasi/stimulus.ts, F-38): 'lolos' harus tanpa alasan, 'ditolak' harus ditolak. kelas dan bahasa menentukan batas panjang. F-41: panjang bacaan bahasa mengikuti kerangka asesmen TKA (SD 150–200, SMP 200–250 kata); S-04 dipindah ke ditolak sebagai T-07.",
  "lolos": [
   {
    "id": "S-01",
@@ -54,29 +54,6 @@
    "isi": {
     "bentuk": "pilihan_ganda",
     "pokok": "Sebuah koperasi nelayan di pesisir Sulawesi Selatan mencatat hasil tangkapan ikan selama lima minggu berturut-turut. Hasil tangkapan minggu pertama 1,2 ton dan setiap minggu berikutnya naik 15% dari minggu sebelumnya karena perahu pinisi baru mulai beroperasi. Ketua koperasi ingin mengetahui total tangkapan untuk menghitung bagi hasil anggota.\nBerapa ton total tangkapan selama lima minggu, dibulatkan ke satu desimal?",
-    "opsi": {
-     "A": "1",
-     "B": "2",
-     "C": "3",
-     "D": "4"
-    },
-    "kunci": "A",
-    "pembahasan": [
-     "x"
-    ],
-    "verifikasi": {
-     "tipe": "tidak_ada"
-    },
-    "gambar": null
-   }
-  },
-  {
-   "id": "S-04",
-   "kelas": 6,
-   "bahasa": true,
-   "isi": {
-    "bentuk": "pilihan_ganda",
-    "pokok": "Di halaman sekolah Dimas ada kebun kecil. Setiap pagi Dimas dan teman-temannya menyiram tanaman cabai dan tomat. Mereka juga mencabut rumput liar yang tumbuh di sela tanaman. Bu Guru meminta mereka mencatat tinggi tanaman setiap hari Jumat. Setelah tiga minggu, tanaman tomat sudah berbunga. Tanaman cabai tumbuh lebih lambat karena terlalu banyak disiram. Dimas lalu membuat jadwal menyiram yang baru. Cabai disiram dua hari sekali, sedangkan tomat tetap disiram setiap pagi. Sebulan kemudian kedua tanaman tumbuh subur.\nMengapa tanaman cabai tumbuh lebih lambat?",
     "opsi": {
      "A": "1",
      "B": "2",
@@ -272,6 +249,30 @@
     },
     "gambar": null
    }
+  },
+  {
+   "id": "T-07",
+   "kelas": 6,
+   "bahasa": true,
+   "isi": {
+    "bentuk": "pilihan_ganda",
+    "pokok": "Di halaman sekolah Dimas ada kebun kecil. Setiap pagi Dimas dan teman-temannya menyiram tanaman cabai dan tomat. Mereka juga mencabut rumput liar yang tumbuh di sela tanaman. Bu Guru meminta mereka mencatat tinggi tanaman setiap hari Jumat. Setelah tiga minggu, tanaman tomat sudah berbunga. Tanaman cabai tumbuh lebih lambat karena terlalu banyak disiram. Dimas lalu membuat jadwal menyiram yang baru. Cabai disiram dua hari sekali, sedangkan tomat tetap disiram setiap pagi. Sebulan kemudian kedua tanaman tumbuh subur.\nMengapa tanaman cabai tumbuh lebih lambat?",
+    "opsi": {
+     "A": "1",
+     "B": "2",
+     "C": "3",
+     "D": "4"
+    },
+    "kunci": "A",
+    "pembahasan": [
+     "x"
+    ],
+    "verifikasi": {
+     "tipe": "tidak_ada"
+    },
+    "gambar": null
+   },
+   "catatan": "Bacaan SD 83 kata: lolos sebelum F-41; kerangka asesmen TKA meminta teks SD 150–200 kata, batas pemeriksa kini 90 kata."
   }
  ]
 }

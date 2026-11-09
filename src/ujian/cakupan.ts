@@ -36,25 +36,30 @@ const MAT_SD: Cakupan = {
     ]),
     ...daftar('Bilangan', 'Faktor dan kelipatan', ['Kelipatan persekutuan terkecil (KPK) dalam masalah sehari-hari', 'Faktor persekutuan terbesar (FPB) dalam masalah sehari-hari']),
     ...daftar('Bilangan', 'Bilangan rasional', [
-      'Pecahan senilai, membandingkan, dan mengurutkan pecahan',
-      'Hubungan pecahan, desimal, dan persen',
+      'Pecahan senilai dengan gambar dan simbol matematika',
+      'Membandingkan dan mengurutkan pecahan',
+      'Hubungan pecahan sederhana, desimal, dan persen',
       'Operasi hitung pecahan dan desimal dalam soal cerita',
       'Persen dalam konteks diskon, bagian, atau peningkatan',
       'Perbandingan dan rasio sederhana',
     ]),
-    ...daftar('Geometri dan Pengukuran', 'Objek geometri', [
-      'Sifat-sifat bangun datar (segitiga, segi empat, lingkaran)',
-      'Sifat-sifat dan jaring-jaring kubus dan balok',
-      'Bangun ruang dilihat dari depan, atas, dan samping',
+    // Sub-elemen dari kerangka asesmen (halaman TKA pusmendik): bentuk bangun datar (segitiga, segiempat, segi banyak);
+    // konstruksi bangun ruang (kubus, balok, gabungannya) dan visualisasi spasial; panjang, volume, berat, waktu dengan satuan baku.
+    ...daftar('Geometri dan Pengukuran', 'Geometri', [
+      'Bentuk bangun datar (segitiga, segiempat, dan segi banyak): sifat dan unsurnya',
+      'Konstruksi bangun ruang (kubus, balok, dan gabungannya) serta jaring-jaringnya',
+      'Visualisasi spasial: bangun ruang dilihat dari depan, atas, dan samping',
       'Jenis dan besar sudut',
     ]),
     ...daftar('Geometri dan Pengukuran', 'Pengukuran', [
-      'Konversi satuan panjang, berat, dan waktu',
-      'Satuan volume (liter, mililiter, cm³) dan penaksiran ukuran',
+      'Panjang benda dengan satuan baku dan hubungan antarsatuan',
+      'Berat benda dengan satuan baku dan hubungan antarsatuan',
+      'Volume benda dengan satuan baku (liter, mililiter, cm³) dan penaksiran ukuran',
+      'Waktu: membaca jam, durasi, dan hubungan antarsatuan waktu',
       'Keliling dan luas bangun datar serta gabungannya',
-      'Volume kubus dan balok',
+      'Volume kubus, balok, dan gabungannya',
     ]),
-    ...daftar('Data', 'Penyajian dan interpretasi data', ['Membaca dan menafsirkan tabel frekuensi dan piktogram', 'Membaca dan menafsirkan diagram batang', 'Rata-rata (mean) dan nilai terbanyak dari data sederhana']),
+    ...daftar('Data', 'Penyajian dan interpretasi data', ['Menyajikan dan menafsirkan data dalam tabel frekuensi', 'Menyajikan dan menafsirkan data dalam diagram batang', 'Membaca data dari gambar atau piktogram', 'Rata-rata (mean) dan nilai terbanyak dari data sederhana']),
   ],
 };
 
@@ -337,7 +342,8 @@ const TKA_BINDO_LANJUT: Cakupan = {
 const TKA_BING_LANJUT: Cakupan = {
   porsi: { 'Argumentative text': 3, 'Literary text': 1 },
   butir: [
-    ...daftar('Argumentative text', 'B2 text (300–400 words)', ['Analytical exposition', 'Hortatory exposition', 'Discussion text (pros and cons)', 'Opinion article or review']),
+    // Halaman TKA pusmendik: teks exposition dan discussion bertopik teknologi dan isu faktual, sekitar 300–400 kata.
+    ...daftar('Argumentative text', 'B2 text (300–400 words) on technology and factual issues', ['Analytical exposition', 'Hortatory exposition', 'Discussion text (pros and cons)', 'Opinion article or review']),
     ...daftar('Literary text', 'Narrative', ['Short story excerpt', 'Biography or memoir excerpt']),
   ],
 };
@@ -367,7 +373,8 @@ const TKA_KIMIA: Cakupan = {
 const TKA_BIOLOGI: Cakupan = {
   porsi: { 'Keanekaragaman hayati': 1, 'Sel dan metabolisme': 1, 'Sistem organ': 2, 'Genetika dan evolusi': 1, 'Keterampilan proses': 1 },
   butir: [
-    ...daftar('Keanekaragaman hayati', 'Keanekaragaman', ['Keanekaragaman hayati dan klasifikasi', 'Ekosistem dan perubahan lingkungan']),
+    // Halaman TKA pusmendik: klasifikasi makhluk hidup, bakteri, ekosistem, metabolisme sel; konteks kesehatan, lingkungan, pertanian, sosial budaya.
+    ...daftar('Keanekaragaman hayati', 'Keanekaragaman', ['Keanekaragaman hayati dan klasifikasi makhluk hidup', 'Bakteri dan perannya bagi kehidupan', 'Ekosistem dan perubahan lingkungan']),
     ...daftar('Sel dan metabolisme', 'Sel', ['Struktur dan fungsi sel serta transpor membran', 'Enzim dan metabolisme (respirasi, fotosintesis)']),
     ...daftar('Sistem organ', 'Fisiologi manusia', ['Sistem sirkulasi', 'Sistem respirasi', 'Sistem ekskresi', 'Sistem imun', 'Sistem koordinasi (saraf dan hormon)', 'Sistem reproduksi']),
     ...daftar('Genetika dan evolusi', 'Pewarisan', ['Pewarisan sifat dan hukum Mendel', 'Evolusi dan bioteknologi']),
@@ -450,12 +457,13 @@ const TKA_BAHASA_ASING: Cakupan = {
   ],
 };
 
+/** Halaman TKA pusmendik: produksi, pemasaran, distribusi, dan pengelolaan usaha (desain produk, perencanaan produksi, proposal usaha, laporan keuangan, HaKI). */
 const TKA_PKK: Cakupan = {
-  porsi: { 'Peluang usaha': 1, 'Perencanaan produk': 1, 'Pemasaran dan keuangan': 1 },
+  porsi: { Produksi: 1, 'Pemasaran dan distribusi': 1, 'Pengelolaan usaha': 1 },
   butir: [
-    ...daftar('Peluang usaha', 'Kewirausahaan', ['Mengidentifikasi peluang usaha dan analisis kebutuhan pasar', 'Karakter dan etika wirausaha']),
-    ...daftar('Perencanaan produk', 'Projek kreatif', ['Merancang produk atau jasa kreatif', 'Proses produksi dan pengendalian mutu']),
-    ...daftar('Pemasaran dan keuangan', 'Usaha', ['Strategi pemasaran dan promosi digital', 'Perhitungan biaya, harga jual, dan laporan keuangan sederhana']),
+    ...daftar('Produksi', 'Produk kreatif', ['Desain produk atau jasa', 'Perencanaan dan proses produksi serta pengendalian mutu']),
+    ...daftar('Pemasaran dan distribusi', 'Pasar', ['Analisis peluang dan kebutuhan pasar', 'Strategi pemasaran dan promosi', 'Saluran distribusi produk']),
+    ...daftar('Pengelolaan usaha', 'Usaha', ['Proposal usaha', 'Perhitungan biaya, harga jual, dan laporan keuangan', 'Hak kekayaan intelektual (HaKI)']),
   ],
 };
 

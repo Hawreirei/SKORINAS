@@ -725,7 +725,7 @@ export default function OpsiLanjutanBuat(p: PropsOpsiLanjutan) {
         <div>
           <Sakelar
             label="Atur panjang stimulus sendiri"
-            petunjuk={f.panjangStimulus ? 'Soal yang stimulusnya kurang dari 70% panjang minimal dibuat ulang.' : 'Bila mati, panjang mengikuti jenjang (mis. bacaan SMP 180–250 kata, cerita hitungan SD 35–80 kata).'}
+            petunjuk={f.panjangStimulus ? 'Soal yang stimulusnya kurang dari 70% panjang minimal dibuat ulang.' : 'Bila mati, panjang mengikuti jenjang (mis. bacaan SMP 200–250 kata, cerita hitungan SD 35–80 kata).'}
             checked={!!f.panjangStimulus}
             ubah={(nyala) => ubah({ panjangStimulus: nyala ? { min: 50, maks: 120 } : null })}
           />
